@@ -1,17 +1,18 @@
 ---
 name: "Bug"
-description: "버그가 생겼어요 👾"
-labels: 버그
-body:
-- type: textarea
-  attributes:
-  label: Describe
-  description: |
-  [Description] 버그에 관한 설명을 적어주세요
-  placeholder: |
-  conflict난거 그냥 merge해버림
-- type: textarea
-  attributes:
-  label: Additional
-  description: |
-  [추가사항] 별도로 알려줘야 할 사항이나 추가사항을 작성해주세요
+about: "버그가 생겼어요 👾"
+title: "[BUG] "
+labels: ["버그"]
+assignees: ""
+---
+
+## 🐞 Describe
+
+[Description] 버그에 대한 설명을 적어주세요.  
+예: conflict난거 그냥 merge해버림
+
+---
+
+## ✨ Additional
+
+[추가사항] 별도로 알려줘야 할 사항이나 추가로 참고할 내용이 있다면 적어주세요.
