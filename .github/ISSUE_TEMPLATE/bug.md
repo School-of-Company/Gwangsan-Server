@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+---
+
 name: "Bug"
 description: "버그가 생겼어요 👾"
 labels: 버그
