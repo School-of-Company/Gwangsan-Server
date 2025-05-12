@@ -1,0 +1,25 @@
+---
+name: todo
+about: "기능 추가\U0001F649"
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+name: "Todo"
+description: "해야할 것이 있나요??🤔"
+body:
+
+  - type: textarea
+    attributes:
+      label: Describe
+      description: |
+        [Description] 할일의 설명을 작성해주세요.
+      placeholder: |
+        회원가입 UI 작성
+  - type: textarea
+    attributes:
+      label: Additional
+      description: |
+        [추가사항] 별도로 알려줘야 할 사항이나 추가사항을 작성해주세요
