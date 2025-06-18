@@ -1,0 +1,45 @@
+package team.startup.gwangsan.chat.entity;
+
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import team.startup.gwangsan.member.entity.Member;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@NoArgsConstructor
+@Table(name = "tbl_chat_room",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"member1_id", "member2_id"})})
+public class ChatRoom {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member1_id", nullable = false)
+    private Member member1;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member2_id", nullable = false)
+    private Member member2;
+
+    @Builder
+    public ChatRoom(LocalDateTime createdAt, Boolean isActive, Member member1, Member member2) {
+        this.createdAt = createdAt;
+        this.isActive = isActive;
+        this.member1 = member1;
+        this.member2 = member2;
+    }
+}
