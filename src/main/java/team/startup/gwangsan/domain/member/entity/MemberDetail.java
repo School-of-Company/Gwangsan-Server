@@ -1,12 +1,12 @@
-package team.startup.gwangsan.member.entity;
+package team.startup.gwangsan.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
-import team.startup.gwangsan.place.entity.Dong;
-import team.startup.gwangsan.place.entity.Place;
+import team.startup.gwangsan.domain.place.entity.Dong;
+import team.startup.gwangsan.domain.place.entity.Place;
 
 @Entity
 @Table(name = "tbl_member_detail")

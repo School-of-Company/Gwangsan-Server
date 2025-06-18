@@ -1,4 +1,4 @@
-package team.startup.gwangsan.member.entity.constant;
+package team.startup.gwangsan.domain.member.entity.constant;
 
 public enum MemberRole {
     ROLE_USER,

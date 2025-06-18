@@ -1,11 +1,11 @@
-package team.startup.gwangsan.member.entity;
+package team.startup.gwangsan.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.member.entity.constant.MemberRole;
-import team.startup.gwangsan.relatedkeyword.entity.MemberRelatedKeyword;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 
 import java.util.List;
 

@@ -1,11 +1,11 @@
-package team.startup.gwangsan.chat.entity;
+package team.startup.gwangsan.domain.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import team.startup.gwangsan.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.Member;
 
 import java.time.LocalDateTime;
 

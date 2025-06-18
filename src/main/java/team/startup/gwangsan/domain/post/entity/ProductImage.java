@@ -1,4 +1,4 @@
-package team.startup.gwangsan.post.entity;
+package team.startup.gwangsan.domain.post.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;

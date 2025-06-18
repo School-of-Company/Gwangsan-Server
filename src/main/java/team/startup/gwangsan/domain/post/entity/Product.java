@@ -1,4 +1,4 @@
-package team.startup.gwangsan.post.entity;
+package team.startup.gwangsan.domain.post.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.member.entity.Member;
-import team.startup.gwangsan.post.entity.constant.Mode;
-import team.startup.gwangsan.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.post.entity.constant.Type;
+import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.Type;
 
 import java.time.LocalDateTime;
 

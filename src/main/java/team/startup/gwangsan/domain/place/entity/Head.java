@@ -1,4 +1,4 @@
-package team.startup.gwangsan.place.entity;
+package team.startup.gwangsan.domain.place.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -8,24 +8,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "tbl_place")
-public class Place {
+@Table(name = "tbl_head")
+public class Head {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "place_id")
+    @Column(name = "head_id")
     private Integer id;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "head_id")
-    private Head head;
-
     @Builder
-    public Place(String name, Head head) {
+    public Head(String name) {
         this.name = name;
-        this.head = head;
     }
 }

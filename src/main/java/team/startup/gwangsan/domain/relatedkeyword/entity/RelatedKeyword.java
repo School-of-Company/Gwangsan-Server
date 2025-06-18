@@ -1,10 +1,9 @@
-package team.startup.gwangsan.relatedkeyword.entity;
+package team.startup.gwangsan.domain.relatedkeyword.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.member.entity.Member;
 
 import java.util.List;
 
