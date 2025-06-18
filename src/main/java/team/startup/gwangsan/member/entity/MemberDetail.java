@@ -1,0 +1,59 @@
+package team.startup.gwangsan.member.entity;
+
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
+import team.startup.gwangsan.place.entity.Dong;
+import team.startup.gwangsan.place.entity.Place;
+
+@Entity
+@Table(name = "tbl_member_detail")
+@NoArgsConstructor
+@Getter
+@Check(constraints = "light >= 1 AND light <= 100")
+public class MemberDetail {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @MapsId
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "dong_id", nullable = false)
+    private Dong dong;
+
+    @Column(name = "gwangsan", nullable = false)
+    private Long gwangsan;
+
+    @ManyToOne
+    @JoinColumn(name = "place_id", nullable = false)
+    private Place place;
+
+    @Column(name = "light", nullable = false)
+    private Integer light;
+
+    @Column(name = "profile_url")
+    private String profileUrl;
+
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Builder
+    public MemberDetail(Member member, Dong dong, Long gwangsan, Place place, Integer light, String profileUrl, String description) {
+        this.member = member;
+        this.dong = dong;
+        this.gwangsan = gwangsan;
+        this.place = place;
+        this.light = light;
+        this.profileUrl = profileUrl;
+        this.description = description;
+    }
+
+}
