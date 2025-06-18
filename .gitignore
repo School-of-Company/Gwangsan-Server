@@ -43,3 +43,4 @@ out/
 src/main/resources/data.sql
 
 ### ENVIRONMENT ###
+.env
