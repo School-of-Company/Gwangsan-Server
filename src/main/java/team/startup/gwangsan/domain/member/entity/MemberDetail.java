@@ -55,5 +55,4 @@ public class MemberDetail {
         this.profileUrl = profileUrl;
         this.description = description;
     }
-
 }
