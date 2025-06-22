@@ -21,8 +21,7 @@ public class RelatedKeyword {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_related_keyword_id", nullable = false)
+    @OneToMany(mappedBy = "relatedKeyword", fetch = FetchType.LAZY)
     private List<MemberRelatedKeyword> memberRelatedKeyword;
 
     @Builder
