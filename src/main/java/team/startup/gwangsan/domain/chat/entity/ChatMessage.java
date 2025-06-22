@@ -24,8 +24,8 @@ public class ChatMessage {
     private String content;
 
     @CreatedDate
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "checked", nullable = false)
     private Boolean checked;
@@ -39,9 +39,9 @@ public class ChatMessage {
     private Member sender;
 
     @Builder
-    public ChatMessage(String content, LocalDateTime timestamp, Boolean checked, ChatRoom room, Member sender) {
+    public ChatMessage(String content, LocalDateTime createdAt, Boolean checked, ChatRoom room, Member sender) {
         this.content = content;
-        this.timestamp = timestamp;
+        this.createdAt = createdAt;
         this.checked = checked;
         this.room = room;
         this.sender = sender;
