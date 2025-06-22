@@ -40,8 +40,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_related_keyword", nullable = false)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<MemberRelatedKeyword> memberRelatedKeyword;
 
     @Builder
