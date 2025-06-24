@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### DS Store ###
+.DS_Store
+
+### SQL ###
+src/main/resources/data.sql
+
+### ENVIRONMENT ###
+.env
