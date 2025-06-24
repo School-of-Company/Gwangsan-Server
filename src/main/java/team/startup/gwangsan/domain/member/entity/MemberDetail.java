@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
-import team.startup.gwangsan.domain.place.entity.Dong;
+import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.place.entity.Place;
 
 @Entity
