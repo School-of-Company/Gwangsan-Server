@@ -38,7 +38,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "member_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
