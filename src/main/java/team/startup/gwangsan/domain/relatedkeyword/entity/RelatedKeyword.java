@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Getter
 @Table(name = "tbl_related_keyword")
@@ -21,12 +19,8 @@ public class RelatedKeyword {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "relatedKeyword", fetch = FetchType.LAZY)
-    private List<MemberRelatedKeyword> memberRelatedKeyword;
-
     @Builder
-    public RelatedKeyword(String name, List<MemberRelatedKeyword> memberRelatedKeyword) {
+    public RelatedKeyword(String name) {
         this.name = name;
-        this.memberRelatedKeyword = memberRelatedKeyword;
     }
 }

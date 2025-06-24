@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
-
-import java.util.List;
+import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 
 @Entity
 @Table(name = "tbl_member")
@@ -32,7 +30,7 @@ public class Member {
     @Column(name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommender_id")
     private Member recommender;
 
@@ -40,17 +38,18 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<MemberRelatedKeyword> memberRelatedKeyword;
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status;
 
     @Builder
-    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, List<MemberRelatedKeyword> memberRelatedKeyword) {
+    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status) {
         this.name = name;
         this.nickname = nickname;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.recommender = recommender;
         this.role = role;
-        this.memberRelatedKeyword = memberRelatedKeyword;
+        this.status = status;
     }
 }
