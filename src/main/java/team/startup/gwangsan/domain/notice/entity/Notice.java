@@ -6,13 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.place.entity.Place;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -41,15 +38,10 @@ public class Notice {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "notice_id")
-    private List<Image> images = new ArrayList<>();
-
     @Builder
-    public Notice(String content, Place place, Member member, List<Image> images) {
+    public Notice(String content, Place place, Member member) {
         this.content = content;
         this.place = place;
         this.member = member;
-        this.images = new ArrayList<>(images);
     }
 }
