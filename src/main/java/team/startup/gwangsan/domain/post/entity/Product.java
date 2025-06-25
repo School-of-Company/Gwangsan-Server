@@ -33,7 +33,7 @@ public class Product {
     private String description;
 
     @Column(name = "gwangsan", nullable = false)
-    private Long gwangsan;
+    private Integer gwangsan;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -60,7 +60,7 @@ public class Product {
     private ProductStatus status;
 
     @Builder
-    public Product(String title, String description, Long gwangsan, Member member, ProductStatus status, Type type, Mode mode) {
+    public Product(String title, String description, Integer gwangsan, Member member, ProductStatus status, Type type, Mode mode) {
         this.title = title;
         this.description = description;
         this.gwangsan = gwangsan;
