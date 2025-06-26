@@ -58,7 +58,7 @@ public class SecurityConfig {
                                 .anyRequest().denyAll()
                 )
 
-                .addFilterBefore(new RequestLogFilter(), ExceptionFilter.class)
+                .addFilterBefore(new RequestLogFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(jwtProvider, tokenParser), UsernamePasswordAuthenticationFilter.class);
 
