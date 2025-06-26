@@ -47,7 +47,7 @@ public class Product {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "product_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private Type type;
 
