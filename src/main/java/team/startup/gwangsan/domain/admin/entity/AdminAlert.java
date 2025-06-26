@@ -24,7 +24,7 @@ public class AdminAlert {
     @Column(name = "admin_alert_id")
     private Long id;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "alert_type", nullable = false)
     private AlertType type;
 
     @Column(name = "title", nullable = false)
