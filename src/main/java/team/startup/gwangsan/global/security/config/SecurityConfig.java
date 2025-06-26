@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsUtils;
 import team.startup.gwangsan.global.filter.ExceptionFilter;
 import team.startup.gwangsan.global.filter.JwtFilter;
+import team.startup.gwangsan.global.filter.RequestLogFilter;
 import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
 import team.startup.gwangsan.global.security.handler.JwtAuthenticationEntryPoint;
 import team.startup.gwangsan.global.security.jwt.JwtProvider;
@@ -57,6 +58,7 @@ public class SecurityConfig {
                                 .anyRequest().denyAll()
                 )
 
+                .addFilterBefore(new RequestLogFilter(), ExceptionFilter.class)
                 .addFilterBefore(new ExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtFilter(jwtProvider, tokenParser), UsernamePasswordAuthenticationFilter.class);
 
