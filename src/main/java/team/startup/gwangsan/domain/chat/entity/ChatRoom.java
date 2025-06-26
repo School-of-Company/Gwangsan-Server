@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.member.entity.Member;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "tbl_chat_room",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"member1_id", "member2_id"})})
+@EntityListeners(AuditingEntityListener.class)
 public class ChatRoom {
 
     @Id

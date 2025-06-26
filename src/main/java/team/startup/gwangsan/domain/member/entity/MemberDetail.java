@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
-import team.startup.gwangsan.domain.place.entity.Dong;
+import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.place.entity.Place;
 
 @Entity
@@ -30,7 +30,7 @@ public class MemberDetail {
     private Dong dong;
 
     @Column(name = "gwangsan", nullable = false)
-    private Long gwangsan;
+    private Integer gwangsan;
 
     @ManyToOne
     @JoinColumn(name = "place_id", nullable = false)
@@ -46,7 +46,7 @@ public class MemberDetail {
     private String description;
 
     @Builder
-    public MemberDetail(Member member, Dong dong, Long gwangsan, Place place, Integer light, String profileUrl, String description) {
+    public MemberDetail(Member member, Dong dong, Integer gwangsan, Place place, Integer light, String profileUrl, String description) {
         this.member = member;
         this.dong = dong;
         this.gwangsan = gwangsan;

@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.post.entity;
+package team.startup.gwangsan.domain.notice.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -9,12 +9,12 @@ import team.startup.gwangsan.domain.image.entity.Image;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "tbl_product_image")
-public class ProductImage {
+@Table(name = "tbl_notice_image")
+public class NoticeImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_image_id")
+    @Column(name = "notice_image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,12 +22,12 @@ public class ProductImage {
     private Image image;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "notice_id", nullable = false)
+    private Notice notice;
 
     @Builder
-    public ProductImage(Image image, Product product) {
+    public NoticeImage(Image image, Notice notice) {
         this.image = image;
-        this.product = product;
+        this.notice = notice;
     }
 }

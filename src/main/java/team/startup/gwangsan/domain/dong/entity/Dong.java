@@ -1,9 +1,10 @@
-package team.startup.gwangsan.domain.place.entity;
+package team.startup.gwangsan.domain.dong.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import team.startup.gwangsan.domain.place.entity.Place;
 
 @Entity
 @Getter
