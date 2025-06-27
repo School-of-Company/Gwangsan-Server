@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.global.security.exception.ExpiredTokenException;
 import team.startup.gwangsan.global.security.exception.InvalidTokenException;
 
@@ -52,12 +53,12 @@ public class JwtProvider {
                 .getSubject();
     }
 
-    public String generateAccessToken(String phoneNumber) {
+    public String generateAccessToken(String phoneNumber, MemberRole role) {
         Date expiry = new Date(System.currentTimeMillis() + ACCESS_TOKEN_TIME * 1000);
 
         return Jwts.builder()
                 .setSubject(phoneNumber)
-                .claim(AUTHORITIES_KEY, "JWT")
+                .claim(AUTHORITIES_KEY, "ROLE_" + role.name())
                 .setIssuedAt(new Date())
                 .setExpiration(expiry)
                 .signWith(getAccessKey(), SignatureAlgorithm.HS256)
