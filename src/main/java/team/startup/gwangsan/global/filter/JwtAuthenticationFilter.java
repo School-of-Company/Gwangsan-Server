@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import team.startup.gwangsan.global.auth.MemberDetails;
 import team.startup.gwangsan.global.auth.MemberDetailsService;
 import team.startup.gwangsan.global.security.jwt.JwtProvider;
 
@@ -31,9 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
             String phoneNumber = jwtProvider.validateAndGetSubject(token);
-            var userDetails = memberDetailsService.loadUserByUsername(phoneNumber);
-            var authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
+            MemberDetails memberDetails = (MemberDetails) memberDetailsService.loadUserByUsername(phoneNumber);
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    memberDetails, null, memberDetails.getAuthorities()
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -49,4 +50,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
-
