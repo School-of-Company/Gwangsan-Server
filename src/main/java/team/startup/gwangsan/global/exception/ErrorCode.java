@@ -14,6 +14,12 @@ public enum ErrorCode {
     // member
     INVALID_MEMBER_PRINCIPAL(401, "현재 인증된 사용자의 정보가 유효하지 않습니다."),
     NOT_FOUND_MEMBER(404, "해당 회원을 찾을 수 없습니다."),
+    DONG_NOT_FOUND(404, "동이 존재하지 않습니다."),
+    PLACE_NOT_FOUND(404, "장소가 존재하지 않습니다."),
+    DUPLICATE_PHONE_NUMBER(409, "이미 존재하는 전화번호입니다."),
+    INVALID_VERIFICATION_CODE(401, "인증 코드가 유효하지 않습니다."),
+    DUPLICATE_NICKNAME(409, "이미 존재하는 닉네임입니다."),
+    NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
 
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다.");
