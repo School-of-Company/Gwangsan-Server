@@ -15,6 +15,11 @@ public enum ErrorCode {
     INVALID_MEMBER_PRINCIPAL(401, "현재 인증된 사용자의 정보가 유효하지 않습니다."),
     NOT_FOUND_MEMBER(404, "해당 회원을 찾을 수 없습니다."),
 
+    // image
+    IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
+    NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
+    IMAGE_UPLOAD_FAILED(500, "이미지 업로드에 실패했습니다."),
+
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다.");
 
