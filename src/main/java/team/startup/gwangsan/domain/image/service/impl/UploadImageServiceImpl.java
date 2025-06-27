@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.domain.image.exception.ImageUploadFailedException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.UploadImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.image.service.UploadImageService;
@@ -35,11 +36,8 @@ public class UploadImageServiceImpl implements UploadImageService {
     private String uploadFile(MultipartFile file) {
         try {
             return s3UploadService.execute(file.getOriginalFilename(), file.getInputStream()).get();
-        } catch (IOException e) {
-            // TODO: 커스텀 예외로 변경
-            throw new RuntimeException(e);
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            throw new ImageUploadFailedException();
         }
     }
 }
