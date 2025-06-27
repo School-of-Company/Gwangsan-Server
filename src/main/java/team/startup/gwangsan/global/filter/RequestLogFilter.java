@@ -33,9 +33,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
             log.info("=========================");
         } catch (Exception e) {
             log.error("=========================");
-            log.error(e.getCause().toString());
             log.error(e.getMessage());
-            log.error(e.getCause().getMessage());
             log.error("=========================");
         }
     }
