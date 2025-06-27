@@ -13,6 +13,8 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
+import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -20,10 +22,10 @@ import team.startup.gwangsan.global.util.MemberUtil;
 public class SignUpServiceImpl implements SignUpService {
 
     private final MemberRepository memberRepository;
+    private final SmsAuthRepository smsAuthRepository;
     private final DongRepository dongRepository;
     private final PlaceRepository placeRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MemberUtil memberUtil;
 
     @Override
     @Transactional
@@ -34,6 +36,13 @@ public class SignUpServiceImpl implements SignUpService {
 
         if (memberRepository.existsByNickname(request.getNickname())) {
             throw new DuplicateNicknameException();
+        }
+
+        SmsAuthEntity smsAuthEntity = smsAuthRepository.findByPhoneNumber(request.getPhoneNumber())
+                .orElseThrow(SmsAuthNotFoundException::new);
+
+        if (!smsAuthEntity.getAuthentication()) {
+            throw new SmsAuthNotCompletedException();
         }
 
         Dong dong = dongRepository.findById(request.getDongId())
