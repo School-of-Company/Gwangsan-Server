@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.global.filter.ExceptionFilter;
 import team.startup.gwangsan.global.filter.JwtFilter;
 import team.startup.gwangsan.global.filter.RequestLogFilter;
@@ -55,7 +56,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                                .anyRequest().denyAll()
+                                .anyRequest().hasAnyAuthority(
+                                        MemberRole.ROLE_USER.name(),
+                                        MemberRole.ROLE_PLACE_ADMIN.name(),
+                                        MemberRole.ROLE_HEAD_ADMIN.name()
+                                )
                 )
 
                 .addFilterBefore(new RequestLogFilter(), UsernamePasswordAuthenticationFilter.class)
