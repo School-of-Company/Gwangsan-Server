@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
 
 @Entity
 @Table(name = "tbl_member")
@@ -31,6 +34,18 @@ public class Member {
     private String phoneNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dong_id")
+    private Dong dong;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "place_id")
+    private Place place;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialty_id")
+    private RelatedKeyword specialty;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommender_id")
     private Member recommender;
 
@@ -43,7 +58,7 @@ public class Member {
     private MemberStatus status;
 
     @Builder
-    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status) {
+    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status, Dong dong, Place place, RelatedKeyword specialty) {
         this.name = name;
         this.nickname = nickname;
         this.password = password;
@@ -51,5 +66,8 @@ public class Member {
         this.recommender = recommender;
         this.role = role;
         this.status = status;
+        this.dong = dong;
+        this.place = place;
+        this.specialty = specialty;
     }
 }
