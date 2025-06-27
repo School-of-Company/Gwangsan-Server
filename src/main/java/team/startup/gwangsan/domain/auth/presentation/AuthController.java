@@ -12,7 +12,7 @@ import team.startup.gwangsan.domain.auth.presentation.dto.SignUpRequest;
 import team.startup.gwangsan.domain.auth.service.SignUpService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
