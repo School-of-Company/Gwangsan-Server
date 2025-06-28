@@ -28,6 +28,7 @@ public enum ErrorCode {
     SMS_AUTH_NOT_COMPLETED(401, "SMS 인증이 완료되지 않았습니다."),
     TOO_MANY_REQUEST_AUTH_CODE(429, "인증번호 요청 횟수를 초과했습니다."),
     AUTH_CODE_GENERATION_FAILURE( 500, "인증번호 생성에 실패하였습니다."),
+    NOT_MATCH_RANDOM_CODE(400, "인증 번호가 일치하지 않습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
