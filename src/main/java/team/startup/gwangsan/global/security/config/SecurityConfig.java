@@ -58,6 +58,7 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/sms").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/sms").permitAll()
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
