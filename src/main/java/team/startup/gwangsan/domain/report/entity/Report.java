@@ -19,6 +19,7 @@ public class Report {
     private Long id;
 
     @Column(name = "report_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private ReportType reportType;
 
     @Column(name = "content", nullable = false)
