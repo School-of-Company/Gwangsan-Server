@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 
 @Entity
 @Getter
@@ -17,11 +18,12 @@ public class Report {
     @Column(name = "report_id")
     private Long id;
 
+    @Column(name = "report_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ReportType reportType;
+
     @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "title", nullable = false)
-    private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_id")
@@ -32,9 +34,9 @@ public class Report {
     private Member reporter;
 
     @Builder
-    public Report(String content, String title, Member reported, Member reporter) {
+    public Report(ReportType reportType, String content, Member reported, Member reporter) {
+        this.reportType = reportType;
         this.content = content;
-        this.title = title;
         this.reported = reported;
         this.reporter = reporter;
     }
