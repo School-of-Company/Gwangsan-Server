@@ -23,9 +23,9 @@ public class ImageController {
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        imageDeleteService.execute(id);
+    @DeleteMapping("/{image_id}")
+    public ResponseEntity<Void> delete(@PathVariable("image_id") Long imageId) {
+        imageDeleteService.execute(imageId);
         return ResponseEntity.noContent().build();
     }
 
