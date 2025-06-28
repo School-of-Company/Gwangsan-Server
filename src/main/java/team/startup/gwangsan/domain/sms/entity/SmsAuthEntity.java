@@ -26,5 +26,7 @@ public class SmsAuthEntity {
     private Integer attemptCount;
 
     public void plusAttemptCount() {attemptCount++;}
+
+    public void changeAuthentication() {authentication = true;}
 }
 
