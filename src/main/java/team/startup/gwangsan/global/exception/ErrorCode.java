@@ -26,6 +26,7 @@ public enum ErrorCode {
     INVALID_VERIFICATION_CODE(401, "인증 코드가 유효하지 않습니다."),
     NOT_FOUND_SMS_AUTH(404, "SMS 인증 정보를 찾을 수 없습니다."),
     SMS_AUTH_NOT_COMPLETED(401, "SMS 인증이 완료되지 않았습니다."),
+    TOO_MANY_REQUEST_AUTH_CODE(429, "인증번호 요청 횟수를 초과했습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
