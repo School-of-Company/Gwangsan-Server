@@ -17,8 +17,13 @@ import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
+import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
+import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
+import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +35,9 @@ public class SignUpServiceImpl implements SignUpService {
     private final PlaceRepository placeRepository;
     private final MemberDetailRepository memberDetailRepository;  // 추가
     private final PasswordEncoder passwordEncoder;
+    private final RelatedKeywordRepository relatedKeywordRepository;
+    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+
 
     @Override
     @Transactional
@@ -79,6 +87,22 @@ public class SignUpServiceImpl implements SignUpService {
                 .build();
 
         memberDetailRepository.save(memberDetail);
+
+        for (String keywordContent : request.specialties()) {
+            RelatedKeyword keyword = relatedKeywordRepository.findByName(keywordContent)
+                    .orElseGet(() -> relatedKeywordRepository.save(
+                            RelatedKeyword.builder()
+                                    .name(keywordContent)
+                                    .build()
+                    ));
+
+            MemberRelatedKeyword mapping = MemberRelatedKeyword.builder()
+                    .member(member)
+                    .relatedKeyword(keyword)
+                    .build();
+
+            memberRelatedKeywordRepository.save(mapping);
+        }
     }
 
     private void validateSmsAuthentication(SmsAuthEntity smsAuthEntity) {
