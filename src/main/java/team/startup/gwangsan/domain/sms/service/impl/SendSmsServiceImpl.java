@@ -7,6 +7,7 @@ import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
+import team.startup.gwangsan.domain.sms.exception.AuthCodeGenerationException;
 import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
@@ -32,7 +33,7 @@ public class SendSmsServiceImpl implements SendSmsService {
         Message message = new Message();
         message.setFrom(smsProperties.getFromNumber());
         message.setTo(request.phoneNumber());
-        message.setText(code);
+        message.setText("[시민화폐광산] 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
 
         saveAuthInfo(request.phoneNumber(), code);
 
@@ -48,7 +49,7 @@ public class SendSmsServiceImpl implements SendSmsService {
             }
             return builder.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            throw new AuthCodeGenerationException();
         }
     }
 
