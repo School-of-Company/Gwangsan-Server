@@ -10,12 +10,15 @@ import team.startup.gwangsan.domain.auth.service.SignUpService;
 import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.dong.repository.DongRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
-import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -25,47 +28,62 @@ public class SignUpServiceImpl implements SignUpService {
     private final SmsAuthRepository smsAuthRepository;
     private final DongRepository dongRepository;
     private final PlaceRepository placeRepository;
+    private final MemberDetailRepository memberDetailRepository;  // 추가
     private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void execute(SignUpRequest request) {
-        if (memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
             throw new DuplicatePhoneNumberException();
         }
 
-        if (memberRepository.existsByNickname(request.getNickname())) {
+        if (memberRepository.existsByNickname(request.nickname())) {
             throw new DuplicateNicknameException();
         }
 
-        SmsAuthEntity smsAuthEntity = smsAuthRepository.findByPhoneNumber(request.getPhoneNumber())
+        SmsAuthEntity smsAuthEntity = smsAuthRepository.findByPhoneNumber(request.phoneNumber())
                 .orElseThrow(SmsAuthNotFoundException::new);
 
-        if (!smsAuthEntity.getAuthentication()) {
-            throw new SmsAuthNotCompletedException();
-        }
+        validateSmsAuthentication(smsAuthEntity);
 
-        Dong dong = dongRepository.findById(request.getDongId())
+        Dong dong = dongRepository.findById(request.dongId())
                 .orElseThrow(DongNotFoundException::new);
 
-        Place place = placeRepository.findById(request.getPlaceId())
+        Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(PlaceNotFoundException::new);
 
-        Member recommender = memberRepository.findByNickname(request.getRecommender())
+        Member recommender = memberRepository.findByNickname(request.recommender())
                 .orElseThrow(RecommenderNotFoundException::new);
 
         Member member = Member.builder()
-                .name(request.getName())
-                .nickname(request.getNickname())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber())
-                .dong(dong)
-                .place(place)
+                .name(request.name())
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
+                .phoneNumber(request.phoneNumber())
                 .recommender(recommender)
-                .specialty(request.getSpecialty())
+                .role(MemberRole.ROLE_USER)
+                .status(MemberStatus.ACTIVE)
                 .build();
 
         memberRepository.save(member);
+
+        MemberDetail memberDetail = MemberDetail.builder()
+                .member(member)
+                .dong(dong)
+                .place(place)
+                .gwangsan(0)
+                .light(1)
+                .description("")
+                .profileUrl(null)
+                .build();
+
+        memberDetailRepository.save(memberDetail);
+    }
+
+    private void validateSmsAuthentication(SmsAuthEntity smsAuthEntity) {
+        if (!smsAuthEntity.getAuthentication()) {
+            throw new SmsAuthNotCompletedException();
+        }
     }
 }
-
