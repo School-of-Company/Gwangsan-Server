@@ -51,11 +51,8 @@ public class SignUpServiceImpl implements SignUpService {
         Place place = placeRepository.findById(request.getPlaceId())
                 .orElseThrow(PlaceNotFoundException::new);
 
-        Member recommender = null;
-        if (request.getRecommender() != null && !request.getRecommender().isEmpty()) {
-            recommender = memberRepository.findByNickname(request.getRecommender())
-                    .orElseThrow(RecommenderNotFoundException::new);
-        }
+        Member recommender = memberRepository.findByNickname(request.getRecommender())
+                .orElseThrow(RecommenderNotFoundException::new);
 
         Member member = Member.builder()
                 .name(request.getName())
