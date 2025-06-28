@@ -32,5 +32,8 @@ public class SignUpRequest {
     @NotNull
     private RelatedKeyword specialty;
 
+    @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
+    @NotBlank(message = "추천인은 필수입니다.")
     private String recommender;
+
 }
