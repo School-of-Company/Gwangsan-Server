@@ -30,11 +30,11 @@ public class ChatRoom {
     private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member1_id", nullable = false)
+    @JoinColumn(name = "member1_id")
     private Member member1;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member2_id", nullable = false)
+    @JoinColumn(name = "member2_id")
     private Member member2;
 
     @Builder
