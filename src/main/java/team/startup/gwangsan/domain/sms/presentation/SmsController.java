@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.sms.presentation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +19,9 @@ public class SmsController {
     private final SendSmsService sendSmsService;
 
     @PostMapping
-    public ResponseEntity<Void> sendSms(@RequestBody @Valid SendSmsRequest request) {
-        sendSmsService.execute(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SingleMessageSentResponse> sendSms(@RequestBody @Valid SendSmsRequest request) {
+        SingleMessageSentResponse response = sendSmsService.execute(request);
+        return ResponseEntity.ok(response);
     }
+
 }
