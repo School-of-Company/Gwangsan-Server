@@ -24,11 +24,11 @@ public class Report {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_id", nullable = false)
+    @JoinColumn(name = "reported_id")
     private Member reported;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id", nullable = false)
+    @JoinColumn(name = "reporter_id")
     private Member reporter;
 
     @Builder
