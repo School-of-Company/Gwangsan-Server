@@ -42,17 +42,13 @@ public class MemberDetail {
     @Column(name = "profile_url")
     private String profileUrl;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
     @Builder
-    public MemberDetail(Member member, Dong dong, Integer gwangsan, Place place, Integer light, String profileUrl, String description) {
+    public MemberDetail(Member member, Dong dong, Integer gwangsan, Place place, Integer light, String profileUrl) {
         this.member = member;
         this.dong = dong;
         this.gwangsan = gwangsan;
         this.place = place;
         this.light = light;
         this.profileUrl = profileUrl;
-        this.description = description;
     }
 }
