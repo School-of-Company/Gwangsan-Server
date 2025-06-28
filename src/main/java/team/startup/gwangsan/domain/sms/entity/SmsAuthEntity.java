@@ -24,5 +24,7 @@ public class SmsAuthEntity {
     private Boolean authentication;
 
     private Integer attemptCount;
+
+    public void plusAttemptCount() {attemptCount++;}
 }
 
