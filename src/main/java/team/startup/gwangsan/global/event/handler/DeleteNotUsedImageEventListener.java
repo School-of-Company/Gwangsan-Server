@@ -20,7 +20,7 @@ public class DeleteNotUsedImageEventListener {
     private final ReportImageRepository reportImageRepository;
     private final ImageRepository imageRepository;
 
-    @Async
+    @Async("asyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDeleteNotUsedImageEvent(DeleteNotUsedImageEvent event) {
         for (Long imageId : event.imageIds()) {
