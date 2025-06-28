@@ -21,3 +21,15 @@ spring:
 jwt:
   accessSecret: ${JWT_ACCESS_SECRET:qXWbwKO97FDyg8AdNGh5SakyMHgdEdyfUZi3WPxKZ/c=}
   refreshSecret: ${JWT_REFRESH_SECRET:bddf2bea2033a184add4770ca6fe8957de4e175f2a295658d3dca73a458573c6}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_STATIC}
+    s3:
+      bucket: ${AWS_BUCKET}
+    stack:
+      auto: false
