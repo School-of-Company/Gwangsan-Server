@@ -33,22 +33,16 @@ public class SignUpServiceImpl implements SignUpService {
     private final SmsAuthRepository smsAuthRepository;
     private final DongRepository dongRepository;
     private final PlaceRepository placeRepository;
-    private final MemberDetailRepository memberDetailRepository;  // 추가
+    private final MemberDetailRepository memberDetailRepository;
     private final PasswordEncoder passwordEncoder;
     private final RelatedKeywordRepository relatedKeywordRepository;
     private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
 
-
     @Override
     @Transactional
     public void execute(SignUpRequest request) {
-        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new DuplicatePhoneNumberException();
-        }
-
-        if (memberRepository.existsByNickname(request.nickname())) {
-            throw new DuplicateNicknameException();
-        }
+        validateDuplicatePhoneNumber(request.phoneNumber());
+        validateDuplicateNickname(request.nickname());
 
         SmsAuthEntity smsAuthEntity = smsAuthRepository.findByPhoneNumber(request.phoneNumber())
                 .orElseThrow(SmsAuthNotFoundException::new);
@@ -71,7 +65,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .phoneNumber(request.phoneNumber())
                 .recommender(recommender)
                 .role(MemberRole.ROLE_USER)
-                .status(MemberStatus.ACTIVE)
+                .status(MemberStatus.PENDING)
                 .build();
 
         memberRepository.save(member);
@@ -101,6 +95,18 @@ public class SignUpServiceImpl implements SignUpService {
                     .build();
 
             memberRelatedKeywordRepository.save(mapping);
+        }
+    }
+
+    private void validateDuplicatePhoneNumber(String phoneNumber) {
+        if (memberRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new DuplicatePhoneNumberException();
+        }
+    }
+
+    private void validateDuplicateNickname(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new DuplicateNicknameException();
         }
     }
 
