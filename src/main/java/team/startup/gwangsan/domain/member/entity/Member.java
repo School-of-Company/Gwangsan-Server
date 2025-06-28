@@ -6,10 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
-import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tbl_member")
