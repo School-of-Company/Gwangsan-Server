@@ -34,14 +34,6 @@ public class Member {
     @Column(name = "phone_number", unique = true, nullable = false)
     private String phoneNumber;
 
-    @ManyToMany
-    @JoinTable(
-            name = "tbl_member_related_keyword",
-            joinColumns = @JoinColumn(name = "member_id"),
-            inverseJoinColumns = @JoinColumn(name = "related_keyword_id")
-    )
-    private List<RelatedKeyword> specialties = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommender_id")
     private Member recommender;
