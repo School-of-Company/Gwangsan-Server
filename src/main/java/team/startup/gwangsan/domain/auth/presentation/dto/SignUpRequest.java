@@ -1,39 +1,37 @@
 package team.startup.gwangsan.domain.auth.presentation.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
 
-@NoArgsConstructor
-@Getter
-public class SignUpRequest {
+import java.util.List;
 
-    @NotBlank
-    private String name;
+public record SignUpRequest(
 
-    @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
-    private String nickname;
+        @NotBlank
+        String name,
 
-    @NotBlank
-    private String password;
+        @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
+        String nickname,
 
-    @Pattern(regexp = "^010\\d{8}$", message = "올바른 휴대폰 번호 형식이어야 합니다.")
-    private String phoneNumber;
+        @NotBlank
+        String password,
 
-    @NotNull
-    private Integer dongId;
+        @Pattern(regexp = "^010\\d{8}$", message = "올바른 휴대폰 번호 형식이어야 합니다.")
+        String phoneNumber,
 
-    @NotNull
-    private Integer placeId;
+        @NotNull
+        Integer dongId,
 
-    @NotNull
-    private RelatedKeyword specialty;
+        @NotNull
+        Integer placeId,
 
-    @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
-    @NotBlank(message = "추천인은 필수입니다.")
-    private String recommender;
+        @NotEmpty(message = "특기는 한 개 이상 선택해야 합니다.")
+        List<@NotBlank String> specialties,
 
-}
+        @Pattern(regexp = "^[가-힣]+$", message = "추천인은 한글만 가능합니다.")
+        @NotBlank(message = "추천인은 필수입니다.")
+        String recommender
+
+) {}
