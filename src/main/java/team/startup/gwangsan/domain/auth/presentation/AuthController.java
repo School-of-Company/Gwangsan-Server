@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 import team.startup.gwangsan.domain.auth.service.ReissueTokenService;
 import team.startup.gwangsan.domain.auth.service.SignInService;
+import team.startup.gwangsan.domain.auth.service.SignOutService;
 import team.startup.gwangsan.domain.auth.service.SignUpService;
 
 @RestController
@@ -20,6 +21,7 @@ public class AuthController {
     private final SignUpService signUpService;
     private final SignInService signInService;
     private final ReissueTokenService reissueTokenService;
+    private final SignOutService signOutService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequest request) {
@@ -37,6 +39,12 @@ public class AuthController {
     public ResponseEntity<TokenResponse> reissueToken(@RequestHeader("RefreshToken") String refreshToken) {
         TokenResponse tokenResponse = reissueTokenService.execute(refreshToken);
         return ResponseEntity.ok(tokenResponse);
+    }
+
+    @DeleteMapping("/signout")
+    public ResponseEntity<Void> signout() {
+        signOutService.execute();
+        return ResponseEntity.ok().build();
     }
 }
 
