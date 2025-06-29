@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 import team.startup.gwangsan.domain.auth.service.ReissueTokenService;
 import team.startup.gwangsan.domain.auth.service.SignInService;
+import team.startup.gwangsan.domain.auth.service.SignOutService;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignInRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
@@ -27,8 +28,8 @@ public class AuthController {
     private final SignUpService signUpService;
     private final SignInService signInService;
     private final ReissueTokenService reissueTokenService;
-    private final ReissueTokenService reissueTokenService;
     private final SignOutService signOutService;
+    private final ReissueTokenService reissueTokenService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequest request) {
@@ -48,16 +49,16 @@ public class AuthController {
         return ResponseEntity.ok(tokenResponse);
     }
 
-    @DeleteMapping("/signout")
-    public ResponseEntity<Void> signout() {
-        signOutService.execute();
-        return ResponseEntity.ok().build();
-    }
-
     @PatchMapping("/reissue")
     public ResponseEntity<TokenResponse> reissueToken(@RequestHeader("RefreshToken") String refreshToken) {
         TokenResponse tokenResponse = reissueTokenService.execute(refreshToken);
         return ResponseEntity.ok(tokenResponse);
+    }
+
+    @DeleteMapping("/signout")
+    public ResponseEntity<Void> signout() {
+        signOutService.execute();
+        return ResponseEntity.ok().build();
     }
 }
 
