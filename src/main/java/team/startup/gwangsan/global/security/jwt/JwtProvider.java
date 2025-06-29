@@ -74,5 +74,14 @@ public class JwtProvider {
                 .signWith(getRefreshKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public long getAccessTokenTime() {
+        return ACCESS_TOKEN_TIME;
+    }
+
+    public long getRefreshTokenTime() {
+        return REFRESH_TOKEN_TIME;
+    }
 }
+
 
