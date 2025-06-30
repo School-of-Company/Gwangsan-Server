@@ -49,10 +49,10 @@ public class SignUpServiceImpl implements SignUpService {
 
         validateSmsAuthentication(smsAuthEntity);
 
-        Dong dong = dongRepository.findById(request.dongId())
+        Dong dong = dongRepository.findByName(request.dongName())
                 .orElseThrow(DongNotFoundException::new);
 
-        Place place = placeRepository.findById(request.placeId())
+        Place place = placeRepository.findByName(request.placeName())
                 .orElseThrow(PlaceNotFoundException::new);
 
         Member recommender = memberRepository.findByNickname(request.recommender())
