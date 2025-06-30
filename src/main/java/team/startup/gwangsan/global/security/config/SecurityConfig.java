@@ -61,8 +61,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
-                                .requestMatchers(HttpMethod.POST, "/sms").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/sms").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
