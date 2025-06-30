@@ -28,4 +28,8 @@ public class Place {
         this.name = name;
         this.head = head;
     }
+
+    public boolean isSamePlace(Place other) {
+        return other != null && this.id.equals(other.id);
+    }
 }
