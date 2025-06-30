@@ -69,4 +69,13 @@ public class Product {
         this.type = type;
         this.mode = mode;
     }
+
+    public void update(Type type, Mode mode, String title, String description, Integer gwangsant) {
+        this.title = title;
+        this.description = description;
+        this.gwangsan = gwangsant;
+        this.status = ProductStatus.ONGOING;
+        this.type = type;
+        this.mode = mode;
+    }
 }
