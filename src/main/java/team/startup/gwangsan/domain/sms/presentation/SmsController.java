@@ -11,7 +11,7 @@ import team.startup.gwangsan.domain.sms.service.SendSmsService;
 import team.startup.gwangsan.domain.sms.service.VerifyCodeService;
 
 @RestController
-@RequestMapping("/sms")
+@RequestMapping("/api/sms")
 @RequiredArgsConstructor
 public class SmsController {
 
