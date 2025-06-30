@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.auth.entity;
+package team.startup.gwangsan.domain.notification.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
