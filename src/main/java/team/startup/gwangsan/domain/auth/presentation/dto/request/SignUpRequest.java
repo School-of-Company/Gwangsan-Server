@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.auth.presentation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.List;
@@ -21,10 +22,10 @@ public record SignUpRequest(
         String phoneNumber,
 
         @NotBlank(message = "동은 필수입니다.")
-        String dongName,
+        Integer dongName,
 
-        @NotBlank(message = "지점은 필수입니다.")
-        String placeName,
+        @NotNull
+        Integer placeId,
 
         @NotEmpty(message = "특기는 한 개 이상 선택해야 합니다.")
         List<@NotBlank String> specialties,

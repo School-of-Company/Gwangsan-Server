@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/sms").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/sms").permitAll()
