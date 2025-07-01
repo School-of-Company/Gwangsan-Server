@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_admin_alert",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"type", "source_id"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"alert_type", "source_id"})})
 @EntityListeners(AuditingEntityListener.class)
 public class AdminAlert {
 
