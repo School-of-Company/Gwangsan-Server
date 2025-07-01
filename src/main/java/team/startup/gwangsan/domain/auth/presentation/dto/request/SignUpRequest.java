@@ -22,10 +22,10 @@ public record SignUpRequest(
         String phoneNumber,
 
         @NotNull
-        Integer dongId,
+        Integer dongName,
 
         @NotNull
-        Integer placeId,
+        Integer placeName,
 
         @NotEmpty(message = "특기는 한 개 이상 선택해야 합니다.")
         List<@NotBlank String> specialties,
