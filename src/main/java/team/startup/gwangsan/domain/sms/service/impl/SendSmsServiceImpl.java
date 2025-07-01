@@ -56,7 +56,7 @@ public class SendSmsServiceImpl implements SendSmsService {
     private void saveAuthInfo(String phoneNumber, String code) {
         SmsAuthEntity entity = smsAuthRepository.findById(phoneNumber)
                 .orElse(SmsAuthEntity.builder()
-                        .phone(phoneNumber)
+                        .phoneNumber(phoneNumber)
                         .authentication(false)
                         .attemptCount(0)
                         .randomValue(code)
@@ -69,7 +69,7 @@ public class SendSmsServiceImpl implements SendSmsService {
         entity.plusAttemptCount();
 
         smsAuthRepository.save(SmsAuthEntity.builder()
-                .phone(phoneNumber)
+                .phoneNumber(phoneNumber)
                 .randomValue(code)
                 .authentication(false)
                 .attemptCount(entity.getAttemptCount())
