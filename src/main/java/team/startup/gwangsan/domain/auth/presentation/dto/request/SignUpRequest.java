@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.auth.presentation.dto;
+package team.startup.gwangsan.domain.auth.presentation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

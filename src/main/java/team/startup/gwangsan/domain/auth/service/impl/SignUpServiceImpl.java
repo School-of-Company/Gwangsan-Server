@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.auth.exception.*;
-import team.startup.gwangsan.domain.auth.presentation.dto.SignUpRequest;
+import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
 import team.startup.gwangsan.domain.auth.service.SignUpService;
 import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.dong.repository.DongRepository;

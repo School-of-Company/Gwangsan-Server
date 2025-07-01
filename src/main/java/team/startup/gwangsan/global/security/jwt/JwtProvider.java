@@ -30,7 +30,7 @@ public class JwtProvider {
         return Keys.hmacShaKeyFor(jwtProperties.getRefreshSecret().getBytes(StandardCharsets.UTF_8));
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getAccessKey()).build().parseClaimsJws(token);
             return true;
@@ -41,8 +41,19 @@ public class JwtProvider {
         }
     }
 
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(getRefreshKey()).build().parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            throw new ExpiredTokenException();
+        } catch (Exception e) {
+            throw new InvalidTokenException();
+        }
+    }
+
     public String validateAndGetSubject(String token) {
-        if (!validateToken(token)) {
+        if (!validateAccessToken(token)) {
             throw new InvalidTokenException();
         }
         return Jwts.parserBuilder()
@@ -74,5 +85,14 @@ public class JwtProvider {
                 .signWith(getRefreshKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public long getAccessTokenTime() {
+        return ACCESS_TOKEN_TIME;
+    }
+
+    public long getRefreshTokenTime() {
+        return REFRESH_TOKEN_TIME;
+    }
 }
+
 
