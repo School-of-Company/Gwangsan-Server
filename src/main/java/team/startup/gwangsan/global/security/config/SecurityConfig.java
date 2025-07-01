@@ -59,7 +59,7 @@ public class SecurityConfig {
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
-                               .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
