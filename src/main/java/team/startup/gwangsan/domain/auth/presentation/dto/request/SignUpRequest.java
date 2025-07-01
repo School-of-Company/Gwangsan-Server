@@ -22,7 +22,7 @@ public record SignUpRequest(
         String phoneNumber,
 
         @NotBlank(message = "동은 필수입니다.")
-        Integer dongName,
+        String dongName,
 
         @NotNull
         Integer placeId,
