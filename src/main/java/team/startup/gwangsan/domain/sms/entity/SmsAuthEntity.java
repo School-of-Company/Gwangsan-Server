@@ -16,7 +16,7 @@ import org.springframework.data.redis.core.index.Indexed;
 public class SmsAuthEntity {
 
     @Id
-    private String phone;
+    private String phoneNumber;
 
     @Indexed
     private String randomValue;
