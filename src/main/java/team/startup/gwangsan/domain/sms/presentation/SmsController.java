@@ -24,9 +24,10 @@ public class SmsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<Void> verifySms(@RequestParam String phoneNumber, @RequestParam String code) {
-        verifyCodeService.execute(new VerifyCodeRequest(phoneNumber, code));
+    @PostMapping("/verify")
+    public ResponseEntity<Void> verifySms(@RequestBody @Valid VerifyCodeRequest request) {
+        verifyCodeService.execute(request);
         return ResponseEntity.ok().build();
     }
+
 }
