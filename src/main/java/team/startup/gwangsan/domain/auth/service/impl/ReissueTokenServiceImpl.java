@@ -31,7 +31,7 @@ public class ReissueTokenServiceImpl implements ReissueTokenService {
         RefreshToken savedToken = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(UnauthorizedException::new);
 
-        if (!jwtProvider.validateToken(refreshToken)) {
+        if (!jwtProvider.validateRefreshToken(refreshToken)) {
             throw new UnauthorizedException();
         }
 
