@@ -32,7 +32,7 @@ public class PostController {
                 request.type(),
                 request.mode(),
                 request.title(),
-                request.description(),
+                request.content(),
                 request.gwangsan(),
                 request.imageIds());
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -46,8 +46,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<GetProductResponse>> findProductByTypeAndMode(
-            @RequestParam Type type,
-            @RequestParam Mode mode
+            @RequestParam(name = "type", required = false) Type type,
+            @RequestParam(name = "mode", required = false) Mode mode
     ) {
         List<GetProductResponse> responses = findProductsByTypeAndModeService.execute(type, mode);
         return ResponseEntity.ok(responses);
@@ -72,7 +72,7 @@ public class PostController {
                 request.type(),
                 request.mode(),
                 request.title(),
-                request.description(),
+                request.content(),
                 request.gwangsan(),
                 request.imageIds()
         );
