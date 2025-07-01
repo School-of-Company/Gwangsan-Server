@@ -21,11 +21,11 @@ public record SignUpRequest(
         @Pattern(regexp = "^010\\d{8}$", message = "올바른 휴대폰 번호 형식이어야 합니다.")
         String phoneNumber,
 
-        @NotNull
-        Integer dongName,
+        @NotBlank(message = "동은 필수입니다.")
+        String dongName,
 
-        @NotNull
-        Integer placeName,
+        @NotBlank(message = "지점은 필수입니다.")
+        String placeName,
 
         @NotEmpty(message = "특기는 한 개 이상 선택해야 합니다.")
         List<@NotBlank String> specialties,
