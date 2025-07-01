@@ -57,7 +57,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
+                               .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/sms").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/sms").permitAll()
