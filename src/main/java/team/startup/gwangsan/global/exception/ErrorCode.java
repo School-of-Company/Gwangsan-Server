@@ -17,6 +17,7 @@ public enum ErrorCode {
     DUPLICATE_PHONE_NUMBER(409, "이미 존재하는 전화번호입니다."),
     DUPLICATE_NICKNAME(409, "이미 존재하는 닉네임입니다."),
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
+    NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
 
     // dong & place
     DONG_NOT_FOUND(404, "동이 존재하지 않습니다."),
