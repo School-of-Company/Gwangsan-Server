@@ -77,6 +77,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
 
+
+                                // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/sms").permitAll()
@@ -96,6 +98,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
+
+                                // admin
+                                .requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/admin/**").hasAnyAuthority(
+                                        MemberRole.ROLE_PLACE_ADMIN.name(),
+                                        MemberRole.ROLE_HEAD_ADMIN.name()
+                                )
+
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
