@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.place.entity.Place;
 
 @Entity
 @Getter
@@ -20,13 +19,8 @@ public class Dong {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "place_id", nullable = false)
-    private Place place;
-
     @Builder
-    public Dong(String name, Place place) {
+    public Dong(String name) {
         this.name = name;
-        this.place = place;
     }
 }
