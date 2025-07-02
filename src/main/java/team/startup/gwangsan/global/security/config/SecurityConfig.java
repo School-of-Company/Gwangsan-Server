@@ -57,13 +57,26 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+
+                                // auth
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
+
+                                // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
+
+                                // post
+                                .requestMatchers(HttpMethod.POST, "api/post").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/post").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/post/{post_id}").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/post/{post_id}").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
+
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/sms").permitAll()
