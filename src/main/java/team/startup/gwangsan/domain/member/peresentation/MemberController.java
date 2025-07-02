@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.member.peresentation.dto.request.UpdateMyInfoRequest;
+import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUserInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindUserInfoResponse;
 import team.startup.gwangsan.domain.member.service.FindAllUserInfoService;
