@@ -47,7 +47,7 @@ public class Product {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "product_type", nullable = false)
+    @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     private Type type;
 
@@ -66,6 +66,15 @@ public class Product {
         this.gwangsan = gwangsan;
         this.member = member;
         this.status = status;
+        this.type = type;
+        this.mode = mode;
+    }
+
+    public void update(Type type, Mode mode, String title, String description, Integer gwangsant) {
+        this.title = title;
+        this.description = description;
+        this.gwangsan = gwangsant;
+        this.status = ProductStatus.ONGOING;
         this.type = type;
         this.mode = mode;
     }

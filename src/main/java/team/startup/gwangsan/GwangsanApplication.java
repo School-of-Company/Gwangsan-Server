@@ -3,11 +3,11 @@ package team.startup.gwangsan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaRepositories
 @ConfigurationPropertiesScan
+@EnableJpaAuditing
 public class GwangsanApplication {
 
 	public static void main(String[] args) {
