@@ -25,7 +25,6 @@ public class AdminAlert {
     private Long id;
 
     @Column(name = "alert_type", nullable = false)
-    @Enumerated(EnumType.STRING)
     private AlertType type;
 
     @Column(name = "title", nullable = false)
