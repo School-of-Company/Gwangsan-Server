@@ -51,4 +51,8 @@ public class MemberDetail {
         this.light = light;
         this.profileUrl = profileUrl;
     }
+
+    public void updateProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
 }
