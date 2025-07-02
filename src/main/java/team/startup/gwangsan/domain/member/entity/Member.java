@@ -64,5 +64,4 @@ public class Member {
     public void updateMemberStatus(MemberStatus status) {
         this.status = status;
     }
-
 }
