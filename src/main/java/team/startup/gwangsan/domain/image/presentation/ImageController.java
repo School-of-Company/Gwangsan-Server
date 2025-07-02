@@ -1,6 +1,5 @@
 package team.startup.gwangsan.domain.image.presentation;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,7 @@ public class ImageController {
     private final DeleteImageService imageDeleteService;
 
     @PostMapping
-    public ResponseEntity<UploadImageResponse> upload(@RequestBody @Valid MultipartFile file) {
+    public ResponseEntity<UploadImageResponse> upload(@RequestPart("file") MultipartFile file) {
         UploadImageResponse response = imageUploadService.execute(file);
         return ResponseEntity.ok().body(response);
     }
@@ -28,5 +27,4 @@ public class ImageController {
         imageDeleteService.execute(imageId);
         return ResponseEntity.noContent().build();
     }
-
 }
