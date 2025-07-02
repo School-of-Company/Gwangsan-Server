@@ -15,9 +15,8 @@ public class MemberController {
     private final GetMyInfoService getMyInfoService;
 
     @GetMapping
-    public ResponseEntity<GetMyInfoResponse> getMyInfo(HttpServletRequest request) {
-        GetMyInfoResponse response = getMyInfoService.execute(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<GetMyInfoResponse> getMyInfo() {
+        return ResponseEntity.ok(getMyInfoService.execute());
     }
 }
 
