@@ -6,27 +6,27 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.peresentation.dto.response.GetMyInfoResponse;
+import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.service.GetMyInfoService;
+import team.startup.gwangsan.domain.member.service.FindMyInfoService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
 @RequiredArgsConstructor
-public class GetMyInfoServiceImpl implements GetMyInfoService {
+public class FindMyInfoServiceImpl implements FindMyInfoService {
 
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
 
     @Override
     @Transactional(readOnly = true)
-    public GetMyInfoResponse execute() {
+    public FindMyInfoResponse execute() {
         Member member = memberUtil.getCurrentMember();
 
         MemberDetail detail = memberDetailRepository.findById(member.getId())
                 .orElseThrow(NotFoundMemberException::new);
 
-        return new GetMyInfoResponse(
+        return new FindMyInfoResponse(
                 member.getId(),
                 member.getNickname(),
                 detail.getProfileUrl(),
