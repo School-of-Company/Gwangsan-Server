@@ -21,6 +21,7 @@ public enum ErrorCode {
     // dong & place
     DONG_NOT_FOUND(404, "동이 존재하지 않습니다."),
     PLACE_NOT_FOUND(404, "장소가 존재하지 않습니다."),
+    PLACE_MISMATCH(403, "게시글과 회원의 지역이 일치하지 않습니다."),
 
     // sms
     INVALID_VERIFICATION_CODE(401, "인증 코드가 유효하지 않습니다."),
@@ -29,6 +30,10 @@ public enum ErrorCode {
     TOO_MANY_REQUEST_AUTH_CODE(429, "인증번호 요청 횟수를 초과했습니다."),
     AUTH_CODE_GENERATION_FAILURE( 500, "인증번호 생성에 실패하였습니다."),
     NOT_MATCH_RANDOM_CODE(400, "인증 번호가 일치하지 않습니다."),
+
+    // product
+    NOT_FOUND_PRODUCT(404, "해당 게시글을 찾을 수 없습니다."),
+    FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
