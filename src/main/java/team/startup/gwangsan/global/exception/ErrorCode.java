@@ -57,7 +57,6 @@ public enum ErrorCode {
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
     NOT_FOUND_USER(401, "존재하지 않는 사용자입니다.");
 
-
     private final int status;
     private final String message;
 }
