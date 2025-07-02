@@ -1,21 +1,20 @@
 package team.startup.gwangsan.domain.member.peresentation;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.member.peresentation.dto.response.GetMyInfoResponse;
-import team.startup.gwangsan.domain.member.service.GetMyInfoService;
+import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
+import team.startup.gwangsan.domain.member.service.FindMyInfoService;
 
 @RestController
 @RequestMapping("/api/member")
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final GetMyInfoService getMyInfoService;
+    private final FindMyInfoService getMyInfoService;
 
     @GetMapping
-    public ResponseEntity<GetMyInfoResponse> getMyInfo() {
+    public ResponseEntity<FindMyInfoResponse> findMyInfo() {
         return ResponseEntity.ok(getMyInfoService.execute());
     }
 }
