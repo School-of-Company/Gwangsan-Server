@@ -25,13 +25,13 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
 
     private final ProductImageCustomRepository productImageCustomRepository;
     private final ProductCustomRepository productCustomRepository;
-    private final MemberDetailCustomRepository memberDetailCustomRepository;
+    private final MemberDetailCustomRepository memberDetailRepository;
     private final MemberUtil memberUtil;
 
     @Override
     @Transactional(readOnly = true)
     public List<GetProductResponse> execute(Type type, Mode mode) {
-        Place myPlace = memberDetailCustomRepository.findPlaceByMemberId(memberUtil.getCurrentMember().getId());
+        Place myPlace = memberDetailRepository.findPlaceByMemberId(memberUtil.getCurrentMember().getId());
 
         List<Product> products = productCustomRepository.findProductsByTypeAndModeAndMemberDetailPlace(type, mode, myPlace);
 

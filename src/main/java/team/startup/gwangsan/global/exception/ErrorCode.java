@@ -29,7 +29,7 @@ public enum ErrorCode {
     NOT_FOUND_SMS_AUTH(404, "SMS 인증 정보를 찾을 수 없습니다."),
     SMS_AUTH_NOT_COMPLETED(401, "SMS 인증이 완료되지 않았습니다."),
     TOO_MANY_REQUEST_AUTH_CODE(429, "인증번호 요청 횟수를 초과했습니다."),
-    AUTH_CODE_GENERATION_FAILURE( 500, "인증번호 생성에 실패하였습니다."),
+    AUTH_CODE_GENERATION_FAILURE(500, "인증번호 생성에 실패하였습니다."),
     NOT_MATCH_RANDOM_CODE(400, "인증 번호가 일치하지 않습니다."),
 
     // product
@@ -47,11 +47,15 @@ public enum ErrorCode {
     // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
-    NOT_FOUND_USER(401, "존재하지 않는 사용자입니다.");
+    NOT_FOUND_USER(401, "존재하지 않는 사용자입니다."),
 
+    // admin
+    NOT_FOUND_PENDING_MEMBER(404, "대기 중인 사용자를 찾을 수 없습니다."),
+    NOT_FOUND_ALERT_TYPE(404, "알림 타입을 찾을 수 없습니다."),
 
+    // report
+    NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다.");
 
     private final int status;
     private final String message;
 }
-

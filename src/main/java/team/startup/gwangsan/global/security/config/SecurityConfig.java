@@ -76,13 +76,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
 
-                                // member
-                                .requestMatchers(HttpMethod.GET, "/api/member").authenticated()
-                                .requestMatchers(HttpMethod.PATCH, "/api/member").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/member/{id}").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/member/all").authenticated()
-
-                                // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
 
