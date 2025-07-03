@@ -48,11 +48,21 @@ public enum ErrorCode {
     // admin
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
 
+    // fcm
+    FAILED_TO_INITIALIZE_FIREBASE(500, "Firebase 초기화에 실패했습니다."),
+
     // server
-    INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."), // auth
+    INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."),
+
+    // notification
+    UNSUPPORTED_NOTIFICATION_TYPE(400, "지원하지 않는 Notification Type입니다."),
+
+    // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
     NOT_FOUND_USER(401, "존재하지 않는 사용자입니다.");
+
+
 
     private final int status;
     private final String message;
