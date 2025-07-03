@@ -22,7 +22,6 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
     @Override
     @Transactional(readOnly = true)
     public List<FindAllUserInfoResponse> execute() {
-
         return memberDetailRepository.findAllWithMember().stream()
                 .map(detail -> {
                     return new FindAllUserInfoResponse(
