@@ -23,16 +23,6 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
     @Transactional(readOnly = true)
     public List<FindAllUserInfoResponse> execute() {
 
-        memberRepository.findAll().forEach(m -> {
-            System.out.println("memberId = " + m.getId());
-            memberDetailRepository.findById(m.getId())
-                    .ifPresentOrElse(
-                            d -> System.out.println("✅ memberDetail found for id " + m.getId()),
-                            () -> System.out.println("❌ memberDetail NOT found for id " + m.getId())
-                    );
-        });
-
-
         return memberRepository.findAll().stream()
                 .map(member -> {
                     MemberDetail detail = memberDetailRepository.findById(member.getId())
