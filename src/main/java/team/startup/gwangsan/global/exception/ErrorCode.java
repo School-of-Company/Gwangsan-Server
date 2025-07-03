@@ -54,9 +54,6 @@ public enum ErrorCode {
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."),
 
-    // notification
-    UNSUPPORTED_NOTIFICATION_TYPE(400, "지원하지 않는 Notification Type입니다."),
-
     // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
