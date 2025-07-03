@@ -36,3 +36,4 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
                 .toList();
     }
 }
+
