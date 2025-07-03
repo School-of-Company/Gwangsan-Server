@@ -55,4 +55,5 @@ public class MemberDetail {
     public void updateProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;
     }
+
 }
