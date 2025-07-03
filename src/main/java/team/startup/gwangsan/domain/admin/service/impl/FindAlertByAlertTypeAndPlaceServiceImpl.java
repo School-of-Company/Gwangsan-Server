@@ -66,62 +66,12 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         } else {
             reports = reportCustomRepository.findByPlace(place);
             members = memberCustomRepository.findByStatusAndPlace(MemberStatus.PENDING, place);
-
         }
 
         List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
-        List<GetReportAlertResponse> reportAlertResponses = reportAlerts.stream()
-                .map(alert -> {
-                    Report report = reports.stream()
-                            .filter(r -> r.getId().equals(alert.getSourceId()))
-                            .findFirst()
-                            .orElseThrow(NotFoundReportException::new);
+        List<GetReportAlertResponse> reportAlertResponses = createReportAlertResponses(reportAlerts, reports, reportImages);
 
-                    List<ReportImage> reportImageList = reportImages.stream()
-                            .filter(ri -> ri.getReport().getId().equals(report.getId()))
-                            .toList();
-
-                    List<GetImageResponse> imageResponses = reportImageList.stream()
-                            .map(ri -> new GetImageResponse(
-                                    ri.getImage().getId(),
-                                    ri.getImage().getImageUrl()
-                            ))
-                            .toList();
-
-                    GetReportResponse reportResponse = new GetReportResponse(
-                            report.getReportType(),
-                            report.getContent(),
-                            imageResponses
-                    );
-
-                    return new GetReportAlertResponse(
-                            report.getId(),
-                            alert.getMember().getNickname(),
-                            report.getReported().getId(),
-                            report.getReported().getNickname(),
-                            alert.getTitle(),
-                            alert.getCreatedAt(),
-                            reportResponse
-                    );
-                })
-                .toList();
-
-        List<GetSignUpAlertResponse> signUpAlertResponses = signUpAlerts.stream()
-                .map(alert -> {
-                    Member member = members.stream()
-                            .filter(m -> m.getId().equals(alert.getMember().getId()))
-                            .findFirst()
-                            .orElseThrow(NotFoundMemberException::new);
-
-                    return new GetSignUpAlertResponse(
-                            member.getId(),
-                            member.getNickname(),
-                            alert.getTitle(),
-                            member.getRecommender().getNickname(),
-                            alert.getCreatedAt()
-                    );
-                })
-                .toList();
+        List<GetSignUpAlertResponse> signUpAlertResponses = createSignUpAlertResponses(signUpAlerts, members);
         return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses);
     }
 
@@ -141,5 +91,57 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         }
 
         return memberDetailCustomRepository.findPlaceByMemberId(member.getId());
+    }
+
+    private List<GetReportAlertResponse> createReportAlertResponses(List<AdminAlert> alerts, List<Report> reports, List<ReportImage> images) {
+        return alerts.stream()
+                .map(alert -> {
+                    Report report = reports.stream()
+                            .filter(r -> r.getId().equals(alert.getSourceId()))
+                            .findFirst()
+                            .orElseThrow(NotFoundReportException::new);
+
+                    List<GetImageResponse> imageResponses = images.stream()
+                            .filter(ri -> ri.getReport().getId().equals(report.getId()))
+                            .map(ri -> new GetImageResponse(
+                                    ri.getImage().getId(),
+                                    ri.getImage().getImageUrl()
+                            ))
+                            .toList();
+
+                    return new GetReportAlertResponse(
+                            report.getId(),
+                            alert.getMember().getNickname(),
+                            report.getReported().getId(),
+                            report.getReported().getNickname(),
+                            alert.getTitle(),
+                            alert.getCreatedAt(),
+                            new GetReportResponse(
+                                    report.getReportType(),
+                                    report.getContent(),
+                                    imageResponses
+                            )
+                    );
+                })
+                .toList();
+    }
+
+    private List<GetSignUpAlertResponse> createSignUpAlertResponses(List<AdminAlert> alerts, List<Member> members) {
+        return alerts.stream()
+                .map(alert -> {
+                    Member member = members.stream()
+                            .filter(m -> m.getId().equals(alert.getMember().getId()))
+                            .findFirst()
+                            .orElseThrow(NotFoundMemberException::new);
+
+                    return new GetSignUpAlertResponse(
+                            member.getId(),
+                            member.getNickname(),
+                            alert.getTitle(),
+                            member.getRecommender().getNickname(),
+                            alert.getCreatedAt()
+                    );
+                })
+                .toList();
     }
 }
