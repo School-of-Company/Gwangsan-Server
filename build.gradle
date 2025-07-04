@@ -66,8 +66,14 @@ dependencies {
 	// cloud
 	implementation 'software.amazon.awssdk:s3:2.29.49'
 
-	//sms
+	// sms
 	implementation("net.nurigo:sdk:4.3.0")
+
+	// fcm
+	implementation 'com.google.firebase:firebase-admin:9.5.0'
+
+	// gson
+	implementation 'com.google.code.gson:gson:2.8.9'
 }
 
 tasks.named('test') {

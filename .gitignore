@@ -44,3 +44,6 @@ src/main/resources/data.sql
 
 ### ENVIRONMENT ###
 .env
+
+### FCM ###
+src/main/resources/firebase-service-account.json
