@@ -3,10 +3,12 @@ package team.startup.gwangsan.domain.member.repository.custom.impl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 
+import java.util.List;
 import java.util.Optional;
 
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
@@ -25,5 +27,13 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 .where(memberDetail.id.eq(id))
                 .fetchOne())
                 .orElseThrow(NotFoundMemberException::new);
+    }
+
+    @Override
+    public List<MemberDetail> findAllWithMember() {
+        return queryFactory
+                .selectFrom(memberDetail)
+                .join(memberDetail.member).fetchJoin()
+                .fetch();
     }
 }
