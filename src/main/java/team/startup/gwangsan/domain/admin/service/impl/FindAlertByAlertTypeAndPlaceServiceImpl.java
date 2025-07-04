@@ -16,9 +16,9 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.repository.custom.MemberCustomRepository;
-import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlertTypeAndPlaceService {
 
-    private final MemberDetailCustomRepository memberDetailCustomRepository;
+    private final MemberDetailRepository memberDetailRepository;
     private final ReportRepository reportRepository;
     private final AdminAlertCustomRepository adminAlertCustomRepository;
     private final MemberCustomRepository memberCustomRepository;
@@ -81,16 +81,14 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private Place findTargetPlaceOrNull(String placeName, Member member) {
         if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
-
             if (placeName == null) {
                 return null;
             }
-
             return placeRepository.findByName(placeName)
                     .orElseThrow(PlaceNotFoundException::new);
         }
 
-        return memberDetailCustomRepository.findPlaceByMemberId(member.getId());
+        return memberDetailRepository.findPlaceByMemberId(member.getId());
     }
 
     private List<GetReportAlertResponse> createReportAlertResponses(List<AdminAlert> alerts, List<Report> reports, List<ReportImage> images) {

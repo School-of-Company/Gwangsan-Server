@@ -53,6 +53,10 @@ public class Member {
         this.status = status;
     }
 
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public void updateMemberRole(MemberRole role) {
         this.role = role;
     }
@@ -60,4 +64,5 @@ public class Member {
     public void updateMemberStatus(MemberStatus status) {
         this.status = status;
     }
+
 }

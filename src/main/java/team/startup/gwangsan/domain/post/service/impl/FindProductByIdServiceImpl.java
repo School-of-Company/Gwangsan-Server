@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
@@ -24,18 +25,18 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
-    private final MemberDetailCustomRepository memberDetailCustomRepository;
+    private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
 
     @Override
     @Transactional(readOnly = true)
     public GetProductResponse execute(Long id) {
         Member member = memberUtil.getCurrentMember();
-        Place myPlace = memberDetailCustomRepository.findPlaceByMemberId(member.getId());
+        Place myPlace = memberDetailRepository.findPlaceByMemberId(member.getId());
 
         Product product = productRepository.findById(id)
                 .orElseThrow(NotFoundProductException::new);
-        Place productPlace = memberDetailCustomRepository.findPlaceByMemberId(product.getMember().getId());
+        Place productPlace = memberDetailRepository.findPlaceByMemberId(product.getMember().getId());
 
         validateSamePlace(myPlace, productPlace);
 
