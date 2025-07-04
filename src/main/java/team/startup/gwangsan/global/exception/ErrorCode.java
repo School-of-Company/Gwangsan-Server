@@ -19,6 +19,7 @@ public enum ErrorCode {
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
+    NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
     ACCESS_FORBIDDEN(403, "접근이 거부되었습니다."),
     NOT_FOUND_PENDING_MEMBER(404, "회원가입 대기중인 사용자가 없습니다."),
 
@@ -34,6 +35,7 @@ public enum ErrorCode {
     TOO_MANY_REQUEST_AUTH_CODE(429, "인증번호 요청 횟수를 초과했습니다."),
     AUTH_CODE_GENERATION_FAILURE(500, "인증번호 생성에 실패하였습니다."),
     NOT_MATCH_RANDOM_CODE(400, "인증 번호가 일치하지 않습니다."),
+    NOT_FOUND_PENDING_MEMBER(404, "대기 중인 사용자를 찾을 수 없습니다."),
 
     // product
     NOT_FOUND_PRODUCT(404, "해당 게시글을 찾을 수 없습니다."),
