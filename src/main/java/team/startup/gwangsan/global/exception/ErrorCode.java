@@ -18,8 +18,6 @@ public enum ErrorCode {
     DUPLICATE_NICKNAME(409, "이미 존재하는 닉네임입니다."),
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
-    ACCESS_FORBIDDEN(403, "접근이 거부되었습니다."),
-    NOT_FOUND_PENDING_MEMBER(404, "회원가입 대기중인 사용자가 없습니다."),
 
     // dong & place
     DONG_NOT_FOUND(404, "동이 존재하지 않습니다."),
@@ -43,22 +41,21 @@ public enum ErrorCode {
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
     IMAGE_UPLOAD_FAILED(500, "이미지 업로드에 실패했습니다."),
 
-    // report
-    NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다."),
-
-    // admin
-    NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
-
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."),
 
     // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
-    NOT_FOUND_USER(401, "존재하지 않는 사용자입니다.");
+    NOT_FOUND_USER(401, "존재하지 않는 사용자입니다."),
 
+    // admin
+    NOT_FOUND_PENDING_MEMBER(404, "대기 중인 사용자를 찾을 수 없습니다."),
+    NOT_FOUND_ALERT_TYPE(404, "알림 타입을 찾을 수 없습니다."),
+
+    // report
+    NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다.");
 
     private final int status;
     private final String message;
 }
-
