@@ -16,7 +16,6 @@ import team.startup.gwangsan.domain.place.entity.Place;
 public class MemberDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
@@ -25,14 +24,14 @@ public class MemberDetail {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dong_id", nullable = false)
     private Dong dong;
 
     @Column(name = "gwangsan", nullable = false)
     private Integer gwangsan;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
