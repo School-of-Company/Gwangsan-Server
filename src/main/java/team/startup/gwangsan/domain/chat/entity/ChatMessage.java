@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.member.entity.Member;
 
 import java.time.LocalDateTime;
@@ -15,7 +13,6 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_chat_message")
-@EntityListeners(AuditingEntityListener.class)
 public class ChatMessage {
 
     @Id
@@ -23,12 +20,8 @@ public class ChatMessage {
     @Column(name = "message_id")
     private Long id;
 
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
-
-    @Column(name = "message_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MessageType messageType;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false)
@@ -46,9 +39,9 @@ public class ChatMessage {
     private Member sender;
 
     @Builder
-    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender) {
+    public ChatMessage(String content, LocalDateTime createdAt, Boolean checked, ChatRoom room, Member sender) {
         this.content = content;
-        this.messageType = messageType;
+        this.createdAt = createdAt;
         this.checked = checked;
         this.room = room;
         this.sender = sender;
