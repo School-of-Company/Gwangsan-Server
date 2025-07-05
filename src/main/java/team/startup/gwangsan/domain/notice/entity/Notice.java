@@ -23,9 +23,6 @@ public class Notice {
     @Column(name = "notice_id")
     private Long id;
 
-    @Column(name = "title", nullable = false)
-    private String title;
-
     @Column(name = "content", nullable = false)
     private String content;
 
