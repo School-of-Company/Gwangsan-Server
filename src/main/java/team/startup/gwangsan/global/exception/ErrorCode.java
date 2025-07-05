@@ -60,12 +60,9 @@ public enum ErrorCode {
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
     NOT_FOUND_USER(401, "존재하지 않는 사용자입니다."),
 
-    // admin
-    NOT_FOUND_PENDING_MEMBER(404, "대기 중인 사용자를 찾을 수 없습니다."),
-    NOT_FOUND_ALERT_TYPE(404, "알림 타입을 찾을 수 없습니다."),
-
-    // report
-    NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다.");
+    // notice
+    NOTICE_NOT_FOUND(404, "해당 공지가 존재하지 않습니다."),
+    NOTICE_FORBIDDEN(403, "공지에 대한 권한이 없습니다.");
 
     private final int status;
     private final String message;
