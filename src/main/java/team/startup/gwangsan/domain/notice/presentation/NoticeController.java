@@ -1,6 +1,5 @@
 package team.startup.gwangsan.domain.notice.presentation;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,8 +25,8 @@ public class NoticeController {
     private final DeleteNoticeService deleteNoticeService;
 
     @PostMapping
-    public ResponseEntity<Void> createNotice(@RequestBody @Valid CreateNoticeRequest request, HttpServletRequest httpRequest) {
-        createNoticeService.execute(request, httpRequest);
+    public ResponseEntity<Void> createNotice(@RequestBody @Valid CreateNoticeRequest request) {
+        createNoticeService.execute(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -51,10 +50,9 @@ public class NoticeController {
     @PatchMapping("/{noticeId}")
     public ResponseEntity<Void> updateNotice(
             @PathVariable("noticeId") Long noticeId,
-            @RequestBody @Valid UpdateNoticeRequest request,
-            HttpServletRequest httpRequest
+            @RequestBody @Valid UpdateNoticeRequest request
     ) {
-        updateNoticeService.execute(noticeId, request, httpRequest);
+        updateNoticeService.execute(noticeId, request);
         return ResponseEntity.ok().build();
     }
 

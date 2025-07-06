@@ -17,7 +17,6 @@ import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.service.UpdateNoticeService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -31,7 +30,7 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
 
     @Override
     @Transactional
-    public void execute(Long noticeId, UpdateNoticeRequest request, HttpServletRequest httpRequest) {
+    public void execute(Long noticeId, UpdateNoticeRequest request) {
         Member member = memberUtil.getCurrentMember();
 
         Notice notice = noticeRepository.findById(noticeId)

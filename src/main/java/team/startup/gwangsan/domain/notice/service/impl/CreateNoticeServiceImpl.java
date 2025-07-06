@@ -1,6 +1,5 @@
 package team.startup.gwangsan.domain.notice.service.impl;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -43,7 +42,7 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
 
     @Override
     @Transactional
-    public void execute(CreateNoticeRequest request, HttpServletRequest httpRequest) {
+    public void execute(CreateNoticeRequest request) {
         Member admin = memberUtil.getCurrentMember();
 
         if (admin.getRole() != MemberRole.ROLE_HEAD_ADMIN && admin.getRole() != MemberRole.ROLE_PLACE_ADMIN) {
