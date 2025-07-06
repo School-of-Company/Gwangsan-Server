@@ -76,9 +76,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
 
-                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
-
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
