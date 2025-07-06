@@ -5,9 +5,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.domain.notice.entity.NoticeImage;
+import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoticeResponse;
+import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.FindAllNoticeService;
-import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoticeResponse;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class FindAllNoticeServiceImpl implements FindAllNoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NoticeImageRepository noticeImageRepository;
 
     @Override
     public List<FindAllNoticeResponse> execute(int page, int size) {
@@ -25,20 +28,26 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         return noticeRepository.findAll(pageable).getContent().stream()
-                .map(notice -> new FindAllNoticeResponse(
-                        notice.getId(),
-                        notice.getTitle(),
-                        notice.getContent(),
-                        notice.getPlace().getName(),
-                        notice.getCreatedAt().format(formatter),
-                        notice.getMember().getRole().name(),
-                        notice.getNoticeImages().stream()
-                                .map(noticeImage -> new GetImageResponse(
-                                        noticeImage.getImage().getId(),
-                                        noticeImage.getImage().getImageUrl()
-                                ))
-                                .collect(Collectors.toList())
-                ))
+                .map(notice -> {
+                    List<NoticeImage> noticeImages = noticeImageRepository.findAllByNotice(notice);
+
+                    List<GetImageResponse> imageResponses = noticeImages.stream()
+                            .map(ni -> new GetImageResponse(
+                                    ni.getImage().getId(),
+                                    ni.getImage().getImageUrl()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new FindAllNoticeResponse(
+                            notice.getId(),
+                            notice.getTitle(),
+                            notice.getContent(),
+                            notice.getPlace().getName(),
+                            notice.getCreatedAt().format(formatter),
+                            notice.getMember().getRole().name(),
+                            imageResponses
+                    );
+                })
                 .collect(Collectors.toList());
     }
 }

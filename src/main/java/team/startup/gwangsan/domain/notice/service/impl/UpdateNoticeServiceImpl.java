@@ -9,11 +9,12 @@ import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.notice.entity.Notice;
+import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeForbiddenException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.UpdateNoticeRequest;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
+import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.UpdateNoticeService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -44,8 +45,8 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
 
         notice.update(request.title(), request.content());
 
-        noticeImageRepository.deleteAll(notice.getNoticeImages());
-        notice.getNoticeImages().clear();
+        List<NoticeImage> oldNoticeImages = noticeImageRepository.findAllByNotice(notice);
+        noticeImageRepository.deleteAll(oldNoticeImages);
 
         List<Image> images = imageRepository.findAllById(request.imageIds());
 
@@ -53,6 +54,12 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
             throw new ImageNotFoundException();
         }
 
-        images.forEach(notice::addImage);
+        for (Image image : images) {
+            NoticeImage noticeImage = NoticeImage.builder()
+                    .notice(notice)
+                    .image(image)
+                    .build();
+            noticeImageRepository.save(noticeImage);
+        }
     }
 }
