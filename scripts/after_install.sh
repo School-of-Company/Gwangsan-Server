@@ -1,10 +1,9 @@
 #!/bin/bash
 echo "== After Install 시작 =="
 
-# 권한 설정
 chmod +x /var/www/myapp/start.sh
 
-# 애플리케이션 디렉터리로 이동
-cd /var/www/myapp
+# 혹시 .jar 파일 권한도 맞춰주기
+chmod +x /var/www/myapp/build/libs/app.jar || true
 
 echo "== After Install 완료 =="
