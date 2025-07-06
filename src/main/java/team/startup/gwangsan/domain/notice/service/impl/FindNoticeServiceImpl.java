@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.presentation.dto.response.FindNoticeResponse;
+import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.FindNoticeService;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class FindNoticeServiceImpl implements FindNoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NoticeImageRepository noticeImageRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -32,7 +34,9 @@ public class FindNoticeServiceImpl implements FindNoticeService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        List<GetImageResponse> imageResponses = notice.getNoticeImages().stream()
+        List<NoticeImage> noticeImages = noticeImageRepository.findAllByNotice(notice);
+
+        List<GetImageResponse> imageResponses = noticeImages.stream()
                 .map(NoticeImage::getImage)
                 .map(image -> new GetImageResponse(image.getId(), image.getImageUrl()))
                 .collect(Collectors.toList());

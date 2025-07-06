@@ -14,7 +14,9 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
+import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.CreateNoticeRequest;
+import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.CreateNoticeService;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
@@ -39,6 +41,7 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     private final ApplicationEventPublisher eventPublisher;
     private final MemberDetailRepository memberDetailRepository;
     private final DeviceTokenRepository deviceTokenRepository;
+    private final NoticeImageRepository noticeImageRepository;
 
     @Override
     @Transactional
@@ -72,9 +75,14 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
             }
 
             for (Image image : images) {
-                notice.addImage(image);
+                NoticeImage noticeImage = NoticeImage.builder()
+                        .image(image)
+                        .notice(notice)
+                        .build();
+                noticeImageRepository.save(noticeImage);
             }
         }
+
 
         List<String> deviceTokens = getDeviceTokens(notice);
 

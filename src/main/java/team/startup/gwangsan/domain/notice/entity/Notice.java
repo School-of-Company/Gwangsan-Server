@@ -44,23 +44,12 @@ public class Notice {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NoticeImage> noticeImages = new ArrayList<>();
-
     @Builder
     public Notice(String title, String content, Place place, Member member) {
         this.title = title;
         this.content = content;
         this.place = place;
         this.member = member;
-    }
-
-    public void addImage(Image image) {
-        NoticeImage noticeImage = NoticeImage.builder()
-                .image(image)
-                .notice(this)
-                .build();
-        this.noticeImages.add(noticeImage);
     }
 
     public void update(String title, String content) {
