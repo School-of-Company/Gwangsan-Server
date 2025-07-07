@@ -17,7 +17,9 @@ import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoti
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.FindAllNoticeService;
+import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -31,22 +33,27 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
     private final NoticeImageRepository noticeImageRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
+    private final PlaceRepository placeRepository;
 
     @Override
     public List<FindAllNoticeResponse> execute(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-
         Member member = memberUtil.getCurrentMember();
         Page<Notice> notices;
 
-        if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
-            notices = noticeRepository.findAll(pageable);
-        } else {
-            MemberDetail memberDetail = memberDetailRepository.findByMember(member)
-                    .orElseThrow(NotFoundMemberDetailException::new);
+        MemberDetail memberDetail = memberDetailRepository.findByMember(member)
+                .orElseThrow(NotFoundMemberDetailException::new);
 
-            Place place = memberDetail.getPlace();
-            notices = noticeRepository.findAllByPlace(place, pageable);
+        Place myPlace = memberDetail.getPlace();
+
+        if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
+            Head myHead = myPlace.getHead();
+
+            List<Place> branchPlaces = placeRepository.findAllByHead(myHead);
+
+            notices = noticeRepository.findAllByPlaceIn(branchPlaces, pageable);
+        } else {
+            notices = noticeRepository.findAllByPlace(myPlace, pageable);
         }
 
         return notices.getContent().stream()

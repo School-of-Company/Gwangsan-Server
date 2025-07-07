@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
@@ -22,6 +26,7 @@ public class FindNoticeServiceImpl implements FindNoticeService {
 
     private final NoticeRepository noticeRepository;
     private final NoticeImageRepository noticeImageRepository;
+    private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -30,6 +35,19 @@ public class FindNoticeServiceImpl implements FindNoticeService {
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(NoticeNotFoundException::new);
+
+        MemberDetail memberDetail = memberDetailRepository.findByMember(member)
+                .orElseThrow(NotFoundMemberDetailException::new);
+
+        if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
+            if (!memberDetail.getPlace().getHead().equals(notice.getPlace().getHead())) {
+                throw new NoticeNotFoundException();
+            }
+        } else {
+            if (!memberDetail.getPlace().equals(notice.getPlace())) {
+                throw new NoticeNotFoundException();
+            }
+        }
 
         List<GetImageResponse> imageResponses = noticeImageRepository.findAllByNotice(notice).stream()
                 .map(NoticeImage::getImage)
