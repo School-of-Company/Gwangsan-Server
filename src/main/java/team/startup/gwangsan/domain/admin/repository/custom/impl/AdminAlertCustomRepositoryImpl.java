@@ -22,22 +22,18 @@ public class AdminAlertCustomRepositoryImpl implements AdminAlertCustomRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<AdminAlert> findAdminAlertByPlaceAndAlertType(Place place, AlertType alertType) {
+    public List<AdminAlert> findAdminAlertByPlacesAndAlertType(List<Place> places, AlertType alertType) {
         return queryFactory
                 .selectFrom(adminAlert).distinct()
                 .join(adminAlert.member, member).fetchJoin()
                 .join(memberDetail).on(member.id.eq(memberDetail.member.id)).fetchJoin()
                 .where(
-                        placeIdEq(place),
+                        memberDetail.place.in(places),
                         alertTypeEq(alertType)
                 )
                 .fetch();
     }
-
-    private BooleanExpression placeIdEq(Place place) {
-        return place != null ? memberDetail.place.id.eq(place.getId()) : null;
-    }
-
+    
     private BooleanExpression alertTypeEq(AlertType alertType) {
         return alertType != null ? adminAlert.type.eq(alertType) : null;
     }
