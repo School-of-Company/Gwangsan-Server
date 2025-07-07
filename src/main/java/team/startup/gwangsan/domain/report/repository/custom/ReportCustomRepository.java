@@ -6,5 +6,5 @@ import team.startup.gwangsan.domain.report.entity.Report;
 import java.util.List;
 
 public interface ReportCustomRepository {
-    List<Report> findByPlace(Place place);
+    List<Report> findByPlaces(List<Place> places);
 }

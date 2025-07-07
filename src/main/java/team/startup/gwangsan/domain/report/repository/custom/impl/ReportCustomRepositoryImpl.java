@@ -21,16 +21,12 @@ public class ReportCustomRepositoryImpl implements ReportCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Report> findByPlace(Place place) {
+    public List<Report> findByPlaces(List<Place> places) {
         return queryFactory
                 .selectFrom(report).distinct()
                 .join(report.reporter, member).fetchJoin()
                 .join(memberDetail).on(member.id.eq(memberDetail.member.id)).fetchJoin()
-                .where(placeEq(place))
+                .where(memberDetail.place.in(places))
                 .fetch();
-    }
-
-    private BooleanExpression placeEq(Place place) {
-        return place != null ? memberDetail.place.eq(place) : null;
     }
 }
