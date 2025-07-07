@@ -1,10 +1,12 @@
 package team.startup.gwangsan.domain.notice.presentation.dto.reqeust;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 public record CreateNoticeRequest(
-        String title,
-        String content,
-        String placeName,
+        @NotNull String title,
+        @NotNull String content,
+        @NotNull String placeName,
         List<Long> imageIds
 ) {}
