@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["*"]
 
+env:
+  AWS_REGION: ap-northeast-2
+
 jobs:
   CI:
     runs-on: ubuntu-latest
@@ -25,3 +28,20 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test
+
+      # AWS 인증
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name gwangsan-deploy \
+            --deployment-group-name gwangsan-dg \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --s3-location bucket=gwangsan-githubaction,key=deploy.zip,bundleType=zip \
+            --region $AWS_REGION
