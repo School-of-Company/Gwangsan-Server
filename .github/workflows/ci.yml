@@ -42,5 +42,5 @@ jobs:
             --application-name gwangsan-deploy \
             --deployment-group-name gwangsan-dg \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --s3-location bucket=gwangsan-githubaction,key=gwangsan-build.zip,bundleType=zip \
+            --s3-location bucket=gwangsan-githubaction,key=deploy.zip,bundleType=zip \
             --region $AWS_REGION
