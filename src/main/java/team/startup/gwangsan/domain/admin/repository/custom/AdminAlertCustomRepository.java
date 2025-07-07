@@ -7,5 +7,5 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import java.util.List;
 
 public interface AdminAlertCustomRepository {
-    List<AdminAlert> findAdminAlertByPlaceAndAlertType(Place place, AlertType alertType);
+    List<AdminAlert> findAdminAlertByPlacesAndAlertType(List<Place> places, AlertType alertType);
 }
