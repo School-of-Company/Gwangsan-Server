@@ -7,5 +7,5 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import java.util.List;
 
 public interface MemberCustomRepository {
-    List<Member> findByStatusAndPlace(MemberStatus status, Place place);
+    List<Member> findByStatusAndPlaces(MemberStatus status, List<Place> places);
 }
