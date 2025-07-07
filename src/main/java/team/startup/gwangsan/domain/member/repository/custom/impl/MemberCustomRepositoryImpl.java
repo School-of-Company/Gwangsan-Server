@@ -21,7 +21,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Member> findByStatusAndPlace(MemberStatus status, Place place) {
+    public List<Member> findByStatusAndPlaces(MemberStatus status, List<Place> places) {
         QMember recommender = new QMember("recommender");
 
         return queryFactory
@@ -30,7 +30,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .join(member.recommender, recommender).on(recommender.id.eq(member.recommender.id))
                 .where(
                         member.status.eq(status),
-                        memberDetail.place.id.eq(place.getId())
+                        memberDetail.place.in(places)
                 )
                 .fetch();
     }

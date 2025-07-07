@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface PlaceRepository extends JpaRepository<Place, Integer> {
     Optional<Place> findByName(String name);
 
-    List<Place> findAllByHead(Head head);
+    List<Place> findByHead(Head head);
 }

@@ -49,7 +49,7 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
         if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
             Head myHead = myPlace.getHead();
 
-            List<Place> branchPlaces = placeRepository.findAllByHead(myHead);
+            List<Place> branchPlaces = placeRepository.findByHead(myHead);
 
             notices = noticeRepository.findAllByPlaceIn(branchPlaces, pageable);
         } else {
