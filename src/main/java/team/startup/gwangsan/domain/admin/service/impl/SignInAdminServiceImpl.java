@@ -38,7 +38,7 @@ public class SignInAdminServiceImpl implements SignInAdminService {
         validateMemberRole(member);
 
         validateMemberStatus(member);
-        //validateMemberPassword(password, member);
+        validateMemberPassword(password, member);
 
         String accessToken = jwtProvider.generateAccessToken(member.getPhoneNumber(), member.getRole());
         String refreshToken = jwtProvider.generateRefreshToken(member.getPhoneNumber());
