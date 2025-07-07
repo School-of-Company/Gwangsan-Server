@@ -20,7 +20,6 @@ import team.startup.gwangsan.domain.notice.service.FindAllNoticeService;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
     @Override
     public List<FindAllNoticeResponse> execute(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         Member member = memberUtil.getCurrentMember();
         Page<Notice> notices;
@@ -67,7 +65,7 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
                             notice.getTitle(),
                             notice.getContent(),
                             notice.getPlace().getName(),
-                            notice.getCreatedAt().format(formatter),
+                            notice.getCreatedAt(),
                             notice.getMember().getRole().name(),
                             imageResponses
                     );

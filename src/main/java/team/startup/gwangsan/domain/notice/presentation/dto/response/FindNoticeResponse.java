@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.notice.presentation.dto.response;
 
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record FindNoticeResponse(
@@ -9,7 +10,7 @@ public record FindNoticeResponse(
         String title,
         String content,
         String place,
-        String createdAt,
+        LocalDateTime createdAt,
         String role,
         List<GetImageResponse> images
 ) {
