@@ -12,5 +12,4 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Page<Notice> findAllByPlace(Place place, Pageable pageable);
 
     Page<Notice> findAllByPlaceIn(List<Place> places, Pageable pageable);
-
 }
