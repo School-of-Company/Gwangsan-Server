@@ -37,12 +37,6 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(NoticeNotFoundException::new);
 
-        if (!notice.getMember().equals(member) &&
-                member.getRole() != MemberRole.ROLE_HEAD_ADMIN &&
-                member.getRole() != MemberRole.ROLE_PLACE_ADMIN) {
-            throw new NoticeForbiddenException();
-        }
-
         notice.update(request.title(), request.content());
 
         List<NoticeImage> oldNoticeImages = noticeImageRepository.findAllByNotice(notice);

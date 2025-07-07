@@ -76,6 +76,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
 
+                                // notice
+                                .requestMatchers(HttpMethod.GET, "/api/notice").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/notice/{id}").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/notice")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+                                .requestMatchers(HttpMethod.PATCH, "/api/notice/{id}").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/notice/{id}").authenticated()
+
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),

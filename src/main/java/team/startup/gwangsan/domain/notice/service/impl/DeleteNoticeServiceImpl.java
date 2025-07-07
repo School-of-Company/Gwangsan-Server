@@ -28,12 +28,10 @@ public class DeleteNoticeServiceImpl implements DeleteNoticeService {
                 .orElseThrow(NoticeNotFoundException::new);
 
         if (!notice.getMember().equals(member) &&
-                member.getRole() != MemberRole.ROLE_HEAD_ADMIN &&
-                member.getRole() != MemberRole.ROLE_PLACE_ADMIN) {
+                member.getRole() != MemberRole.ROLE_HEAD_ADMIN) {
             throw new NoticeForbiddenException();
         }
 
         noticeRepository.delete(notice);
     }
 }
-
