@@ -29,6 +29,7 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
         return new FindMyInfoResponse(
                 member.getId(),
                 member.getNickname(),
+                detail.getPlace().getName(),
                 detail.getProfileUrl(),
                 detail.getLight(),
                 detail.getGwangsan()
