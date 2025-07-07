@@ -37,10 +37,6 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     public void execute(CreateNoticeRequest request) {
         Member admin = memberUtil.getCurrentMember();
 
-        if (admin.getRole() != MemberRole.ROLE_HEAD_ADMIN && admin.getRole() != MemberRole.ROLE_PLACE_ADMIN) {
-            throw new ForbiddenException();
-        }
-
         Place place = null;
         if (request.placeName() != null) {
             place = placeRepository.findByName(request.placeName())

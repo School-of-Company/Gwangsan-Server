@@ -76,25 +76,13 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
 
-                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/sms").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/signup").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/signin").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/sms").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
-                                .requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
-                                .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
+                                // notice
+                                .requestMatchers(HttpMethod.GET, "/api/notice").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/notice/{id}").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/notice")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+                                .requestMatchers(HttpMethod.PATCH, "/api/notice/{id}").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/notice/{id}").authenticated()
 
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
