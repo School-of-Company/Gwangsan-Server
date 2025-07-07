@@ -35,10 +35,6 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     public void execute(CreateNoticeRequest request) {
         Member admin = memberUtil.getCurrentMember();
 
-        if (request.placeName() == null) {
-            throw new PlaceNotFoundException();
-        }
-
         Place place = placeRepository.findByName(request.placeName())
                 .orElseThrow(PlaceNotFoundException::new);
 
