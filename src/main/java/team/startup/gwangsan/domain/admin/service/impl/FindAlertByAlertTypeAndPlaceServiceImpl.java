@@ -17,7 +17,6 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.repository.custom.MemberCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
@@ -26,22 +25,22 @@ import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.report.repository.custom.ReportCustomRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlertTypeAndPlaceService {
 
     private final MemberDetailRepository memberDetailRepository;
-    private final ReportRepository reportRepository;
+    private final ReportCustomRepository reportCustomRepository;
     private final AdminAlertCustomRepository adminAlertCustomRepository;
     private final MemberCustomRepository memberCustomRepository;
-    private final MemberRepository memberRepository;
-    private final ReportCustomRepository reportCustomRepository;
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
@@ -50,28 +49,21 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     @Transactional
     public GetAdminAlertResponse execute(String placeName, AlertType type) {
         Member admin = memberUtil.getCurrentMember();
-        Place place = findTargetPlaceOrNull(placeName, admin);
+        List<Place> places = findTargetPlaces(placeName, admin);
 
-        List<AdminAlert> alerts = adminAlertCustomRepository.findAdminAlertByPlaceAndAlertType(place, type);
+        List<AdminAlert> alerts = adminAlertCustomRepository.findAdminAlertByPlacesAndAlertType(places, type);
 
         List<AdminAlert> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
         List<AdminAlert> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
 
-        List<Report> reports;
-        List<Member> members;
-
-        if (place == null) {
-            reports = reportRepository.findAll();
-            members = memberRepository.findAllByStatus(MemberStatus.PENDING);
-        } else {
-            reports = reportCustomRepository.findByPlace(place);
-            members = memberCustomRepository.findByStatusAndPlace(MemberStatus.PENDING, place);
-        }
+        List<Report> reports = reportCustomRepository.findByPlaces(places);
+        List<Member> members = memberCustomRepository.findByStatusAndPlaces(MemberStatus.PENDING, places);
 
         List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
-        List<GetReportAlertResponse> reportAlertResponses = createReportAlertResponses(reportAlerts, reports, reportImages);
 
+        List<GetReportAlertResponse> reportAlertResponses = createReportAlertResponses(reportAlerts, reports, reportImages);
         List<GetSignUpAlertResponse> signUpAlertResponses = createSignUpAlertResponses(signUpAlerts, members);
+
         return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses);
     }
 
@@ -79,33 +71,39 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         return alerts.stream().filter(a -> a.getType().equals(type)).toList();
     }
 
-    private Place findTargetPlaceOrNull(String placeName, Member member) {
+    private List<Place> findTargetPlaces(String placeName, Member member) {
         if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
             if (placeName == null) {
-                return null;
+                Place place = memberDetailRepository.findPlaceByMemberId(member.getId());
+                return placeRepository.findByHead(place.getHead());
             }
-            return placeRepository.findByName(placeName)
+            Place target = placeRepository.findByName(placeName)
                     .orElseThrow(PlaceNotFoundException::new);
+            return List.of(target);
         }
 
-        return memberDetailRepository.findPlaceByMemberId(member.getId());
+        Place place = memberDetailRepository.findPlaceByMemberId(member.getId());
+        return List.of(place);
     }
 
     private List<GetReportAlertResponse> createReportAlertResponses(List<AdminAlert> alerts, List<Report> reports, List<ReportImage> images) {
+        Map<Long, Report> reportMap = reports.stream()
+                .collect(Collectors.toMap(Report::getId, r -> r));
+
+        Map<Long, List<GetImageResponse>> imageMap = images.stream()
+                .collect(Collectors.groupingBy(
+                        ri -> ri.getReport().getId(),
+                        Collectors.mapping(ri -> new GetImageResponse(
+                                ri.getImage().getId(),
+                                ri.getImage().getImageUrl()), Collectors.toList())
+                ));
+
         return alerts.stream()
                 .map(alert -> {
-                    Report report = reports.stream()
-                            .filter(r -> r.getId().equals(alert.getSourceId()))
-                            .findFirst()
+                    Report report = Optional.ofNullable(reportMap.get(alert.getSourceId()))
                             .orElseThrow(NotFoundReportException::new);
 
-                    List<GetImageResponse> imageResponses = images.stream()
-                            .filter(ri -> ri.getReport().getId().equals(report.getId()))
-                            .map(ri -> new GetImageResponse(
-                                    ri.getImage().getId(),
-                                    ri.getImage().getImageUrl()
-                            ))
-                            .toList();
+                    List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
 
                     return new GetReportAlertResponse(
                             report.getId(),
@@ -125,11 +123,12 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     }
 
     private List<GetSignUpAlertResponse> createSignUpAlertResponses(List<AdminAlert> alerts, List<Member> members) {
+        Map<Long, Member> memberMap = members.stream()
+                .collect(Collectors.toMap(Member::getId, m -> m));
+
         return alerts.stream()
                 .map(alert -> {
-                    Member member = members.stream()
-                            .filter(m -> m.getId().equals(alert.getMember().getId()))
-                            .findFirst()
+                    Member member = Optional.ofNullable(memberMap.get(alert.getMember().getId()))
                             .orElseThrow(NotFoundMemberException::new);
 
                     return new GetSignUpAlertResponse(
