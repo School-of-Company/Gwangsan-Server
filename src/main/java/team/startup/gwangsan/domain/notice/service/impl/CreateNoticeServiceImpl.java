@@ -35,11 +35,12 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     public void execute(CreateNoticeRequest request) {
         Member admin = memberUtil.getCurrentMember();
 
-        Place place = null;
-        if (request.placeName() != null) {
-            place = placeRepository.findByName(request.placeName())
-                    .orElseThrow(PlaceNotFoundException::new);
+        if (request.placeName() == null) {
+            throw new PlaceNotFoundException();
         }
+
+        Place place = placeRepository.findByName(request.placeName())
+                .orElseThrow(PlaceNotFoundException::new);
 
         Notice notice = Notice.builder()
                 .title(request.title())
@@ -57,13 +58,14 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
                 throw new ImageNotFoundException();
             }
 
-            for (Image image : images) {
-                NoticeImage noticeImage = NoticeImage.builder()
-                        .image(image)
-                        .notice(notice)
-                        .build();
-                noticeImageRepository.save(noticeImage);
-            }
+            List<NoticeImage> noticeImages = images.stream()
+                    .map(image -> NoticeImage.builder()
+                            .image(image)
+                            .notice(notice)
+                            .build())
+                    .toList();
+
+            noticeImageRepository.saveAll(noticeImages);
         }
     }
 }

@@ -46,12 +46,13 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
             throw new ImageNotFoundException();
         }
 
-        for (Image image : images) {
-            NoticeImage noticeImage = NoticeImage.builder()
-                    .notice(notice)
-                    .image(image)
-                    .build();
-            noticeImageRepository.save(noticeImage);
-        }
+        List<NoticeImage> newNoticeImages = images.stream()
+                .map(image -> NoticeImage.builder()
+                        .notice(notice)
+                        .image(image)
+                        .build())
+                .toList();
+
+        noticeImageRepository.saveAll(newNoticeImages);
     }
 }
