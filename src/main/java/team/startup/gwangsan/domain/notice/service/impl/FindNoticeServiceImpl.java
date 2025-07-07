@@ -13,7 +13,6 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.FindNoticeService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,11 +31,7 @@ public class FindNoticeServiceImpl implements FindNoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(NoticeNotFoundException::new);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        List<NoticeImage> noticeImages = noticeImageRepository.findAllByNotice(notice);
-
-        List<GetImageResponse> imageResponses = noticeImages.stream()
+        List<GetImageResponse> imageResponses = noticeImageRepository.findAllByNotice(notice).stream()
                 .map(NoticeImage::getImage)
                 .map(image -> new GetImageResponse(image.getId(), image.getImageUrl()))
                 .collect(Collectors.toList());
@@ -46,7 +41,7 @@ public class FindNoticeServiceImpl implements FindNoticeService {
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getPlace().getName(),
-                notice.getCreatedAt().format(formatter),
+                notice.getCreatedAt(),
                 member.getRole().name(),
                 imageResponses
         );
