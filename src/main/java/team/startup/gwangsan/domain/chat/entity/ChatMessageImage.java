@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.image.entity.Image;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "tbl_chat_messege_image")
+@Table(name = "tbl_chat_message_image")
 public class ChatMessageImage {
 
     @Id
