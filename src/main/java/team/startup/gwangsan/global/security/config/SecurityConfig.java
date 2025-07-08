@@ -45,6 +45,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
 
                 .exceptionHandling(config ->
                         config.authenticationEntryPoint(jwtAuthenticationEntryPoint)
