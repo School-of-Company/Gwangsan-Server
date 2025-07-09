@@ -26,7 +26,7 @@ public class RelatedKeywordController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/current")
     public ResponseEntity<List<MyRelatedKeywordResponse>> findMyKeywords() {
         List<MyRelatedKeywordResponse> response = findMyRelatedKeywordService.execute();
         return ResponseEntity.ok(response);

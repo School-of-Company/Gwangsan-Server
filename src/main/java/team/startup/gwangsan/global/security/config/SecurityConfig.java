@@ -89,7 +89,7 @@ public class SecurityConfig {
 
                                 //related-keyword
                                 .requestMatchers(HttpMethod.GET, "/api/related-keyword").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/related-keyword/me").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/related-keyword/current").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/related-keyword/{memberRelatedKeywordId}").authenticated()
 
                                 // health
