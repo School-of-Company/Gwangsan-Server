@@ -4,5 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record UpdateMyInfoRequest(
         @NotBlank String nickname,
-        @NotBlank String profileUrl
+        @NotBlank String profileUrl,
+        @NotBlank String description
 ) {}

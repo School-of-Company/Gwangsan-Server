@@ -5,5 +5,6 @@ public record FindUserInfoResponse(
         String nickname,
         String profileUrl,
         String placeName,
-        Integer light
+        Integer light,
+        String description
 ) {}
