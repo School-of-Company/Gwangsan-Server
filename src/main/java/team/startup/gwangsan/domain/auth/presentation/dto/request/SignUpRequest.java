@@ -31,6 +31,8 @@ public record SignUpRequest(
 
         @Pattern(regexp = "^[가-힣]+$", message = "추천인은 한글만 가능합니다.")
         @NotBlank(message = "추천인은 필수입니다.")
-        String recommender
+        String recommender,
+
+        @NotBlank String description
 
 ) {}

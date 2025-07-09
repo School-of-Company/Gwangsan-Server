@@ -32,7 +32,8 @@ public class FindUserInfoServiceImpl implements FindUserInfoService {
                 member.getNickname(),
                 detail.getProfileUrl(),
                 detail.getPlace().getName(),
-                detail.getLight()
+                detail.getLight(),
+                detail.getDescription()
         );
     }
 }

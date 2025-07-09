@@ -32,7 +32,8 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
                 detail.getPlace().getName(),
                 detail.getProfileUrl(),
                 detail.getLight(),
-                detail.getGwangsan()
+                detail.getGwangsan(),
+                detail.getDescription()
         );
     }
 }
