@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.CreateNoticeRequest;
@@ -29,6 +30,7 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     private final NoticeRepository noticeRepository;
     private final ImageRepository imageRepository;
     private final NoticeImageRepository noticeImageRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     @Transactional
