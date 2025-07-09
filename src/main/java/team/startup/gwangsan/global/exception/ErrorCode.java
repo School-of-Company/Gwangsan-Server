@@ -62,7 +62,11 @@ public enum ErrorCode {
 
     // notice
     NOTICE_NOT_FOUND(404, "해당 공지가 존재하지 않습니다."),
-    NOTICE_FORBIDDEN(403, "공지에 대한 권한이 없습니다.");
+    NOTICE_FORBIDDEN(403, "공지에 대한 권한이 없습니다."),
+
+    // related-keyword
+    MEMBER_RELATED_KEYWORD_NOT_FOUND(404, "해당 관련 키워드를 찾을 수 없습니다."),
+    MEMBER_RELATED_KEYWORD_FORBIDDEN(403, "해당 관련 키워드에 대한 권한이 없습니다.");
 
     private final int status;
     private final String message;
