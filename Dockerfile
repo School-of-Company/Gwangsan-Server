@@ -4,7 +4,7 @@ FROM gradle:8.4.0-jdk21-alpine AS build
 WORKDIR /app
 
 COPY gradle ./gradle
-COPY build.gradle settings.gradle gradlew ./  # 너에겐 이 두 파일이 있으니 이렇게 작성
+COPY build.gradle settings.gradle gradlew ./
 COPY src ./src
 
 RUN chmod +x ./gradlew
