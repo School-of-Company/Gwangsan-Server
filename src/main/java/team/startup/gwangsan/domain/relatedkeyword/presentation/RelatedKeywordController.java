@@ -3,7 +3,6 @@ package team.startup.gwangsan.domain.relatedkeyword.presentation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.MyRelatedKeywordResponse;
 import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.RelatedKeywordResponse;
 import team.startup.gwangsan.domain.relatedkeyword.service.DeleteMemberRelatedKeywordService;
 import team.startup.gwangsan.domain.relatedkeyword.service.FindMyRelatedKeywordService;
@@ -27,8 +26,8 @@ public class RelatedKeywordController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity<List<MyRelatedKeywordResponse>> findMyKeywords() {
-        List<MyRelatedKeywordResponse> response = findMyRelatedKeywordService.execute();
+    public ResponseEntity<List<RelatedKeywordResponse>> findMyKeywords() {
+        List<RelatedKeywordResponse> response = findMyRelatedKeywordService.execute();
         return ResponseEntity.ok(response);
     }
 
