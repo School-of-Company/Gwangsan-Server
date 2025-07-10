@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface MemberRelatedKeywordRepository extends JpaRepository<MemberRelatedKeyword, Long> {
     List<MemberRelatedKeyword> findAllByMember(Member member);
+
+    void deleteAllByMember(Member member);
 }
