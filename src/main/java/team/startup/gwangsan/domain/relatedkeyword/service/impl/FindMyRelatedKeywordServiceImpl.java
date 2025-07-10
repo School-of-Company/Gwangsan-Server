@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.MyRelatedKeywordResponse;
+import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.RelatedKeywordResponse;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.service.FindMyRelatedKeywordService;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -22,13 +22,13 @@ public class FindMyRelatedKeywordServiceImpl implements FindMyRelatedKeywordServ
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyRelatedKeywordResponse> execute() {
+    public List<RelatedKeywordResponse> execute() {
         Member member = memberUtil.getCurrentMember();
 
         List<MemberRelatedKeyword> list = memberRelatedKeywordRepository.findAllByMember(member);
 
         return list.stream()
-                .map(mrk -> new MyRelatedKeywordResponse(
+                .map(mrk -> new RelatedKeywordResponse(
                         mrk.getRelatedKeyword().getId(),
                         mrk.getRelatedKeyword().getName()
                 ))
