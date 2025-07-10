@@ -10,6 +10,9 @@ import team.startup.gwangsan.domain.member.peresentation.dto.response.FindUserIn
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.service.FindUserInfoService;
+import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ public class FindUserInfoServiceImpl implements FindUserInfoService {
 
     private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
+    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -27,14 +31,18 @@ public class FindUserInfoServiceImpl implements FindUserInfoService {
         MemberDetail detail = memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
+        List<String> specialties = memberRelatedKeywordRepository.findAllByMember(member).stream()
+                .map(mrk -> mrk.getRelatedKeyword().getName())
+                .toList();
+
         return new FindUserInfoResponse(
                 member.getId(),
                 member.getNickname(),
                 detail.getProfileUrl(),
                 detail.getPlace().getName(),
                 detail.getLight(),
-                detail.getDescription()
+                detail.getDescription(),
+                specialties
         );
     }
 }
-

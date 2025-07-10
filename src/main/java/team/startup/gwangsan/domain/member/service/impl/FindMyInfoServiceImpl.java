@@ -9,13 +9,17 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.service.FindMyInfoService;
+import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FindMyInfoServiceImpl implements FindMyInfoService {
 
     private final MemberDetailRepository memberDetailRepository;
+    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -26,6 +30,10 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
         MemberDetail detail = memberDetailRepository.findById(member.getId())
                 .orElseThrow(NotFoundMemberException::new);
 
+        List<String> specialties = memberRelatedKeywordRepository.findAllByMember(member).stream()
+                .map(mrk -> mrk.getRelatedKeyword().getName())
+                .toList();
+
         return new FindMyInfoResponse(
                 member.getId(),
                 member.getNickname(),
@@ -33,7 +41,8 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
                 detail.getProfileUrl(),
                 detail.getLight(),
                 detail.getGwangsan(),
-                detail.getDescription()
+                detail.getDescription(),
+                specialties
         );
     }
 }

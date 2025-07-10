@@ -1,5 +1,7 @@
 package team.startup.gwangsan.domain.member.peresentation.dto.response;
 
+import java.util.List;
+
 public record FindMyInfoResponse(
         Long memberId,
         String nickname,
@@ -7,6 +9,7 @@ public record FindMyInfoResponse(
         String profileUrl,
         Integer light,
         Integer gwangsan,
-        String description
+        String description,
+        List<String> specialties
 ) {}
 
