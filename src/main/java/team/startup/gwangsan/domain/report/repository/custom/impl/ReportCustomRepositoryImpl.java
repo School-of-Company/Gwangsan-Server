@@ -29,7 +29,7 @@ public class ReportCustomRepositoryImpl implements ReportCustomRepository {
                 .selectFrom(report).distinct()
                 .join(report.reporter, reporter).fetchJoin()
                 .join(report.reported, reported).fetchJoin()
-                .join(memberDetail).on(member.id.eq(memberDetail.member.id)).fetchJoin()
+                .join(memberDetail).on(reporter.id.eq(memberDetail.member.id)).fetchJoin()
                 .where(memberDetail.place.in(places))
                 .fetch();
     }
