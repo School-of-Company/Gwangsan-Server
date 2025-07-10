@@ -16,7 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.global.auth.MemberDetailsService;
 import team.startup.gwangsan.global.filter.ExceptionFilter;
+import team.startup.gwangsan.global.filter.JwtAuthenticationFilter;
 import team.startup.gwangsan.global.filter.JwtFilter;
 import team.startup.gwangsan.global.filter.RequestLogFilter;
 import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
@@ -34,6 +36,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final MemberDetailsService memberDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -104,7 +107,8 @@ public class SecurityConfig {
 
                 .addFilterBefore(new RequestLogFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtFilter(jwtProvider, tokenParser), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(jwtProvider, tokenParser), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, memberDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
