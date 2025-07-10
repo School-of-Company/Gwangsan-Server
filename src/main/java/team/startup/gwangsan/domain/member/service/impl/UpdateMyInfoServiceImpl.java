@@ -11,7 +11,13 @@ import team.startup.gwangsan.domain.member.peresentation.dto.request.UpdateMyInf
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.service.UpdateMyInfoService;
+import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
+import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
+import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
+import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,8 @@ public class UpdateMyInfoServiceImpl implements UpdateMyInfoService {
     private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
+    private final RelatedKeywordRepository relatedKeywordRepository;
+    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
 
     @Override
     @Transactional
@@ -38,5 +46,17 @@ public class UpdateMyInfoServiceImpl implements UpdateMyInfoService {
 
         detail.updateProfileUrl(request.profileUrl());
         detail.updateDescription(request.description());
+
+        memberRelatedKeywordRepository.deleteAllByMember(member);
+
+        List<MemberRelatedKeyword> newKeywords = request.specialties().stream()
+                .map(specialty -> {
+                    RelatedKeyword keyword = relatedKeywordRepository.findByName(specialty)
+                            .orElseGet(() -> relatedKeywordRepository.save(new RelatedKeyword(specialty)));
+                    return new MemberRelatedKeyword(keyword, member);
+                })
+                .toList();
+
+        memberRelatedKeywordRepository.saveAll(newKeywords);
     }
 }
