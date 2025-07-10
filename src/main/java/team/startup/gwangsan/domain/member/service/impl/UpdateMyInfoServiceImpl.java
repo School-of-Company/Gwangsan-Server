@@ -37,5 +37,6 @@ public class UpdateMyInfoServiceImpl implements UpdateMyInfoService {
                 .orElseThrow(NotFoundMemberException::new);
 
         detail.updateProfileUrl(request.profileUrl());
+        detail.updateDescription(request.description());
     }
 }

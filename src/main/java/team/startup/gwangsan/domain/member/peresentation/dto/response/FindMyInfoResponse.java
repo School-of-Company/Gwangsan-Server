@@ -6,6 +6,7 @@ public record FindMyInfoResponse(
         String placeName,
         String profileUrl,
         Integer light,
-        Integer gwangsan
+        Integer gwangsan,
+        String description
 ) {}
 
