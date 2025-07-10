@@ -40,7 +40,6 @@ public class NoticeController {
     }
 
 
-
     @GetMapping("/{noticeId}")
     public ResponseEntity<FindNoticeResponse> findNotice(
             @PathVariable Long noticeId
