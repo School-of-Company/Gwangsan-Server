@@ -31,6 +31,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,22 +54,28 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
         List<AdminAlert> alerts = adminAlertCustomRepository.findAdminAlertByPlacesAndAlertType(places, type);
 
+        Set<Long> memberIds = alerts.stream()
+                .map(alert -> alert.getMember().getId())
+                .collect(Collectors.toSet());
+        Map<Long, String> memberIdToPlaceName = memberDetailRepository.findPlaceNameMapByMemberIds(memberIds);
+
         List<AdminAlert> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
         List<AdminAlert> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
 
         List<Report> reports = reportCustomRepository.findByPlaces(places);
         List<Member> members = memberCustomRepository.findByStatusAndPlaces(MemberStatus.PENDING, places);
-
         List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
 
-        List<GetReportAlertResponse> reportAlertResponses = createReportAlertResponses(reportAlerts, reports, reportImages);
-        List<GetSignUpAlertResponse> signUpAlertResponses = createSignUpAlertResponses(signUpAlerts, members);
+        List<GetReportAlertResponse> reportAlertResponses =
+                createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
+        List<GetSignUpAlertResponse> signUpAlertResponses =
+                createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
 
         return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses);
     }
 
     private List<AdminAlert> filterAlertsByType(List<AdminAlert> alerts, AlertType type) {
-        return alerts.stream().filter(a -> a.getType().equals(type)).toList();
+        return alerts.stream().filter(a -> a.getType() == type).toList();
     }
 
     private List<Place> findTargetPlaces(String placeName, Member member) {
@@ -86,7 +93,12 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         return List.of(place);
     }
 
-    private List<GetReportAlertResponse> createReportAlertResponses(List<AdminAlert> alerts, List<Report> reports, List<ReportImage> images) {
+    private List<GetReportAlertResponse> createReportAlertResponses(
+            List<AdminAlert> alerts,
+            List<Report> reports,
+            List<ReportImage> images,
+            Map<Long, String> memberIdToPlaceName
+    ) {
         Map<Long, Report> reportMap = reports.stream()
                 .collect(Collectors.toMap(Report::getId, r -> r));
 
@@ -105,12 +117,15 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
 
+                    String placeName = memberIdToPlaceName.get(alert.getMember().getId());
+
                     return new GetReportAlertResponse(
                             report.getId(),
                             alert.getMember().getNickname(),
                             report.getReported().getId(),
                             report.getReported().getNickname(),
                             alert.getTitle(),
+                            placeName,
                             alert.getCreatedAt(),
                             new GetReportResponse(
                                     report.getReportType(),
@@ -122,7 +137,11 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 .toList();
     }
 
-    private List<GetSignUpAlertResponse> createSignUpAlertResponses(List<AdminAlert> alerts, List<Member> members) {
+    private List<GetSignUpAlertResponse> createSignUpAlertResponses(
+            List<AdminAlert> alerts,
+            List<Member> members,
+            Map<Long, String> memberIdToPlaceName
+    ) {
         Map<Long, Member> memberMap = members.stream()
                 .collect(Collectors.toMap(Member::getId, m -> m));
 
@@ -131,10 +150,13 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     Member member = Optional.ofNullable(memberMap.get(alert.getMember().getId()))
                             .orElseThrow(NotFoundMemberException::new);
 
+                    String placeName = memberIdToPlaceName.get(alert.getMember().getId());
+
                     return new GetSignUpAlertResponse(
                             member.getId(),
                             member.getNickname(),
                             alert.getTitle(),
+                            placeName,
                             member.getRecommender().getNickname(),
                             alert.getCreatedAt()
                     );
