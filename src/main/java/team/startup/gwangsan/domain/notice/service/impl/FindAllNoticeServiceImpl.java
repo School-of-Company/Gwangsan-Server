@@ -22,6 +22,8 @@ import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,24 +49,27 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
             Head myHead = myPlace.getHead();
             List<Place> branchPlaces = placeRepository.findByHead(myHead);
 
-            if (lastId == null) {
-                notices = noticeRepository.findByPlaceInOrderByIdDesc(branchPlaces, pageable);
-            } else {
-                notices = noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(branchPlaces, lastId, pageable);
-            }
+            notices = (lastId == null)
+                    ? noticeRepository.findByPlaceInOrderByIdDesc(branchPlaces, pageable)
+                    : noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(branchPlaces, lastId, pageable);
 
         } else {
-            if (lastId == null) {
-                notices = noticeRepository.findByPlaceOrderByIdDesc(myPlace, pageable);
-            } else {
-                notices = noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(myPlace, lastId, pageable);
-            }
+            notices = (lastId == null)
+                    ? noticeRepository.findByPlaceOrderByIdDesc(myPlace, pageable)
+                    : noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(myPlace, lastId, pageable);
         }
+
+        List<Long> noticeIds = notices.stream().map(Notice::getId).toList();
+        List<NoticeImage> allNoticeImages = noticeImageRepository.findAllByNoticeIdIn(noticeIds);
+
+        Map<Long, List<NoticeImage>> noticeImageMap = allNoticeImages.stream()
+                .collect(Collectors.groupingBy(ni -> ni.getNotice().getId()));
 
         return notices.stream()
                 .map(notice -> {
-                    List<NoticeImage> noticeImages = noticeImageRepository.findAllByNotice(notice);
-                    List<GetImageResponse> imageResponses = noticeImages.stream()
+                    List<GetImageResponse> imageResponses = noticeImageMap
+                            .getOrDefault(notice.getId(), List.of())
+                            .stream()
                             .map(ni -> new GetImageResponse(
                                     ni.getImage().getId(),
                                     ni.getImage().getImageUrl()
