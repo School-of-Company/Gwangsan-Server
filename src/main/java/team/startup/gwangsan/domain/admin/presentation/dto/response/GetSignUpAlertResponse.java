@@ -6,6 +6,7 @@ public record GetSignUpAlertResponse(
         Long memberId,
         String nickname,
         String title,
+        String placeName,
         String recommenderNickname,
         LocalDateTime createdAt
 ) {

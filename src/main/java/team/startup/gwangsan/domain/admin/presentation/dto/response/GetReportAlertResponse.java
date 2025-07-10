@@ -10,6 +10,7 @@ public record GetReportAlertResponse(
         Long reportedMemberId,
         String reportedMemberName,
         String title,
+        String placeName,
         LocalDateTime createdAt,
         GetReportResponse report
 ) {
