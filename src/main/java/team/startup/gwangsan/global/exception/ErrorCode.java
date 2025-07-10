@@ -20,7 +20,6 @@ public enum ErrorCode {
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
     NOT_ALLOWED_USER_ACCESS(403, "사용자 목록 조회 권한이 없습니다."),
 
-
     // dong & place
     DONG_NOT_FOUND(404, "동이 존재하지 않습니다."),
     PLACE_NOT_FOUND(404, "장소가 존재하지 않습니다."),
