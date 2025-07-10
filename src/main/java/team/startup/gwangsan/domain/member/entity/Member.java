@@ -4,9 +4,14 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 
+import java.time.LocalDateTime;
+
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(name = "tbl_member")
 @NoArgsConstructor
@@ -42,8 +47,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
+    @CreatedDate
+    @Column(name = "joined_at", nullable = false, updatable = false)
+    private LocalDateTime joinedAt;
+
     @Builder
-    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status) {
+    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status, LocalDateTime joinedAt) {
         this.name = name;
         this.nickname = nickname;
         this.password = password;
@@ -51,6 +60,7 @@ public class Member {
         this.recommender = recommender;
         this.role = role;
         this.status = status;
+        this.joinedAt = joinedAt;
     }
 
     public void updateNickname(String nickname) {

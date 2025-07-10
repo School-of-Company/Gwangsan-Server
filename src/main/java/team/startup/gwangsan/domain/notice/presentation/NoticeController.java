@@ -32,12 +32,13 @@ public class NoticeController {
 
     @GetMapping
     public ResponseEntity<List<FindAllNoticeResponse>> findAllNotices(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<FindAllNoticeResponse> notices = findAllNoticeService.execute(page, size);
+        List<FindAllNoticeResponse> notices = findAllNoticeService.execute(lastId, size);
         return ResponseEntity.ok(notices);
     }
+
 
     @GetMapping("/{noticeId}")
     public ResponseEntity<FindNoticeResponse> findNotice(

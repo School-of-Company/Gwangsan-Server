@@ -5,5 +5,6 @@ import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoti
 import java.util.List;
 
 public interface FindAllNoticeService {
-    List<FindAllNoticeResponse> execute(int page, int size);
+    List<FindAllNoticeResponse> execute(Long lastId, int size);
 }
+

@@ -43,6 +43,7 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
                 .content(request.content())
                 .place(place)
                 .member(admin)
+                .targetRoles(request.roles())
                 .build();
 
         noticeRepository.save(notice);
