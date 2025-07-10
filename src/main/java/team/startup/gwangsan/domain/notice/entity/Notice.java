@@ -44,7 +44,7 @@ public class Notice {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "tbl_notice_target_roles", joinColumns = @JoinColumn(name = "notice_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
