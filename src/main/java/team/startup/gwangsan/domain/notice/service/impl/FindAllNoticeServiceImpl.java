@@ -1,7 +1,6 @@
 package team.startup.gwangsan.domain.notice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,47 +36,57 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
     private final PlaceRepository placeRepository;
 
     @Override
-    public List<FindAllNoticeResponse> execute(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public List<FindAllNoticeResponse> execute(Long lastId, int size) {
         Member member = memberUtil.getCurrentMember();
-        Page<Notice> notices;
-
         MemberDetail memberDetail = memberDetailRepository.findByMember(member)
                 .orElseThrow(NotFoundMemberDetailException::new);
-
         Place myPlace = memberDetail.getPlace();
+        MemberRole myRole = member.getRole();
+        Pageable pageable = PageRequest.of(0, size);
 
-        if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
+        List<Notice> notices;
+
+        if (myRole == MemberRole.ROLE_HEAD_ADMIN) {
             Head myHead = myPlace.getHead();
+            List<Place> branchPlaces = placeRepository.findByHead(myHead);
 
-            List<Place> branchPlaces = placeRepository.findAllByHead(myHead);
+            notices = (lastId == null)
+                    ? noticeRepository.findByPlaceInOrderByIdDesc(branchPlaces, pageable)
+                    : noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(branchPlaces, lastId, pageable);
 
-            notices = noticeRepository.findAllByPlaceIn(branchPlaces, pageable);
         } else {
-            notices = noticeRepository.findAllByPlace(myPlace, pageable);
+            notices = (lastId == null)
+                    ? noticeRepository.findByPlaceOrderByIdDesc(myPlace, pageable)
+                    : noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(myPlace, lastId, pageable);
         }
 
-        return notices.getContent().stream()
-                .map(notice -> {
-                    List<NoticeImage> noticeImages = noticeImageRepository.findAllByNotice(notice);
+        List<Long> noticeIds = notices.stream().map(Notice::getId).toList();
+        List<NoticeImage> allNoticeImages = noticeImageRepository.findAllByNoticeIdIn(noticeIds);
 
-                    List<GetImageResponse> imageResponses = noticeImages.stream()
+        Map<Long, List<NoticeImage>> noticeImageMap = allNoticeImages.stream()
+                .collect(Collectors.groupingBy(ni -> ni.getNotice().getId()));
+
+        return notices.stream()
+                .map(notice -> {
+                    List<GetImageResponse> imageResponses = noticeImageMap
+                            .getOrDefault(notice.getId(), List.of())
+                            .stream()
                             .map(ni -> new GetImageResponse(
                                     ni.getImage().getId(),
                                     ni.getImage().getImageUrl()
                             ))
-                            .collect(Collectors.toList());
+                            .toList();
+
+                    boolean isMe = notice.getMember().getId().equals(member.getId());
 
                     return new FindAllNoticeResponse(
                             notice.getId(),
                             notice.getTitle(),
                             notice.getContent(),
-                            notice.getPlace().getName(),
-                            notice.getCreatedAt(),
-                            notice.getMember().getRole().name(),
-                            imageResponses
+                            imageResponses,
+                            isMe
                     );
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }
