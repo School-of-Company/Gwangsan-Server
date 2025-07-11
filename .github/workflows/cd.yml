@@ -18,6 +18,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,7 +35,7 @@ jobs:
           mkdir -p src/main/resources
           aws s3 cp s3://gwangsan-githubaction/firebase-service-account.json src/main/resources/firebase-service-account.json
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -44,18 +45,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with gradle
+      - name: Build with Gradle
         run: ./gradlew build --no-daemon -x test
-
-
-
-
 
       - name: Build Docker image and save as tar
         run: |
           docker build -t gwangsan-app .
-          mkdir -p output/docker-image
-          docker save gwangsan-app > output/docker-image/gwangsan-app.tar
+          mkdir -p output
+          docker save gwangsan-app > output/gwangsan-app.tar
 
       - name: Prepare appspec.yml and scripts
         run: |
@@ -63,19 +60,19 @@ jobs:
           cp appspec.yml output/
           cp -r scripts/* output/scripts/
 
-      - name: Zip output directory
+      - name: Zip deployment package
         run: |
           cd output
-          zip -r ../deploy-package.zip appspec.yml scripts docker-image
+          zip -r ../deploy-package.zip gwangsan-app.tar scripts appspec.yml
 
       - name: Upload to AWS S3
         run: |
-          aws s3 cp deploy-package.zip s3://${{env.S3_BUCKET_NAME}}/$GITHUB_SHA.zip
+          aws s3 cp deploy-package.zip s3://${{ env.S3_BUCKET_NAME }}/${{ github.sha }}.zip
 
-      - name: Deploy to AWS EC2 from S3
+      - name: Deploy to AWS EC2 using CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=${{env.S3_BUCKET_NAME}},key=$GITHUB_SHA.zip,bundleType=zip
+            --s3-location bucket=${{ env.S3_BUCKET_NAME }},key=${{ github.sha }}.zip,bundleType=zip
