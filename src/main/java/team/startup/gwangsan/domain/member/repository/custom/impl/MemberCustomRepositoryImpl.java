@@ -27,7 +27,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return queryFactory
                 .selectFrom(member).distinct()
                 .join(memberDetail).on(member.id.eq(memberDetail.member.id)).fetchJoin()
-                .join(member.recommender, recommender).on(recommender.id.eq(member.recommender.id))
+                .join(member.recommender, recommender).fetchJoin()
                 .where(
                         member.status.eq(status),
                         memberDetail.place.in(places)
