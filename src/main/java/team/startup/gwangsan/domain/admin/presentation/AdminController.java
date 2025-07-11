@@ -10,11 +10,11 @@ import team.startup.gwangsan.domain.admin.presentation.dto.request.AdminSignInRe
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberRoleRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberStatusRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
+import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
 import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceService;
 import team.startup.gwangsan.domain.admin.service.SignInAdminService;
 import team.startup.gwangsan.domain.admin.service.UpdateMemberRoleService;
 import team.startup.gwangsan.domain.admin.service.UpdateMemberStatusService;
-import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -54,8 +54,8 @@ public class AdminController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<TokenResponse> signIn(@RequestBody @Valid AdminSignInRequest request) {
-        TokenResponse response = signInAdminService.execute(request.nickname(), request.password());
+    public ResponseEntity<SignInAdminResponse> signIn(@RequestBody @Valid AdminSignInRequest request) {
+        SignInAdminResponse response = signInAdminService.execute(request.nickname(), request.password());
         return ResponseEntity.ok(response);
     }
 
