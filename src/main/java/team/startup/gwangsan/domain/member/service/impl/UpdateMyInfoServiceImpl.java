@@ -44,7 +44,6 @@ public class UpdateMyInfoServiceImpl implements UpdateMyInfoService {
         MemberDetail detail = memberDetailRepository.findById(member.getId())
                 .orElseThrow(NotFoundMemberException::new);
 
-        detail.updateProfileUrl(request.profileUrl());
         detail.updateDescription(request.description());
 
         memberRelatedKeywordRepository.deleteAllByMember(member);
