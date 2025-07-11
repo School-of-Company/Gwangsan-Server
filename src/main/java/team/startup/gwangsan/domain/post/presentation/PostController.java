@@ -25,6 +25,7 @@ public class PostController {
     private final FindProductByCurrentUserAndTypeAndModeService findProductByCurrentUserAndTypeAndModeService;
     private final UpdateProductService updateProductService;
     private final DeleteProductByIdService deleteProductByIdService;
+    private final FindProductsByMemberIdService findProductsByMemberIdService;
 
     @PostMapping
     public ResponseEntity<Void> createProduct(@RequestBody @Valid CreateProductRequest request) {
@@ -83,5 +84,15 @@ public class PostController {
     public ResponseEntity<Void> deleteProduct(@PathVariable("post_id") Long postId) {
         deleteProductByIdService.execute(postId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/member/{member_id}")
+    public ResponseEntity<List<GetProductResponse>> findByMemberID(
+            @PathVariable("member_id") Long memberId,
+            @RequestParam(name = "type", required = false) Type type,
+            @RequestParam(name = "mode", required = false) Mode mode
+    ) {
+        List<GetProductResponse> responses = findProductsByMemberIdService.execute(memberId, type, mode);
+        return ResponseEntity.ok(responses);
     }
 }
