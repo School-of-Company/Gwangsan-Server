@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.admin.service;
 
-import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
+import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
 
 public interface SignInAdminService {
-    TokenResponse execute(String phoneNumber, String password);
+    SignInAdminResponse execute(String phoneNumber, String password);
 }
