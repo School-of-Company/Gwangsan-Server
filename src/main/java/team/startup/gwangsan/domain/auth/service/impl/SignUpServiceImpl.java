@@ -76,7 +76,6 @@ public class SignUpServiceImpl implements SignUpService {
                 .place(place)
                 .gwangsan(0)
                 .light(1)
-                .profileUrl(null)
                 .description(request.description())
                 .build();
 
