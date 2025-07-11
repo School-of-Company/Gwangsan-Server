@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
 import team.startup.gwangsan.domain.admin.service.SignInAdminService;
 import team.startup.gwangsan.domain.auth.entity.RefreshToken;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
-import team.startup.gwangsan.domain.auth.exception.NotFoundUserException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 import team.startup.gwangsan.domain.auth.repository.RefreshTokenRepository;
@@ -31,7 +31,7 @@ public class SignInAdminServiceImpl implements SignInAdminService {
 
     @Override
     @Transactional
-    public TokenResponse execute(String nickname, String password) {
+    public SignInAdminResponse execute(String nickname, String password) {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(NotFoundMemberException::new);
 
@@ -48,11 +48,16 @@ public class SignInAdminServiceImpl implements SignInAdminService {
                 .token(refreshToken)
                 .build());
 
-        return new TokenResponse(
+        TokenResponse token = new TokenResponse(
                 accessToken,
                 refreshToken,
                 LocalDateTime.now().plusSeconds(jwtProvider.getAccessTokenTime()),
                 LocalDateTime.now().plusSeconds(jwtProvider.getRefreshTokenTime())
+        );
+
+        return new SignInAdminResponse(
+                token,
+                member.getRole()
         );
     }
 
