@@ -58,7 +58,7 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
         eventPublisher.publishEvent(
                 new CreateAdminAlertEvent(
                         AlertType.REPORT,
-                        product.getId(),
+                        report.getId(),
                         reporter
                 )
         );
