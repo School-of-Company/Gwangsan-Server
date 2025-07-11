@@ -6,7 +6,6 @@ public record FindMyInfoResponse(
         Long memberId,
         String nickname,
         String placeName,
-        String profileUrl,
         Integer light,
         Integer gwangsan,
         String description,
