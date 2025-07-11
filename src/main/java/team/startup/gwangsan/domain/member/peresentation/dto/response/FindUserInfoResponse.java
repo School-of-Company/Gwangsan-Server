@@ -5,7 +5,6 @@ import java.util.List;
 public record FindUserInfoResponse(
         Long memberId,
         String nickname,
-        String profileUrl,
         String placeName,
         Integer light,
         String description,

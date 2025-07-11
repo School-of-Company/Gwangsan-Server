@@ -92,7 +92,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/notice/{id}").authenticated()
 
                                 // related-keyword
-                                .requestMatchers(HttpMethod.GET, "/api/related-keyword").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/related-keyword").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/related-keyword/current").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/related-keyword/{memberRelatedKeywordId}").authenticated()
 

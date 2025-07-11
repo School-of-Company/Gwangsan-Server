@@ -6,7 +6,6 @@ import java.util.List;
 
 public record UpdateMyInfoRequest(
         @NotBlank String nickname,
-        @NotBlank String profileUrl,
         @NotBlank String description,
         List<@NotBlank String> specialties
 ) {}
