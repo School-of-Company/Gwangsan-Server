@@ -14,8 +14,7 @@ import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMem
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
-import team.startup.gwangsan.domain.post.service.FindProductByCurrentUserAndTypeAndModeService;
-import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.domain.post.service.FindProductsByMemberIdService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,18 +22,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindProductByCurrentUserAndTypeAndModeService {
+public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberIdService {
 
+    private final ProductRepository productRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductRepository productRepository;
-    private final MemberUtil memberUtil;
 
     @Override
-    public List<GetProductResponse> execute(Type type, Mode mode) {
-        Member member = memberUtil.getCurrentMember();
-        MemberDetail memberDetail = memberDetailRepository.findById(member.getId())
+    public List<GetProductResponse> execute(Long memberId, Type type, Mode mode) {
+        MemberDetail memberDetail = memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
+        Member member = memberDetail.getMember();
+
         List<Product> products = productRepository.findProductByMemberAndTypeAndMode(member, type, mode);
 
         List<Long> productIds = products.stream()
