@@ -66,7 +66,7 @@ jobs:
       - name: Zip output directory
         run: |
           cd output
-          zip -r ../deploy-package.zip .
+          zip -r ../deploy-package.zip appspec.yml scripts docker-image
 
       - name: Upload to AWS S3
         run: |
