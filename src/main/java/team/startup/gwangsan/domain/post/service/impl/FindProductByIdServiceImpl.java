@@ -5,12 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -38,6 +40,9 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
                 .orElseThrow(NotFoundProductException::new);
         Place productPlace = memberDetailRepository.findPlaceByMemberId(product.getMember().getId());
 
+        MemberDetail memberDetail = memberDetailRepository.findById(product.getMember().getId())
+                .orElseThrow(NotFoundMemberException::new);
+
         validateSamePlace(myPlace, productPlace);
 
         List<GetImageResponse> images = productImageRepository.findByProductId(
@@ -48,6 +53,16 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
                 ))
                 .toList();
 
+        int rawLight = memberDetail.getLight();
+        int light = Math.max(1, rawLight / 10);
+
+        GetProductMemberResponse memberResponse = new GetProductMemberResponse(
+                memberDetail.getId(),
+                memberDetail.getMember().getNickname(),
+                memberDetail.getPlace().getName(),
+                light
+        );
+
         return new GetProductResponse(
                 product.getId(),
                 product.getTitle(),
@@ -55,6 +70,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
                 product.getGwangsan(),
                 product.getType(),
                 product.getMode(),
+                memberResponse,
                 images
         );
     }
