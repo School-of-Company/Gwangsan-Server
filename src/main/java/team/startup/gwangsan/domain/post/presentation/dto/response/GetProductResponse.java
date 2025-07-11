@@ -13,6 +13,7 @@ public record GetProductResponse(
         Integer gwangsan,
         Type type,
         Mode mode,
+        GetProductMemberResponse member,
         List<GetImageResponse> images
 ) {
 }
