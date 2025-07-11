@@ -81,6 +81,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/post/member/{member_id}").authenticated()
 
                                 // notice
                                 .requestMatchers(HttpMethod.GET, "/api/notice").authenticated()
@@ -90,10 +91,15 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "/api/notice/{id}").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/notice/{id}").authenticated()
 
-                                //related-keyword
+                                // related-keyword
                                 .requestMatchers(HttpMethod.GET, "/api/related-keyword").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/related-keyword/current").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/related-keyword/{memberRelatedKeywordId}").authenticated()
+
+                                // admin
+                                .requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/admin/**")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
                                 // health
                                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
