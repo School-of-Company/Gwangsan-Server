@@ -44,7 +44,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
                         .type(type)
                         .title(alertTile)
                         .sourceId(sourceId)
-                        .member(member)
+                        .requester(member)
                         .build();
                 saveAdminAlert(alert);
             }
@@ -56,14 +56,12 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
                         .type(type)
                         .title(NEW_SIGNUP_MEMBER_TITLE)
                         .sourceId(sourceId)
-                        .member(signUpMember)
+                        .requester(signUpMember)
                         .build();
 
                 saveAdminAlert(alert);
             }
-            default -> {
-                throw new NotFoundAlertTypeException();
-            }
+            default -> throw new NotFoundAlertTypeException();
         }
     }
 
