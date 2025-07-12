@@ -53,11 +53,10 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      - name: Prepare SSH known_hosts
+      - name: Prepare SSH known_hosts (bastion only)
         run: |
-          mkdir -p /home/runner/.ssh
-          ssh-keyscan -H ${{ secrets.BASTION_IP }} >> /home/runner/.ssh/known_hosts
-          ssh-keyscan -H ${{ secrets.PRIVATE_IP }} >> /home/runner/.ssh/known_hosts
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Private EC2 via Bastion
         shell: bash
@@ -65,8 +64,6 @@ jobs:
           ssh -tt -o StrictHostKeyChecking=no -o ProxyJump=ec2-user@${{ secrets.BASTION_IP }} \
               -i private_key.pem ec2-user@${{ secrets.PRIVATE_IP }} << 'EOF'
           cd /home/ec2-user/app || mkdir -p /home/ec2-user/app && cd /home/ec2-user/app
-
-          echo "[+] Pulling latest source from GitHub (optional)"
 
           echo "[+] Stopping existing container (if any)..."
           docker stop gwangsan-container || true
