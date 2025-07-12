@@ -37,6 +37,7 @@ public enum ErrorCode {
     // product
     NOT_FOUND_PRODUCT(404, "해당 게시글을 찾을 수 없습니다."),
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
+    CANNOT_COMPLETE_TRADE(400, "거래 완료를 할 수 없습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
@@ -50,6 +51,7 @@ public enum ErrorCode {
 
     // admin
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
+    NOT_FOUND_ADMIN_ALERT(404, "존재하지 않는 어드민 알림입니다."),
 
     // fcm
     FAILED_TO_INITIALIZE_FIREBASE(500, "Firebase 초기화에 실패했습니다."),
