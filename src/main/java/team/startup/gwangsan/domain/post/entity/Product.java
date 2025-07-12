@@ -78,4 +78,8 @@ public class Product {
         this.type = type;
         this.mode = mode;
     }
+
+    public void updateStatus(ProductStatus status) {
+        this.status = status;
+    }
 }
