@@ -73,4 +73,4 @@ jobs:
               docker run -d --name gwangsan-container -p 8080:8080 --env-file .env gwangsan-app
 
               echo "✅ Deployment Done"
-EOF
+          EOF
