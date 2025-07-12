@@ -101,6 +101,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/admin/**")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
+                                // report
+                                .requestMatchers(HttpMethod.POST, "/api/report").authenticated()
+
                                 // health
                                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
