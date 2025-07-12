@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.post.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
@@ -31,6 +32,7 @@ public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindPr
     private final MemberUtil memberUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public List<GetProductResponse> execute(Type type, Mode mode) {
         Member member = memberUtil.getCurrentMember();
         MemberDetail memberDetail = memberDetailRepository.findById(member.getId())
