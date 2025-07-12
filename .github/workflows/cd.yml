@@ -53,24 +53,31 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
+      - name: Add Bastion to known_hosts
+        run: ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
+
+      - name: Add Private host to known_hosts
+        run: ssh-keyscan -H ${{ secrets.PRIVATE_IP }} >> ~/.ssh/known_hosts
+
       - name: Deploy to Private EC2 via Bastion
+        shell: bash
         run: |
-          ssh -o StrictHostKeyChecking=no -o ProxyJump=ec2-user@${{ secrets.BASTION_IP }} \
+          ssh -tt -o StrictHostKeyChecking=no -o ProxyJump=ec2-user@${{ secrets.BASTION_IP }} \
               -i private_key.pem ec2-user@${{ secrets.PRIVATE_IP }} << 'EOF'
-              cd /home/ec2-user/app || mkdir -p /home/ec2-user/app && cd /home/ec2-user/app
+          cd /home/ec2-user/app || mkdir -p /home/ec2-user/app && cd /home/ec2-user/app
 
-              echo "[+] Pulling latest source from GitHub (optional)"
+          echo "[+] Pulling latest source from GitHub (optional)"
 
-              echo "[+] Stopping existing container (if any)..."
-              docker stop gwangsan-container || true
-              docker rm gwangsan-container || true
-              docker rmi gwangsan-app || true
+          echo "[+] Stopping existing container (if any)..."
+          docker stop gwangsan-container || true
+          docker rm gwangsan-container || true
+          docker rmi gwangsan-app || true
 
-              echo "[+] Building Docker image..."
-              docker build -t gwangsan-app .
+          echo "[+] Building Docker image..."
+          docker build -t gwangsan-app .
 
-              echo "[+] Running new container..."
-              docker run -d --name gwangsan-container -p 8080:8080 --env-file .env gwangsan-app
+          echo "[+] Running new container..."
+          docker run -d --name gwangsan-container -p 8080:8080 --env-file .env gwangsan-app
 
-              echo "✅ Deployment Done"
+          echo "✅ Deployment Done"
           EOF
