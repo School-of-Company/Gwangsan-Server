@@ -54,4 +54,12 @@ public class MemberDetail {
     public void updateDescription(String description) {
         this.description = description;
     }
+
+    public void minusGwangsan(Integer gwangsan) {
+        this.gwangsan = this.gwangsan - gwangsan;
+    }
+
+    public void plusGwangsan(Integer gwangsan) {
+        this.gwangsan = this.gwangsan + gwangsan;
+    }
 }
