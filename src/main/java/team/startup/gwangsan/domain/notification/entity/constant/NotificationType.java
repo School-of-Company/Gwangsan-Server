@@ -4,4 +4,5 @@ public enum NotificationType {
     NOTICE,
     CHATTING,
     RECOMMENDATION,
+    TRADE_COMPLETE,
 }
