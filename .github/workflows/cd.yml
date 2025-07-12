@@ -59,10 +59,9 @@ jobs:
           ssh-keyscan -H ${{ secrets.BASTION_IP }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Private EC2 via Bastion
-        shell: bash
         run: |
           ssh -tt -o StrictHostKeyChecking=no -o ProxyJump=ec2-user@${{ secrets.BASTION_IP }} \
-              -i private_key.pem ec2-user@${{ secrets.PRIVATE_IP }} << 'EOF'
+            -i private_key.pem ec2-user@${{ secrets.PRIVATE_IP }} << 'EOF'
           cd /home/ec2-user/app || mkdir -p /home/ec2-user/app && cd /home/ec2-user/app
 
           echo "[+] Stopping existing container (if any)..."
@@ -77,4 +76,4 @@ jobs:
           docker run -d --name gwangsan-container -p 8080:8080 --env-file .env gwangsan-app
 
           echo "✅ Deployment Done"
-          EOF
+          EOF 
