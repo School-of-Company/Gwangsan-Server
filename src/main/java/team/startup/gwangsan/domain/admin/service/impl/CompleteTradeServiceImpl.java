@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.admin.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.entity.AdminAlert;
@@ -12,17 +13,20 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
+import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
-import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,9 +36,10 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
     private final MemberUtil memberUtil;
     private final MemberDetailRepository memberDetailRepository;
     private final PlaceRepository placeRepository;
-    private final TradeCompleteRepository tradeCompleteRepository;
     private final ProductRepository productRepository;
     private final AdminAlertRepository adminAlertRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Override
     @Transactional
@@ -50,6 +55,10 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
         MemberDetail productOwnerDetail = findMemberDetail(product.getMember().getId());
         validatePlaceAuthority(places, productOwnerDetail.getPlace());
 
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(admin.getId());
+        memberIds.add(productOwnerDetail.getId());
+
         AdminAlert adminAlert = adminAlertRepository.findBySourceId(productId)
                 .orElseThrow(NotFoundAdminAlertException::new);
 
@@ -57,15 +66,20 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
 
         settleGwangsan(product, productOwnerDetail, counterpartDetail);
 
-        tradeCompleteRepository.save(
-                TradeComplete.builder()
-                        .product(product)
-                        .member(counterpartDetail.getMember())
-                        .build()
-        );
-
         product.updateStatus(ProductStatus.COMPLETED);
         adminAlertRepository.delete(adminAlert);
+
+        List<String> deviceTokens = new ArrayList<>();
+        for (Long memberId : memberIds) {
+            deviceTokenRepository.findByUserId(memberId)
+                    .map(DeviceToken::getDeviceToken)
+                    .ifPresent(deviceTokens::add);
+        }
+
+        applicationEventPublisher.publishEvent(new SendNotificationEvent(
+                deviceTokens,
+                NotificationType.TRADE_COMPLETE
+                ));
     }
 
     private MemberDetail findMemberDetail(Long memberId) {
@@ -95,5 +109,4 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
             other.plusGwangsan(gwangsan);
         }
     }
-
 }
