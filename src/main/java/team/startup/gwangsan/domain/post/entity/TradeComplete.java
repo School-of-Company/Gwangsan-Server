@@ -28,16 +28,21 @@ public class TradeComplete {
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false)
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "other_member_id", referencedColumnName = "member_id", nullable = false)
+    private Member otherMember;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public TradeComplete(Product product, Member member) {
+    public TradeComplete(Product product, Member member, Member otherMember) {
         this.product = product;
         this.member = member;
+        this.otherMember = otherMember;
     }
 }
