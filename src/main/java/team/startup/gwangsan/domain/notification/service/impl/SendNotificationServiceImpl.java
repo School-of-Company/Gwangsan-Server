@@ -22,6 +22,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
     private static final String NOTICE_BODY = "새로운 공지가 등록되었습니다.";
     private static final String CHAT_BODY = "새로운 메세지가 도착했습니다.";
     private static final String RECOMMENDATION_BODY = "추천인이 등록되었습니다.";
+    private static final String TRADE_COMPLETE_BODY = "거래가 승인되었습니다.";
 
     @Override
     @Transactional
@@ -38,6 +39,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
             case NOTICE -> NOTICE_BODY;
             case CHATTING -> CHAT_BODY;
             case RECOMMENDATION -> RECOMMENDATION_BODY;
+            case TRADE_COMPLETE -> TRADE_COMPLETE_BODY;
         };
     }
 }

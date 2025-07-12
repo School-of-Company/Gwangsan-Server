@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.Product;
 
 import java.time.LocalDateTime;
 
@@ -45,12 +46,17 @@ public class ChatMessage {
     @JoinColumn(name = "sender_id")
     private Member sender;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     @Builder
-    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender) {
+    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender, Product product) {
         this.content = content;
         this.messageType = messageType;
         this.checked = checked;
         this.room = room;
         this.sender = sender;
+        this.product = product;
     }
 }

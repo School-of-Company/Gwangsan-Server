@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetReportAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetSignUpAlertResponse;
+import team.startup.gwangsan.domain.admin.presentation.dto.response.GetTradeCompleteAlertResponse;
 import team.startup.gwangsan.domain.admin.repository.custom.AdminAlertCustomRepository;
 import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceService;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
@@ -20,6 +21,8 @@ import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.custom.MemberCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
+import team.startup.gwangsan.domain.post.service.FindProductByIdService;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
@@ -45,6 +48,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
+    private final FindProductByIdService findProductByIdService;
 
     @Override
     @Transactional
@@ -55,12 +59,13 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         List<AdminAlert> alerts = adminAlertCustomRepository.findAdminAlertByPlacesAndAlertType(places, type);
 
         Set<Long> memberIds = alerts.stream()
-                .map(alert -> alert.getMember().getId())
+                .map(alert -> alert.getRequester().getId())
                 .collect(Collectors.toSet());
         Map<Long, String> memberIdToPlaceName = memberDetailRepository.findPlaceNameMapByMemberIds(memberIds);
 
         List<AdminAlert> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
         List<AdminAlert> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
+        List<AdminAlert> tradeAlerts = filterAlertsByType(alerts, AlertType.TRADE_COMPLETE);
 
         List<Report> reports = reportCustomRepository.findByPlaces(places);
         List<Member> members = memberCustomRepository.findByStatusAndPlaces(MemberStatus.PENDING, places);
@@ -70,8 +75,10 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
         List<GetSignUpAlertResponse> signUpAlertResponses =
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
+        List<GetTradeCompleteAlertResponse> tradeAlertResponses =
+                createTradeCompleteAlertResponses(tradeAlerts, memberIdToPlaceName);
 
-        return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses);
+        return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses, tradeAlertResponses);
     }
 
     private List<AdminAlert> filterAlertsByType(List<AdminAlert> alerts, AlertType type) {
@@ -117,11 +124,11 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
 
-                    String placeName = memberIdToPlaceName.get(alert.getMember().getId());
+                    String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
 
                     return new GetReportAlertResponse(
                             report.getId(),
-                            alert.getMember().getNickname(),
+                            alert.getRequester().getNickname(),
                             report.getReported().getId(),
                             report.getReported().getNickname(),
                             alert.getTitle(),
@@ -147,10 +154,10 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
         return alerts.stream()
                 .map(alert -> {
-                    Member member = Optional.ofNullable(memberMap.get(alert.getMember().getId()))
+                    Member member = Optional.ofNullable(memberMap.get(alert.getRequester().getId()))
                             .orElseThrow(NotFoundMemberException::new);
 
-                    String placeName = memberIdToPlaceName.get(alert.getMember().getId());
+                    String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
 
                     return new GetSignUpAlertResponse(
                             member.getId(),
@@ -159,6 +166,28 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             placeName,
                             member.getRecommender().getNickname(),
                             alert.getCreatedAt()
+                    );
+                })
+                .toList();
+    }
+
+    private List<GetTradeCompleteAlertResponse> createTradeCompleteAlertResponses(
+            List<AdminAlert> alerts,
+            Map<Long, String> memberIdToPlaceName
+    ) {
+        return alerts.stream()
+                .map(alert -> {
+                    Member requester = alert.getRequester();
+                    String placeName = memberIdToPlaceName.get(requester.getId());
+
+                    GetProductResponse productResponse = findProductByIdService.execute(alert.getSourceId());
+
+                    return new GetTradeCompleteAlertResponse(
+                            requester.getNickname(),
+                            alert.getTitle(),
+                            placeName,
+                            alert.getCreatedAt(),
+                            productResponse
                     );
                 })
                 .toList();
