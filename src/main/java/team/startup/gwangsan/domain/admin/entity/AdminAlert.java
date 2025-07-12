@@ -38,14 +38,19 @@ public class AdminAlert {
     private Long sourceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "other_member_id", referencedColumnName = "member_id")
+    private Member otherMember;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_id", referencedColumnName = "member_id")
+    private Member requester;
 
     @Builder
-    public AdminAlert(AlertType type, String title, Long sourceId, Member member) {
+    public AdminAlert(AlertType type, String title, Long sourceId, Member otherMember, Member requester) {
         this.type = type;
         this.title = title;
         this.sourceId = sourceId;
-        this.member = member;
+        this.otherMember = otherMember;
+        this.requester = requester;
     }
 }
