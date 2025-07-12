@@ -18,8 +18,6 @@ import team.startup.gwangsan.domain.report.service.CreateProductReportService;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class CreateProductReportServiceImpl implements CreateProductReportService {
@@ -43,8 +41,10 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
             throw new SelfReportNotAllowedException();
         }
 
-        reportRepository.findByReporterAndReportedAndContent(reporter, reported, request.content())
-                .ifPresent(r -> { throw new AlreadyReportedException(); });
+        reportRepository.findByReporterAndReportedAndReportType(reporter, reported, request.reportType())
+                .ifPresent(report -> {
+                    throw new AlreadyReportedException();
+                });
 
         Report report = Report.builder()
                 .reportType(request.reportType())
