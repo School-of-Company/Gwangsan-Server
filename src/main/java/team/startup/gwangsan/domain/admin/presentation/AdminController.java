@@ -11,10 +11,7 @@ import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberR
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberStatusRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
-import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceService;
-import team.startup.gwangsan.domain.admin.service.SignInAdminService;
-import team.startup.gwangsan.domain.admin.service.UpdateMemberRoleService;
-import team.startup.gwangsan.domain.admin.service.UpdateMemberStatusService;
+import team.startup.gwangsan.domain.admin.service.*;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -25,6 +22,7 @@ public class AdminController {
     private final UpdateMemberRoleService updateMemberRoleService;
     private final SignInAdminService signInAdminService;
     private final UpdateMemberStatusService updateMemberStatusService;
+    private final CompleteTradeService completeTradeService;
 
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
@@ -57,6 +55,12 @@ public class AdminController {
     public ResponseEntity<SignInAdminResponse> signIn(@RequestBody @Valid AdminSignInRequest request) {
         SignInAdminResponse response = signInAdminService.execute(request.nickname(), request.password());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/trade-complete/{product_id}")
+    public ResponseEntity<Void> tradeComplete(@PathVariable("product_id") Long productId) {
+        completeTradeService.execute(productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
