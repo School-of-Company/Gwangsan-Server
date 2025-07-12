@@ -38,6 +38,7 @@ public enum ErrorCode {
     NOT_FOUND_PRODUCT(404, "해당 게시글을 찾을 수 없습니다."),
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
     CANNOT_COMPLETE_TRADE(400, "거래 완료를 할 수 없습니다."),
+    CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
