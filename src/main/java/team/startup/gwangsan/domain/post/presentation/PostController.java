@@ -9,6 +9,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.request.CreateProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.PatchProductRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.service.*;
 
@@ -26,6 +27,7 @@ public class PostController {
     private final UpdateProductService updateProductService;
     private final DeleteProductByIdService deleteProductByIdService;
     private final FindProductsByMemberIdService findProductsByMemberIdService;
+    private final RequestTradeCompleteService requestTradeCompleteService;
 
     @PostMapping
     public ResponseEntity<Void> createProduct(@RequestBody @Valid CreateProductRequest request) {
@@ -94,5 +96,11 @@ public class PostController {
     ) {
         List<GetProductResponse> responses = findProductsByMemberIdService.execute(memberId, type, mode);
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping("/trade")
+    public ResponseEntity<Void> tradeRequest(@RequestBody @Valid RequestTradeCompleteRequest request) {
+        requestTradeCompleteService.execute(request.productId(), request.otherMemberId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
