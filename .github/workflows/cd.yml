@@ -6,9 +6,6 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME: gwangsan-githubaction
-  CODE_DEPLOY_APPLICATION_NAME: gwangsan-deploy
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: gwangsan-dg
 
 permissions:
   contents: read
@@ -35,7 +32,7 @@ jobs:
           mkdir -p src/main/resources
           aws s3 cp s3://gwangsan-githubaction/firebase-service-account.json src/main/resources/firebase-service-account.json
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -45,34 +42,35 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Build with gradle
         run: ./gradlew build --no-daemon -x test
 
-      - name: Build Docker image and save as tar
-        run: |
-          docker build -t gwangsan-app .
-          mkdir -p output
-          docker save gwangsan-app > output/gwangsan-app.tar
+      - name: Build Docker image
+        run: docker build -t gwangsan-app .
 
-      - name: Prepare appspec.yml and scripts
+      - name: Setup SSH key
         run: |
-          mkdir -p output/scripts
-          cp appspec.yml output/
-          cp -r scripts/* output/scripts/
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
-      - name: Zip deployment package
+      - name: Deploy to Private EC2 via Bastion
         run: |
-          cd output
-          zip -r ../deploy-package.zip gwangsan-app.tar scripts appspec.yml
+          ssh -o StrictHostKeyChecking=no -o ProxyJump=ec2-user@${{ secrets.BASTION_IP }} \
+              -i private_key.pem ec2-user@${{ secrets.PRIVATE_IP }} << 'EOF'
+              cd /home/ec2-user/app || mkdir -p /home/ec2-user/app && cd /home/ec2-user/app
 
-      - name: Upload to AWS S3
-        run: |
-          aws s3 cp deploy-package.zip s3://${{ env.S3_BUCKET_NAME }}/${{ github.sha }}.zip
+              echo "[+] Pulling latest source from GitHub (optional)"
 
-      - name: Deploy to AWS EC2 using CodeDeploy
-        run: |
-          aws deploy create-deployment \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=${{ env.S3_BUCKET_NAME }},key=${{ github.sha }}.zip,bundleType=zip
+              echo "[+] Stopping existing container (if any)..."
+              docker stop gwangsan-container || true
+              docker rm gwangsan-container || true
+              docker rmi gwangsan-app || true
+
+              echo "[+] Building Docker image..."
+              docker build -t gwangsan-app .
+
+              echo "[+] Running new container..."
+              docker run -d --name gwangsan-container -p 8080:8080 --env-file .env gwangsan-app
+
+              echo "✅ Deployment Done"
+EOF
