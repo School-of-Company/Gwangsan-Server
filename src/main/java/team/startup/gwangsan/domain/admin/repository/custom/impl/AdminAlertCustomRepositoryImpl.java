@@ -25,7 +25,7 @@ public class AdminAlertCustomRepositoryImpl implements AdminAlertCustomRepositor
     public List<AdminAlert> findAdminAlertByPlacesAndAlertType(List<Place> places, AlertType alertType) {
         return queryFactory
                 .selectFrom(adminAlert).distinct()
-                .join(adminAlert.member, member).fetchJoin()
+                .join(adminAlert.requester, member).fetchJoin()
                 .join(memberDetail).on(member.id.eq(memberDetail.member.id)).fetchJoin()
                 .where(
                         memberDetail.place.in(places),
