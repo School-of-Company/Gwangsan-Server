@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReviewRequest;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.service.CreateReviewService;
@@ -33,11 +31,8 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReviewResponse>> getMyReviews(
-            @RequestParam("type") Type type,
-            @RequestParam("mode") Mode mode
-    ) {
-        List<ReviewResponse> responses = getMyReviewListService.execute(type, mode);
+    public ResponseEntity<List<ReviewResponse>> getMyReviews() {
+        List<ReviewResponse> responses = getMyReviewListService.execute();
         return ResponseEntity.ok(responses);
     }
 
