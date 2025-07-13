@@ -9,8 +9,6 @@ public record FindAllUserInfoResponse(
         Long memberId,
         String nickname,
         String name,
-        Integer light,
-        Integer gwangsan,
         String phoneNumber,
         MemberRole role,
         MemberStatus status,
