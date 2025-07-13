@@ -6,9 +6,9 @@ public record FindMyInfoResponse(
         Long memberId,
         String nickname,
         String placeName,
+        String dongName,
         Integer light,
         Integer gwangsan,
         String description,
         List<String> specialties
 ) {}
-
