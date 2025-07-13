@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
-    private static final long ACCESS_TOKEN_TIME = 60L * 15 * 4;          // 1시간
+    private static final long ACCESS_TOKEN_TIME = 60L * 60 * 24;         // 1일
     public static final long REFRESH_TOKEN_TIME = 60L * 60 * 24 * 7;     // 7일
 
     private final JwtProperties jwtProperties;
