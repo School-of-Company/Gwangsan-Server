@@ -38,6 +38,7 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
                 member.getId(),
                 member.getNickname(),
                 detail.getPlace().getName(),
+                detail.getDong().getName(),
                 detail.getLight(),
                 detail.getGwangsan(),
                 detail.getDescription(),
