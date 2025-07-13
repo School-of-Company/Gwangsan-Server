@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
@@ -20,13 +22,13 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ReviewResponse> execute(String type, String mode) {
+    public List<ReviewResponse> execute(Type type, Mode mode) {
         Member reviewer = memberUtil.getCurrentMember();
 
         return reviewRepository.findAllByReviewer(reviewer).stream()
                 .filter(review ->
-                        review.getProduct().getType().name().equalsIgnoreCase(type) &&
-                                review.getProduct().getMode().name().equalsIgnoreCase(mode))
+                        review.getProduct().getType() == type &&
+                                review.getProduct().getMode() == mode)
                 .map(review -> new ReviewResponse(
                         review.getProduct().getId(),
                         review.getContent(),
