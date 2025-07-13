@@ -30,7 +30,7 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
 
         return reviewRepository.findAllByReviewed(reviewedMember).stream()
                 .map(review -> {
-                    var images = productImageRepository.findAllByProduct(review.getProduct()).stream()
+                    List<GetImageResponse> images = productImageRepository.findAllByProduct(review.getProduct()).stream()
                             .map(pi -> new GetImageResponse(
                                     pi.getImage().getId(),
                                     pi.getImage().getImageUrl()
