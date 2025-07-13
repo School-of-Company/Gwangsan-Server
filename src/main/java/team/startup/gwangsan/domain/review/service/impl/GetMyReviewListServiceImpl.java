@@ -25,10 +25,8 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
     public List<ReviewResponse> execute(Type type, Mode mode) {
         Member reviewer = memberUtil.getCurrentMember();
 
-        return reviewRepository.findAllByReviewer(reviewer).stream()
-                .filter(review ->
-                        review.getProduct().getType() == type &&
-                                review.getProduct().getMode() == mode)
+        return reviewRepository.findAllByReviewerAndProduct_TypeAndProduct_Mode(reviewer, type, mode)
+                .stream()
                 .map(review -> new ReviewResponse(
                         review.getProduct().getId(),
                         review.getContent(),
@@ -38,3 +36,4 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
                 .toList();
     }
 }
+
