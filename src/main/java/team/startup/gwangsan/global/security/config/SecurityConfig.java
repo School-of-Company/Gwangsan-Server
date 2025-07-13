@@ -101,6 +101,12 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/admin/**")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
+                                // review
+                                .requestMatchers(HttpMethod.POST, "/api/review").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
+
                                 // report
                                 .requestMatchers(HttpMethod.POST, "/api/report").authenticated()
 
