@@ -107,6 +107,13 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
 
+                                // member
+                                .requestMatchers(HttpMethod.GET, "/api/member").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/member").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/member/{memberId}").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/member/all")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+
                                 // report
                                 .requestMatchers(HttpMethod.POST, "/api/report").authenticated()
 
