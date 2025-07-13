@@ -105,6 +105,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/review").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
 
                                 // report
                                 .requestMatchers(HttpMethod.POST, "/api/report").authenticated()
