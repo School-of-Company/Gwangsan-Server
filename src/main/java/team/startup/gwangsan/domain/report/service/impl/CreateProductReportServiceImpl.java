@@ -16,6 +16,7 @@ import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
+import team.startup.gwangsan.domain.report.exception.InvalidReportTypeException;
 import team.startup.gwangsan.domain.report.exception.SelfReportNotAllowedException;
 import team.startup.gwangsan.domain.report.presentation.dto.request.CreateProductReportRequest;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
@@ -60,7 +61,7 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
                 reported = null;
             }
 
-            default -> throw new IllegalArgumentException();
+            default -> throw new InvalidReportTypeException();
         }
 
         if (reported != null && reporter.getId().equals(reported.getId())) {
