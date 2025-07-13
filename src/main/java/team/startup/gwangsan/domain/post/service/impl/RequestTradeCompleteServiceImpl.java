@@ -44,7 +44,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         Member otherMember = findMemberById(otherMemberId);
 
-        validateChatExists(productId, otherMember.getId());
+        //validateChatExists(productId, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
         saveTradeComplete(product, member, otherMember);
