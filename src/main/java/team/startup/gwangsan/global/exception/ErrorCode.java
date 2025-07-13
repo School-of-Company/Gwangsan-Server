@@ -71,7 +71,12 @@ public enum ErrorCode {
 
     // related-keyword
     MEMBER_RELATED_KEYWORD_NOT_FOUND(404, "해당 관련 키워드를 찾을 수 없습니다."),
-    MEMBER_RELATED_KEYWORD_FORBIDDEN(403, "해당 관련 키워드에 대한 권한이 없습니다.");
+    MEMBER_RELATED_KEYWORD_FORBIDDEN(403, "해당 관련 키워드에 대한 권한이 없습니다."),
+
+    // review
+    ALREADY_REVIEWED(409, "이미 리뷰를 작성하였습니다."),
+    CANNOT_REVIEW_BEFORE_TRADE(403, "거래가 완료되지 않아 리뷰를 작성할 수 없습니다.");
+
 
     private final int status;
     private final String message;
