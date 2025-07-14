@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 public record GetTradeCompleteAlertResponse(
         String nickname,
         String title,
-        String placeName,
         LocalDateTime createdAt,
         GetProductResponse product
 ) {
