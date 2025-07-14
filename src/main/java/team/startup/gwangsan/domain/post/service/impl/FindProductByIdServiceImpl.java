@@ -33,7 +33,13 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
     @Override
     @Transactional(readOnly = true)
     public GetProductResponse execute(Long id) {
-        Member member = memberUtil.getCurrentMember();
+        Member currentMember = memberUtil.getCurrentMember();
+        return execute(currentMember, id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GetProductResponse execute(Member member, Long id) {
         Place myPlace = memberDetailRepository.findPlaceByMemberId(member.getId());
 
         Product product = productRepository.findById(id)
@@ -45,8 +51,8 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
         validateSamePlace(myPlace, productPlace);
 
-        List<GetImageResponse> images = productImageRepository.findByProductId(
-                product.getId()).stream()
+        List<GetImageResponse> images = productImageRepository.findByProductId(product.getId())
+                .stream()
                 .map(pi -> new GetImageResponse(
                         pi.getImage().getId(),
                         pi.getImage().getImageUrl()
