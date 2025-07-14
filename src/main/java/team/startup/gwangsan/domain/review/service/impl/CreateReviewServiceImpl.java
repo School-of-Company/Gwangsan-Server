@@ -53,6 +53,7 @@ public class CreateReviewServiceImpl implements CreateReviewService {
         Review review = Review.builder()
                 .product(product)
                 .reviewer(reviewer)
+                .reviewed(product.getMember())
                 .content(request.content())
                 .light(light)
                 .build();
