@@ -75,7 +75,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
 
                                 // post
-                                .requestMatchers(HttpMethod.POST, "api/post").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/post").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/{post_id}").authenticated()
