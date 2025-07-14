@@ -76,7 +76,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         List<GetSignUpAlertResponse> signUpAlertResponses =
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
         List<GetTradeCompleteAlertResponse> tradeAlertResponses =
-                createTradeCompleteAlertResponses(tradeAlerts, memberIdToPlaceName);
+                createTradeCompleteAlertResponses(admin, tradeAlerts, memberIdToPlaceName);
 
         return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses, tradeAlertResponses);
     }
@@ -172,6 +172,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     }
 
     private List<GetTradeCompleteAlertResponse> createTradeCompleteAlertResponses(
+            Member member,
             List<AdminAlert> alerts,
             Map<Long, String> memberIdToPlaceName
     ) {
@@ -180,7 +181,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     Member requester = alert.getRequester();
                     String placeName = memberIdToPlaceName.get(requester.getId());
 
-                    GetProductResponse productResponse = findProductByIdService.execute(alert.getSourceId());
+                    GetProductResponse productResponse = findProductByIdService.execute(member, alert.getSourceId());
 
                     return new GetTradeCompleteAlertResponse(
                             requester.getNickname(),
