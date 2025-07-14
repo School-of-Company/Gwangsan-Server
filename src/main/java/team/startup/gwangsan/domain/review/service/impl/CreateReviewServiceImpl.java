@@ -36,9 +36,9 @@ public class CreateReviewServiceImpl implements CreateReviewService {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(NotFoundProductException::new);
 
-        if (product.getStatus() != ProductStatus.COMPLETED) {
-            throw new CannotReviewBeforeTradeException();
-        }
+        //if (product.getStatus() != ProductStatus.COMPLETED) {
+         //   throw new CannotReviewBeforeTradeException();
+        //}
 
         if (reviewRepository.existsByProductAndReviewer(product, reviewer)) {
             throw new AlreadyReviewedException();
