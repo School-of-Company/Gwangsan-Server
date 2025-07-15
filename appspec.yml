@@ -1,10 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /home/ec2-user
+  - source: .
+    destination: /home/ec2-user/codedeploy/
 hooks:
-  BeforeInstall:
-    - location: scripts/deploy.sh
+  ApplicationStart:
+    - location: deploy.sh
       timeout: 300
       runas: root
