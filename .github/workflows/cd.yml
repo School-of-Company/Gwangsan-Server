@@ -69,7 +69,7 @@ jobs:
       docker rm gwangsan-container || true
       docker rmi gwangsan-app || true
 
-      echo "[+] Building Docker image..."
+      echo "[+] Pulling new image from GitHub Actions..."
       docker build -t gwangsan-app .
 
       echo "[+] Running new container..."
