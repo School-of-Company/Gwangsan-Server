@@ -76,16 +76,23 @@ jobs:
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=codedeploy_bundle.zip \
             --region ${{ env.AWS_REGION }}
-
+      
       - name: ✅ Discord Notification - 배포 성공
         if: success()
-        uses: peter-evans/discord-webhook@v2
-        with:
-          url: ${{ env.DISCORD_WEBHOOK_URL }}
-          content: |
-            ✅ **Deployment Succeeded**
-            ---
-            🔀 **Branch**: `${{ github.ref_name }}`
-            🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-            📦 **Repository**: `${{ github.repository }}`
-            🌐 **Region**: `${{ env.AWS_REGION }}`
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "content": "✅ **Deployment Succeeded**\n🔀 **Branch**: `${{ github.ref_name }}`\n🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\n📦 **Repository**: `${{ github.repository }}`\n🌐 **Region**: `${{ env.AWS_REGION }}`"
+               }' \
+               ${{ env.DISCORD_WEBHOOK_URL }}
+
+      - name: ❌ Discord Notification - 배포 실패
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "content": "❌ **Deployment Failed**\n🔀 **Branch**: `${{ github.ref_name }}`\n🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\n📦 **Repository**: `${{ github.repository }}`\n🌐 **Region**: `${{ env.AWS_REGION }}`"
+               }' \
+               ${{ env.DISCORD_WEBHOOK_URL }}      
