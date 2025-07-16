@@ -12,6 +12,7 @@ env:
   S3_BUCKET_NAME: gwangsan-githubaction
   CODE_DEPLOY_APPLICATION_NAME: gwangsan-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: gwangsan-dg
+  DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1387943644601913365/sYVG9ylcYE6yFucoThqvz1l0pgwZylBfsGZhNU7NmCvStq4fB-GZ037bEDxCOSbfhMuH
 
 jobs:
   ci-cd:
@@ -75,3 +76,16 @@ jobs:
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
             --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=codedeploy_bundle.zip \
             --region ${{ env.AWS_REGION }}
+
+      - name: ✅ Discord Notification - 배포 성공
+        if: success()
+        uses: peter-evans/discord-webhook@v1
+        with:
+          url: ${{ env.DISCORD_WEBHOOK_URL }}
+          content: |
+            ✅ **Deployment Succeeded**
+            ---
+            🔀 **Branch**: `${{ github.ref_name }}`
+            🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            📦 **Repository**: `${{ github.repository }}`
+            🌐 **Region**: `${{ env.AWS_REGION }}`
