@@ -79,7 +79,7 @@ jobs:
 
       - name: ✅ Discord Notification - 배포 성공
         if: success()
-        uses: peter-evans/discord-webhook@v1
+        uses: peter-evans/discord-webhook@v2
         with:
           url: ${{ env.DISCORD_WEBHOOK_URL }}
           content: |
