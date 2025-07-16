@@ -49,6 +49,7 @@ public enum ErrorCode {
     NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다."),
     SELF_REPORT_NOT_ALLOWED(403, "본인의 게시물은 신고할 수 없습니다."),
     ALREADY_REPORTED(409, "이미 신고한 대상입니다."),
+    INVALID_REPORT_TYPE(400, "지원하지 않는 신고 유형입니다."),
 
     // admin
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
