@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
@@ -37,7 +38,7 @@ public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindPr
         Member member = memberUtil.getCurrentMember();
         MemberDetail memberDetail = memberDetailRepository.findById(member.getId())
                 .orElseThrow(NotFoundMemberDetailException::new);
-        List<Product> products = productRepository.findProductByMemberAndTypeAndMode(member, type, mode);
+        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatus(member, type, mode, ProductStatus.ONGOING);
 
         List<Long> productIds = products.stream()
                 .map(Product::getId)
