@@ -4,12 +4,13 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 
 import java.util.List;
 
 public interface ProductCustomRepository {
-    List<Product> findProductsByTypeAndModeAndMemberDetailPlace(Type type, Mode mode, Place place);
+    List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status);
 
-    List<Product> findProductByMemberAndTypeAndMode(Member member, Type type, Mode mode);
+    List<Product> findProductByMemberAndTypeAndModeAndStatus(Member member, Type type, Mode mode, ProductStatus status);
 }
