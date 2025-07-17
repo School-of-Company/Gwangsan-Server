@@ -82,9 +82,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{
-                 "content": "✅ **Deployment Succeeded**\n🔀 **Branch**: `${{ github.ref_name }}`\n🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\n📦 **Repository**: `${{ github.repository }}`\n🌐 **Region**: `${{ env.AWS_REGION }}`"
-               }' \
+               -d '{"content": "✅ Deployment succeeded!"}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
 
       - name: ❌ Discord Notification - 배포 실패
@@ -92,7 +90,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{
-                 "content": "❌ **Deployment Failed**\n🔀 **Branch**: `${{ github.ref_name }}`\n🔢 **Commit**: [`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\n📦 **Repository**: `${{ github.repository }}`\n🌐 **Region**: `${{ env.AWS_REGION }}`"
-               }' \
-               ${{ env.DISCORD_WEBHOOK_URL }}      
+               -d '{"content": "❌ Deployment failed."}' \
+               ${{ env.DISCORD_WEBHOOK_URL }}
