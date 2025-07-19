@@ -46,17 +46,12 @@ public class ChatMessage {
     @JoinColumn(name = "sender_id")
     private Member sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
-
     @Builder
-    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender, Product product) {
+    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender) {
         this.content = content;
         this.messageType = messageType;
         this.checked = checked;
         this.room = room;
         this.sender = sender;
-        this.product = product;
     }
 }
