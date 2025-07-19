@@ -1,9 +1,11 @@
 package team.startup.gwangsan.domain.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.auth.exception.*;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
 import team.startup.gwangsan.domain.auth.service.SignUpService;
@@ -23,6 +25,7 @@ import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywo
 import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
+import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 
 
 @Service
@@ -37,6 +40,7 @@ public class SignUpServiceImpl implements SignUpService {
     private final PasswordEncoder passwordEncoder;
     private final RelatedKeywordRepository relatedKeywordRepository;
     private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -96,6 +100,11 @@ public class SignUpServiceImpl implements SignUpService {
 
             memberRelatedKeywordRepository.save(mapping);
         }
+        applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
+                AlertType.SIGN_UP,
+                member.getId(),
+                member
+        ));
     }
 
     private void validateDuplicatePhoneNumber(String phoneNumber) {

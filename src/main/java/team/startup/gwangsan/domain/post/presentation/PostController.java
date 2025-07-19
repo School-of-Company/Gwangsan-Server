@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.request.CreateProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.PatchProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductByIdResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.service.*;
 
@@ -42,8 +43,8 @@ public class PostController {
     }
 
     @GetMapping("/{post_id}")
-    public ResponseEntity<GetProductResponse> findProductById(@PathVariable("post_id") Long postId) {
-        GetProductResponse response = findProductByIdService.execute(postId);
+    public ResponseEntity<GetProductByIdResponse> findProductById(@PathVariable("post_id") Long postId) {
+        GetProductByIdResponse response = findProductByIdService.execute(postId);
         return ResponseEntity.ok(response);
     }
 

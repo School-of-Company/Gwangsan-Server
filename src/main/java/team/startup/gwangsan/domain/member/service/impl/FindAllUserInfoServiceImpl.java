@@ -50,8 +50,7 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
                     return new FindAllUserInfoResponse(
                             member.getId(),
                             member.getNickname(),
-                            detail.getLight(),
-                            detail.getGwangsan(),
+                            member.getName(),
                             member.getPhoneNumber(),
                             member.getRole(),
                             member.getStatus(),

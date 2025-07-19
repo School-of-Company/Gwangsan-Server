@@ -49,6 +49,7 @@ public enum ErrorCode {
     NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다."),
     SELF_REPORT_NOT_ALLOWED(403, "본인의 게시물은 신고할 수 없습니다."),
     ALREADY_REPORTED(409, "이미 신고한 대상입니다."),
+    INVALID_REPORT_TYPE(400, "지원하지 않는 신고 유형입니다."),
 
     // admin
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
@@ -71,7 +72,12 @@ public enum ErrorCode {
 
     // related-keyword
     MEMBER_RELATED_KEYWORD_NOT_FOUND(404, "해당 관련 키워드를 찾을 수 없습니다."),
-    MEMBER_RELATED_KEYWORD_FORBIDDEN(403, "해당 관련 키워드에 대한 권한이 없습니다.");
+    MEMBER_RELATED_KEYWORD_FORBIDDEN(403, "해당 관련 키워드에 대한 권한이 없습니다."),
+
+    // review
+    ALREADY_REVIEWED(409, "이미 리뷰를 작성하였습니다."),
+    CANNOT_REVIEW_BEFORE_TRADE(403, "거래가 완료되지 않아 리뷰를 작성할 수 없습니다.");
+
 
     private final int status;
     private final String message;

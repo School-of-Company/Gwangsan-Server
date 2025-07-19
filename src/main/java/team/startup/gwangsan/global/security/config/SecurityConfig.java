@@ -75,7 +75,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
 
                                 // post
-                                .requestMatchers(HttpMethod.POST, "api/post").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/post").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/{post_id}").authenticated()
@@ -99,6 +99,19 @@ public class SecurityConfig {
                                 // admin
                                 .requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/admin/**")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+
+                                // review
+                                .requestMatchers(HttpMethod.POST, "/api/review").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
+
+                                // member
+                                .requestMatchers(HttpMethod.GET, "/api/member").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/member").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/member/{memberId}").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/member/all")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
                                 // report

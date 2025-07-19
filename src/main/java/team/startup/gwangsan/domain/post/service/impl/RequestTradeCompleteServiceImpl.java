@@ -44,12 +44,12 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         Member otherMember = findMemberById(otherMemberId);
 
-        validateChatExists(productId, otherMember.getId());
+        //validateChatExists(productId, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
         saveTradeComplete(product, member, otherMember);
 
-        notifyIfMutualComplete(productId, member, otherMember);
+        notifyIfMutualComplete(productId, member, otherMember, product.getMember());
     }
 
     private void validateNotSelfTrade(Long memberId, Long otherMemberId) {
@@ -98,16 +98,29 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .build());
     }
 
-    private void notifyIfMutualComplete(Long productId, Member member, Member otherMember) {
+    private void notifyIfMutualComplete(Long productId, Member member, Member otherMember, Member productMember) {
         long count = tradeCompleteRepository.countMutualTradeComplete(
                 productId, member.getId(), otherMember.getId());
 
         if (count == 2) {
+            Member sender;
+            Member receiver;
+
+            if (member.getId().equals(productMember.getId())) {
+                sender = member;
+                receiver = otherMember;
+            } else if (otherMember.getId().equals(productMember.getId())) {
+                sender = otherMember;
+                receiver = member;
+            } else {
+                throw new CannotCompleteTradeException();
+            }
+
             applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
                     AlertType.TRADE_COMPLETE,
                     productId,
-                    otherMember,
-                    member
+                    sender,
+                    receiver
             ));
         }
     }

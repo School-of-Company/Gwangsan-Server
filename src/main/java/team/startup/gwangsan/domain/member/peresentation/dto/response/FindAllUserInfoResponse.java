@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 public record FindAllUserInfoResponse(
         Long memberId,
         String nickname,
-        Integer light,
-        Integer gwangsan,
+        String name,
         String phoneNumber,
         MemberRole role,
         MemberStatus status,

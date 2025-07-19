@@ -5,18 +5,27 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
+import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
+import team.startup.gwangsan.domain.report.exception.InvalidReportTypeException;
 import team.startup.gwangsan.domain.report.exception.SelfReportNotAllowedException;
 import team.startup.gwangsan.domain.report.presentation.dto.request.CreateProductReportRequest;
+import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.report.service.CreateProductReportService;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +33,9 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
 
     private final ProductRepository productRepository;
     private final ReportRepository reportRepository;
+    private final MemberRepository memberRepository;
+    private final ImageRepository imageRepository;
+    private final ReportImageRepository reportImageRepository;
     private final MemberUtil memberUtil;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -31,20 +43,37 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
     @Transactional
     public void execute(CreateProductReportRequest request) {
         Member reporter = memberUtil.getCurrentMember();
+        Member reported;
 
-        Product product = productRepository.findById(request.productId())
-                .orElseThrow(NotFoundProductException::new);
+        switch (request.reportType()) {
+            case FRAUD -> {
+                Product product = productRepository.findById(request.sourceId())
+                        .orElseThrow(NotFoundProductException::new);
+                reported = product.getMember();
+            }
 
-        Member reported = product.getMember();
+            case BAD_LANGUAGE, MEMBER -> {
+                reported = memberRepository.findById(request.sourceId())
+                        .orElseThrow(() -> new NotFoundMemberException());
+            }
 
-        if (reported.getId().equals(reporter.getId())) {
+            case ETC -> {
+                reported = null;
+            }
+
+            default -> throw new InvalidReportTypeException();
+        }
+
+        if (reported != null && reporter.getId().equals(reported.getId())) {
             throw new SelfReportNotAllowedException();
         }
 
-        reportRepository.findByReporterAndReportedAndReportType(reporter, reported, request.reportType())
-                .ifPresent(report -> {
-                    throw new AlreadyReportedException();
-                });
+        if (reported != null) {
+            reportRepository.findByReporterAndReportedAndReportType(reporter, reported, request.reportType())
+                    .ifPresent(report -> {
+                        throw new AlreadyReportedException();
+                    });
+        }
 
         Report report = Report.builder()
                 .reportType(request.reportType())
@@ -54,6 +83,15 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
                 .build();
 
         reportRepository.save(report);
+
+        if (request.imageIds() != null && !request.imageIds().isEmpty()) {
+            List<Image> images = imageRepository.findAllById(request.imageIds());
+            List<ReportImage> reportImages = images.stream()
+                    .map(image -> new ReportImage(image, report))
+                    .toList();
+
+            reportImageRepository.saveAll(reportImages);
+        }
 
         eventPublisher.publishEvent(
                 new CreateAdminAlertEvent(

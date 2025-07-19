@@ -14,6 +14,7 @@ import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceSe
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -21,8 +22,13 @@ import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.custom.MemberCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.ProductImage;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
-import team.startup.gwangsan.domain.post.service.FindProductByIdService;
+import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
@@ -48,7 +54,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
-    private final FindProductByIdService findProductByIdService;
+    private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Override
     @Transactional
@@ -67,16 +74,25 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         List<AdminAlert> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
         List<AdminAlert> tradeAlerts = filterAlertsByType(alerts, AlertType.TRADE_COMPLETE);
 
+        List<Long> productIds = tradeAlerts.stream()
+                .map(AdminAlert::getSourceId)
+                .toList();
+
         List<Report> reports = reportCustomRepository.findByPlaces(places);
         List<Member> members = memberCustomRepository.findByStatusAndPlaces(MemberStatus.PENDING, places);
         List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
+        List<Product> products = productRepository.findAllById(productIds);
+        List<ProductImage> productImages = productImageRepository.findProductImageByProductIdIn(productIds);
+        List<MemberDetail> memberDetails = memberDetailRepository.findAllByMemberIdIn(tradeAlerts.stream()
+                .map(alert -> alert.getRequester().getId())
+                .toList());
 
         List<GetReportAlertResponse> reportAlertResponses =
                 createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
         List<GetSignUpAlertResponse> signUpAlertResponses =
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
         List<GetTradeCompleteAlertResponse> tradeAlertResponses =
-                createTradeCompleteAlertResponses(tradeAlerts, memberIdToPlaceName);
+                createTradeCompleteAlertResponses(memberDetails, tradeAlerts, products, productImages, memberIdToPlaceName);
 
         return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses, tradeAlertResponses);
     }
@@ -172,20 +188,59 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     }
 
     private List<GetTradeCompleteAlertResponse> createTradeCompleteAlertResponses(
+            List<MemberDetail> memberDetails,
             List<AdminAlert> alerts,
+            List<Product> products,
+            List<ProductImage> productImages,
             Map<Long, String> memberIdToPlaceName
     ) {
+        Map<Long, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
+                .collect(Collectors.groupingBy(
+                        ri -> ri.getProduct().getId(),
+                        Collectors.mapping(ri -> new GetImageResponse(
+                                ri.getImage().getId(),
+                                ri.getImage().getImageUrl()), Collectors.toList())
+                ));
+
         return alerts.stream()
                 .map(alert -> {
-                    Member requester = alert.getRequester();
-                    String placeName = memberIdToPlaceName.get(requester.getId());
+                    MemberDetail memberDetail = memberDetails.stream()
+                            .filter(md -> md.getMember().getId().equals(alert.getRequester().getId()))
+                            .findFirst()
+                            .orElseThrow(NotFoundMemberException::new);
 
-                    GetProductResponse productResponse = findProductByIdService.execute(alert.getSourceId());
+                    String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
+
+                    Product product = Optional.ofNullable(productMap.get(alert.getSourceId()))
+                            .orElseThrow(NotFoundProductException::new);
+
+                    List<GetImageResponse> imageResponses = imageMap.getOrDefault(alert.getSourceId(), List.of());
+
+                    int rawLight = memberDetail.getLight();
+                    int light = Math.max(1, rawLight / 10);
+
+                    GetProductResponse productResponse = new GetProductResponse(
+                            product.getId(),
+                            product.getTitle(),
+                            product.getDescription(),
+                            product.getGwangsan(),
+                            product.getType(),
+                            product.getMode(),
+                            new GetProductMemberResponse(
+                                    memberDetail.getId(),
+                                    memberDetail.getMember().getNickname(),
+                                    placeName,
+                                    light
+                            ),
+                            imageResponses
+                    );
 
                     return new GetTradeCompleteAlertResponse(
-                            requester.getNickname(),
+                            alert.getOtherMember().getNickname(),
                             alert.getTitle(),
-                            placeName,
                             alert.getCreatedAt(),
                             productResponse
                     );

@@ -2,8 +2,11 @@ package team.startup.gwangsan.domain.report.presentation.dto.request;
 
 import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 
+import java.util.List;
+
 public record CreateProductReportRequest(
-        Long productId,
+        Long sourceId,
         ReportType reportType,
-        String content
+        String content,
+        List<Long> imageIds
 ) {}
