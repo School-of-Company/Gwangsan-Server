@@ -3,7 +3,9 @@ package team.startup.gwangsan.domain.post.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
@@ -32,6 +34,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -67,7 +70,12 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
         );
 
         boolean isMine = member.getId().equals(product.getMember().getId());
-        boolean isCompletable = chatMessageRepository.existsByProductIdAndSenderId(product.getId(), member.getId());
+        ChatRoom chatRoom = chatRoomRepository.findByProductIdAndMember(product.getId(), member)
+                .orElse(null);
+        boolean isCompletable = false;
+        if (chatRoom != null) {
+            isCompletable = chatMessageRepository.existsByRoomAndSenderId(chatRoom, member.getId());
+        }
         boolean isCompleted = product.getStatus().equals(ProductStatus.COMPLETED);
 
         return new GetProductByIdResponse(
