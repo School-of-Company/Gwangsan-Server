@@ -8,7 +8,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.post.entity.Product;
 
 import java.time.LocalDateTime;
 
@@ -53,5 +52,9 @@ public class ChatMessage {
         this.checked = checked;
         this.room = room;
         this.sender = sender;
+    }
+
+    public void updateChecked(Boolean checked) {
+        this.checked = checked;
     }
 }
