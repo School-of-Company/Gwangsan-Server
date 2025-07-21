@@ -30,15 +30,9 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
                 .orElseThrow(NotFoundProductException::new);
         Member productMember = product.getMember();
 
-        Member member1;
-        Member member2;
-        if (member.getId() < productMember.getId()) {
-            member1 = member;
-            member2 = productMember;
-        } else {
-            member1 = productMember;
-            member2 = member;
-        }
+        Member member1 = member.getId() < productMember.getId() ? member : productMember;
+        Member member2 = member.getId() < productMember.getId() ? productMember : member;
+
 
         ChatRoom existsChatRoom = chatRoomRepository.findByProductIdAndMember1AndMember2(productId, member1, member2)
                 .orElse(null);
