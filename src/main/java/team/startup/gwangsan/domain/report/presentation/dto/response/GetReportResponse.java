@@ -6,6 +6,7 @@ import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 import java.util.List;
 
 public record GetReportResponse(
+        Long reportId,
         ReportType reportType,
         String content,
         List<GetImageResponse> images
