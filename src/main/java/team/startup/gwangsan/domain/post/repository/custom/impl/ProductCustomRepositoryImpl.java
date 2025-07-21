@@ -7,6 +7,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.repository.custom.ProductCustomRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -24,7 +25,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Product> findProductsByTypeAndModeAndMemberDetailPlace(Type type, Mode mode, Place place) {
+    public List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .join(product.member, member).fetchJoin()
@@ -32,7 +33,8 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .where(
                         typeEq(type),
                         modeEq(mode),
-                        memberDetail.place.eq(place)
+                        memberDetail.place.eq(place),
+                        statusEq(status)
                 )
                 .fetch()
                 .stream()
@@ -40,13 +42,14 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
     @Override
-    public List<Product> findProductByMemberAndTypeAndMode(Member member, Type type, Mode mode) {
+    public List<Product> findProductByMemberAndTypeAndModeAndStatus(Member member, Type type, Mode mode, ProductStatus status) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .where(
                         product.member.id.eq(member.getId()),
                         typeEq(type),
-                        modeEq(mode)
+                        modeEq(mode),
+                        statusEq(status)
                 )
                 .fetch()
                 .stream()
@@ -59,5 +62,9 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
     private BooleanExpression modeEq(Mode mode) {
         return mode != null ? product.mode.eq(mode) : null;
+    }
+
+    private BooleanExpression statusEq(ProductStatus status) {
+        return status != null ? product.status.eq(status) : null;
     }
 }

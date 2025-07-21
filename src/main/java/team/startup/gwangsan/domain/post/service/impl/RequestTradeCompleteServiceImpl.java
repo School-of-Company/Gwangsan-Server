@@ -49,7 +49,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
 
-        //validateChatExists(productId, otherMember.getId());
+        //validateChatExists(chatRoom, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
         saveTradeComplete(product, member, otherMember);

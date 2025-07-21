@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
@@ -36,7 +37,7 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
     public List<GetProductResponse> execute(Type type, Mode mode) {
         Place myPlace = memberDetailRepository.findPlaceByMemberId(memberUtil.getCurrentMember().getId());
 
-        List<Product> products = productRepository.findProductsByTypeAndModeAndMemberDetailPlace(type, mode, myPlace);
+        List<Product> products = productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(type, mode, myPlace, ProductStatus.ONGOING);
 
         List<Long> memberIds = products.stream()
                 .map(p -> p.getMember().getId())
