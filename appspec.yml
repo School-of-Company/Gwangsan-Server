@@ -6,7 +6,7 @@ files:
 
 hooks:
   BeforeInstall:
-    - location: cleanup.sh
+    - location: /home/ec2-user/cleanup.sh
       timeout: 180
       runas: root
   ApplicationStart:
