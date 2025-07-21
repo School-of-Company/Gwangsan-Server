@@ -76,8 +76,11 @@ public enum ErrorCode {
 
     // review
     ALREADY_REVIEWED(409, "이미 리뷰를 작성하였습니다."),
-    CANNOT_REVIEW_BEFORE_TRADE(403, "거래가 완료되지 않아 리뷰를 작성할 수 없습니다.");
+    CANNOT_REVIEW_BEFORE_TRADE(403, "거래가 완료되지 않아 리뷰를 작성할 수 없습니다."),
 
+    // chat
+    NOT_FOUND_CHAT_ROOM(404, "해당하는 채팅방을 찾을 수 없습니다."),
+    NOT_FOUND_CHAT_MESSAGE(404, "해당하는 채팅 메세지를 찾을 수 없습니다.");
 
     private final int status;
     private final String message;

@@ -5,7 +5,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
@@ -31,6 +33,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TradeCompleteRepository tradeCompleteRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     @Transactional
@@ -44,7 +47,9 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         Member otherMember = findMemberById(otherMemberId);
 
-        //validateChatExists(productId, otherMember.getId());
+        ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
+
+        //validateChatExists(chatRoom, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
         saveTradeComplete(product, member, otherMember);
@@ -74,8 +79,16 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .orElseThrow(NotFoundMemberException::new);
     }
 
-    private void validateChatExists(Long productId, Long otherMemberId) {
-        boolean hasChat = chatMessageRepository.existsByProductIdAndSenderId(productId, otherMemberId);
+    private ChatRoom findChatRoom(Long productId, Member member, Member otherMember) {
+        Member member1 = member.getId() < otherMember.getId() ? member : otherMember;
+        Member member2 = member.getId() < otherMember.getId() ? otherMember : member;
+
+        return chatRoomRepository.findByProductIdAndMember1AndMember2(productId, member1, member2)
+                .orElseThrow(CannotCompleteTradeException::new);
+    }
+
+    private void validateChatExists(ChatRoom room, Long otherMemberId) {
+        boolean hasChat = chatMessageRepository.existsByRoomAndSenderId(room, otherMemberId);
         if (!hasChat) {
             throw new CannotCompleteTradeException();
         }
