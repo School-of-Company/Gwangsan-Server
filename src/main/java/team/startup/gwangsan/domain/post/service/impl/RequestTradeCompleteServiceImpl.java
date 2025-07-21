@@ -47,7 +47,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         Member otherMember = findMemberById(otherMemberId);
 
-        ChatRoom chatRoom = findChatRoom(member, otherMember);
+        ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
 
         //validateChatExists(productId, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
@@ -79,11 +79,11 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .orElseThrow(NotFoundMemberException::new);
     }
 
-    private ChatRoom findChatRoom(Member member, Member otherMember) {
+    private ChatRoom findChatRoom(Long productId, Member member, Member otherMember) {
         Member member1 = member.getId() < otherMember.getId() ? member : otherMember;
         Member member2 = member.getId() < otherMember.getId() ? otherMember : member;
 
-        return chatRoomRepository.findByMember1AndMember2(member1, member2)
+        return chatRoomRepository.findByProductIdAndMember1AndMember2(productId, member1, member2)
                 .orElseThrow(CannotCompleteTradeException::new);
     }
 
