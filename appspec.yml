@@ -1,15 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: .
-    destination: /home/ec2-user/codedeploy/
-
+  - source: scripts/
+    destination: /home/ec2-user/scripts/
 hooks:
-  BeforeInstall:
-    - location: /home/ec2-user/cleanup.sh
-      timeout: 180
-      runas: root
   ApplicationStart:
-    - location: deploy.sh
+    - location: scripts/deploy.sh
       timeout: 300
       runas: root
