@@ -5,6 +5,7 @@ import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductRes
 import java.time.LocalDateTime;
 
 public record GetTradeCompleteAlertResponse(
+        Long id,
         String nickname,
         String title,
         LocalDateTime createdAt,
