@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.chat.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
@@ -17,9 +18,15 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
+import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +37,14 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
     private final MemberUtil memberUtil;
     private final ImageRepository imageRepository;
     private final ChatMessageImageRepository chatMessageImageRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Override
     @Transactional
     public SaveChatMessageResponse execute(Long roomId, String content, List<Long> imageIds, MessageType messageType) {
         Member member = memberUtil.getCurrentMember();
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);
 
         ChatMessage chatMessage = ChatMessage.builder()
@@ -55,6 +64,19 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             chatMessageImages = mapToChatMessageImages(images, chatMessage);
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
+
+        Member otherMember = member.getId().equals(chatRoom.getMember1().getId()) ? chatRoom.getMember2() : chatRoom.getMember1();
+
+        Optional<DeviceToken> optionalToken = deviceTokenRepository.findByUserId(otherMember.getId());
+
+        optionalToken.ifPresent(token -> {
+            List<String> deviceTokens = List.of(token.getDeviceToken());
+
+            applicationEventPublisher.publishEvent(new SendNotificationEvent(
+                    deviceTokens,
+                    NotificationType.CHATTING
+            ));
+        });
 
         return new SaveChatMessageResponse(
                 chatMessage.getId(),
