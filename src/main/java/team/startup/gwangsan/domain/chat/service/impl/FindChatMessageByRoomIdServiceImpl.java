@@ -40,15 +40,8 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
 
         Member otherMember = chatRoom.getMember1() == member ? chatRoom.getMember2() : chatRoom.getMember1();
 
-        Member member1;
-        Member member2;
-        if (member.getId() < otherMember.getId()) {
-            member1 = member;
-            member2 = otherMember;
-        } else {
-            member1 = otherMember;
-            member2 = member;
-        }
+        Member member1 = member.getId() < otherMember.getId() ? member : otherMember;
+        Member member2 = member.getId() < otherMember.getId() ? otherMember : member;
 
         List<ChatRoom> chatRooms = chatRoomRepository.findAllByMember1AndMember2(member1, member2);
 
