@@ -19,7 +19,7 @@ public class FindRoomIdByProductIdServiceImpl implements FindRoomIdByProductIdSe
     private final MemberUtil memberUtil;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GetRoomIdResponse execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
         ChatRoom chatRoom = chatRoomRepository.findByProductIdAndMember(productId, member)
