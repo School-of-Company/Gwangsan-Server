@@ -3,6 +3,7 @@ package team.startup.gwangsan.domain.admin.presentation.dto.response;
 import java.time.LocalDateTime;
 
 public record GetSignUpAlertResponse(
+        Long id,
         Long memberId,
         String nickname,
         String title,
