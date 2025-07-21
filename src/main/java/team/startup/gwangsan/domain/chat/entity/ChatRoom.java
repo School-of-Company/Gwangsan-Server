@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "tbl_chat_room",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"member1_id", "member2_id"})})
+@Table(name = "tbl_chat_room")
 @EntityListeners(AuditingEntityListener.class)
 public class ChatRoom {
 
