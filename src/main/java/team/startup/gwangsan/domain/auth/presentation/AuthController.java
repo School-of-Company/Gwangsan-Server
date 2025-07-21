@@ -7,11 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignInRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
+import team.startup.gwangsan.domain.auth.presentation.dto.response.MemberInfoResponse;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
-import team.startup.gwangsan.domain.auth.service.ReissueTokenService;
-import team.startup.gwangsan.domain.auth.service.SignInService;
-import team.startup.gwangsan.domain.auth.service.SignOutService;
-import team.startup.gwangsan.domain.auth.service.SignUpService;
+import team.startup.gwangsan.domain.auth.service.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,6 +20,7 @@ public class AuthController {
     private final SignInService signInService;
     private final ReissueTokenService reissueTokenService;
     private final SignOutService signOutService;
+    private final TokenAuthenticationService tokenAuthenticationService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequest request) {
@@ -45,6 +44,12 @@ public class AuthController {
     public ResponseEntity<Void> signout() {
         signOutService.execute();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<MemberInfoResponse> getMemberInfo() {
+        MemberInfoResponse response = tokenAuthenticationService.execute();
+        return ResponseEntity.ok(response);
     }
 }
 

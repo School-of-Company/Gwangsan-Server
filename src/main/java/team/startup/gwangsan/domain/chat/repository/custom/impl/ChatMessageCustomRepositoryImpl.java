@@ -33,6 +33,19 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
                 .fetch();
     }
 
+    @Override
+    public List<ChatMessage> findUnreadMessages(Long roomId, Long lastMessageId, Long readerId) {
+        return queryFactory
+                .selectFrom(chatMessage)
+                .where(
+                        chatMessage.room.id.eq(roomId),
+                        chatMessage.checked.isFalse(),
+                        chatMessage.id.loe(lastMessageId),
+                        chatMessage.sender.id.ne(readerId)
+                )
+                .fetch();
+    }
+
     private BooleanExpression buildCursorCondition(LocalDateTime lastCreatedAt, Long lastMessageId) {
         if (lastCreatedAt == null || lastMessageId == null) {
             return null;
