@@ -30,7 +30,7 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping
+    @PostMapping("/message")
     public ResponseEntity<SaveChatMessageResponse> saveChatMessage(@RequestBody SaveChatMessageRequest request) {
         SaveChatMessageResponse response = saveChatMessageService.execute(request.roomId(), request.content(), request.imageIds(), request.messageType());
         return ResponseEntity.ok(response);
