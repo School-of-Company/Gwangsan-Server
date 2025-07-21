@@ -3,8 +3,12 @@ os: linux
 files:
   - source: .
     destination: /home/ec2-user/codedeploy/
-    overwrite: true
+
 hooks:
+  BeforeInstall:
+    - location: cleanup.sh
+      timeout: 180
+      runas: root
   ApplicationStart:
     - location: deploy.sh
       timeout: 300
