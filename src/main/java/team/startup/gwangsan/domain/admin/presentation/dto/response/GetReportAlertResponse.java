@@ -5,7 +5,7 @@ import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportRe
 import java.time.LocalDateTime;
 
 public record GetReportAlertResponse(
-        Long reportId,
+        Long id,
         String nickname,
         Long reportedMemberId,
         String reportedMemberName,
