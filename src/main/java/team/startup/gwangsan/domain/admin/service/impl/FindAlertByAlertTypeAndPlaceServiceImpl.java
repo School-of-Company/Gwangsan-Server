@@ -143,7 +143,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
 
                     return new GetReportAlertResponse(
-                            report.getId(),
+                            alert.getId(),
                             alert.getRequester().getNickname(),
                             report.getReported().getId(),
                             report.getReported().getNickname(),
@@ -151,6 +151,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             placeName,
                             alert.getCreatedAt(),
                             new GetReportResponse(
+                                    report.getId(),
                                     report.getReportType(),
                                     report.getContent(),
                                     imageResponses
@@ -176,6 +177,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
 
                     return new GetSignUpAlertResponse(
+                            alert.getId(),
                             member.getId(),
                             member.getNickname(),
                             alert.getTitle(),
@@ -239,6 +241,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     );
 
                     return new GetTradeCompleteAlertResponse(
+                            alert.getId(),
                             alert.getOtherMember().getNickname(),
                             alert.getTitle(),
                             alert.getCreatedAt(),
