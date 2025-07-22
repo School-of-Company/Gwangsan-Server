@@ -12,6 +12,7 @@ public record GetAlertResponse(
         String content,
         AlertType alertType,
         LocalDateTime createdAt,
-        List<GetImageResponse> images
+        List<GetImageResponse> images,
+        Long sendMemberId
 ) {
 }
