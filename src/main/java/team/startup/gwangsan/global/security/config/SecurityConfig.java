@@ -120,6 +120,10 @@ public class SecurityConfig {
                                 // health
                                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
+                                // suspend
+                                .requestMatchers(HttpMethod.PATCH, "/api/suspend")
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
