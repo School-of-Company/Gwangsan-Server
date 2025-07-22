@@ -16,10 +16,9 @@ import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResp
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.custom.MemberCustomRepository;
+import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -34,7 +33,7 @@ import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
-import team.startup.gwangsan.domain.report.repository.custom.ReportCustomRepository;
+import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -48,9 +47,9 @@ import java.util.stream.Collectors;
 public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlertTypeAndPlaceService {
 
     private final MemberDetailRepository memberDetailRepository;
-    private final ReportCustomRepository reportCustomRepository;
+    private final ReportRepository reportRepository;
     private final AdminAlertCustomRepository adminAlertCustomRepository;
-    private final MemberCustomRepository memberCustomRepository;
+    private final MemberRepository memberRepository;
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
@@ -78,8 +77,16 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 .map(AdminAlert::getSourceId)
                 .toList();
 
-        List<Report> reports = reportCustomRepository.findByPlaces(places);
-        List<Member> members = memberCustomRepository.findByStatusAndPlaces(MemberStatus.PENDING, places);
+        List<Long> reportIds = reportAlerts.stream()
+                .map(AdminAlert::getSourceId)
+                .toList();
+
+        List<Long> signUpMemberIds = signUpAlerts.stream()
+                .map(AdminAlert::getSourceId)
+                .toList();
+
+        List<Report> reports = reportRepository.findAllByIdIn(reportIds);
+        List<Member> members = memberRepository.findAllByIdIn(signUpMemberIds);
         List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
         List<Product> products = productRepository.findAllById(productIds);
         List<ProductImage> productImages = productImageRepository.findProductImageByProductIdIn(productIds);
@@ -142,11 +149,13 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
 
+                    Member reported = report.getReported();
+
                     return new GetReportAlertResponse(
                             alert.getId(),
                             alert.getRequester().getNickname(),
-                            report.getReported().getId(),
-                            report.getReported().getNickname(),
+                            reported != null ? reported.getId() : null,
+                            reported != null ? reported.getNickname() : "알 수 없음",
                             alert.getTitle(),
                             placeName,
                             alert.getCreatedAt(),
