@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface AdminAlertRepository extends JpaRepository<AdminAlert, Long> {
     Optional<AdminAlert> findBySourceId(Long sourceId);
 
-    Optional<AdminAlert> findBySourceIdAndType(Long sourceId, AlertType type);
+    Optional<AdminAlert> findByIdAndType(Long alertId, AlertType type);
 }
