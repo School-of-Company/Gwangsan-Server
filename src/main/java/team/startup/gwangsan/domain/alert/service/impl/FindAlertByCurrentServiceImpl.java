@@ -86,7 +86,8 @@ public class FindAlertByCurrentServiceImpl implements FindAlertByCurrentService 
                             alert.getAlertType(),
                             alert.getCreatedAt(),
                             images,
-                            alert.getSendMember() != null ? alert.getSendMember().getId() : null
+                            alert.getSendMember() != null ? alert.getSendMember().getId() : null,
+                            alert.getSourceId()
                     );
                 })
                 .toList();
