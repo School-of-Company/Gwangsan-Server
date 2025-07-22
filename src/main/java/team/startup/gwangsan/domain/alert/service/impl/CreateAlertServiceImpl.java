@@ -62,7 +62,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 TradeComplete tradeComplete = tradeCompleteRepository.findById(sourceId)
                         .orElseThrow(NotFoundTradeCompleteException::new);
 
-                saveAlert(sourceId, alertType, member, tradeComplete.getProduct().getTitle(), tradeComplete.getMember().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT);
+                saveAlert(sourceId, alertType, member, tradeComplete.getMember(), tradeComplete.getProduct().getTitle(), tradeComplete.getMember().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT);
             }
 
             case RECOMMENDER -> {
