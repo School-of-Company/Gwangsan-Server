@@ -3,10 +3,6 @@ package team.startup.gwangsan.domain.admin.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.admin.entity.AdminAlert;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
-import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
-import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.UpdateMemberRoleService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.domain.member.entity.Member;
@@ -26,7 +22,6 @@ public class UpdateMemberRoleServiceImpl implements UpdateMemberRoleService {
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final ValidatePlaceUtil validatePlaceUtil;
-    private final AdminAlertRepository adminAlertRepository;
 
     @Override
     @Transactional
@@ -43,10 +38,5 @@ public class UpdateMemberRoleServiceImpl implements UpdateMemberRoleService {
         validatePlaceUtil.validateSamePlace(admin, adminDetail, targetMemberDetail);
 
         targetMember.updateMemberRole(role);
-
-        AdminAlert alert = adminAlertRepository.findBySourceIdAndType(memberId, AlertType.SIGN_UP)
-                        .orElseThrow(NotFoundAdminAlertException::new);
-
-        adminAlertRepository.delete(alert);
     }
 }
