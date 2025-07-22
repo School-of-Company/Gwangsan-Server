@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.chat.presentation.dto.response;
 
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +12,7 @@ public record GetRoomsResponse(
         String lastMessage,
         MessageType lastMessageType,
         LocalDateTime lastMessageTime,
-        Long unreadMessageCount
+        Long unreadMessageCount,
+        GetRoomProductDto product
 ) {
 }
