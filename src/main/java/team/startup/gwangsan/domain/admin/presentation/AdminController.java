@@ -23,6 +23,9 @@ public class AdminController {
     private final SignInAdminService signInAdminService;
     private final UpdateMemberStatusService updateMemberStatusService;
     private final CompleteTradeService completeTradeService;
+    private final RejectAdminAlertService rejectAdminAlertService;
+    private final VerificationSignUpService verificationSignUpService;
+    private final WithDrawnMemberService withDrawnMemberService;
 
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
@@ -60,6 +63,24 @@ public class AdminController {
     @PostMapping("/trade-complete/{product_id}")
     public ResponseEntity<Void> tradeComplete(@PathVariable("product_id") Long productId) {
         completeTradeService.execute(productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/alert/{alert_id}")
+    public ResponseEntity<Void> rejectAlert(@PathVariable("alert_id") Long alertId) {
+        rejectAdminAlertService.execute(alertId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/verify/signup/{alert_id}")
+    public ResponseEntity<Void> verifySignUp(@PathVariable("alert_id") Long alertId) {
+        verificationSignUpService.execute(alertId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/ban/{member_id}")
+    public ResponseEntity<Void> ban(@PathVariable("member_id") Long memberId) {
+        withDrawnMemberService.execute(memberId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
