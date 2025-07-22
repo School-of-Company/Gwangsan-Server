@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.QChatMessage;
+import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomMemberResponse;
-import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatRoomCustomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.QMember;
@@ -54,7 +54,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
     }
 
     @Override
-    public List<GetRoomsResponse> findRoomsByMemberId(Long memberId) {
+    public List<GetRoomsDto> findRoomsByMemberId(Long memberId) {
         QChatMessage latestMessage = QChatMessage.chatMessage;
         QChatMessage subMessage = new QChatMessage("subMessage");
         QChatMessage unreadMessage = new QChatMessage("unreadMessage");
@@ -75,11 +75,11 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .select(unreadMessage.count())
                 .from(unreadMessage)
                 .where(unreadMessage.room.eq(chatRoom)
-                        .and(unreadMessage.sender.id.ne(memberId)) // 내가 보낸 거 아님
+                        .and(unreadMessage.sender.id.ne(memberId))
                         .and(unreadMessage.checked.isFalse()));
 
         return queryFactory
-                .select(Projections.constructor(GetRoomsResponse.class,
+                .select(Projections.constructor(GetRoomsDto.class,
                         chatRoom.id,
                         Projections.constructor(GetRoomMemberResponse.class,
                                 new CaseBuilder()
@@ -94,8 +94,9 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         latestMessage.content,
                         latestMessage.messageType,
                         latestMessage.createdAt,
-                        unreadCountSubQuery
-                ))
+                        unreadCountSubQuery,
+                        chatRoom.product.id
+                )).distinct()
                 .from(chatRoom)
                 .leftJoin(latestMessage)
                 .on(latestMessage.id.eq(latestMessageIdSubQuery))
@@ -104,8 +105,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .where(chatRoom.isActive.isTrue()
                         .and(chatRoom.member1.id.eq(memberId).or(chatRoom.member2.id.eq(memberId))))
                 .orderBy(latestMessage.createdAt.desc().nullsLast())
-                .groupBy(member1, member2)
-                .limit(1)
+                .groupBy(chatRoom.id)
                 .fetch();
     }
 }
