@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.CompleteTradeService;
+import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
@@ -23,6 +24,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -79,7 +81,10 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
         applicationEventPublisher.publishEvent(new SendNotificationEvent(
                 deviceTokens,
                 NotificationType.TRADE_COMPLETE
-                ));
+        ));
+
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(productId, productOwnerDetail.getId(), AlertType.TRADE_COMPLETE));
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(productId, counterpartDetail.getId(), AlertType.TRADE_COMPLETE));
     }
 
     private MemberDetail findMemberDetail(Long memberId) {
