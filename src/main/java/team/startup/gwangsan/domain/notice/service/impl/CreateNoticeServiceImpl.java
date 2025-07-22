@@ -1,23 +1,33 @@
 package team.startup.gwangsan.domain.notice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.CreateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.CreateNoticeService;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
+import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.global.event.CreateAlertMembersEvent;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +39,9 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     private final NoticeRepository noticeRepository;
     private final ImageRepository imageRepository;
     private final NoticeImageRepository noticeImageRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final DeviceTokenRepository deviceTokenRepository;
+    private final MemberDetailRepository memberDetailRepository;
 
     @Override
     @Transactional
@@ -64,5 +77,29 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
 
             noticeImageRepository.saveAll(noticeImages);
         }
+
+        List<MemberDetail> members = memberDetailRepository.findAllByPlaceAndRoleIn(place, request.roles());
+
+        List<Long> memberIds = members.stream().map(member -> member.getId()).toList();
+
+        List<String> allDeviceToken  = new ArrayList<>();
+
+        for (Long memberId : memberIds) {
+            DeviceToken deviceToken = deviceTokenRepository.findByUserId(memberId)
+                    .orElse(null);
+
+            allDeviceToken.add(deviceToken.getDeviceToken());
+        }
+
+        applicationEventPublisher.publishEvent(new SendNotificationEvent(
+                allDeviceToken,
+                NotificationType.NOTICE
+        ));
+
+        applicationEventPublisher.publishEvent(new CreateAlertMembersEvent(
+                notice.getId(),
+                memberIds,
+                AlertType.NOTICE
+        ));
     }
 }
