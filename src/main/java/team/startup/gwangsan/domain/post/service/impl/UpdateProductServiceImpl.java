@@ -51,7 +51,7 @@ public class UpdateProductServiceImpl implements UpdateProductService {
         List<Image> images = imageRepository.findByIdIn(imageIds);
         ImageValidateUtil.validateExistence(imageIds, images);
 
-        List<ProductImage> existingImages = productImageRepository.findByProductId(productId);
+        List<ProductImage> existingImages = productImageRepository.findAllByProductId(productId);
 
         Set<Long> existingImageIds = extractImageIds(existingImages);
         Set<Long> requestImageIds = new HashSet<>(imageIds);

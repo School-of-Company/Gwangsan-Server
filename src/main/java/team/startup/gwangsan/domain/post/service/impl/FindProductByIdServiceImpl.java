@@ -51,7 +51,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
         validateSamePlace(myPlace, productPlace);
 
-        List<GetImageResponse> images = productImageRepository.findByProductId(product.getId())
+        List<GetImageResponse> images = productImageRepository.findAllByProductId(product.getId())
                 .stream()
                 .map(pi -> new GetImageResponse(
                         pi.getImage().getId(),

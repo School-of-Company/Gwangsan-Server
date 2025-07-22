@@ -8,7 +8,7 @@ import team.startup.gwangsan.domain.post.repository.custom.ProductImageCustomRep
 import java.util.List;
 
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long>, ProductImageCustomRepository {
-    List<ProductImage> findByProductId(Long productId);
+    List<ProductImage> findAllByProductId(Long productId);
 
     void deleteByProductIdAndImageId(Long productId, Long imageId);
 
