@@ -19,7 +19,7 @@ public class MemberDetail {
     @Column(name = "member_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @MapsId
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
