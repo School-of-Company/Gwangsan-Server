@@ -21,6 +21,7 @@ import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
+import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -48,13 +49,23 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         Member otherMember = findMemberById(otherMemberId);
 
         ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
-
-        //validateChatExists(chatRoom, otherMember.getId());
+        validateChatExists(chatRoom, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
-        saveTradeComplete(product, member, otherMember);
+        TradeComplete tradeComplete = TradeComplete.builder()
+                .product(product)
+                .member(member)
+                .otherMember(otherMember)
+                .build();
+
+        saveTradeComplete(tradeComplete);
 
         notifyIfMutualComplete(productId, member, otherMember, product.getMember());
+
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(
+                tradeComplete.getId(),
+                otherMemberId,
+                team.startup.gwangsan.domain.alert.entity.constant.AlertType.OTHER_MEMBER_TRADE_COMPLETE));
     }
 
     private void validateNotSelfTrade(Long memberId, Long otherMemberId) {
@@ -103,12 +114,8 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private void saveTradeComplete(Product product, Member member, Member otherMember) {
-        tradeCompleteRepository.save(TradeComplete.builder()
-                .product(product)
-                .member(member)
-                .otherMember(otherMember)
-                .build());
+    private void saveTradeComplete(TradeComplete tradeComplete) {
+        tradeCompleteRepository.save(tradeComplete);
     }
 
     private void notifyIfMutualComplete(Long productId, Member member, Member otherMember, Member productMember) {
@@ -132,8 +139,8 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
             applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
                     AlertType.TRADE_COMPLETE,
                     productId,
-                    sender,
-                    receiver
+                    sender.getId(),
+                    receiver.getId()
             ));
         }
     }
