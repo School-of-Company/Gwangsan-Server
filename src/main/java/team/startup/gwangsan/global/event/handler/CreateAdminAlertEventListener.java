@@ -21,9 +21,9 @@ public class CreateAdminAlertEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCreateAdminAlertEvent(CreateAdminAlertEvent event) {
         if (event.type() == AlertType.TRADE_COMPLETE) {
-            createTradeCompleteAlertService.execute(event.type(), event.sourceId(), event.otherMember(), event.member());
+            createTradeCompleteAlertService.execute(event.type(), event.sourceId(), event.otherMemberId(), event.memberId());
         } else {
-            createAdminAlertService.execute(event.type(), event.sourceId(), event.member());
+            createAdminAlertService.execute(event.type(), event.sourceId(), event.memberId());
         }
     }
 }
