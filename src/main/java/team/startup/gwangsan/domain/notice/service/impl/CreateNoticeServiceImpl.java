@@ -88,7 +88,9 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
             DeviceToken deviceToken = deviceTokenRepository.findByUserId(memberId)
                     .orElse(null);
 
-            allDeviceToken.add(deviceToken.getDeviceToken());
+            if (deviceToken != null && deviceToken.getDeviceToken() != null) {
+                allDeviceToken.add(deviceToken.getDeviceToken());
+            }
         }
 
         applicationEventPublisher.publishEvent(new SendNotificationEvent(
