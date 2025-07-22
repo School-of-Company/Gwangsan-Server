@@ -49,7 +49,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                                 chatRoom.product.id.eq(productId),
                                 chatRoom.member1.eq(member).or(chatRoom.member2.eq(member))
                         )
-                        .fetchOne()
+                        .fetchFirst()
         );
     }
 
