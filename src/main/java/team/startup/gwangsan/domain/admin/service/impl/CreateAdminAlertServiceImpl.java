@@ -11,6 +11,7 @@ import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.CreateAdminAlertService;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
@@ -32,13 +33,16 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
     @Override
     @Transactional
-    public void execute(AlertType type, Long sourceId, Member member) {
+    public void execute(AlertType type, Long sourceId, Long memberId) {
         switch (type) {
             case REPORT -> {
                 Report report = reportRepository.findById(sourceId)
                         .orElseThrow(NotFoundReportException::new);
 
                 String alertTile = resolveReportAlertTitle(report);
+
+                Member member = memberRepository.findById(memberId)
+                        .orElseThrow(NotFoundMemberException::new);
 
                 AdminAlert alert = AdminAlert.builder()
                         .type(type)
