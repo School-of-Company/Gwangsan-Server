@@ -39,6 +39,7 @@ public enum ErrorCode {
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
     CANNOT_COMPLETE_TRADE(400, "거래 완료를 할 수 없습니다."),
     CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
+    NOT_FOUND_TRADE_COMPLETE(404, "거래 완료 요청을 찾을 수 없습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
@@ -77,6 +78,7 @@ public enum ErrorCode {
     // review
     ALREADY_REVIEWED(409, "이미 리뷰를 작성하였습니다."),
     CANNOT_REVIEW_BEFORE_TRADE(403, "거래가 완료되지 않아 리뷰를 작성할 수 없습니다."),
+    NOT_FOUND_REVIEW(404, "해당하는 후기를 찾을 수 없습니다."),
 
     // chat
     NOT_FOUND_CHAT_ROOM(404, "해당하는 채팅방을 찾을 수 없습니다."),
