@@ -49,7 +49,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         Member otherMember = findMemberById(otherMemberId);
 
         ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
-        validateChatExists(chatRoom, otherMember.getId());
+        //validateChatExists(chatRoom, otherMember.getId());
         validateNotAlreadyRequested(product, member, otherMember);
 
         TradeComplete tradeComplete = TradeComplete.builder()
