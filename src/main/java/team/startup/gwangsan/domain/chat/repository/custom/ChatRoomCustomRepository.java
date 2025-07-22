@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.chat.repository.custom;
 
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
-import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
+import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.member.entity.Member;
 
 import java.util.List;
@@ -12,5 +12,5 @@ public interface ChatRoomCustomRepository {
 
     Optional<ChatRoom> findByProductIdAndMember(Long productId, Member member);
 
-    List<GetRoomsResponse> findRoomsByMemberId(Long memberId);
+    List<GetRoomsDto> findRoomsByMemberId(Long memberId);
 }
