@@ -5,16 +5,19 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 
+import javax.management.relation.Role;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static team.startup.gwangsan.domain.member.entity.QMember.member;
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
 
 @Repository
@@ -56,6 +59,18 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         tuple -> tuple.get(memberDetail.member.id),
                         tuple -> tuple.get(memberDetail.place.name)
                 ));
+    }
+
+    @Override
+    public List<MemberDetail> findAllByPlaceAndRoleIn(Place place, List<MemberRole> roles) {
+        return queryFactory
+                .selectFrom(memberDetail)
+                .join(memberDetail.member, member).fetchJoin()
+                .where(
+                        memberDetail.place.eq(place),
+                        memberDetail.member.role.in(roles)
+                )
+                .fetch();
     }
 
 }
