@@ -12,4 +12,4 @@ docker stop $CONTAINER_NAME || true
 docker rm $CONTAINER_NAME || true
 
 docker pull $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-docker run -d --name $CONTAINER_NAME -p 8080:8080 --env-file /root/.env $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+docker run -d --name $CONTAINER_NAME -p 8080:8080 --env-file /root/.env -e TZ=Asia/Seoul $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
