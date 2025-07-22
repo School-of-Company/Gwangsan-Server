@@ -3,8 +3,7 @@ name: CI/CD
 on:
   push:
     branches: ["develop", "main"]
-  pull_request:
-    branches: ["*"]
+ 
 
 env:
   AWS_REGION: ap-northeast-2
