@@ -1,8 +1,10 @@
 package team.startup.gwangsan.domain.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
@@ -17,6 +19,7 @@ import team.startup.gwangsan.domain.review.exception.CannotReviewBeforeTradeExce
 import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReviewRequest;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.CreateReviewService;
+import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -27,6 +30,7 @@ public class CreateReviewServiceImpl implements CreateReviewService {
     private final MemberUtil memberUtil;
     private final ProductRepository productRepository;
     private final MemberDetailRepository memberDetailRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -36,9 +40,9 @@ public class CreateReviewServiceImpl implements CreateReviewService {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(NotFoundProductException::new);
 
-        //if (product.getStatus() != ProductStatus.COMPLETED) {
-         //   throw new CannotReviewBeforeTradeException();
-        //}
+        if (product.getStatus() != ProductStatus.COMPLETED) {
+            throw new CannotReviewBeforeTradeException();
+        }
 
         if (reviewRepository.existsByProductAndReviewer(product, reviewer)) {
             throw new AlreadyReviewedException();
@@ -59,5 +63,11 @@ public class CreateReviewServiceImpl implements CreateReviewService {
                 .build();
 
         reviewRepository.save(review);
+
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(
+                review.getId(),
+                product.getMember().getId(),
+                AlertType.REVIEW
+        ));
     }
 }

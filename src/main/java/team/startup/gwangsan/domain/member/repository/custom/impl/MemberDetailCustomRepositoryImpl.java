@@ -1,21 +1,27 @@
 package team.startup.gwangsan.domain.member.repository.custom.impl;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 
+import javax.management.relation.Role;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static team.startup.gwangsan.domain.member.entity.QMember.member;
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
+import static team.startup.gwangsan.domain.post.entity.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor
@@ -58,4 +64,19 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 ));
     }
 
+    @Override
+    public List<MemberDetail> findAllByPlaceAndRoleIn(Place place, List<MemberRole> roles) {
+        return queryFactory
+                .selectFrom(memberDetail)
+                .join(memberDetail.member, member).fetchJoin()
+                .where(
+                        memberDetail.place.eq(place),
+                        roleIn(roles)
+                )
+                .fetch();
+    }
+
+    private BooleanExpression roleIn(List<MemberRole> roles) {
+        return roles != null ? memberDetail.member.role.in(roles) : null;
+    }
 }

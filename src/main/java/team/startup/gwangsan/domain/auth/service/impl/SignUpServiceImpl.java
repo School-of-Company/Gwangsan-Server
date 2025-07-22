@@ -26,7 +26,7 @@ import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepo
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
-
+import team.startup.gwangsan.global.event.CreateAlertEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -103,8 +103,13 @@ public class SignUpServiceImpl implements SignUpService {
         applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
                 AlertType.SIGN_UP,
                 member.getId(),
-                member
+                member.getId()
         ));
+
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(
+                member.getId(),
+                recommender.getId(),
+                team.startup.gwangsan.domain.alert.entity.constant.AlertType.RECOMMENDER));
     }
 
     private void validateDuplicatePhoneNumber(String phoneNumber) {
