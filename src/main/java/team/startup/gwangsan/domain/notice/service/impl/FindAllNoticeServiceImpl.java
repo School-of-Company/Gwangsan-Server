@@ -76,11 +76,14 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
                             ))
                             .toList();
 
+                    boolean isMe = notice.getMember().getId().equals(member.getId());
+
                     return new FindAllNoticeResponse(
                             notice.getId(),
                             notice.getTitle(),
                             notice.getContent(),
-                            imageResponses
+                            imageResponses,
+                            isMe
                     );
                 })
                 .toList();

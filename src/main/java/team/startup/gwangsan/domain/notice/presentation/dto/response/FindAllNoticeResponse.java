@@ -8,5 +8,6 @@ public record FindAllNoticeResponse(
         Long id,
         String title,
         String content,
-        List<GetImageResponse> images
+        List<GetImageResponse> images,
+        boolean isMe
 ) {}
