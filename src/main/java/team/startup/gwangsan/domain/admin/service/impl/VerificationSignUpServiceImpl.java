@@ -42,6 +42,8 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
 
         memberDetail.getMember().updateMemberStatus(MemberStatus.ACTIVE);
 
+        memberDetail.plusGwangsan(5000);
+
         adminAlertRepository.delete(alert);
     }
 }
