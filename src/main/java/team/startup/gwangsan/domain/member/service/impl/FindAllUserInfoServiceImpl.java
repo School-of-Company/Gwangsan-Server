@@ -36,10 +36,10 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
 
         if (role == MemberRole.ROLE_HEAD_ADMIN) {
             Integer headId = currentDetail.getPlace().getHead().getId();
-            details = memberDetailRepository.findAllByPlace_Head_Id(headId);
+            details = memberDetailRepository.findAllWithMemberByHeadId(headId);
         } else if (role == MemberRole.ROLE_PLACE_ADMIN) {
             Integer placeId = currentDetail.getPlace().getId();
-            details = memberDetailRepository.findAllByPlace_Id(placeId);
+            details = memberDetailRepository.findAllWithMemberByPlaceId(placeId);
         } else {
             throw new NotAllowedUserAccessException();
         }
