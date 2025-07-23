@@ -26,6 +26,7 @@ public class AdminController {
     private final RejectAdminAlertService rejectAdminAlertService;
     private final VerificationSignUpService verificationSignUpService;
     private final WithDrawnMemberService withDrawnMemberService;
+    private final DeleteAdminAlertService deleteAdminAlertService;
 
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
@@ -81,6 +82,12 @@ public class AdminController {
     @PatchMapping("/ban/{member_id}")
     public ResponseEntity<Void> ban(@PathVariable("member_id") Long memberId) {
         withDrawnMemberService.execute(memberId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/{alert_id}")
+    public ResponseEntity<Void> deleteAlert(@PathVariable("alert_id") Long alertId) {
+        deleteAdminAlertService.execute(alertId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
