@@ -10,9 +10,7 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 
-import javax.management.relation.Role;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static team.startup.gwangsan.domain.member.entity.QMember.member;
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
-import static team.startup.gwangsan.domain.post.entity.QProduct.product;
 
 @Repository
 @RequiredArgsConstructor
@@ -75,6 +72,25 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 )
                 .fetch();
     }
+
+    @Override
+    public List<MemberDetail> findAllWithMemberByHeadId(Integer headId) {
+        return queryFactory
+                .selectFrom(memberDetail)
+                .join(memberDetail.member, member).fetchJoin()
+                .where(memberDetail.place.head.id.eq(headId))
+                .fetch();
+    }
+
+    @Override
+    public List<MemberDetail> findAllWithMemberByPlaceId(Integer placeId) {
+        return queryFactory
+                .selectFrom(memberDetail)
+                .join(memberDetail.member, member).fetchJoin()
+                .where(memberDetail.place.id.eq(placeId))
+                .fetch();
+    }
+
 
     private BooleanExpression roleIn(List<MemberRole> roles) {
         return roles != null ? memberDetail.member.role.in(roles) : null;
