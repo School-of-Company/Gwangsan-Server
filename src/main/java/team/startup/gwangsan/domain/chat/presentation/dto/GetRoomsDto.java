@@ -1,11 +1,11 @@
-package team.startup.gwangsan.domain.chat.presentation.dto.response;
+package team.startup.gwangsan.domain.chat.presentation.dto;
 
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
-import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomMemberResponse;
 
 import java.time.LocalDateTime;
 
-public record GetRoomsResponse(
+public record GetRoomsDto(
         Long roomId,
         GetRoomMemberResponse member,
         Long messageId,
@@ -13,6 +13,6 @@ public record GetRoomsResponse(
         MessageType lastMessageType,
         LocalDateTime lastMessageTime,
         Long unreadMessageCount,
-        GetRoomProductDto product
+        Long productId
 ) {
 }
