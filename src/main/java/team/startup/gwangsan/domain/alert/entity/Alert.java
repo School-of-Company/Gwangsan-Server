@@ -47,15 +47,21 @@ public class Alert {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "checked", nullable = false)
+    private Boolean checked;
+
     @Builder
-    public Alert(Long sourceId, Member member, Member sendMember, AlertType alertType, String title, String content) {
+    public Alert(Long sourceId, Member member, Member sendMember, AlertType alertType, String title, String content, Boolean checked) {
         this.sourceId = sourceId;
         this.member = member;
         this.sendMember = sendMember;
         this.alertType = alertType;
         this.title = title;
         this.content = content;
+        this.checked = checked;
     }
 
-
+    public void updateChecked(Boolean checked) {
+        this.checked = checked;
+    }
 }
