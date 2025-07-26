@@ -44,6 +44,7 @@ public class CreateAlertMembersServiceImpl implements CreateAlertMembersService 
                 .member(member)
                 .title(title)
                 .content(content)
+                .checked(false)
                 .build();
     }
 

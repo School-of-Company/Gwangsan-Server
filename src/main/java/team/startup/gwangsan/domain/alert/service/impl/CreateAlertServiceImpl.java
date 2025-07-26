@@ -98,6 +98,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .member(member)
                 .title(title)
                 .content(content)
+                .checked(false)
                 .build();
     }
 
@@ -109,6 +110,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .sendMember(sendMember)
                 .title(title)
                 .content(content)
+                .checked(false)
                 .build();
     }
 
