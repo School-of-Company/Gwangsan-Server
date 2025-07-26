@@ -1,6 +1,6 @@
 package team.startup.gwangsan.domain.alert.presentation.dto.response;
 
-public record UnreadAlertResponse(
+public record ExistsAlertResponse(
         boolean unread
 ) {
 }
