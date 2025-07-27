@@ -51,13 +51,13 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
             List<Place> branchPlaces = placeRepository.findByHead(myHead);
 
             notices = (lastId == null)
-                    ? noticeRepository.findByPlaceInOrderByIdDesc(branchPlaces, pageable)
-                    : noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(branchPlaces, lastId, pageable);
+                    ? noticeRepository.findByPlaceInAndTargetRolesContainingOrderByIdDesc(branchPlaces, myRole, pageable)
+                    : noticeRepository.findByPlaceInAndTargetRolesContainingAndIdLessThanOrderByIdDesc(branchPlaces, myRole, lastId, pageable);
 
         } else {
             notices = (lastId == null)
-                    ? noticeRepository.findByPlaceOrderByIdDesc(myPlace, pageable)
-                    : noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(myPlace, lastId, pageable);
+                    ? noticeRepository.findByPlaceAndTargetRolesContainingOrderByIdDesc(myPlace, myRole, pageable)
+                    : noticeRepository.findByPlaceAndTargetRolesContainingAndIdLessThanOrderByIdDesc(myPlace, myRole, lastId, pageable);
         }
 
         List<Long> noticeIds = notices.stream().map(Notice::getId).toList();
