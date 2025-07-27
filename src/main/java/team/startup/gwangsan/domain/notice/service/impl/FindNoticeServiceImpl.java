@@ -49,6 +49,10 @@ public class FindNoticeServiceImpl implements FindNoticeService {
             }
         }
 
+        if (!notice.getTargetRoles().contains(member.getRole())) {
+            throw new NoticeNotFoundException();
+        }
+
         List<GetImageResponse> imageResponses = noticeImageRepository.findAllByNotice(notice).stream()
                 .map(NoticeImage::getImage)
                 .map(image -> new GetImageResponse(image.getId(), image.getImageUrl()))
