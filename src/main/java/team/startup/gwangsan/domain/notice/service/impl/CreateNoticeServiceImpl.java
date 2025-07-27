@@ -14,7 +14,7 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
-import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.CreateNoticeRequest;
+import team.startup.gwangsan.domain.notice.presentation.dto.request.CreateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.CreateNoticeService;
