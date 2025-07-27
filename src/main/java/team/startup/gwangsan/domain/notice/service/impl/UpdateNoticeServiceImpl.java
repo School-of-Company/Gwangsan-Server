@@ -10,7 +10,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
-import team.startup.gwangsan.domain.notice.presentation.dto.reqeust.UpdateNoticeRequest;
+import team.startup.gwangsan.domain.notice.presentation.dto.request.UpdateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.UpdateNoticeService;

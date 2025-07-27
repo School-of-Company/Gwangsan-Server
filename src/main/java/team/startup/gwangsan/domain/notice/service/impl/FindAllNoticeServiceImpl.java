@@ -41,22 +41,23 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
         MemberDetail memberDetail = memberDetailRepository.findByMember(member)
                 .orElseThrow(NotFoundMemberDetailException::new);
         Place myPlace = memberDetail.getPlace();
+        MemberRole myRole = member.getRole();
         Pageable pageable = PageRequest.of(0, size);
 
         List<Notice> notices;
 
-        if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
+        if (myRole == MemberRole.ROLE_HEAD_ADMIN) {
             Head myHead = myPlace.getHead();
             List<Place> branchPlaces = placeRepository.findByHead(myHead);
 
             notices = (lastId == null)
-                    ? noticeRepository.findByPlaceInOrderByIdDesc(branchPlaces, pageable)
-                    : noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(branchPlaces, lastId, pageable);
+                    ? noticeRepository.findByPlaceInAndTargetRolesContainingOrderByIdDesc(branchPlaces, myRole, pageable)
+                    : noticeRepository.findByPlaceInAndTargetRolesContainingAndIdLessThanOrderByIdDesc(branchPlaces, myRole, lastId, pageable);
 
         } else {
             notices = (lastId == null)
-                    ? noticeRepository.findByPlaceOrderByIdDesc(myPlace, pageable)
-                    : noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(myPlace, lastId, pageable);
+                    ? noticeRepository.findByPlaceAndTargetRolesContainingOrderByIdDesc(myPlace, myRole, pageable)
+                    : noticeRepository.findByPlaceAndTargetRolesContainingAndIdLessThanOrderByIdDesc(myPlace, myRole, lastId, pageable);
         }
 
         List<Long> noticeIds = notices.stream().map(Notice::getId).toList();
