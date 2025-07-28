@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
+import team.startup.gwangsan.domain.notice.exception.UnauthorizedNoticeAccessException;
 import team.startup.gwangsan.domain.notice.presentation.dto.request.UpdateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
@@ -35,13 +36,15 @@ public class UpdateNoticeServiceImpl implements UpdateNoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(NoticeNotFoundException::new);
 
+        if (!notice.getMember().getId().equals(member.getId())) {
+            throw new UnauthorizedNoticeAccessException();
+        }
+
         notice.update(request.title(), request.content());
 
-        List<NoticeImage> oldNoticeImages = noticeImageRepository.findAllByNotice(notice);
-        noticeImageRepository.deleteAll(oldNoticeImages);
+        noticeImageRepository.deleteAllByNotice(notice);
 
         List<Image> images = imageRepository.findAllById(request.imageIds());
-
         if (images.size() != request.imageIds().size()) {
             throw new ImageNotFoundException();
         }
