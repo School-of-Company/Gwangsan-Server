@@ -70,6 +70,7 @@ public enum ErrorCode {
     // notice
     NOTICE_NOT_FOUND(404, "해당 공지가 존재하지 않습니다."),
     NOTICE_FORBIDDEN(403, "공지에 대한 권한이 없습니다."),
+    UNAUTHORIZED_NOTICE_ACCESS(403, "공지 작성자만 수정할 수 있습니다."),
 
     // related-keyword
     MEMBER_RELATED_KEYWORD_NOT_FOUND(404, "해당 관련 키워드를 찾을 수 없습니다."),

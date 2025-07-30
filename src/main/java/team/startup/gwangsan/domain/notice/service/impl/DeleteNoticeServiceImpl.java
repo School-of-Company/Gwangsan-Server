@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeForbiddenException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
+import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.DeleteNoticeService;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -17,6 +18,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 public class DeleteNoticeServiceImpl implements DeleteNoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NoticeImageRepository noticeImageRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -32,6 +34,9 @@ public class DeleteNoticeServiceImpl implements DeleteNoticeService {
             throw new NoticeForbiddenException();
         }
 
+        noticeImageRepository.deleteAllByNotice(notice);
+
         noticeRepository.delete(notice);
     }
 }
+

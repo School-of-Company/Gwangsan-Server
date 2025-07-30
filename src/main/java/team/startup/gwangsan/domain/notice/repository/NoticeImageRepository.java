@@ -12,4 +12,6 @@ public interface NoticeImageRepository extends JpaRepository<NoticeImage, Long> 
     List<NoticeImage> findAllByNotice(Notice notice);
 
     List<NoticeImage> findAllByNoticeIdIn(List<Long> noticeIds);
+
+    void deleteAllByNotice(Notice notice);
 }
