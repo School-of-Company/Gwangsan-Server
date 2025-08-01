@@ -11,9 +11,11 @@ import team.startup.gwangsan.domain.admin.service.VerificationSignUpService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -24,6 +26,9 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
     private final MemberUtil memberUtil;
     private final MemberDetailRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
+    private final WithdrawalRecordRepository withdrawalRecordRepository;
+
+    private static final int SIGNUP_GWANGSAN_REWARD = 5000;
 
     @Override
     @Transactional
@@ -37,13 +42,26 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
 
         MemberDetail memberDetail = memberDetailRepository.findById(alert.getSourceId())
                 .orElseThrow(NotFoundMemberDetailException::new);
+        Member member = memberDetail.getMember();
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, memberDetail);
 
-        memberDetail.getMember().updateMemberStatus(MemberStatus.ACTIVE);
+        member.updateMemberStatus(MemberStatus.ACTIVE);
 
-        memberDetail.plusGwangsan(5000);
+        WithdrawalRecord withdrawalRecord = withdrawalRecordRepository.findByPhoneNumber(member.getPhoneNumber())
+                .orElse(null);
+
+        applyGwangsanPolicy(memberDetail, withdrawalRecord);
 
         adminAlertRepository.delete(alert);
+    }
+
+    private void applyGwangsanPolicy(MemberDetail memberDetail, WithdrawalRecord record) {
+        if (record != null) {
+            memberDetail.plusGwangsan(record.getGwangsan());
+            withdrawalRecordRepository.delete(record);
+        } else {
+            memberDetail.plusGwangsan(SIGNUP_GWANGSAN_REWARD);
+        }
     }
 }
