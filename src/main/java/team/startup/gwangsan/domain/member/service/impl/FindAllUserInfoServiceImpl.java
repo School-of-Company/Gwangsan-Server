@@ -24,7 +24,7 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FindAllUserInfoResponse> execute() {
+    public List<FindAllUserInfoResponse> execute(String nickname, String placeName) {
         Member currentMember = memberUtil.getCurrentMember();
 
         MemberDetail currentDetail = memberDetailRepository.findById(currentMember.getId())
@@ -32,17 +32,19 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
 
         MemberRole role = currentMember.getRole();
 
-        List<MemberDetail> details;
-
+        Integer placeId = null;
+        Integer headId = null;
         if (role == MemberRole.ROLE_HEAD_ADMIN) {
-            Integer headId = currentDetail.getPlace().getHead().getId();
-            details = memberDetailRepository.findAllWithMemberByHeadId(headId);
+            headId = currentDetail.getPlace().getHead().getId();
         } else if (role == MemberRole.ROLE_PLACE_ADMIN) {
-            Integer placeId = currentDetail.getPlace().getId();
-            details = memberDetailRepository.findAllWithMemberByPlaceId(placeId);
+            placeId = currentDetail.getPlace().getId();
         } else {
             throw new NotAllowedUserAccessException();
         }
+
+        List<MemberDetail> details = memberDetailRepository.findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(
+                nickname, placeName, placeId, headId
+        );
 
         return details.stream()
                 .map(detail -> {
