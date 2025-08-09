@@ -11,14 +11,9 @@ import java.util.Set;
 public interface MemberDetailCustomRepository {
     Place findPlaceByMemberId(Long id);
 
-    List<MemberDetail> findAllWithMember();
-
     Map<Long, String> findPlaceNameMapByMemberIds(Set<Long> memberIds);
 
     List<MemberDetail> findAllByPlaceAndRoleIn(Place place, List<MemberRole> roles);
 
-    List<MemberDetail> findAllWithMemberByHeadId(Integer headId);
-
-    List<MemberDetail> findAllWithMemberByPlaceId(Integer placeId);
-
+    List<MemberDetail> findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(String nickname, String placeName, Integer placeId, Integer headId);
 }
