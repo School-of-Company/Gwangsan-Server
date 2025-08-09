@@ -43,8 +43,11 @@ public class MemberController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<FindAllUserInfoResponse>> findAllUserInfo() {
-        List<FindAllUserInfoResponse> response = findAllUserInfoService.execute();
+    public ResponseEntity<List<FindAllUserInfoResponse>> findAllUserInfo(
+            @RequestParam(name = "nickname", required = false) String nickname,
+            @RequestParam(name = "placeName", required = false) String placeName
+    ) {
+        List<FindAllUserInfoResponse> response = findAllUserInfoService.execute(nickname, placeName);
         return ResponseEntity.ok(response);
     }
 
