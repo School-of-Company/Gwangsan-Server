@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 import static team.startup.gwangsan.domain.member.entity.QMember.member;
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
+import static team.startup.gwangsan.domain.place.entity.QHead.head;
+import static team.startup.gwangsan.domain.place.entity.QPlace.place;
 
 @Repository
 @RequiredArgsConstructor
@@ -34,14 +36,6 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 .where(memberDetail.id.eq(id))
                 .fetchOne())
                 .orElseThrow(NotFoundMemberException::new);
-    }
-
-    @Override
-    public List<MemberDetail> findAllWithMember() {
-        return queryFactory
-                .selectFrom(memberDetail)
-                .join(memberDetail.member).fetchJoin()
-                .fetch();
     }
 
     @Override
@@ -74,25 +68,38 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
     }
 
     @Override
-    public List<MemberDetail> findAllWithMemberByHeadId(Integer headId) {
+    public List<MemberDetail> findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(String nickname, String placeName, Integer placeId, Integer headId) {
         return queryFactory
                 .selectFrom(memberDetail)
                 .join(memberDetail.member, member).fetchJoin()
-                .where(memberDetail.place.head.id.eq(headId))
+                .join(memberDetail.place, place).fetchJoin()
+                .join(place.head, head).fetchJoin()
+                .where(
+                        nicknameEq(nickname),
+                        placeNameEq(placeName),
+                        placeIdEq(placeId),
+                        headIdEq(headId)
+                )
                 .fetch();
     }
-
-    @Override
-    public List<MemberDetail> findAllWithMemberByPlaceId(Integer placeId) {
-        return queryFactory
-                .selectFrom(memberDetail)
-                .join(memberDetail.member, member).fetchJoin()
-                .where(memberDetail.place.id.eq(placeId))
-                .fetch();
-    }
-
 
     private BooleanExpression roleIn(List<MemberRole> roles) {
-        return roles != null ? memberDetail.member.role.in(roles) : null;
+        return roles != null ? member.role.in(roles) : null;
+    }
+
+    private BooleanExpression nicknameEq(String nickname) {
+        return nickname != null ? member.nickname.eq(nickname) : null;
+    }
+
+    private BooleanExpression placeNameEq(String placeName) {
+        return placeName != null ? place.name.eq(placeName) : null;
+    }
+
+    private BooleanExpression placeIdEq(Integer placeId) {
+        return placeId != null ? place.id.eq(placeId) : null;
+    }
+
+    private BooleanExpression headIdEq(Integer headId) {
+        return headId != null ? head.id.eq(headId) : null;
     }
 }
