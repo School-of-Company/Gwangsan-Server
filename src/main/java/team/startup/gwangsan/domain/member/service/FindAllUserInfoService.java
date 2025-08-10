@@ -5,6 +5,6 @@ import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUse
 import java.util.List;
 
 public interface FindAllUserInfoService {
-    List<FindAllUserInfoResponse> execute();
+    List<FindAllUserInfoResponse> execute(String nickname, String placeName);
 }
 
