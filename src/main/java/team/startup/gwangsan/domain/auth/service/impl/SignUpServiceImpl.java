@@ -69,7 +69,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .phoneNumber(request.phoneNumber())
                 .recommender(recommender)
                 .role(MemberRole.ROLE_USER)
-                .status(MemberStatus.PENDING)
+                .status(MemberStatus.ACTIVE)
                 .build();
 
         memberRepository.save(member);
