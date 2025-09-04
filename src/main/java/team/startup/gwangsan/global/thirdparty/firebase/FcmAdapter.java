@@ -1,13 +1,20 @@
 package team.startup.gwangsan.global.thirdparty.firebase;
 
 import com.google.firebase.messaging.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.notification.NotificationPort;
 
 import java.util.List;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class FcmAdapter implements NotificationPort {
+
+    private final RetryTemplate retryTemplate;
 
     @Override
     public void sendNotification(List<String> deviceTokens, String title, String body) {
@@ -18,7 +25,14 @@ public class FcmAdapter implements NotificationPort {
                 .setAndroidConfig(createAndroidConfig())
                 .build();
 
-        FirebaseMessaging.getInstance().sendEachForMulticastAsync(message);
+        try {
+            retryTemplate.execute(context -> {
+                FirebaseMessaging.getInstance().sendEachForMulticast(message);
+                return null;
+            });
+        } catch (FirebaseMessagingException e) {
+            log.error("FCM 알림 보내기 실패했습니다. : {}", e.getMessage());
+        }
     }
 
     private Notification createNotification(String title, String body) {
