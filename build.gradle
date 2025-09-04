@@ -74,6 +74,9 @@ dependencies {
 
 	// gson
 	implementation 'com.google.code.gson:gson:2.8.9'
+
+    // retry
+    implementation("org.springframework.retry:spring-retry")
 }
 
 tasks.named('test') {
