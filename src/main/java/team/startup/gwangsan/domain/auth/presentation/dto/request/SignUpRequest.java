@@ -11,7 +11,7 @@ public record SignUpRequest(
         @NotBlank
         String name,
 
-        @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
+        //@Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
         String nickname,
 
         @NotBlank
