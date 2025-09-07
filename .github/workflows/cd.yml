@@ -44,12 +44,35 @@ jobs:
           docker build -t ${{ env.DOCKERHUB_REPOSITORY }}:$IMAGE_TAG .
           docker push ${{ env.DOCKERHUB_REPOSITORY }}:$IMAGE_TAG
       
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: gsmsv-1.yujun.kr
+          username: ubuntu
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 36657
+          script: |
+            docker pull ${{ env.DOCKERHUB_REPOSITORY }}:latest
+            
+            docker stop gwangsan-container || true
+            docker rm gwangsan-container || true
+            
+            docker run -d \
+              --name gwangsan-container \
+              -p 8080:8080 \
+              -e TZ=Asia/Seoul \
+              --env-file .env \
+              --net gwangsan-net \
+              ${{ env.DOCKERHUB_REPOSITORY }}:latest
+            
+            docker system prune -f
+      
       - name: ✅ Discord Notification - 배포 성공
         if: success()
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{"content": "✅ Docker image build and push succeeded!"}' \
+               -d '{"content": "✅ Docker image build, push and deployment succeeded!"}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
       
       - name: ❌ Discord Notification - 배포 실패
@@ -57,5 +80,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{"content": "❌ Docker image build and push failed."}' \
+               -d '{"content": "❌ Docker image build, push or deployment failed."}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
