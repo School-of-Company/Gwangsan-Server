@@ -54,11 +54,11 @@ jobs:
           script: |
             docker pull ${{ env.DOCKERHUB_REPOSITORY }}:latest
             
-            docker stop gwangsan-app || true
-            docker rm gwangsan-app || true
+            docker stop gwangsan-container || true
+            docker rm gwangsan-container || true
             
             docker run -d \
-              --name gwangsan-app \
+              --name gwangsan-container \
               -p 8080:8080 \
               -e TZ=Asia/Seoul \
               --env.file .env \
