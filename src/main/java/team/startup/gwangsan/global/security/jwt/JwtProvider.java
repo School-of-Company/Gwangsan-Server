@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.global.redis.RedisUtil;
 import team.startup.gwangsan.global.security.exception.ExpiredTokenException;
 import team.startup.gwangsan.global.security.exception.InvalidTokenException;
 
@@ -21,6 +22,7 @@ public class JwtProvider {
     public static final long REFRESH_TOKEN_TIME = 60L * 60 * 24 * 7;     // 7일
 
     private final JwtProperties jwtProperties;
+    private final RedisUtil redisUtil;
 
     private Key getAccessKey() {
         return Keys.hmacShaKeyFor(jwtProperties.getAccessSecret().getBytes(StandardCharsets.UTF_8));
@@ -33,7 +35,7 @@ public class JwtProvider {
     public boolean validateAccessToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getAccessKey()).build().parseClaimsJws(token);
-            return true;
+            return !redisUtil.hasKeyBlackList(token);
         } catch (ExpiredJwtException e) {
             throw new ExpiredTokenException();
         } catch (Exception e) {
@@ -44,7 +46,7 @@ public class JwtProvider {
     public boolean validateRefreshToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getRefreshKey()).build().parseClaimsJws(token);
-            return true;
+            return !redisUtil.hasKeyBlackList(token);
         } catch (ExpiredJwtException e) {
             throw new ExpiredTokenException();
         } catch (Exception e) {
