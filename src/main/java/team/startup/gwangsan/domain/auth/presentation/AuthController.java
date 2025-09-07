@@ -1,5 +1,6 @@
 package team.startup.gwangsan.domain.auth.presentation;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,9 +57,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/signout")
-    public ResponseEntity<Void> signout() {
-        signOutService.execute();
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> signout(HttpServletRequest request) {
+        String accessToken = request.getHeader("Authorization").substring(7);
+        signOutService.execute(accessToken);
+        return ResponseEntity.noContent().build();
     }
 }
 
