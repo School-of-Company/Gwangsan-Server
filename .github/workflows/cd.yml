@@ -60,6 +60,9 @@ jobs:
             docker run -d \
               --name gwangsan-app \
               -p 8080:8080 \
+              -e TZ=Asia/Seoul \
+              --env.file .env \
+              --net gwangsan-net \
               ${{ env.DOCKERHUB_REPOSITORY }}:latest
             
             docker system prune -f
