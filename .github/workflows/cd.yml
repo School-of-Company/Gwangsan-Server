@@ -1,7 +1,7 @@
 name: CI/CD
 on:
   push:
-    branches: ["Updata/171-change-auth"]
+    branches: ["develop"]
  
 env:
   DOCKERHUB_REPOSITORY: 2aew0n/gwangsan
@@ -82,3 +82,4 @@ jobs:
                -X POST \
                -d '{"content": "❌ Docker image build, push or deployment failed."}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
+
