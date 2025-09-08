@@ -33,7 +33,7 @@ jobs:
       - name: Download Firebase service account from S3
         run: |
           mkdir -p src/main/resources
-          aws s3 cp s3://my-bucket-name/firebase-service-account.json src/main/resources/firebase-service-account.json
+          aws s3 cp s3://gwangsan-githubaction/firebase-service-account.json src/main/resources/firebase-service-account.json
       
       - name: Build with Gradle
         run: ./gradlew clean build -x test
@@ -89,3 +89,4 @@ jobs:
                -X POST \
                -d '{"content": "❌ Docker image build, push or deployment failed."}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
+
