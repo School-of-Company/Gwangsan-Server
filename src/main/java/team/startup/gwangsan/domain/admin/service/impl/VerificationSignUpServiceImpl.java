@@ -28,7 +28,7 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
     private final ValidatePlaceUtil validatePlaceUtil;
     private final WithdrawalRecordRepository withdrawalRecordRepository;
 
-    private static final int SIGNUP_GWANGSAN_REWARD = 5000;
+    private static final int SIGNUP_GWANGSAN_REWARD = 10000;
 
     @Override
     @Transactional
