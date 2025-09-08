@@ -52,7 +52,7 @@ public class Member {
     private LocalDateTime joinedAt;
 
     @Builder
-    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status, LocalDateTime joinedAt) {
+    public Member(String name, String nickname, String phoneNumber, String password, Member recommender, MemberRole role, MemberStatus status) {
         this.name = name;
         this.nickname = nickname;
         this.password = password;
@@ -60,7 +60,6 @@ public class Member {
         this.recommender = recommender;
         this.role = role;
         this.status = status;
-        this.joinedAt = joinedAt;
     }
 
     public void updateNickname(String nickname) {
