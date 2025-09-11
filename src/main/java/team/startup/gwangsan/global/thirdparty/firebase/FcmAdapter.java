@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.notification.NotificationPort;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 
 import java.util.List;
 
@@ -17,12 +18,14 @@ public class FcmAdapter implements NotificationPort {
     private final RetryTemplate retryTemplate;
 
     @Override
-    public void sendNotification(List<String> deviceTokens, String title, String body) {
+    public void sendNotification(List<String> deviceTokens, String title, String body, NotificationType type, Long sourceId) {
         MulticastMessage message = MulticastMessage.builder()
                 .addAllTokens(deviceTokens)
                 .setNotification(createNotification(title, body))
                 .setApnsConfig(createApnsConfig())
                 .setAndroidConfig(createAndroidConfig())
+                .putData("type", type.name())
+                .putData("id", sourceId.toString())
                 .build();
 
         try {
