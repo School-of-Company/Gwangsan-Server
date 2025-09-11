@@ -5,5 +5,5 @@ import team.startup.gwangsan.domain.notification.entity.constant.NotificationTyp
 import java.util.List;
 
 public interface SendNotificationService {
-    void execute(List<String> deviceTokens, NotificationType type);
+    void execute(List<String> deviceTokens, NotificationType type, Long sourceId);
 }
