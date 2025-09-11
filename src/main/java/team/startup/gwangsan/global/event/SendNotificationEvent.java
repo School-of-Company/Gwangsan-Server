@@ -6,6 +6,7 @@ import java.util.List;
 
 public record SendNotificationEvent(
         List<String> deviceTokens,
-        NotificationType type
+        NotificationType type,
+        Long sourceId
 ) {
 }

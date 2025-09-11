@@ -74,7 +74,8 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
 
             applicationEventPublisher.publishEvent(new SendNotificationEvent(
                     deviceTokens,
-                    NotificationType.CHATTING
+                    NotificationType.CHATTING,
+                    roomId
             ));
         });
 

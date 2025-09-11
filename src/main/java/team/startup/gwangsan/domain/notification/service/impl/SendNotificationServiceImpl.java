@@ -26,11 +26,13 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
     @Override
     @Transactional
-    public void execute(List<String> deviceTokens, NotificationType type) {
+    public void execute(List<String> deviceTokens, NotificationType type, Long sourceId) {
         notificationPort.sendNotification(
                 deviceTokens,
                 GWANGSAN_DEFAULT_TITLE,
-                createBodyByType(type)
+                createBodyByType(type),
+                type,
+                sourceId
         );
     }
 
