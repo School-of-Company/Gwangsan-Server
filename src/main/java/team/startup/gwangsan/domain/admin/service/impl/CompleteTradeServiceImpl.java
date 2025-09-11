@@ -80,7 +80,8 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
 
         applicationEventPublisher.publishEvent(new SendNotificationEvent(
                 deviceTokens,
-                NotificationType.TRADE_COMPLETE
+                NotificationType.TRADE_COMPLETE,
+                productId
         ));
 
         applicationEventPublisher.publishEvent(new CreateAlertEvent(productId, productOwnerDetail.getId(), AlertType.TRADE_COMPLETE));
