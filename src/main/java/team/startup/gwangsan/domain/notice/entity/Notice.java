@@ -44,20 +44,12 @@ public class Notice {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "tbl_notice_target_roles", joinColumns = @JoinColumn(name = "notice_id"))
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private List<MemberRole> targetRoles = new ArrayList<>();
-
-
     @Builder
-    public Notice(String title, String content, Place place, Member member, List<MemberRole> targetRoles) {
+    public Notice(String title, String content, Place place, Member member) {
         this.title = title;
         this.content = content;
         this.place = place;
         this.member = member;
-        this.targetRoles = targetRoles;
     }
 
     public void update(String title, String content) {

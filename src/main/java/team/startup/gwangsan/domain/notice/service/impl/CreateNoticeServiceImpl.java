@@ -56,7 +56,6 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
                 .content(request.content())
                 .place(place)
                 .member(admin)
-                .targetRoles(request.roles())
                 .build();
 
         noticeRepository.save(notice);
@@ -78,9 +77,11 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
             noticeImageRepository.saveAll(noticeImages);
         }
 
-        List<MemberDetail> members = memberDetailRepository.findAllByPlaceAndRoleIn(place, request.roles());
+        List<MemberDetail> members = memberDetailRepository.findAllByPlace(place);
 
-        List<Long> memberIds = members.stream().map(member -> member.getId()).toList();
+        List<Long> memberIds = members.stream()
+                .map(MemberDetail::getId)
+                .toList();
 
         List<String> allDeviceToken  = new ArrayList<>();
 
