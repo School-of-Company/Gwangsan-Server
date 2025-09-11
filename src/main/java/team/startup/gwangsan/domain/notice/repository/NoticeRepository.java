@@ -9,12 +9,12 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-    List<Notice> findByPlaceInAndTargetRolesContainingOrderByIdDesc(List<Place> places, MemberRole role, Pageable pageable);
+    List<Notice> findByPlaceInOrderByIdDesc(List<Place> places, Pageable pageable);
 
-    List<Notice> findByPlaceInAndTargetRolesContainingAndIdLessThanOrderByIdDesc(List<Place> places, MemberRole role, Long lastId, Pageable pageable);
+    List<Notice> findByPlaceInAndIdLessThanOrderByIdDesc(List<Place> places, Long lastId, Pageable pageable);
 
-    List<Notice> findByPlaceAndTargetRolesContainingOrderByIdDesc(Place place, MemberRole role, Pageable pageable);
+    List<Notice> findByPlaceOrderByIdDesc(Place place, Pageable pageable);
 
-    List<Notice> findByPlaceAndTargetRolesContainingAndIdLessThanOrderByIdDesc(Place place, MemberRole role, Long lastId, Pageable pageable);
+    List<Notice> findByPlaceAndIdLessThanOrderByIdDesc(Place place, Long lastId, Pageable pageable);
 
 }
