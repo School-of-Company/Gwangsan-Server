@@ -95,7 +95,8 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
 
         applicationEventPublisher.publishEvent(new SendNotificationEvent(
                 allDeviceToken,
-                NotificationType.NOTICE
+                NotificationType.NOTICE,
+                notice.getId()
         ));
 
         applicationEventPublisher.publishEvent(new CreateAlertMembersEvent(
