@@ -29,8 +29,18 @@ public class FcmAdapter implements NotificationPort {
                 .build();
 
         try {
-            retryTemplate.execute(context -> {
-                FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            retryTemplate.execute(ctx -> {
+                BatchResponse resp = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+                log.info("성공: {}, 실패: {}", resp.getSuccessCount(), resp.getFailureCount());
+                for (int i = 0; i < resp.getResponses().size(); i++) {
+                    var r = resp.getResponses().get(i);
+                    if (!r.isSuccessful()) {
+                        var ex = r.getException();
+                        log.warn("FCM 실패 token={}, code={}, msg={}",
+                                deviceTokens.get(i),
+                                ex.getMessagingErrorCode(), ex.getMessage());
+                    }
+                }
                 return null;
             });
         } catch (FirebaseMessagingException e) {
