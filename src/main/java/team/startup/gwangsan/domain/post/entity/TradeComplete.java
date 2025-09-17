@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
 
 import java.time.LocalDateTime;
 
@@ -28,21 +29,37 @@ public class TradeComplete {
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "buyer_id", referencedColumnName = "member_id", nullable = false)
+    private Member buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "other_member_id", referencedColumnName = "member_id", nullable = false)
-    private Member otherMember;
+    @JoinColumn(name = "seller_id", referencedColumnName = "member_id", nullable = false)
+    private Member seller;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TradeStatus status;
+
     @Builder
-    public TradeComplete(Product product, Member member, Member otherMember) {
+    public TradeComplete(Product product, Member buyer, Member seller, TradeStatus status) {
         this.product = product;
-        this.member = member;
-        this.otherMember = otherMember;
+        this.buyer = buyer;
+        this.seller = seller;
+        this.status = status;
+    }
+
+    public void updateStatus(TradeStatus status) {
+        this.status = status;
+    }
+
+    public void updateCompletedAt() {
+        this.completedAt = LocalDateTime.now();
     }
 }
