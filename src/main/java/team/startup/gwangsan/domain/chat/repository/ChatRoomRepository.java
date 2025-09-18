@@ -5,11 +5,8 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatRoomCustomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatRoomCustomRepository {
-    Optional<ChatRoom> findByProductIdAndMember1AndMember2(Long productId, Member member1, Member member2);
-
-    List<ChatRoom> findAllByMember1AndMember2(Member member1, Member member2);
+    Optional<ChatRoom> findByProductIdAndBuyerAndSeller(Long productId, Member buyer, Member seller);
 }
