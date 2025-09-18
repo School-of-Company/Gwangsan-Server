@@ -82,6 +82,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/post/member/{member_id}").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/post/trade").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/post/reservation/{post_id}").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/post/reservation/{post_id}").authenticated()
 
                                 // notice
                                 .requestMatchers(HttpMethod.GET, "/api/notice").authenticated()
