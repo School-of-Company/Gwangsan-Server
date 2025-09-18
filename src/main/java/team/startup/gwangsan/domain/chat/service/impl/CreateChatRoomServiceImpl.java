@@ -9,9 +9,12 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.CreateChatRoomService;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,19 +33,26 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
                 .orElseThrow(NotFoundProductException::new);
         Member productMember = product.getMember();
 
-        Member member1 = member.getId() < productMember.getId() ? member : productMember;
-        Member member2 = member.getId() < productMember.getId() ? productMember : member;
+        Member buyer;
+        Member seller;
 
+        if (product.getMode() == Mode.GIVER) {
+            buyer = member;
+            seller = productMember;
+        } else {
+            buyer = productMember;
+            seller = member;
+        }
 
-        ChatRoom existsChatRoom = chatRoomRepository.findByProductIdAndMember1AndMember2(productId, member1, member2)
-                .orElse(null);
-        if (existsChatRoom != null) {
-            return new CreateChatRoomResponse(existsChatRoom.getId());
+        Optional<ChatRoom> existsChatRoom = chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller);
+
+        if (existsChatRoom.isPresent()) {
+            return new CreateChatRoomResponse(existsChatRoom.get().getId());
         }
 
         ChatRoom chatRoom = ChatRoom.builder()
-                .member1(member1)
-                .member2(member2)
+                .buyer(buyer)
+                .seller(seller)
                 .isActive(true)
                 .product(product)
                 .build();
