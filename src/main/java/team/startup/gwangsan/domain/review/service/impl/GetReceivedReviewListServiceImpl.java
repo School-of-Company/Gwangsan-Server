@@ -28,7 +28,7 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
         return reviewRepository.findAllByReviewed(reviewed).stream()
                 .map(review -> {
-                    List<GetImageResponse> images = productImageRepository.findAllByProduct(review.getProduct()).stream()
+                    List<GetImageResponse> images = productImageRepository.findAllByProductId(review.getProduct().getId()).stream()
                             .map(pi -> new GetImageResponse(
                                     pi.getImage().getId(),
                                     pi.getImage().getImageUrl()
