@@ -13,7 +13,5 @@ public interface MemberDetailCustomRepository {
 
     Map<Long, String> findPlaceNameMapByMemberIds(Set<Long> memberIds);
 
-    List<MemberDetail> findAllByPlaceAndRoleIn(Place place, List<MemberRole> roles);
-
     List<MemberDetail> findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(String nickname, String placeName, Integer placeId, Integer headId);
 }
