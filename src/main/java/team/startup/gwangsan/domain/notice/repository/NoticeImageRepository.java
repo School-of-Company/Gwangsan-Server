@@ -3,15 +3,10 @@ package team.startup.gwangsan.domain.notice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
+import team.startup.gwangsan.domain.notice.repository.custom.NoticeImageCustomRepository;
 
-import java.util.List;
-
-public interface NoticeImageRepository extends JpaRepository<NoticeImage, Long> {
+public interface NoticeImageRepository extends JpaRepository<NoticeImage, Long>, NoticeImageCustomRepository {
     void deleteByNoticeIdAndImageId(Long noticeId, Long imageId);
-
-    List<NoticeImage> findAllByNotice(Notice notice);
-
-    List<NoticeImage> findAllByNoticeIdIn(List<Long> noticeIds);
 
     void deleteAllByNotice(Notice notice);
 }
