@@ -19,11 +19,18 @@ public class ProductImageCustomRepositoryImpl implements ProductImageCustomRepos
     @Override
     public List<ProductImage> findProductImageByProductIdIn(List<Long> productIds) {
         return queryFactory
-                .selectFrom(productImage).distinct()
+                .selectFrom(productImage)
                 .join(productImage.image).fetchJoin()
-                .where(
-                        productImage.product.id.in(productIds)
-                )
+                .where(productImage.product.id.in(productIds))
+                .fetch();
+    }
+
+    @Override
+    public List<ProductImage> findAllByProductId(Long productId) {
+        return queryFactory
+                .selectFrom(productImage)
+                .join(productImage.image).fetchJoin()
+                .where(productImage.product.id.eq(productId))
                 .fetch();
     }
 }
