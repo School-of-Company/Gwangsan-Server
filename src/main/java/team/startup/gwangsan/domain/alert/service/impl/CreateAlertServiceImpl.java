@@ -10,7 +10,6 @@ import team.startup.gwangsan.domain.alert.service.CreateAlertService;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
@@ -62,7 +61,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 TradeComplete tradeComplete = tradeCompleteRepository.findById(sourceId)
                         .orElseThrow(NotFoundTradeCompleteException::new);
 
-                saveAlert(tradeComplete.getProduct().getId(), alertType, member, tradeComplete.getMember(), tradeComplete.getProduct().getTitle(), tradeComplete.getMember().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT);
+                saveAlert(tradeComplete.getProduct().getId(), alertType, member, tradeComplete.getBuyer(), tradeComplete.getProduct().getTitle(), tradeComplete.getBuyer().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT);
             }
 
             case RECOMMENDER -> {
