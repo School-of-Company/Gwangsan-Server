@@ -29,6 +29,8 @@ public class PostController {
     private final DeleteProductByIdService deleteProductByIdService;
     private final FindProductsByMemberIdService findProductsByMemberIdService;
     private final RequestTradeCompleteService requestTradeCompleteService;
+    private final ReservationProductService reservationProductService;
+    private final DeleteReservationProductService deleteReservationProductService;
 
     @PostMapping
     public ResponseEntity<Void> createProduct(@RequestBody @Valid CreateProductRequest request) {
@@ -102,6 +104,18 @@ public class PostController {
     @PostMapping("/trade")
     public ResponseEntity<Void> tradeRequest(@RequestBody @Valid RequestTradeCompleteRequest request) {
         requestTradeCompleteService.execute(request.productId(), request.otherMemberId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/reservation/{product_id}")
+    public ResponseEntity<Void> reservation(@PathVariable("product_id") Long productId) {
+        requestTradeCompleteService.execute(productId, null);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/reservation/{product_id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("product_id") Long productId) {
+        deleteReservationProductService.execute(productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
