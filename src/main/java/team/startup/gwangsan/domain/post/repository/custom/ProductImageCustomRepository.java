@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ProductImageCustomRepository {
     List<ProductImage> findProductImageByProductIdIn(List<Long> productIds);
+
+    List<ProductImage> findAllByProductId(Long productId);
 }
