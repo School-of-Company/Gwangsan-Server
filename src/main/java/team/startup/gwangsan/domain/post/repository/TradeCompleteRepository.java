@@ -5,11 +5,10 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.post.repository.custom.TradeCompleteCustomRepository;
 
 import java.util.Optional;
 
-public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long>, TradeCompleteCustomRepository {
+public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long> {
     boolean existsByProductAndSeller(Product product, Member seller);
 
     boolean existsByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus status);
