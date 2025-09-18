@@ -46,25 +46,13 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         memberDetail.place.name
                 ))
                 .from(memberDetail)
-                .where(memberDetail.member.id.in(memberIds))
+                .where(memberDetail.id.in(memberIds))
                 .fetch()
                 .stream()
                 .collect(Collectors.toMap(
-                        tuple -> tuple.get(memberDetail.member.id),
+                        tuple -> tuple.get(memberDetail.id),
                         tuple -> tuple.get(memberDetail.place.name)
                 ));
-    }
-
-    @Override
-    public List<MemberDetail> findAllByPlaceAndRoleIn(Place place, List<MemberRole> roles) {
-        return queryFactory
-                .selectFrom(memberDetail)
-                .join(memberDetail.member, member).fetchJoin()
-                .where(
-                        memberDetail.place.eq(place),
-                        roleIn(roles)
-                )
-                .fetch();
     }
 
     @Override
@@ -81,10 +69,6 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         headIdEq(headId)
                 )
                 .fetch();
-    }
-
-    private BooleanExpression roleIn(List<MemberRole> roles) {
-        return roles != null ? member.role.in(roles) : null;
     }
 
     private BooleanExpression nicknameEq(String nickname) {
