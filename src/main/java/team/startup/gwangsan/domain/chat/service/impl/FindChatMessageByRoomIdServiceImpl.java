@@ -38,12 +38,10 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);
 
-        Member otherMember = chatRoom.getMember1() == member ? chatRoom.getMember2() : chatRoom.getMember1();
+        Member buyer = chatRoom.getBuyer();
+        Member seller = chatRoom.getSeller();
 
-        Member member1 = member.getId() < otherMember.getId() ? member : otherMember;
-        Member member2 = member.getId() < otherMember.getId() ? otherMember : member;
-
-        List<ChatRoom> chatRooms = chatRoomRepository.findAllByMember1AndMember2(member1, member2);
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByBuyerAndSeller(buyer, seller);
 
         List<Long> chatRoomIds = chatRooms.stream().map(ChatRoom::getId).toList();
 
