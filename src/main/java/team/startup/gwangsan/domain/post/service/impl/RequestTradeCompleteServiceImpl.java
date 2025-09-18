@@ -1,11 +1,10 @@
 package team.startup.gwangsan.domain.post.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
@@ -13,28 +12,25 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.exception.CannotCompleteTradeException;
-import team.startup.gwangsan.domain.post.exception.CannotSelectSelfException;
-import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
+import team.startup.gwangsan.domain.post.exception.*;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
-import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
 @RequiredArgsConstructor
 public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteService {
 
-    private final ChatMessageRepository chatMessageRepository;
     private final MemberUtil memberUtil;
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
-    private final TradeCompleteRepository tradeCompleteRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final TradeCompleteRepository tradeCompleteRepository;
 
     @Override
     @Transactional
@@ -43,29 +39,23 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         validateNotSelfTrade(member.getId(), otherMemberId);
 
-        Product product = findProductById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(NotFoundProductException::new);
         validateProductStatus(product);
 
-        Member otherMember = findMemberById(otherMemberId);
+        Member otherMember = memberRepository.findById(otherMemberId)
+                .orElseThrow(NotFoundMemberException::new);
 
-        ChatRoom chatRoom = findChatRoom(productId, member, otherMember);
-        //validateChatExists(chatRoom, otherMember.getId());
-        validateNotAlreadyRequested(product, member, otherMember);
+        boolean isBuyer = isBuyer(product, member);
+        Member buyer  = isBuyer ? member    : otherMember;
+        Member seller = isBuyer ? otherMember: member;
 
-        TradeComplete tradeComplete = TradeComplete.builder()
-                .product(product)
-                .member(member)
-                .otherMember(otherMember)
-                .build();
+        ChatRoom chatRoom = findChatRoom(product, buyer, seller);
+        validateChatExists(chatRoom, member.getId());
 
-        saveTradeComplete(tradeComplete);
+        if (isBuyer) handleBuyerTradeCompletion(product, buyer, seller);
+        else         handleSellerTradeCompletion(product, seller, buyer);
 
-        notifyIfMutualComplete(productId, member, otherMember, product.getMember());
-
-        applicationEventPublisher.publishEvent(new CreateAlertEvent(
-                tradeComplete.getId(),
-                otherMemberId,
-                team.startup.gwangsan.domain.alert.entity.constant.AlertType.OTHER_MEMBER_TRADE_COMPLETE));
     }
 
     private void validateNotSelfTrade(Long memberId, Long otherMemberId) {
@@ -74,74 +64,56 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private Product findProductById(Long productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(NotFoundProductException::new);
-    }
-
     private void validateProductStatus(Product product) {
         if (product.getStatus() == ProductStatus.COMPLETED) {
-            throw new CannotCompleteTradeException();
+            throw new TradeAlreadyCompleteException();
         }
     }
 
-    private Member findMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(NotFoundMemberException::new);
+    private ChatRoom findChatRoom(Product product, Member buyer, Member seller) {
+        return chatRoomRepository.findByProductIdAndBuyerAndSeller(product.getId(), buyer, seller)
+                .orElseThrow(NotFoundChatRoomException::new);
     }
 
-    private ChatRoom findChatRoom(Long productId, Member member, Member otherMember) {
-        Member member1 = member.getId() < otherMember.getId() ? member : otherMember;
-        Member member2 = member.getId() < otherMember.getId() ? otherMember : member;
-
-        return chatRoomRepository.findByProductIdAndMember1AndMember2(productId, member1, member2)
-                .orElseThrow(CannotCompleteTradeException::new);
-    }
-
-    private void validateChatExists(ChatRoom room, Long otherMemberId) {
-        boolean hasChat = chatMessageRepository.existsByRoomAndSenderId(room, otherMemberId);
+    private void validateChatExists(ChatRoom room, Long memberId) {
+        boolean hasChat = chatMessageRepository.existsByRoomAndSenderId(room, memberId);
         if (!hasChat) {
-            throw new CannotCompleteTradeException();
+            throw new TradeCompleteWithoutChattingException();
         }
     }
 
-    private void validateNotAlreadyRequested(Product product, Member member, Member otherMember) {
-        boolean alreadyRequested = tradeCompleteRepository.existsByProductAndMemberAndOtherMember(
-                product, member, otherMember
-        );
-        if (alreadyRequested) {
-            throw new CannotCompleteTradeException();
+    private boolean isBuyer(Product product, Member member) {
+        if (product.getMode() == Mode.GIVER) {
+            return !product.getMember().equals(member);
+        } else {
+            return product.getMember().equals(member);
         }
     }
 
-    private void saveTradeComplete(TradeComplete tradeComplete) {
-        tradeCompleteRepository.save(tradeComplete);
+    private void handleBuyerTradeCompletion(Product product, Member buyer, Member seller) {
+        TradeComplete pending = tradeCompleteRepository
+                .findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING)
+                .orElseThrow(SellerNotTradeCompleteException::new);
+
+        product.updateStatus(ProductStatus.COMPLETED);
+        pending.updateStatus(TradeStatus.COMPLETED);
+        pending.updateCompletedAt();
     }
 
-    private void notifyIfMutualComplete(Long productId, Member member, Member otherMember, Member productMember) {
-        long count = tradeCompleteRepository.countMutualTradeComplete(
-                productId, member.getId(), otherMember.getId());
+    private void handleSellerTradeCompletion(Product product, Member seller, Member buyer) {
+        boolean existsTradeComplete = tradeCompleteRepository
+                .existsByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING);
 
-        if (count == 2) {
-            Member sender;
-            Member receiver;
-
-            if (member.getId().equals(productMember.getId())) {
-                sender = member;
-                receiver = otherMember;
-            } else if (otherMember.getId().equals(productMember.getId())) {
-                sender = otherMember;
-                receiver = member;
-            } else {
-                throw new CannotCompleteTradeException();
-            }
-
-            applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
-                    AlertType.TRADE_COMPLETE,
-                    productId,
-                    sender.getId(),
-                    receiver.getId()
-            ));
+        if (existsTradeComplete) {
+            throw new TradeAlreadyCompleteRequestException();
         }
+        TradeComplete newTradeComplete = TradeComplete.builder()
+                .product(product)
+                .buyer(buyer)
+                .seller(seller)
+                .status(TradeStatus.PENDING)
+                .build();
+
+        tradeCompleteRepository.save(newTradeComplete);
     }
 }
