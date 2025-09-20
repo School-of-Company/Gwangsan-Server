@@ -20,12 +20,12 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ChatMessage> findChatMessageByRoomIdsWithCursorPaging(List<Long> roomIds, LocalDateTime lastCreatedAt, Long lastMessageId, int limit) {
+    public List<ChatMessage> findChatMessageByRoomIdWithCursorPaging(Long roomId, LocalDateTime lastCreatedAt, Long lastMessageId, int limit) {
         return queryFactory
                 .selectFrom(chatMessage)
                 .join(chatMessage.sender, member).fetchJoin()
                 .where(
-                        chatMessage.room.id.in(roomIds),
+                        chatMessage.room.id.eq(roomId),
                         buildCursorCondition(lastCreatedAt, lastMessageId)
                 )
                 .orderBy(chatMessage.createdAt.desc(), chatMessage.id.desc())
