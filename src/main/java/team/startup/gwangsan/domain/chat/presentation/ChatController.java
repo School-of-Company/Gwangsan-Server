@@ -37,13 +37,13 @@ public class ChatController {
     }
 
     @GetMapping("/{room_id}")
-    public ResponseEntity<List<GetChatMessageResponse>> getChatMessage(
+    public ResponseEntity<GetChatMessagesResponse> getChatMessage(
             @PathVariable("room_id") Long roomId,
             @RequestParam(name = "lastCreatedAt", required = false) LocalDateTime lastCreatedAt,
             @RequestParam(name = "lastMessageId", required = false) Long lastMessageId,
             @RequestParam(name = "limit", required = false, defaultValue = "20") int limit
     ) {
-        List<GetChatMessageResponse> responses = findChatMessageByRoomIdService.execute(roomId, lastCreatedAt, lastMessageId, limit);
+        GetChatMessagesResponse responses = findChatMessageByRoomIdService.execute(roomId, lastCreatedAt, lastMessageId, limit);
         return ResponseEntity.ok(responses);
     }
 
