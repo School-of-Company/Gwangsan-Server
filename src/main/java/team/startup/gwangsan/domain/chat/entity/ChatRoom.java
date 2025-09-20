@@ -31,23 +31,23 @@ public class ChatRoom {
     private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member1_id")
-    private Member member1;
+    @JoinColumn(name = "buyer_id")
+    private Member buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member2_id")
-    private Member member2;
+    @JoinColumn(name = "seller_id")
+    private Member seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
     @Builder
-    public ChatRoom(LocalDateTime createdAt, Boolean isActive, Member member1, Member member2, Product product) {
+    public ChatRoom(LocalDateTime createdAt, Boolean isActive, Member buyer, Member seller, Product product) {
         this.createdAt = createdAt;
         this.isActive = isActive;
-        this.member1 = member1;
-        this.member2 = member2;
+        this.buyer = buyer;
+        this.seller = seller;
         this.product = product;
     }
 }

@@ -8,16 +8,16 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
-import team.startup.gwangsan.domain.chat.entity.QChatMessage;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomMemberResponse;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatRoomCustomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.QMember;
 
 import java.util.List;
 import java.util.Optional;
 
+import team.startup.gwangsan.domain.chat.entity.QChatMessage;
+import team.startup.gwangsan.domain.member.entity.QMember;
 import static team.startup.gwangsan.domain.chat.entity.QChatMessage.chatMessage;
 import static team.startup.gwangsan.domain.chat.entity.QChatRoom.chatRoom;
 
@@ -29,13 +29,13 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
 
     @Override
     public Optional<ChatRoom> findChatRoomByRoomId(Long roomId) {
-        QMember member1 = new QMember("member1");
-        QMember member2 = new QMember("member2");
+        QMember buyer = new QMember("buyer");
+        QMember seller = new QMember("seller");
 
         return Optional.ofNullable(queryFactory
                 .selectFrom(chatRoom)
-                .join(chatRoom.member1, member1).fetchJoin()
-                .join(chatRoom.member2, member2).fetchJoin()
+                .join(chatRoom.buyer, buyer).fetchJoin()
+                .join(chatRoom.seller, seller).fetchJoin()
                 .where(chatRoom.id.eq(roomId))
                 .fetchOne());
     }
@@ -47,7 +47,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         .selectFrom(chatRoom)
                         .where(
                                 chatRoom.product.id.eq(productId),
-                                chatRoom.member1.eq(member).or(chatRoom.member2.eq(member))
+                                chatRoom.buyer.eq(member).or(chatRoom.seller.eq(member))
                         )
                         .fetchFirst()
         );
@@ -58,8 +58,8 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         QChatMessage latestMessage = QChatMessage.chatMessage;
         QChatMessage subMessage = new QChatMessage("subMessage");
         QChatMessage unreadMessage = new QChatMessage("unreadMessage");
-        QMember member1 = new QMember("member1");
-        QMember member2 = new QMember("member2");
+        QMember buyer = new QMember("buyer");
+        QMember seller = new QMember("seller");
 
         JPQLQuery<Long> latestMessageIdSubQuery = JPAExpressions
                 .select(subMessage.id.max())
@@ -83,13 +83,13 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         chatRoom.id,
                         Projections.constructor(GetRoomMemberResponse.class,
                                 new CaseBuilder()
-                                        .when(chatRoom.member1.id.eq(memberId))
-                                        .then(chatRoom.member2.id)
-                                        .otherwise(chatRoom.member1.id),
+                                        .when(chatRoom.buyer.id.eq(memberId))
+                                        .then(chatRoom.seller.id)
+                                        .otherwise(chatRoom.buyer.id),
                                 new CaseBuilder()
-                                        .when(chatRoom.member1.id.eq(memberId))
-                                        .then(chatRoom.member2.nickname)
-                                        .otherwise(chatRoom.member1.nickname)),
+                                        .when(chatRoom.buyer.id.eq(memberId))
+                                        .then(chatRoom.seller.nickname)
+                                        .otherwise(chatRoom.buyer.nickname)),
                         latestMessage.id,
                         latestMessage.content,
                         latestMessage.messageType,
@@ -100,10 +100,10 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .from(chatRoom)
                 .leftJoin(latestMessage)
                 .on(latestMessage.id.eq(latestMessageIdSubQuery))
-                .join(chatRoom.member1, member1)
-                .join(chatRoom.member2, member2)
+                .join(chatRoom.buyer, buyer)
+                .join(chatRoom.seller, seller)
                 .where(chatRoom.isActive.isTrue()
-                        .and(chatRoom.member1.id.eq(memberId).or(chatRoom.member2.id.eq(memberId))))
+                        .and(chatRoom.buyer.id.eq(memberId).or(chatRoom.seller.id.eq(memberId))))
                 .orderBy(latestMessage.createdAt.desc().nullsLast())
                 .groupBy(chatRoom.id)
                 .fetch();

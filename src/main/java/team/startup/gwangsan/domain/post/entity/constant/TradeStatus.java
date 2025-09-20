@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.post.entity.constant;
 
-public enum ProductStatus {
-    ONGOING,
+public enum TradeStatus {
+    PENDING,
     COMPLETED,
-    RESERVATION
+    CANCELLED,
 }

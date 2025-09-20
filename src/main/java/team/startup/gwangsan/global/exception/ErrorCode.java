@@ -40,6 +40,13 @@ public enum ErrorCode {
     CANNOT_COMPLETE_TRADE(400, "거래 완료를 할 수 없습니다."),
     CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
     NOT_FOUND_TRADE_COMPLETE(404, "거래 완료 요청을 찾을 수 없습니다."),
+    TRADE_ALREADY_COMPLETE(409, "이미 거래 완료된 상품입니다."),
+    TRADE_ALREADY_COMPLETE_REQUEST(409, "이미 거래 완료 요청한 상품입니다."),
+    TRADE_COMPLETE_WITHOUT_CHATTING(400, "채팅을 하지 않은 상품은 거래 완료할 수 없습니다."),
+    SELLER_NOT_TRADE_COMPLETED(400, "아직 판매자가 거래 완료를 하지 않았습니다."),
+    PRODUCT_NOT_ONGOING(400, "진행 중인 상품만 예약할 수 있습니다."),
+    PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
+    PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),

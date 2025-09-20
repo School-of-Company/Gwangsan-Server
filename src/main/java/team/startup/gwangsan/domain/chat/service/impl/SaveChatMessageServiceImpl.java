@@ -65,7 +65,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
 
-        Member otherMember = member.getId().equals(chatRoom.getMember1().getId()) ? chatRoom.getMember2() : chatRoom.getMember1();
+        Member otherMember = member.getId().equals(chatRoom.getBuyer().getId()) ? chatRoom.getSeller() : chatRoom.getBuyer();
 
         Optional<DeviceToken> optionalToken = deviceTokenRepository.findByUserId(otherMember.getId());
 
@@ -83,7 +83,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
                 chatMessage.getId(),
                 chatMessageImages.stream()
                         .map(mi -> new GetImageResponse(
-                                mi.getId(),
+                                mi.getImage().getId(),
                                 mi.getImage().getImageUrl()
                         ))
                         .toList(),
