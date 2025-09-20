@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
 import java.util.Optional;
 
 public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long> {
-    boolean existsByProductAndSeller(Product product, Member seller);
+    Optional<TradeComplete> findByProductAndSeller(Product product, Member seller);
 
     boolean existsByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus status);
 
