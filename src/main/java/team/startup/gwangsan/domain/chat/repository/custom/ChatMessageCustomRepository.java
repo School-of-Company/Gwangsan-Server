@@ -8,5 +8,5 @@ import java.util.List;
 public interface ChatMessageCustomRepository {
     List<ChatMessage> findChatMessageByRoomIdWithCursorPaging(Long roomId, LocalDateTime lastCreatedAt, Long lastMessageId, int limit);
 
-    List<ChatMessage> findUnreadMessages(Long roomId, Long lastMessageId, Long readerId);
+    void readMessage(Long roomId, Long lastMessageId, Long readerId);
 }
