@@ -17,6 +17,7 @@ import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
+import team.startup.gwangsan.domain.post.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -60,13 +61,15 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .toList();
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
-        boolean sellerCompleted = tradeCompleteRepository.existsByProductAndSeller(product, chatRoom.getSeller());
+        TradeComplete tradeComplete = tradeCompleteRepository.findByProductAndSeller(product, chatRoom.getSeller()).orElse(null);
+        boolean sellerCompleted = tradeComplete != null;
         boolean isCompletable = isSeller ? !sellerCompleted : sellerCompleted;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
                 product.getTitle(),
                 imageResponses,
+                tradeComplete != null ? tradeComplete.getCreatedAt() : null,
                 isSeller,
                 isCompletable
         );
