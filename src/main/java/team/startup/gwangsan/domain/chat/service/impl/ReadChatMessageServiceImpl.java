@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.chat.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@DynamicUpdate
 public class ReadChatMessageServiceImpl implements ReadChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
@@ -21,13 +23,7 @@ public class ReadChatMessageServiceImpl implements ReadChatMessageService {
     @Override
     @Transactional
     public void execute(Long roomId, Long lastMessage) {
-        Member member = memberUtil.getCurrentMember();
-        List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(roomId, lastMessage, member.getId());
-
-        for (ChatMessage chatMessage : unreadMessages) {
-            chatMessage.updateChecked(true);
-        }
-
-        chatMessageRepository.saveAll(unreadMessages);
+        Long readerId = memberUtil.getCurrentMember().getId();
+        chatMessageRepository.readMessage(roomId, lastMessage, readerId);
     }
 }
