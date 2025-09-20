@@ -2,6 +2,8 @@ package team.startup.gwangsan.domain.chat.repository.custom.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
@@ -18,6 +20,8 @@ import static team.startup.gwangsan.domain.member.entity.QMember.member;
 public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public List<ChatMessage> findChatMessageByRoomIdsWithCursorPaging(List<Long> roomIds, LocalDateTime lastCreatedAt, Long lastMessageId, int limit) {
@@ -34,16 +38,20 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
     }
 
     @Override
-    public List<ChatMessage> findUnreadMessages(Long roomId, Long lastMessageId, Long readerId) {
-        return queryFactory
-                .selectFrom(chatMessage)
+    public void readMessage(Long roomId, Long lastMessageId, Long readerId) {
+        long updated = queryFactory
+                .update(chatMessage)
+                .set(chatMessage.checked, true)
                 .where(
                         chatMessage.room.id.eq(roomId),
                         chatMessage.checked.isFalse(),
                         chatMessage.id.loe(lastMessageId),
                         chatMessage.sender.id.ne(readerId)
                 )
-                .fetch();
+                .execute();
+
+        em.flush();
+        em.clear();
     }
 
     private BooleanExpression buildCursorCondition(LocalDateTime lastCreatedAt, Long lastMessageId) {
