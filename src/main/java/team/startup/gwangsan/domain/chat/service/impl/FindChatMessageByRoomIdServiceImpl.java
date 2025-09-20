@@ -25,6 +25,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,15 +62,15 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .toList();
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
-        TradeComplete tradeComplete = tradeCompleteRepository.findByProductAndSeller(product, chatRoom.getSeller()).orElse(null);
-        boolean sellerCompleted = tradeComplete != null;
+        Optional<TradeComplete> tradeComplete = tradeCompleteRepository.findByProductAndSeller(product, chatRoom.getSeller());
+        boolean sellerCompleted = tradeComplete.isPresent();
         boolean isCompletable = isSeller ? !sellerCompleted : sellerCompleted;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
                 product.getTitle(),
                 imageResponses,
-                tradeComplete != null ? tradeComplete.getCreatedAt() : null,
+                tradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
                 isSeller,
                 isCompletable
         );
