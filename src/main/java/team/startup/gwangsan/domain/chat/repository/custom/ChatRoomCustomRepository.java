@@ -13,4 +13,6 @@ public interface ChatRoomCustomRepository {
     Optional<ChatRoom> findByProductIdAndMember(Long productId, Member member);
 
     List<GetRoomsDto> findRoomsByMemberId(Long memberId);
+
+    Optional<ChatRoom> findByRoomIdWithSellerAndProduct(Long roomId);
 }

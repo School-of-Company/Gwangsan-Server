@@ -108,4 +108,16 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .groupBy(chatRoom.id)
                 .fetch();
     }
+
+    @Override
+    public Optional<ChatRoom> findByRoomIdWithSellerAndProduct(Long roomId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(chatRoom)
+                        .join(chatRoom.seller).fetchJoin()
+                        .join(chatRoom.product).fetchJoin()
+                        .where(chatRoom.id.eq(roomId))
+                        .fetchFirst()
+        );
+    }
 }
