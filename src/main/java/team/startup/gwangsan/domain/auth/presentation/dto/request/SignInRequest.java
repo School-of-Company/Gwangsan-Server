@@ -8,8 +8,8 @@ public record SignInRequest(
 
         @NotBlank
         @Pattern(
-                regexp = "^[가-힣a-zA-Z0-9 ()~]+$",
-                message = "닉네임은 한글, 영문, 숫자, 공백, (), ~ 만 입력 가능합니다."
+                regexp = "^[ㄱ-ㅎㅏ-ㅣ가-힣0-9 ()~]+$",
+                message = "닉네임은 한글(초성 포함), 숫자, 공백, (), ~ 만 입력 가능합니다."
         )
         String nickname,
 
