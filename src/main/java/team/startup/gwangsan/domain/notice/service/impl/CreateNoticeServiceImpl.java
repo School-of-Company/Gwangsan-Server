@@ -83,19 +83,14 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
                 .map(MemberDetail::getId)
                 .toList();
 
-        List<String> allDeviceToken  = new ArrayList<>();
-
+        List<DeviceToken> deviceTokens = new ArrayList<>();
         for (Long memberId : memberIds) {
-            DeviceToken deviceToken = deviceTokenRepository.findByUserId(memberId)
-                    .orElse(null);
-
-            if (deviceToken != null && deviceToken.getDeviceToken() != null) {
-                allDeviceToken.add(deviceToken.getDeviceToken());
-            }
+            deviceTokenRepository.findByUserId(memberId)
+                    .ifPresent(deviceTokens::add);
         }
 
         applicationEventPublisher.publishEvent(new SendNotificationEvent(
-                allDeviceToken,
+                deviceTokens,
                 NotificationType.NOTICE,
                 notice.getId()
         ));
