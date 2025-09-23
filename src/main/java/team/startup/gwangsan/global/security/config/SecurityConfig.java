@@ -127,6 +127,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "/api/suspend")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
+                                // trade
+                                .requestMatchers(HttpMethod.GET, "/api/trade/graph/head").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name())
+                                .requestMatchers(HttpMethod.GET, "/api/trade/graph/place").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name(), MemberRole.ROLE_PLACE_ADMIN.name())
+
                                 .anyRequest().hasAnyAuthority(
                                         MemberRole.ROLE_USER.name(),
                                         MemberRole.ROLE_PLACE_ADMIN.name(),
