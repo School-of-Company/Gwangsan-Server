@@ -12,7 +12,8 @@ public record FindNoticeResponse(
         String place,
         LocalDateTime createdAt,
         String role,
-        List<GetImageResponse> images
+        List<GetImageResponse> images,
+        boolean isMe
 ) {
 }
 
