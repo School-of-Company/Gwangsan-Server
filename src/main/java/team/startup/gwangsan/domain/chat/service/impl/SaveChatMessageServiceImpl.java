@@ -18,15 +18,12 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -67,17 +64,10 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
 
         Member otherMember = member.getId().equals(chatRoom.getBuyer().getId()) ? chatRoom.getSeller() : chatRoom.getBuyer();
 
-        Optional<DeviceToken> optionalToken = deviceTokenRepository.findByUserId(otherMember.getId());
-
-        optionalToken.ifPresent(token -> {
-            List<String> deviceTokens = List.of(token.getDeviceToken());
-
-            applicationEventPublisher.publishEvent(new SendNotificationEvent(
-                    deviceTokens,
-                    NotificationType.CHATTING,
-                    roomId
-            ));
-        });
+        deviceTokenRepository.findByUserId(otherMember.getId())
+                .ifPresent(token -> applicationEventPublisher.publishEvent(
+                        new SendNotificationEvent(List.of(token), NotificationType.CHATTING, roomId)
+                ));
 
         return new SaveChatMessageResponse(
                 chatMessage.getId(),
