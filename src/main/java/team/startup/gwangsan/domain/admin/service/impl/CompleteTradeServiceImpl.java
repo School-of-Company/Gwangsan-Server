@@ -71,10 +71,9 @@ public class CompleteTradeServiceImpl implements CompleteTradeService {
         product.updateStatus(ProductStatus.COMPLETED);
         adminAlertRepository.delete(adminAlert);
 
-        List<String> deviceTokens = new ArrayList<>();
+        List<DeviceToken> deviceTokens = new ArrayList<>();
         for (Long memberId : memberIds) {
             deviceTokenRepository.findByUserId(memberId)
-                    .map(DeviceToken::getDeviceToken)
                     .ifPresent(deviceTokens::add);
         }
 
