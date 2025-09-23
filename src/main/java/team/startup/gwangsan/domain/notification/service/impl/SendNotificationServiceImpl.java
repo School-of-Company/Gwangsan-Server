@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.notification.NotificationPort;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.service.SendNotificationService;
 
@@ -26,7 +27,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
 
     @Override
     @Transactional
-    public void execute(List<String> deviceTokens, NotificationType type, Long sourceId) {
+    public void execute(List<DeviceToken> deviceTokens, NotificationType type, Long sourceId) {
         notificationPort.sendNotification(
                 deviceTokens,
                 GWANGSAN_DEFAULT_TITLE,
