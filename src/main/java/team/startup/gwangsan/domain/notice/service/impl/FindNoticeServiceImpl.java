@@ -54,6 +54,8 @@ public class FindNoticeServiceImpl implements FindNoticeService {
                 .map(image -> new GetImageResponse(image.getId(), image.getImageUrl()))
                 .collect(Collectors.toList());
 
+        boolean isMe = notice.getMember().getId().equals(member.getId());
+
         return new FindNoticeResponse(
                 notice.getId(),
                 notice.getTitle(),
@@ -61,7 +63,8 @@ public class FindNoticeServiceImpl implements FindNoticeService {
                 notice.getPlace().getName(),
                 notice.getCreatedAt(),
                 member.getRole().name(),
-                imageResponses
+                imageResponses,
+                isMe
         );
     }
 }
