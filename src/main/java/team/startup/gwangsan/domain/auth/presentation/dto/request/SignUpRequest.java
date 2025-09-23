@@ -11,7 +11,7 @@ public record SignUpRequest(
         @NotBlank
         String name,
 
-        @Pattern(regexp = "^[가-힣]+$", message = "닉네임은 한글만 가능합니다.")
+        @Pattern(regexp = "^[가-힣a-zA-Z0-9 ()~]+$", message = "닉네임은 한글, 영문, 숫자, 공백, (), ~ 만 가능합니다.")
         String nickname,
 
         @NotBlank
@@ -29,7 +29,7 @@ public record SignUpRequest(
         @NotEmpty(message = "특기는 한 개 이상 선택해야 합니다.")
         List<@NotBlank String> specialties,
 
-        @Pattern(regexp = "^[가-힣]+$", message = "추천인은 한글만 가능합니다.")
+        @Pattern(regexp = "^[가-힣a-zA-Z0-9 ()~]+$", message = "추천인은 한글, 영문, 숫자, 공백, (), ~ 만 가능합니다.")
         @NotBlank(message = "추천인은 필수입니다.")
         String recommender,
 
