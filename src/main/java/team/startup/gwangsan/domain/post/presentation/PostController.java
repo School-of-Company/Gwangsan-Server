@@ -109,7 +109,7 @@ public class PostController {
 
     @PatchMapping("/reservation/{product_id}")
     public ResponseEntity<Void> reservation(@PathVariable("product_id") Long productId) {
-        requestTradeCompleteService.execute(productId, null);
+        reservationProductService.execute(productId);
         return ResponseEntity.ok().build();
     }
 
