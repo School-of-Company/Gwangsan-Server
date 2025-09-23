@@ -56,19 +56,28 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
     }
 
     @Override
-    public List<MemberDetail> findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(String nickname, String placeName, Integer placeId, Integer headId) {
+    public List<MemberDetail> findAllByRoleAndNicknameAndPlaceName(Integer placeId, Integer headId, String nickname, String placeName) {
         return queryFactory
                 .selectFrom(memberDetail)
                 .join(memberDetail.member, member).fetchJoin()
                 .join(memberDetail.place, place).fetchJoin()
                 .join(place.head, head).fetchJoin()
                 .where(
+                        roleCondition(placeId, headId),
                         nicknameEq(nickname),
-                        placeNameEq(placeName),
-                        placeIdEq(placeId),
-                        headIdEq(headId)
+                        placeNameEq(placeName)
                 )
                 .fetch();
+    }
+
+    private BooleanExpression roleCondition(Integer placeId, Integer headId) {
+        if (placeId != null) {
+            return place.id.eq(placeId);
+        } else if (headId != null) {
+            return place.head.id.eq(headId);
+        } else {
+            return null;
+        }
     }
 
     private BooleanExpression nicknameEq(String nickname) {
