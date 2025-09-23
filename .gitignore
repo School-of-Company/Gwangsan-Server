@@ -47,3 +47,6 @@ src/main/resources/data.sql
 
 ### FCM ###
 src/main/resources/firebase-service-account.json
+
+### GCP ###
+src/main/resources/google-service-account.json
