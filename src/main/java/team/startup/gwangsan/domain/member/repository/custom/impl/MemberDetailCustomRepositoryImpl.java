@@ -50,7 +50,7 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 .fetch()
                 .stream()
                 .collect(Collectors.toMap(
-                        tuple -> tuple.get(memberDetail.id),
+                        tuple -> tuple.get(memberDetail.member.id),
                         tuple -> tuple.get(memberDetail.place.name)
                 ));
     }
