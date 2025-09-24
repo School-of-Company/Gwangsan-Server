@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.post.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
@@ -8,7 +9,9 @@ import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
@@ -31,11 +34,14 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
+    private final MemberDetailRepository memberDetailRepository;
 
     @Override
     @Transactional
     public void execute(Long productId, Long otherMemberId) {
-        Member member = memberUtil.getCurrentMember();
+        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        MemberDetail memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);
+        Member member = memberDetail.getMember();
 
         validateNotSelfTrade(member.getId(), otherMemberId);
 
@@ -43,18 +49,17 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .orElseThrow(NotFoundProductException::new);
         validateProductStatus(product);
 
-        Member otherMember = memberRepository.findById(otherMemberId)
-                .orElseThrow(NotFoundMemberException::new);
+        MemberDetail otherMemberDetail = memberDetailRepository.findByMemberIdWithMember(otherMemberId);
 
         boolean isBuyer = isBuyer(product, member);
-        Member buyer  = isBuyer ? member    : otherMember;
-        Member seller = isBuyer ? otherMember: member;
+        MemberDetail buyerDetail  = isBuyer ? memberDetail    : otherMemberDetail;
+        MemberDetail sellerDetail = isBuyer ? otherMemberDetail: memberDetail;
 
-        ChatRoom chatRoom = findChatRoom(product, buyer, seller);
+        ChatRoom chatRoom = findChatRoom(product, buyerDetail.getMember(), sellerDetail.getMember());
         validateChatExists(chatRoom, member.getId());
 
-        if (isBuyer) handleBuyerTradeCompletion(product, buyer, seller);
-        else         handleSellerTradeCompletion(product, seller, buyer);
+        if (isBuyer) handleBuyerTradeCompletion(product, buyerDetail, sellerDetail);
+        else         handleSellerTradeCompletion(product, sellerDetail.getMember(), buyerDetail.getMember());
 
     }
 
@@ -90,14 +95,18 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private void handleBuyerTradeCompletion(Product product, Member buyer, Member seller) {
+    private void handleBuyerTradeCompletion(Product product, MemberDetail buyerDetail, MemberDetail sellerDetail) {
         TradeComplete pending = tradeCompleteRepository
-                .findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING)
+                .findByProductAndBuyerAndSellerAndStatus(
+                        product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING)
                 .orElseThrow(SellerNotTradeCompleteException::new);
 
         product.updateStatus(ProductStatus.COMPLETED);
         pending.updateStatus(TradeStatus.COMPLETED);
         pending.updateCompletedAt();
+
+        buyerDetail.minusGwangsan(product.getGwangsan());
+        sellerDetail.plusGwangsan(product.getGwangsan());
     }
 
     private void handleSellerTradeCompletion(Product product, Member seller, Member buyer) {

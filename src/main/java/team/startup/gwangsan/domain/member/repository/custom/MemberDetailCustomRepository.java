@@ -18,4 +18,7 @@ public interface MemberDetailCustomRepository {
             String nickname,
             String placeName
     );
+    MemberDetail findByMemberIdWithMember(Long memberId);
+
+    MemberDetail findByPhoneNumberWithMember(String phoneNumber);
 }
