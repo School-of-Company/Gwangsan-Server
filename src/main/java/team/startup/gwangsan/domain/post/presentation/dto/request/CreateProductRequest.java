@@ -1,5 +1,6 @@
 package team.startup.gwangsan.domain.post.presentation.dto.request;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -13,6 +14,6 @@ public record CreateProductRequest(
         @NotNull @Size(max = 20) String title,
         @NotNull String content,
         @NotNull Integer gwangsan,
-        @NotNull List<Long> imageIds
+        @NotEmpty List<Long> imageIds
 ) {
 }
