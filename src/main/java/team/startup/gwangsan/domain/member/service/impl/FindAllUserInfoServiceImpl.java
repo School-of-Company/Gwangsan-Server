@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotAllowedUserAccessException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUserInfoResponse;
@@ -30,20 +29,16 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
         MemberDetail currentDetail = memberDetailRepository.findById(currentMember.getId())
                 .orElseThrow(NotFoundMemberException::new);
 
-        MemberRole role = currentMember.getRole();
-
         Integer placeId = null;
         Integer headId = null;
-        if (role == MemberRole.ROLE_HEAD_ADMIN) {
-            headId = currentDetail.getPlace().getHead().getId();
-        } else if (role == MemberRole.ROLE_PLACE_ADMIN) {
-            placeId = currentDetail.getPlace().getId();
-        } else {
-            throw new NotAllowedUserAccessException();
+        switch (currentMember.getRole()) {
+            case ROLE_HEAD_ADMIN -> headId = currentDetail.getPlace().getHead().getId();
+            case ROLE_PLACE_ADMIN -> placeId = currentDetail.getPlace().getId();
+            default -> throw new NotAllowedUserAccessException();
         }
 
-        List<MemberDetail> details = memberDetailRepository.findAllByNicknameAndPlaceNameAndPlaceIdAndHeadId(
-                nickname, placeName, placeId, headId
+        List<MemberDetail> details = memberDetailRepository.findAllByRoleAndNicknameAndPlaceName(
+                placeId, headId, nickname, placeName
         );
 
         return details.stream()
