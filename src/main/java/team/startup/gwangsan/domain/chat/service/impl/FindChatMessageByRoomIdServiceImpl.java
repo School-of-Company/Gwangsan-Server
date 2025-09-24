@@ -18,6 +18,8 @@ import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResp
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -65,6 +67,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         Optional<TradeComplete> tradeComplete = tradeCompleteRepository.findByProductAndSeller(product, chatRoom.getSeller());
         boolean sellerCompleted = tradeComplete.isPresent();
         boolean isCompletable = isSeller ? !sellerCompleted : sellerCompleted;
+        boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
@@ -72,7 +75,8 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 imageResponses,
                 tradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
                 isSeller,
-                isCompletable
+                isCompletable,
+                isCompleted
         );
 
         List<ChatMessage> messages = chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(roomId, lastCreatedAt, lastMessageId, limit);
