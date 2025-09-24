@@ -46,12 +46,13 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         memberDetail.place.name
                 ))
                 .from(memberDetail)
-                .where(memberDetail.id.in(memberIds))
+                .where(memberDetail.member.id.in(memberIds))
                 .fetch()
                 .stream()
                 .collect(Collectors.toMap(
                         tuple -> tuple.get(memberDetail.member.id),
-                        tuple -> tuple.get(memberDetail.place.name)
+                        tuple -> tuple.get(memberDetail.place.name),
+                        (prev, next) -> prev
                 ));
     }
 
