@@ -11,6 +11,7 @@ public record GetChatProductDto(
         List<GetImageResponse> images,
         LocalDateTime createdAt,
         boolean isSeller,
-        boolean isCompletable
+        boolean isCompletable,
+        boolean isCompleted
 )  {
 }
