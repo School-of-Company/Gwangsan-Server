@@ -30,11 +30,12 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
 
     @Override
     public Place findPlaceByMemberId(Long id) {
-        return Optional.ofNullable(queryFactory
-                .select(memberDetail.place)
-                .from(memberDetail)
-                .where(memberDetail.id.eq(id))
-                .fetchOne())
+        return Optional.ofNullable(
+                queryFactory
+                        .select(memberDetail.place)
+                        .from(memberDetail)
+                        .where(memberDetail.id.eq(id))
+                        .fetchOne())
                 .orElseThrow(NotFoundMemberException::new);
     }
 
@@ -69,6 +70,28 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         headIdEq(headId)
                 )
                 .fetch();
+    }
+
+    @Override
+    public MemberDetail findByMemberIdWithMember(Long memberId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(memberDetail)
+                        .join(memberDetail.member).fetchJoin()
+                        .where(memberDetail.member.id.eq(memberId))
+                        .fetchOne())
+                .orElseThrow(NotFoundMemberException::new);
+    }
+
+    @Override
+    public MemberDetail findByPhoneNumberWithMember(String phoneNumber) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(memberDetail)
+                        .join(memberDetail.member).fetchJoin()
+                        .where(memberDetail.member.phoneNumber.eq(phoneNumber))
+                        .fetchOne())
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private BooleanExpression nicknameEq(String nickname) {
