@@ -44,7 +44,7 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
 
-        List<ProductImage> productImages = productImageRepository.findAllById(productIds);
+        List<ProductImage> productImages = productImageRepository.findProductImageByProductIdIn(productIds);
 
         Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
                 .collect(Collectors.groupingBy(
