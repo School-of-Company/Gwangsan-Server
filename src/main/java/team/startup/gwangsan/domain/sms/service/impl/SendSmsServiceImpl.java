@@ -6,7 +6,9 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.stereotype.Service;
+import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
+import team.startup.gwangsan.domain.sms.exception.AlreadyRegisteredPhoneNumberException;
 import team.startup.gwangsan.domain.sms.exception.AuthCodeGenerationException;
 import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
@@ -25,9 +27,15 @@ public class SendSmsServiceImpl implements SendSmsService {
     private final DefaultMessageService messageService;
     private final SmsProperties smsProperties;
     private final SmsAuthRepository smsAuthRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public SingleMessageSentResponse execute(SendSmsRequest request) {
+
+        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
+            throw new AlreadyRegisteredPhoneNumberException();
+        }
+
         String code = generateCode();
 
         Message message = new Message();
