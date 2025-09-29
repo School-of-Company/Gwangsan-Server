@@ -7,6 +7,7 @@ public record FindUserInfoResponse(
         String nickname,
         String placeName,
         Integer light,
+        Integer gwangsan,
         String description,
         List<String> specialties
 ) {}
