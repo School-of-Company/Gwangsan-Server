@@ -40,6 +40,7 @@ public class FindUserInfoServiceImpl implements FindUserInfoService {
                 member.getNickname(),
                 detail.getPlace().getName(),
                 detail.getLight(),
+                detail.getGwangsan(),
                 detail.getDescription(),
                 specialties
         );

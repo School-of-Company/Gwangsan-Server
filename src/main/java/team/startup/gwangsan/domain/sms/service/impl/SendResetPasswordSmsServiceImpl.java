@@ -6,14 +6,15 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
-import team.startup.gwangsan.domain.sms.exception.AlreadyRegisteredPhoneNumberException;
 import team.startup.gwangsan.domain.sms.exception.AuthCodeGenerationException;
+import team.startup.gwangsan.domain.sms.exception.NotRegisteredPhoneNumberException;
 import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
-import team.startup.gwangsan.domain.sms.service.SendSmsService;
+import team.startup.gwangsan.domain.sms.service.SendResetPasswordSmsService;
 import team.startup.gwangsan.global.sms.SmsProperties;
 
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +23,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class SendSmsServiceImpl implements SendSmsService {
+public class SendResetPasswordSmsServiceImpl implements SendResetPasswordSmsService {
 
     private final DefaultMessageService messageService;
     private final SmsProperties smsProperties;
@@ -30,10 +31,11 @@ public class SendSmsServiceImpl implements SendSmsService {
     private final MemberRepository memberRepository;
 
     @Override
+    @Transactional
     public SingleMessageSentResponse execute(SendSmsRequest request) {
 
-        if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
-            throw new AlreadyRegisteredPhoneNumberException();
+        if (!memberRepository.existsByPhoneNumber(request.phoneNumber())) {
+            throw new NotRegisteredPhoneNumberException();
         }
 
         String code = generateCode();
@@ -41,7 +43,7 @@ public class SendSmsServiceImpl implements SendSmsService {
         Message message = new Message();
         message.setFrom(smsProperties.getFromNumber());
         message.setTo(request.phoneNumber());
-        message.setText("[시민화폐광산] 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
+        message.setText("[시민화폐광산] 비밀번호 재설정 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
 
         saveAuthInfo(request.phoneNumber(), code);
 
@@ -84,4 +86,3 @@ public class SendSmsServiceImpl implements SendSmsService {
                 .build());
     }
 }
-
