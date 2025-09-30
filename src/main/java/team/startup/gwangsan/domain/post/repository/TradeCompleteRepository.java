@@ -15,4 +15,6 @@ public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Lo
     boolean existsByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus status);
 
     Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus tradeStatus);
+
+    void deleteByProductAndStatus(Product product, TradeStatus tradeStatus);
 }
