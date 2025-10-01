@@ -69,6 +69,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/auth/password").authenticated()
 
                                 // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
@@ -104,7 +105,7 @@ public class SecurityConfig {
                                 // admin
                                 .requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/admin/**")
-                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name() )
 
                                 // review
                                 .requestMatchers(HttpMethod.POST, "/api/review").authenticated()
