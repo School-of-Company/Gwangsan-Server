@@ -1,6 +1,8 @@
 package team.startup.gwangsan.domain.post.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,9 +12,10 @@ import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
+import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -22,19 +25,23 @@ import team.startup.gwangsan.domain.post.exception.*;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
-import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteService {
 
-    private final MemberUtil memberUtil;
     private final ProductRepository productRepository;
-    private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
     private final MemberDetailRepository memberDetailRepository;
+    private final DeviceTokenRepository deviceTokenRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -107,6 +114,26 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         buyerDetail.minusGwangsan(product.getGwangsan());
         sellerDetail.plusGwangsan(product.getGwangsan());
+
+        List<Long> memberIds = new ArrayList<>();
+
+        memberIds.add(buyerDetail.getId());
+        memberIds.add(sellerDetail.getId());
+
+        List<DeviceToken> deviceTokens = new ArrayList<>();
+
+        for (Long memberId : memberIds) {
+            deviceTokenRepository.findByUserId(memberId)
+                    .ifPresent(deviceTokens::add);
+        }
+
+        tradeCompleteRepository.deleteByProductAndStatus(product, TradeStatus.PENDING);
+
+        applicationEventPublisher.publishEvent(new SendNotificationEvent(
+                deviceTokens,
+                NotificationType.TRADE_COMPLETE,
+                product.getId()
+        ));
     }
 
     private void handleSellerTradeCompletion(Product product, Member seller, Member buyer) {
