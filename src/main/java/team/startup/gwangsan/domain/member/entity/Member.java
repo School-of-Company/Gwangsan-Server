@@ -74,4 +74,7 @@ public class Member {
         this.status = status;
     }
 
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

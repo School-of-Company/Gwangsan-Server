@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import team.startup.gwangsan.domain.auth.presentation.dto.request.ResetPasswordRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignInRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignUpRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.MemberInfoResponse;
@@ -22,6 +23,7 @@ public class AuthController {
     private final ReissueTokenService reissueTokenService;
     private final SignOutService signOutService;
     private final TokenAuthenticationService tokenAuthenticationService;
+    private final ResetPasswordService resetPasswordService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequest request) {
@@ -52,6 +54,12 @@ public class AuthController {
     public ResponseEntity<MemberInfoResponse> getMemberInfo() {
         MemberInfoResponse response = tokenAuthenticationService.execute();
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        resetPasswordService.execute(request);
+        return ResponseEntity.ok().build();
     }
 }
 
