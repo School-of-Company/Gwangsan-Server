@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.presentation.dto.response.GetAlertResponse;
-import team.startup.gwangsan.domain.alert.repository.AlertRepository;
+import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.service.FindAlertByCurrentService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class FindAlertByCurrentServiceImpl implements FindAlertByCurrentService {
 
     private final MemberUtil memberUtil;
-    private final AlertRepository alertRepository;
+    private final AlertReceiptRepository alertReceiptRepository;
     private final NoticeImageRepository noticeImageRepository;
     private final ProductImageRepository productImageRepository;
 
@@ -32,7 +32,7 @@ public class FindAlertByCurrentServiceImpl implements FindAlertByCurrentService 
     @Transactional(readOnly = true)
     public List<GetAlertResponse> execute() {
         Member member = memberUtil.getCurrentMember();
-        List<Alert> alerts = alertRepository.findAllByMember(member);
+        List<Alert> alerts = alertReceiptRepository.findByMemberId(member.getId());
 
         List<Long> noticeIds = alerts.stream()
                 .filter(a -> a.getAlertType() == AlertType.NOTICE)
