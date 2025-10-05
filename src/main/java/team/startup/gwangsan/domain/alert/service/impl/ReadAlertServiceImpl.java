@@ -3,8 +3,8 @@ package team.startup.gwangsan.domain.alert.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.alert.entity.Alert;
-import team.startup.gwangsan.domain.alert.repository.AlertRepository;
+import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
+import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.service.ReadAlertService;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -15,17 +15,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReadAlertServiceImpl implements ReadAlertService {
 
-    private final AlertRepository alertRepository;
+    private final AlertReceiptRepository alertReceiptRepository;
     private final MemberUtil memberUtil;
 
     @Override
     @Transactional
     public void execute(Long alertId) {
         Member member = memberUtil.getCurrentMember();
-        List<Alert> unreadAlerts = alertRepository.findUnreadAlerts(alertId, member.getId());
+        List<AlertReceipt> alertReceipts = alertReceiptRepository.findByMemberIdAndCheckedAndAlertId(member.getId(), false, alertId);
 
-        for (Alert alert : unreadAlerts) {
-            alert.updateChecked(true);
+        for (AlertReceipt alert : alertReceipts) {
+            alert.markChecked();
         }
     }
 }
