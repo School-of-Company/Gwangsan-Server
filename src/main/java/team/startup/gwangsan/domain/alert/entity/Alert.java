@@ -27,14 +27,11 @@ public class Alert {
     private Long sourceId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "send_member_id")
     private Member sendMember;
 
     @Column(name = "alert_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private AlertType alertType;
 
     @Column(name = "title", nullable = false)
@@ -47,21 +44,12 @@ public class Alert {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "checked", nullable = false)
-    private Boolean checked;
-
     @Builder
-    public Alert(Long sourceId, Member member, Member sendMember, AlertType alertType, String title, String content, Boolean checked) {
+    public Alert(Long sourceId, Member sendMember, AlertType alertType, String title, String content) {
         this.sourceId = sourceId;
-        this.member = member;
         this.sendMember = sendMember;
         this.alertType = alertType;
         this.title = title;
         this.content = content;
-        this.checked = checked;
-    }
-
-    public void updateChecked(Boolean checked) {
-        this.checked = checked;
     }
 }
