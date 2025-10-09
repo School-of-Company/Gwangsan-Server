@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
@@ -25,6 +26,7 @@ import team.startup.gwangsan.domain.post.exception.*;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
+import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 
 import java.util.ArrayList;
@@ -150,6 +152,12 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .status(TradeStatus.PENDING)
                 .build();
 
-        tradeCompleteRepository.save(newTradeComplete);
+        newTradeComplete = tradeCompleteRepository.save(newTradeComplete);
+
+        applicationEventPublisher.publishEvent(new CreateAlertEvent(
+                newTradeComplete.getId(),
+                newTradeComplete.getBuyer().getId(),
+                AlertType.OTHER_MEMBER_TRADE_COMPLETE
+        ));
     }
 }

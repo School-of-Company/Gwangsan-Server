@@ -3,8 +3,11 @@ package team.startup.gwangsan.domain.alert.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.admin.exception.NotFoundAlertTypeException;
 import team.startup.gwangsan.domain.alert.entity.Alert;
+import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
+import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
 import team.startup.gwangsan.domain.alert.service.CreateAlertService;
 import team.startup.gwangsan.domain.member.entity.Member;
@@ -29,14 +32,17 @@ public class CreateAlertServiceImpl implements CreateAlertService {
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
+    private final AlertReceiptRepository alertReceiptRepository;
 
-    private static final String TRADE_COMPLETE_CONTENT = "거래가 완료되었습니다.";
     private static final String TRADE_COMPLETE_REJECT_CONTENT = "거래 완료가 거절되었습니다.";
     private static final String OTHER_MEMBER_TRADE_COMPLETE_CONTENT = "님이 거래를 완료하였습니다.";
     private static final String RECOMMENDER_TITLE = "추천인 등록";
     private static final String RECOMMENDER_CONTENT = "추천인으로 등록되었습니다.";
     private static final String REVIEW_TITLE = "리뷰 등록";
     private static final String REVIEW_CONTENT = "나에 대한 후기가 등록되었습니다.";
+
+    private static final String BUYER_TRADE_BODY = "광산이 차감되었습니다.";
+    private static final String SELLER_TRADE_BODY = "광산이 추가되었습니다.";
 
     @Override
     @Transactional
@@ -46,36 +52,71 @@ public class CreateAlertServiceImpl implements CreateAlertService {
 
         switch (alertType) {
             case TRADE_COMPLETE -> {
-                Product product = getProduct(sourceId);
+                TradeComplete tradeComplete = tradeCompleteRepository.findById(sourceId)
+                        .orElseThrow(NotFoundTradeCompleteException::new);
 
-                saveAlert(sourceId, alertType, member, product.getTitle(), TRADE_COMPLETE_CONTENT);
+                Product product = tradeComplete.getProduct();
+                Member buyer = tradeComplete.getBuyer();
+                Member seller = tradeComplete.getSeller();
+
+                Alert buyerAlert = saveAlert(
+                        product.getId(),
+                        alertType,
+                        seller,
+                        product.getTitle(),
+                        BUYER_TRADE_BODY
+                );
+                saveAlertReceipt(buyerAlert, buyer);
+
+                Alert sellerAlert = saveAlert(
+                        product.getId(),
+                        alertType,
+                        seller,
+                        product.getTitle(),
+                        SELLER_TRADE_BODY
+                );
+                saveAlertReceipt(sellerAlert, seller);
             }
 
             case TRADE_COMPLETE_REJECT -> {
                 Product product = getProduct(sourceId);
-
-                saveAlert(sourceId, alertType, member, product.getTitle(), TRADE_COMPLETE_REJECT_CONTENT);
+                Alert alert = saveAlert(sourceId, alertType, product.getTitle(), TRADE_COMPLETE_REJECT_CONTENT);
+                saveAlertReceipt(alert, member);
             }
 
             case OTHER_MEMBER_TRADE_COMPLETE -> {
                 TradeComplete tradeComplete = tradeCompleteRepository.findById(sourceId)
                         .orElseThrow(NotFoundTradeCompleteException::new);
-
-                saveAlert(tradeComplete.getProduct().getId(), alertType, member, tradeComplete.getBuyer(), tradeComplete.getProduct().getTitle(), tradeComplete.getBuyer().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT);
+                Alert alert = saveAlert(
+                        tradeComplete.getProduct().getId(),
+                        alertType,
+                        tradeComplete.getSeller(),
+                        tradeComplete.getProduct().getTitle(),
+                        tradeComplete.getBuyer().getNickname() + OTHER_MEMBER_TRADE_COMPLETE_CONTENT
+                );
+                saveAlertReceipt(alert, member);
             }
 
             case RECOMMENDER -> {
                 Member signUpMember = getMember(sourceId);
-
-                saveAlert(sourceId, alertType, member, signUpMember, RECOMMENDER_TITLE, RECOMMENDER_CONTENT);
+                Alert alert = saveAlert(sourceId, alertType, signUpMember, RECOMMENDER_TITLE, RECOMMENDER_CONTENT);
+                saveAlertReceipt(alert, member);
             }
 
             case REVIEW -> {
                 Review review = reviewRepository.findById(sourceId)
                         .orElseThrow(NotFoundReviewException::new);
-
-                saveAlert(sourceId, alertType, member, review.getReviewer().getNickname() + REVIEW_TITLE, REVIEW_CONTENT);
+                Alert alert = saveAlert(
+                        sourceId,
+                        alertType,
+                        review.getReviewer(),
+                        review.getReviewer().getNickname() + REVIEW_TITLE,
+                        REVIEW_CONTENT
+                );
+                saveAlertReceipt(alert, member);
             }
+
+            default -> throw new NotFoundAlertTypeException();
         }
     }
 
@@ -89,35 +130,42 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .orElseThrow(NotFoundProductException::new);
     }
 
-
-    private Alert createAlert(Long sourceId, AlertType alertType, Member member, String title, String content) {
+    private Alert createAlert(Long sourceId, AlertType alertType, String title, String content) {
         return Alert.builder()
                 .alertType(alertType)
                 .sourceId(sourceId)
-                .member(member)
                 .title(title)
                 .content(content)
-                .checked(false)
                 .build();
     }
 
-    private Alert createAlert(Long sourceId, AlertType alertType, Member member, Member sendMember, String title, String content) {
+    private Alert createAlert(Long sourceId, AlertType alertType, Member sendMember, String title, String content) {
         return Alert.builder()
                 .alertType(alertType)
                 .sourceId(sourceId)
-                .member(member)
                 .sendMember(sendMember)
                 .title(title)
                 .content(content)
-                .checked(false)
                 .build();
     }
 
-    private void saveAlert(Long sourceId, AlertType alertType, Member member, String title, String content) {
-        alertRepository.save(createAlert(sourceId, alertType, member, title, content));
+    private AlertReceipt createAlertReceipt(Alert alert, Member member) {
+        return AlertReceipt.builder()
+                .alert(alert)
+                .checked(false)
+                .member(member)
+                .build();
     }
 
-    private void saveAlert(Long sourceId, AlertType alertType, Member member, Member sendMember, String title, String content) {
-        alertRepository.save(createAlert(sourceId, alertType, member, sendMember, title, content));
+    private void saveAlertReceipt(Alert alert, Member member) {
+        alertReceiptRepository.save(createAlertReceipt(alert, member));
+    }
+
+    private Alert saveAlert(Long sourceId, AlertType alertType, String title, String content) {
+        return alertRepository.save(createAlert(sourceId, alertType, title, content));
+    }
+
+    private Alert saveAlert(Long sourceId, AlertType alertType, Member sendMember, String title, String content) {
+        return alertRepository.save(createAlert(sourceId, alertType, sendMember, title, content));
     }
 }
