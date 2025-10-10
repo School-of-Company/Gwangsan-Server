@@ -33,10 +33,7 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
         Integer headId = null;
 
         switch (currentMember.getRole()) {
-            case ROLE_HEAD_ADMIN -> {
-                placeId = null;
-                headId = null;
-            }
+            case ROLE_HEAD_ADMIN -> headId = currentDetail.getPlace().getHead().getId();
             case ROLE_PLACE_ADMIN -> placeId = currentDetail.getPlace().getId();
             default -> throw new NotAllowedUserAccessException();
         }
