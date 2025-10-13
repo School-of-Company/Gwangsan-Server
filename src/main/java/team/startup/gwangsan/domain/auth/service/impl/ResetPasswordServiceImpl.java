@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotCompletedException;
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotFoundException;
+import team.startup.gwangsan.domain.auth.presentation.dto.request.ResetPasswordRequest;
 import team.startup.gwangsan.domain.auth.service.ResetPasswordService;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -23,7 +24,7 @@ public class ResetPasswordServiceImpl implements ResetPasswordService {
 
     @Override
     @Transactional
-    public void execute(team.startup.gwangsan.domain.auth.presentation.dto.request.ResetPasswordRequest request) {
+    public void execute(ResetPasswordRequest request) {
         SmsAuthEntity smsAuthEntity = smsAuthRepository.findById(request.phoneNumber())
                 .orElseThrow(SmsAuthNotFoundException::new);
 
