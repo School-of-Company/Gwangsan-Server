@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import team.startup.gwangsan.domain.auth.entity.constant.OsType;
+import team.startup.gwangsan.domain.notification.entity.constant.OsType;
 import team.startup.gwangsan.domain.notification.NotificationPort;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;

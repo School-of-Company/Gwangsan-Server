@@ -2,7 +2,7 @@ package team.startup.gwangsan.domain.auth.presentation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import team.startup.gwangsan.domain.auth.entity.constant.OsType;
+import team.startup.gwangsan.domain.notification.entity.constant.OsType;
 
 public record SignInRequest(
 
