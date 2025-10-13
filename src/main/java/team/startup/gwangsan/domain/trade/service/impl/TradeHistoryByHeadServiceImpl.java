@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.presentation.dto.PlaceDto;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
-import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.constant.Period;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.HeadTradeHistoryResponse;
 import team.startup.gwangsan.domain.trade.service.TradeHistoryByHeadService;

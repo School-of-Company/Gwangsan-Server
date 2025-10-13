@@ -17,7 +17,6 @@ import static team.startup.gwangsan.domain.member.entity.QMember.member;
 import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
 import static team.startup.gwangsan.domain.place.entity.QHead.head;
 import static team.startup.gwangsan.domain.place.entity.QPlace.place;
-import static team.startup.gwangsan.domain.post.entity.QProduct.product;
 import static team.startup.gwangsan.domain.trade.entity.QTradeComplete.tradeComplete;
 
 @Repository
@@ -86,6 +85,19 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                                 tradeComplete.status.eq(status)
                         )
                         .limit(1)
+                        .fetchOne()
+        );
+    }
+
+    @Override
+    public Optional<TradeComplete> findByIdWithProductAndMember(Long id) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(tradeComplete)
+                        .join(tradeComplete.product).fetchJoin()
+                        .join(tradeComplete.buyer).fetchJoin()
+                        .join(tradeComplete.seller).fetchJoin()
+                        .where(tradeComplete.id.eq(id))
                         .fetchOne()
         );
     }

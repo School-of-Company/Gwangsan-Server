@@ -1,11 +1,11 @@
-package team.startup.gwangsan.domain.post.repository;
+package team.startup.gwangsan.domain.trade.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.TradeComplete;
-import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.post.repository.custom.TradeCompleteCustomRepository;
+import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
+import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomRepository;
 
 import java.util.Optional;
 
