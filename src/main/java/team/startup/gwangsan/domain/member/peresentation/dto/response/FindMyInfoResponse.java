@@ -7,6 +7,7 @@ public record FindMyInfoResponse(
         String nickname,
         String placeName,
         String dongName,
+        String headName,
         Integer light,
         Integer gwangsan,
         String description,
