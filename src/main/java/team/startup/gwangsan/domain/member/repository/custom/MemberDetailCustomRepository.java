@@ -5,6 +5,7 @@ import team.startup.gwangsan.domain.place.entity.Place;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public interface MemberDetailCustomRepository {
@@ -21,4 +22,6 @@ public interface MemberDetailCustomRepository {
     MemberDetail findByMemberIdWithMember(Long memberId);
 
     MemberDetail findByPhoneNumberWithMember(String phoneNumber);
+
+    Optional<MemberDetail> findByMemberIdWithPlaceHeadDong(Long memberId);
 }

@@ -27,7 +27,7 @@ public class FindMyInfoServiceImpl implements FindMyInfoService {
     public FindMyInfoResponse execute() {
         Member member = memberUtil.getCurrentMember();
 
-        MemberDetail detail = memberDetailRepository.findById(member.getId())
+        MemberDetail detail = memberDetailRepository.findByMemberIdWithPlaceHeadDong(member.getId())
                 .orElseThrow(NotFoundMemberException::new);
 
         List<String> specialties = memberRelatedKeywordRepository.findAllByMember(member).stream()
