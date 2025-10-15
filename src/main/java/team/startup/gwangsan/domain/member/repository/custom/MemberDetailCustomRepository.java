@@ -19,4 +19,6 @@ public interface MemberDetailCustomRepository {
     MemberDetail findByMemberIdWithMember(Long memberId);
 
     MemberDetail findByPhoneNumberWithMember(String phoneNumber);
+
+    Optional<MemberDetail> findByMemberIdWithPlaceHeadDong(Long memberId);
 }
