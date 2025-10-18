@@ -7,4 +7,8 @@ public enum AlertType {
     OTHER_MEMBER_TRADE_COMPLETE,
     RECOMMENDER,
     REVIEW,
+    TRADE_CANCEL,
+    TRADE_CANCEL_REJECT,
+    REPORT,
+    REPORT_REJECT,
 }
