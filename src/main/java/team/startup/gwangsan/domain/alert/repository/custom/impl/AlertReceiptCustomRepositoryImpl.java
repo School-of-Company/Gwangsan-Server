@@ -33,8 +33,9 @@ public class AlertReceiptCustomRepositoryImpl implements AlertReceiptCustomRepos
     @Override
     public List<Alert> findByMemberId(Long memberId) {
         return queryFactory
-                .selectFrom(alertReceipt.alert)
-                .join(alertReceipt.alert).fetchJoin()
+                .select(alert).distinct()
+                .from(alertReceipt)
+                .join(alertReceipt.alert, alert)
                 .leftJoin(alert.sendMember).fetchJoin()
                 .where(alertReceipt.member.id.eq(memberId))
                 .orderBy(alert.createdAt.desc())
