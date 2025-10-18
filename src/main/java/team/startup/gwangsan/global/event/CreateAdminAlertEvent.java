@@ -5,10 +5,6 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 public record CreateAdminAlertEvent(
         AlertType type,
         Long sourceId,
-        Long memberId,
-        Long otherMemberId
+        Long memberId
 ) {
-    public CreateAdminAlertEvent(AlertType type, Long sourceId, Long memberId) {
-        this(type, sourceId, memberId, null);
-    }
 }

@@ -16,6 +16,9 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.domain.trade.entity.TradeCancel;
+import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
+import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +27,14 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
     private final AdminAlertRepository adminAlertRepository;
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
+    private final TradeCancelRepository tradeCancelRepository;
 
     private static final String REPORT_FRAUD_ALERT_TITLE = "부적절한 거래 신고";
     private static final String REPORT_BAD_LANGUAGE_ALERT_TITLE = "부적절한 언어 사용";
     private static final String REPORT_MEMBER_ALERT_TITLE = "부적절한 사용자 신고";
     private static final String REPORT_ETC_ALERT_TITLE = "기타 신고";
     private static final String NEW_SIGNUP_MEMBER_TITLE = "새로운 회원가입 요청";
+    private static final String TRADE_CANCEL_TITLE = "거래 철회 요청";
 
     @Override
     @Transactional
@@ -65,6 +70,21 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
                 saveAdminAlert(alert);
             }
+
+            case TRADE_CANCEL -> {
+                TradeCancel tradeCancel = tradeCancelRepository.findByIdWithMember(sourceId)
+                        .orElseThrow(NotFoundTradeCancelException::new);
+
+                AdminAlert alert = AdminAlert.builder()
+                        .type(type)
+                        .title(TRADE_CANCEL_TITLE)
+                        .sourceId(sourceId)
+                        .requester(tradeCancel.getMember())
+                        .build();
+
+                saveAdminAlert(alert);
+            }
+
             default -> throw new NotFoundAlertTypeException();
         }
     }
