@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.admin.repository.custom.AdminAlertCustomRepo
 import team.startup.gwangsan.domain.place.entity.Place;
 
 import java.util.List;
+import java.util.Optional;
 
 import static team.startup.gwangsan.domain.admin.entity.QAdminAlert.adminAlert;
 import static team.startup.gwangsan.domain.member.entity.QMember.member;
@@ -33,7 +34,18 @@ public class AdminAlertCustomRepositoryImpl implements AdminAlertCustomRepositor
                 )
                 .fetch();
     }
-    
+
+    @Override
+    public Optional<AdminAlert> findByIdWithMember(Long id) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(adminAlert)
+                        .join(adminAlert.requester, member).fetchJoin()
+                        .where(adminAlert.id.eq(id))
+                        .fetchOne()
+        );
+    }
+
     private BooleanExpression alertTypeEq(AlertType alertType) {
         return alertType != null ? adminAlert.type.eq(alertType) : null;
     }
