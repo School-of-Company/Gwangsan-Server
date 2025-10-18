@@ -19,11 +19,11 @@ public class ReportImageCustomRepositoryImpl implements ReportImageCustomReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ReportImage> findByReportIn(Collection<Report> reports) {
+    public List<ReportImage> findAllByReportIdIn(Collection<Long> reportIds) {
         return queryFactory
                 .selectFrom(reportImage)
                 .join(reportImage.image).fetchJoin()
-                .where(reportImage.report.in(reports))
+                .where(reportImage.report.id.in(reportIds))
                 .fetch();
     }
 }
