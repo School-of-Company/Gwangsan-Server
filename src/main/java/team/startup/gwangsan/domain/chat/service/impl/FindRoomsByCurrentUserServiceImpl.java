@@ -18,6 +18,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,15 +37,15 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
         Long memberId = memberUtil.getCurrentMember().getId();
         List<GetRoomsDto> rooms = chatRoomRepository.findRoomsByMemberId(memberId);
 
-        List<Long> productIds = rooms.stream()
+        Set<Long> productIds = rooms.stream()
                 .map(GetRoomsDto::productId)
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toSet());
 
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
 
-        List<ProductImage> productImages = productImageRepository.findProductImageByProductIdIn(productIds);
+        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
 
         Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
                 .collect(Collectors.groupingBy(
