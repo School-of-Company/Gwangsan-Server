@@ -5,6 +5,6 @@ import java.util.List;
 public record GetAdminAlertResponse(
         List<GetReportAlertResponse> reports,
         List<GetSignUpAlertResponse> signUps,
-        List<GetTradeCompleteAlertResponse> trades
+        List<GetTradeCancelAlertResponse> tradeCancels
 ) {
 }
