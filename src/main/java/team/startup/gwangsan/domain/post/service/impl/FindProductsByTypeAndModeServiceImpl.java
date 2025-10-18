@@ -52,7 +52,7 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
                 .toList();
 
         Map<Long, List<GetImageResponse>> imageMap = productImageRepository
-                .findProductImageByProductIdIn(productIds).stream()
+                .findAllByProductIdIn(productIds).stream()
                 .collect(Collectors.groupingBy(
                         pi -> pi.getProduct().getId(),
                         Collectors.mapping(
