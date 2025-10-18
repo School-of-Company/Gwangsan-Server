@@ -22,11 +22,11 @@ public class AdminController {
     private final UpdateMemberRoleService updateMemberRoleService;
     private final SignInAdminService signInAdminService;
     private final UpdateMemberStatusService updateMemberStatusService;
-    private final CompleteTradeService completeTradeService;
     private final RejectAdminAlertService rejectAdminAlertService;
     private final VerificationSignUpService verificationSignUpService;
     private final WithDrawnMemberService withDrawnMemberService;
     private final DeleteAdminAlertService deleteAdminAlertService;
+    private final ApproveTradeCancelService approveTradeCancelService;
 
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
@@ -61,12 +61,6 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/trade-complete/{product_id}")
-    public ResponseEntity<Void> tradeComplete(@PathVariable("product_id") Long productId) {
-        completeTradeService.execute(productId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
     @DeleteMapping("/alert/{alert_id}")
     public ResponseEntity<Void> rejectAlert(@PathVariable("alert_id") Long alertId) {
         rejectAdminAlertService.execute(alertId);
@@ -91,4 +85,9 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PatchMapping("/trade/{alert_id}")
+    public ResponseEntity<Void> approveTradeCancel(@PathVariable("alert_id") Long alertId) {
+        approveTradeCancelService.execute(alertId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
