@@ -10,7 +10,6 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
@@ -44,7 +43,7 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
                 .toList();
 
         Map<Long, List<GetImageResponse>> imageMap = productImageRepository
-                .findProductImageByProductIdIn(productIds).stream()
+                .findAllByProductIdIn(productIds).stream()
                 .collect(Collectors.groupingBy(
                         pi -> pi.getProduct().getId(),
                         Collectors.mapping(

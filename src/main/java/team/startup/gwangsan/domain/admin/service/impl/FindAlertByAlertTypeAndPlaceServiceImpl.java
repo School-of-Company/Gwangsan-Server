@@ -8,13 +8,12 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetReportAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetSignUpAlertResponse;
-import team.startup.gwangsan.domain.admin.presentation.dto.response.GetTradeCompleteAlertResponse;
-import team.startup.gwangsan.domain.admin.repository.custom.AdminAlertCustomRepository;
+import team.startup.gwangsan.domain.admin.presentation.dto.response.GetTradeCancelAlertResponse;
+import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceService;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
@@ -23,17 +22,20 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.domain.trade.entity.TradeCancel;
+import team.startup.gwangsan.domain.trade.entity.TradeCancelImage;
+import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
+import team.startup.gwangsan.domain.trade.repository.TradeCancelImageRepository;
+import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -48,13 +50,14 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private final MemberDetailRepository memberDetailRepository;
     private final ReportRepository reportRepository;
-    private final AdminAlertCustomRepository adminAlertCustomRepository;
+    private final AdminAlertRepository adminAlertRepository;
     private final MemberRepository memberRepository;
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
-    private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final TradeCancelRepository tradeCancelRepository;
+    private final TradeCancelImageRepository tradeCancelImageRepository;
 
     @Override
     @Transactional
@@ -62,7 +65,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         Member admin = memberUtil.getCurrentMember();
         List<Place> places = findTargetPlaces(placeName, admin);
 
-        List<AdminAlert> alerts = adminAlertCustomRepository.findAdminAlertByPlacesAndAlertType(places, type);
+        List<AdminAlert> alerts = adminAlertRepository.findAdminAlertByPlacesAndAlertType(places, type);
 
         Set<Long> memberIds = alerts.stream()
                 .map(alert -> alert.getRequester().getId())
@@ -71,37 +74,64 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
         List<AdminAlert> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
         List<AdminAlert> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
-        List<AdminAlert> tradeAlerts = filterAlertsByType(alerts, AlertType.TRADE_COMPLETE);
+        List<AdminAlert> tradeCancelAlerts = filterAlertsByType(alerts, AlertType.TRADE_CANCEL);
 
-        List<Long> productIds = tradeAlerts.stream()
-                .map(AdminAlert::getSourceId)
-                .toList();
-
-        List<Long> reportIds = reportAlerts.stream()
-                .map(AdminAlert::getSourceId)
-                .toList();
-
-        List<Long> signUpMemberIds = signUpAlerts.stream()
-                .map(AdminAlert::getSourceId)
-                .toList();
-
-        List<Report> reports = reportRepository.findAllByIdIn(reportIds);
-        List<Member> members = memberRepository.findAllByIdIn(signUpMemberIds);
-        List<ReportImage> reportImages = reportImageRepository.findByReportIn(reports);
-        List<Product> products = productRepository.findAllById(productIds);
-        List<ProductImage> productImages = productImageRepository.findProductImageByProductIdIn(productIds);
-        List<MemberDetail> memberDetails = memberDetailRepository.findAllByMemberIdIn(tradeAlerts.stream()
-                .map(alert -> alert.getRequester().getId())
-                .toList());
+        List<Long> reportIds = reportAlerts.stream().map(AdminAlert::getSourceId).toList();
+        List<Report> reports = reportIds.isEmpty() ? List.of() : reportRepository.findAllByIdIn(reportIds);
+        List<ReportImage> reportImages = reports.isEmpty() ? List.of() : reportImageRepository.findAllByReportIdIn(reportIds);
 
         List<GetReportAlertResponse> reportAlertResponses =
                 createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
+
+        List<Long> signUpMemberIds = signUpAlerts.stream().map(AdminAlert::getSourceId).toList();
+        List<Member> members = signUpMemberIds.isEmpty() ? List.of() : memberRepository.findAllByIdIn(signUpMemberIds);
+
         List<GetSignUpAlertResponse> signUpAlertResponses =
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
-        List<GetTradeCompleteAlertResponse> tradeAlertResponses =
-                createTradeCompleteAlertResponses(memberDetails, tradeAlerts, products, productImages, memberIdToPlaceName);
 
-        return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses, tradeAlertResponses);
+        List<Long> tradeCancelIds = tradeCancelAlerts.stream().map(AdminAlert::getSourceId).toList();
+        List<TradeCancel> tradeCancels = tradeCancelIds.isEmpty() ? List.of() : tradeCancelRepository.findAllByIdIn(tradeCancelIds);
+        List<TradeCancelImage> tradeCancelImages = tradeCancels.isEmpty() ? List.of() : tradeCancelImageRepository.findByTradeCancelIn(tradeCancelIds);
+
+        Set<Long> productIds = tradeCancels.stream()
+                .map(tc -> tc.getTradeComplete().getProduct().getId())
+                .collect(Collectors.toSet());
+
+        List<ProductImage> productImages = productIds.isEmpty()
+                ? List.of()
+                : productImageRepository.findAllByProductIdIn(productIds);
+
+        Map<Long, List<GetImageResponse>> productImageMap = productImages.stream()
+                .collect(Collectors.groupingBy(
+                        pi -> pi.getProduct().getId(),
+                        Collectors.mapping(
+                                pi -> new GetImageResponse(pi.getImage().getId(), pi.getImage().getImageUrl()),
+                                Collectors.toList()
+                        )
+                ));
+
+        Set<Long> ownerMemberIds = tradeCancels.stream()
+                .map(tc -> tc.getTradeComplete().getProduct().getMember().getId())
+                .collect(Collectors.toSet());
+
+        Map<Long, GetProductMemberResponse> ownerInfoByMemberId =
+                ownerMemberIds.isEmpty()
+                        ? Map.of()
+                        : memberRepository.findProductMemberResponsesByMemberIds(ownerMemberIds)
+                        .stream()
+                        .collect(Collectors.toMap(GetProductMemberResponse::memberId, it -> it));
+
+        List<GetTradeCancelAlertResponse> tradeCancelAlertResponses =
+                createTradeCancelAlertResponses(
+                        tradeCancelAlerts,
+                        tradeCancels,
+                        tradeCancelImages,
+                        productImageMap,
+                        memberIdToPlaceName,
+                        ownerInfoByMemberId
+                );
+
+        return new GetAdminAlertResponse(reportAlertResponses, signUpAlertResponses, tradeCancelAlertResponses);
     }
 
     private List<AdminAlert> filterAlertsByType(List<AdminAlert> alerts, AlertType type) {
@@ -118,7 +148,6 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     .orElseThrow(PlaceNotFoundException::new);
             return List.of(target);
         }
-
         Place place = memberDetailRepository.findPlaceByMemberId(member.getId());
         return List.of(place);
     }
@@ -146,9 +175,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             .orElseThrow(NotFoundReportException::new);
 
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
-
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
-
                     Member reported = report.getReported();
 
                     return new GetReportAlertResponse(
@@ -184,6 +211,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             .orElseThrow(NotFoundMemberException::new);
 
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
+                    String recommenderNickname =
+                            member.getRecommender() != null ? member.getRecommender().getNickname() : null;
 
                     return new GetSignUpAlertResponse(
                             alert.getId(),
@@ -191,72 +220,91 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             member.getNickname(),
                             alert.getTitle(),
                             placeName,
-                            member.getRecommender().getNickname(),
+                            recommenderNickname,
                             alert.getCreatedAt()
                     );
                 })
                 .toList();
     }
 
-    private List<GetTradeCompleteAlertResponse> createTradeCompleteAlertResponses(
-            List<MemberDetail> memberDetails,
+    private List<GetTradeCancelAlertResponse> createTradeCancelAlertResponses(
             List<AdminAlert> alerts,
-            List<Product> products,
-            List<ProductImage> productImages,
-            Map<Long, String> memberIdToPlaceName
+            List<TradeCancel> tradeCancels,
+            List<TradeCancelImage> images,
+            Map<Long, List<GetImageResponse>> productImageMap,
+            Map<Long, String> requesterPlaceNameMap,
+            Map<Long, GetProductMemberResponse> ownerInfoByMemberId
     ) {
-        Map<Long, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
+        Map<Long, TradeCancel> tcMap = tradeCancels.stream()
+                .collect(Collectors.toMap(TradeCancel::getId, t -> t));
 
-        Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
+        Map<Long, List<GetImageResponse>> tcImageMap = images.stream()
                 .collect(Collectors.groupingBy(
-                        ri -> ri.getProduct().getId(),
-                        Collectors.mapping(ri -> new GetImageResponse(
-                                ri.getImage().getId(),
-                                ri.getImage().getImageUrl()), Collectors.toList())
+                        tci -> tci.getTradeCancel().getId(),
+                        Collectors.mapping(
+                                tci -> new GetImageResponse(tci.getImage().getId(), tci.getImage().getImageUrl()),
+                                Collectors.toList()
+                        )
                 ));
 
         return alerts.stream()
                 .map(alert -> {
-                    MemberDetail memberDetail = memberDetails.stream()
-                            .filter(md -> md.getMember().getId().equals(alert.getRequester().getId()))
-                            .findFirst()
-                            .orElseThrow(NotFoundMemberException::new);
+                    TradeCancel tc = Optional.ofNullable(tcMap.get(alert.getSourceId()))
+                            .orElseThrow(NotFoundTradeCancelException::new);
 
-                    String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
+                    Product product = tc.getTradeComplete().getProduct();
+                    Member owner = product.getMember();
+                    Long ownerId = owner.getId();
 
-                    Product product = Optional.ofNullable(productMap.get(alert.getSourceId()))
-                            .orElseThrow(NotFoundProductException::new);
+                    List<GetImageResponse> cancelImages = tcImageMap.getOrDefault(tc.getId(), List.of());
+                    List<GetImageResponse> pImages = productImageMap.getOrDefault(product.getId(), List.of());
 
-                    List<GetImageResponse> imageResponses = imageMap.getOrDefault(alert.getSourceId(), List.of());
+                    String requesterPlace = requesterPlaceNameMap.get(alert.getRequester().getId());
 
-                    int rawLight = memberDetail.getLight();
-                    int light = Math.max(1, rawLight / 10);
+                    GetProductMemberResponse ownerInfo = ownerInfoByMemberId.get(ownerId);
+                    String ownerPlace = ownerInfo.placeName();
+                    Integer ownerLight = Math.max(1, ownerInfo.light() / 10);
 
-                    GetProductResponse productResponse = new GetProductResponse(
-                            product.getId(),
-                            product.getTitle(),
-                            product.getDescription(),
-                            product.getGwangsan(),
-                            product.getType(),
-                            product.getMode(),
-                            new GetProductMemberResponse(
-                                    memberDetail.getId(),
-                                    memberDetail.getMember().getNickname(),
-                                    placeName,
-                                    light
-                            ),
-                            imageResponses
-                    );
+                    GetProductResponse productDto = buildProductResponse(product, pImages, ownerPlace, ownerLight);
 
-                    return new GetTradeCompleteAlertResponse(
+                    return new GetTradeCancelAlertResponse(
                             alert.getId(),
-                            alert.getOtherMember().getNickname(),
+                            alert.getRequester().getNickname(),
                             alert.getTitle(),
+                            tc.getReason(),
+                            requesterPlace,
                             alert.getCreatedAt(),
-                            productResponse
+                            cancelImages,
+                            productDto
                     );
                 })
                 .toList();
+    }
+
+    private GetProductResponse buildProductResponse(
+            Product product,
+            List<GetImageResponse> images,
+            String ownerPlaceName,
+            Integer ownerLight
+    ) {
+        Member member = product.getMember();
+
+        GetProductMemberResponse memberDto = new GetProductMemberResponse(
+                member.getId(),
+                member.getNickname(),
+                ownerPlaceName,
+                ownerLight
+        );
+
+        return new GetProductResponse(
+                product.getId(),
+                product.getTitle(),
+                product.getDescription(),
+                product.getGwangsan(),
+                product.getType(),
+                product.getMode(),
+                memberDto,
+                images
+        );
     }
 }

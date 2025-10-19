@@ -4,7 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
-import team.startup.gwangsan.domain.auth.entity.constant.OsType;
+import team.startup.gwangsan.domain.notification.entity.constant.OsType;
 
 @RedisHash(value = "gwangsan_deviceToken", timeToLive = 60L * 60 * 24 * 30)
 @Getter

@@ -17,6 +17,6 @@ public class CreateAlertEventListener {
     @Async("asyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCreateAlertEvent(CreateAlertEvent event) {
-        createAlertService.execute(event.sourceId(), event.memberId(), event.alertType());
+        createAlertService.execute(event.sourceId(), event.memberId(), event.alertType(), event.suspendId());
     }
 }

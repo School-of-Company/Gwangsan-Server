@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.custom.ProductImageCustomRepository;
 
+import java.util.Collection;
 import java.util.List;
 
 import static team.startup.gwangsan.domain.post.entity.QProductImage.productImage;
@@ -17,7 +18,7 @@ public class ProductImageCustomRepositoryImpl implements ProductImageCustomRepos
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ProductImage> findProductImageByProductIdIn(List<Long> productIds) {
+    public List<ProductImage> findAllByProductIdIn(Collection<Long> productIds) {
         return queryFactory
                 .selectFrom(productImage)
                 .join(productImage.image).fetchJoin()

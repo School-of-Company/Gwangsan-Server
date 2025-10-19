@@ -39,13 +39,6 @@ public enum ErrorCode {
     // product
     NOT_FOUND_PRODUCT(404, "해당 게시글을 찾을 수 없습니다."),
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
-    CANNOT_COMPLETE_TRADE(400, "거래 완료를 할 수 없습니다."),
-    CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
-    NOT_FOUND_TRADE_COMPLETE(404, "거래 완료 요청을 찾을 수 없습니다."),
-    TRADE_ALREADY_COMPLETE(409, "이미 거래 완료된 상품입니다."),
-    TRADE_ALREADY_COMPLETE_REQUEST(409, "이미 거래 완료 요청한 상품입니다."),
-    TRADE_COMPLETE_WITHOUT_CHATTING(400, "채팅을 하지 않은 상품은 거래 완료할 수 없습니다."),
-    SELLER_NOT_TRADE_COMPLETED(400, "아직 판매자가 거래 완료를 하지 않았습니다."),
     PRODUCT_NOT_ONGOING(400, "진행 중인 상품만 예약할 수 있습니다."),
     PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
     PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
@@ -92,7 +85,23 @@ public enum ErrorCode {
 
     // chat
     NOT_FOUND_CHAT_ROOM(404, "해당하는 채팅방을 찾을 수 없습니다."),
-    NOT_FOUND_CHAT_MESSAGE(404, "해당하는 채팅 메세지를 찾을 수 없습니다.");
+    NOT_FOUND_CHAT_MESSAGE(404, "해당하는 채팅 메세지를 찾을 수 없습니다."),
+
+    // trade
+    CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
+    NOT_FOUND_TRADE_COMPLETE(404, "거래 완료 요청을 찾을 수 없습니다."),
+    TRADE_ALREADY_COMPLETE(409, "이미 거래 완료된 상품입니다."),
+    TRADE_ALREADY_COMPLETE_REQUEST(409, "이미 거래 완료 요청한 상품입니다."),
+    TRADE_COMPLETE_WITHOUT_CHATTING(400, "채팅을 하지 않은 상품은 거래 완료할 수 없습니다."),
+    SELLER_NOT_TRADE_COMPLETED(400, "아직 판매자가 거래 완료를 하지 않았습니다."),
+    ALREADY_TRADE_CANCEL_REQUEST(409, "이미 거래 철회 요청된 거래입니다."),
+    NOT_FOUND_TRADE_CANCEL(404, "거래 철회 요청을 찾을 수 없습니다."),
+    TRADE_PARTICIPANT_ONLY(403, "거래 당사자만 요청할 수 있습니다."),
+    NOT_TRADE_CANCEL_REQUESTER(403, "거래 철회 요청자가 아닙니다."),
+    CANNOT_PENDING_TRADE_CANCEL(400, "거래 철회가 대기중이 아닙니다."),
+
+    // suspend
+    NOT_FOUND_SUSPEND(404, "해당하는 정지 내역을 찾을 수 없습니다.");
 
     private final int status;
     private final String message;

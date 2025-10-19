@@ -17,11 +17,10 @@ import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.entity.TradeComplete;
+import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.post.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
