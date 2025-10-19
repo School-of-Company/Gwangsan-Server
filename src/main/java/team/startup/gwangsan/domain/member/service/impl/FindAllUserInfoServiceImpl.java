@@ -52,7 +52,8 @@ public class FindAllUserInfoServiceImpl implements FindAllUserInfoService {
                             member.getPhoneNumber(),
                             member.getRole(),
                             member.getStatus(),
-                            member.getJoinedAt()
+                            member.getJoinedAt(),
+                            detail.getGwangsan()
                     );
                 })
                 .toList();

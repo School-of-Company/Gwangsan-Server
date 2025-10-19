@@ -12,7 +12,8 @@ public record FindAllUserInfoResponse(
         String phoneNumber,
         MemberRole role,
         MemberStatus status,
-        LocalDateTime joinedAt
+        LocalDateTime joinedAt,
+        Integer gwangsan
 ) {}
 
 
