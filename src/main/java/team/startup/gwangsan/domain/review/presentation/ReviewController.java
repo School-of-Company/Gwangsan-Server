@@ -6,11 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReviewRequest;
+import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewDetailResponse;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
-import team.startup.gwangsan.domain.review.service.CreateReviewService;
-import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
-import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
-import team.startup.gwangsan.domain.review.service.GetReviewByMemberService;
+import team.startup.gwangsan.domain.review.service.*;
 
 import java.util.List;
 
@@ -23,6 +21,7 @@ public class ReviewController {
     private final GetMyReviewListService getMyReviewListService;
     private final GetReceivedReviewListService getReceivedReviewListService;
     private final GetReviewByMemberService getReviewByMemberService;
+    private final GetReviewDetailService getReviewDetailService;
 
     @PostMapping
     public ResponseEntity<Void> createReview(@RequestBody @Valid CreateReviewRequest request) {
@@ -49,4 +48,9 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewDetailResponse> getReviewDetail(@PathVariable Long reviewId) {
+        ReviewDetailResponse response = getReviewDetailService.execute(reviewId);
+        return ResponseEntity.ok(response);
+    }
 }
