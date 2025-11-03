@@ -112,7 +112,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/review").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
-                                .requestMatchers(HttpMethod.POST, "/api/review/{reviewId}").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/review/detail/{reviewId}").authenticated()
 
                                 // member
                                 .requestMatchers(HttpMethod.GET, "/api/member").authenticated()
