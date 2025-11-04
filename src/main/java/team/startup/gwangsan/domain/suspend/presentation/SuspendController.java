@@ -19,7 +19,7 @@ public class SuspendController {
 
     @PatchMapping
     public ResponseEntity<Void> suspend(@RequestBody @Valid SuspendMemberRequest request) {
-        suspendMemberService.execute(request.memberId(), request.suspendedDays());
+        suspendMemberService.execute(request.memberId(), request.suspendedDays(), request.alertId());
         return ResponseEntity.noContent().build();
     }
 }
