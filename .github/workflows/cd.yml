@@ -57,7 +57,7 @@ jobs:
           host: gsmsv-1.yujun.kr
           username: ubuntu
           password: ${{ secrets.SSH_PASSWORD }}
-          port: 36657
+          port: 32659
           script: |
             docker pull ${{ env.DOCKERHUB_REPOSITORY }}:latest
             
@@ -89,4 +89,5 @@ jobs:
                -X POST \
                -d '{"content": "❌ Docker image build, push or deployment failed."}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
+
 
