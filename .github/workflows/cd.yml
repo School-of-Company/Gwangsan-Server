@@ -69,7 +69,7 @@ jobs:
               -p 8080:8080 \
               -e TZ=Asia/Seoul \
               --env-file .env \
-              --net gwangsan-net \
+              --net gwangsan-nw \
               ${{ env.DOCKERHUB_REPOSITORY }}:latest
             
             docker system prune -f
@@ -89,5 +89,6 @@ jobs:
                -X POST \
                -d '{"content": "❌ Docker image build, push or deployment failed."}' \
                ${{ env.DISCORD_WEBHOOK_URL }}
+
 
 
