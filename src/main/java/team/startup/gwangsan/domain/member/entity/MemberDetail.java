@@ -62,4 +62,8 @@ public class MemberDetail {
     public void plusGwangsan(Integer gwangsan) {
         this.gwangsan = this.gwangsan + gwangsan;
     }
+
+    public void updatePlace(Place place) {
+        this.place = place;
+    }
 }
