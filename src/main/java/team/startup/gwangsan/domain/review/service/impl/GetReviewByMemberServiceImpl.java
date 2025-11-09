@@ -38,6 +38,7 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
                             .toList();
 
                     return new ReviewResponse(
+                            review.getId(),
                             review.getProduct().getId(),
                             review.getContent(),
                             review.getLight(),

@@ -5,6 +5,7 @@ import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResp
 import java.util.List;
 
 public record ReviewResponse(
+        Long reviewId,
         Long productId,
         String content,
         Integer light,

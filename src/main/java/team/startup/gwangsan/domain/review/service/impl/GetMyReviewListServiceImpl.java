@@ -36,6 +36,7 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
                             .toList();
 
                     return new ReviewResponse(
+                            review.getId(),
                             review.getProduct().getId(),
                             review.getContent(),
                             review.getLight(),
