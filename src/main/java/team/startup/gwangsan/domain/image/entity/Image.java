@@ -4,11 +4,16 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_image")
+@EntityListeners(AuditingEntityListener.class)
 public class Image {
 
     @Id
@@ -18,6 +23,10 @@ public class Image {
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Builder
     public Image(String imageUrl) {
