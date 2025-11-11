@@ -48,22 +48,39 @@ public class UpdateProductServiceImpl implements UpdateProductService {
 
         product.update(type, mode, title, description, gwangsan);
 
-        List<Image> images = imageRepository.findByIdIn(imageIds);
-        ImageValidateUtil.validateExistence(imageIds, images);
-
         List<ProductImage> existingImages = productImageRepository.findAllByProductId(productId);
-
         Set<Long> existingImageIds = extractImageIds(existingImages);
         Set<Long> requestImageIds = new HashSet<>(imageIds);
 
         Set<Long> toDeleteImageIds = findToDeleteIds(existingImageIds, requestImageIds);
         Set<Long> toAddImageIds = findToAddIds(existingImageIds, requestImageIds);
 
+        deleteObsoleteImages(existingImages, toDeleteImageIds);
+
+        List<Image> images = imageRepository.findByIdIn(imageIds);
+        ImageValidateUtil.validateExistence(imageIds, images);
+
         List<ProductImage> toSave = buildProductImagesToSave(toAddImageIds, images, product);
+        saveNewImages(toSave);
 
+        applicationEventPublisher.publishEvent(
+                new DeleteNotUsedImageEvent(productId, toDeleteImageIds, ImageType.PRODUCT)
+        );
+    }
+
+    private void deleteObsoleteImages(List<ProductImage> existingImages, Set<Long> toDeleteImageIds) {
+        if (toDeleteImageIds.isEmpty()) return;
+        List<ProductImage> toDelete = existingImages.stream()
+                .filter(pi -> toDeleteImageIds.contains(pi.getImage().getId()))
+                .toList();
+        if (!toDelete.isEmpty()) {
+            productImageRepository.deleteAllInBatch(toDelete);
+        }
+    }
+
+    private void saveNewImages(List<ProductImage> toSave) {
+        if (toSave.isEmpty()) return;
         productImageRepository.saveAll(toSave);
-
-        applicationEventPublisher.publishEvent(new DeleteNotUsedImageEvent(productId, toDeleteImageIds, ImageType.PRODUCT));
     }
 
     private Set<Long> extractImageIds(List<ProductImage> productImages) {
