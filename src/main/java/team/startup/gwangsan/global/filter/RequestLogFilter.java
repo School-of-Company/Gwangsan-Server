@@ -43,7 +43,6 @@ public class RequestLogFilter extends OncePerRequestFilter {
                         .writerWithDefaultPrettyPrinter()
                         .writeValueAsString(json);
             } catch (Exception ignore) {
-                // fall through and return raw body
             }
         }
 
