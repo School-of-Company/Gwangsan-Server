@@ -5,13 +5,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.domain.review.entity.Review;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,18 +30,39 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
     public List<ReviewResponse> execute() {
         Member reviewed = memberUtil.getCurrentMember();
 
-        return reviewRepository.findAllByReviewedWithFetch(reviewed).stream()
+        List<Review> reviews = reviewRepository.findAllByReviewedWithFetch(reviewed);
+
+        if (reviews.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> productIds = reviews.stream()
+                .map(review -> review.getProduct().getId())
+                .distinct()
+                .toList();
+
+        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
+
+        Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
+                .collect(Collectors.groupingBy(
+                        pi -> pi.getProduct().getId(),
+                        Collectors.mapping(
+                                pi -> new GetImageResponse(
+                                        pi.getImage().getId(),
+                                        pi.getImage().getImageUrl()
+                                ),
+                                Collectors.toList()
+                        )
+                ));
+
+        return reviews.stream()
                 .map(review -> {
-                    List<GetImageResponse> images = productImageRepository.findAllByProductId(review.getProduct().getId()).stream()
-                            .map(pi -> new GetImageResponse(
-                                    pi.getImage().getId(),
-                                    pi.getImage().getImageUrl()
-                            ))
-                            .toList();
+                    Long productId = review.getProduct().getId();
+                    List<GetImageResponse> images = imageMap.getOrDefault(productId, List.of());
 
                     return new ReviewResponse(
                             review.getId(),
-                            review.getProduct().getId(),
+                            productId,
                             review.getContent(),
                             review.getLight(),
                             review.getReviewer().getNickname(),
