@@ -15,6 +15,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,10 +37,9 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
             return List.of();
         }
 
-        List<Long> productIds = reviews.stream()
+        Set<Long> productIds = reviews.stream()
                 .map(review -> review.getProduct().getId())
-                .distinct()
-                .toList();
+                .collect(Collectors.toSet());
 
         List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
 
