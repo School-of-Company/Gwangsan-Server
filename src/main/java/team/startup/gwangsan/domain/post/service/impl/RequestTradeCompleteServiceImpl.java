@@ -18,6 +18,9 @@ import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.ProductReservation;
+import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
+import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -50,6 +53,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     private final MemberDetailRepository memberDetailRepository;
     private final DeviceTokenRepository deviceTokenRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ProductReservationRepository productReservationRepository;
 
     @Override
     @Transactional
@@ -70,11 +74,17 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         MemberDetail buyerDetail  = isBuyer ? memberDetail    : otherMemberDetail;
         MemberDetail sellerDetail = isBuyer ? otherMemberDetail: memberDetail;
 
+        ProductReservation reservation =
+                validateReservationParticipant(product, buyerDetail.getMember(), sellerDetail.getMember());
+
         ChatRoom chatRoom = findChatRoom(product, buyerDetail.getMember(), sellerDetail.getMember());
         validateChatExists(chatRoom, member.getId());
 
-        if (isBuyer) handleBuyerTradeCompletion(product, buyerDetail, sellerDetail);
-        else         handleSellerTradeCompletion(product, sellerDetail.getMember(), buyerDetail.getMember());
+        if (isBuyer) {
+            handleBuyerTradeCompletion(product, buyerDetail, sellerDetail, reservation);
+        } else {
+            handleSellerTradeCompletion(product, sellerDetail.getMember(), buyerDetail.getMember());
+        }
 
     }
 
@@ -110,7 +120,25 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private void handleBuyerTradeCompletion(Product product, MemberDetail buyerDetail, MemberDetail sellerDetail) {
+    private ProductReservation validateReservationParticipant(Product product, Member buyer, Member seller) {
+        if (product.getStatus() != ProductStatus.RESERVATION) {
+            return null;
+        }
+
+        ProductReservation reservation = productReservationRepository
+                .findByProductAndStatus(product, ReservationStatus.PENDING)
+                .orElseThrow(ReservationParticipantOnlyException::new);
+
+        Member reserver = reservation.getReserver();
+
+        if (!reserver.equals(buyer) && !reserver.equals(seller)) {
+            throw new ReservationParticipantOnlyException();
+        }
+
+        return reservation;
+    }
+
+    private void handleBuyerTradeCompletion(Product product, MemberDetail buyerDetail, MemberDetail sellerDetail, ProductReservation reservation) {
         TradeComplete pending = tradeCompleteRepository
                 .findByProductAndBuyerAndSellerAndStatus(
                         product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING)
@@ -122,6 +150,10 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         buyerDetail.minusGwangsan(product.getGwangsan());
         sellerDetail.plusGwangsan(product.getGwangsan());
+
+        if (reservation != null) {
+            reservation.complete();
+        }
 
         List<Long> memberIds = new ArrayList<>();
 
