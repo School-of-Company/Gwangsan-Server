@@ -8,16 +8,11 @@ import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.FindRoomsByCurrentUserService;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,7 +24,6 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
     private final ChatRoomRepository chatRoomRepository;
     private final MemberUtil memberUtil;
     private final ProductRepository productRepository;
-    private final ProductImageRepository productImageRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,38 +33,15 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
 
         Set<Long> productIds = rooms.stream()
                 .map(GetRoomsDto::productId)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity()));
-
-        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
-
-        Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
-                .collect(Collectors.groupingBy(
-                        pi -> pi.getProduct().getId(),
-                        Collectors.mapping(
-                                pi -> new GetImageResponse(pi.getImage().getId(), pi.getImage().getImageUrl()),
-                                Collectors.toList()
-                        )
-                ));
+        Map<Long, GetRoomProductDto> productDtoMap = productRepository.findRoomProductsWithImagesByIds(productIds)
+                .stream()
+                .collect(Collectors.toMap(GetRoomProductDto::productId, Function.identity()));
 
         return rooms.stream()
-                .map(room -> {
-                    Product product = productMap.get(room.productId());
-                    GetRoomProductDto productDto = null;
-
-                    if (product != null) {
-                        List<GetImageResponse> imageResponses = imageMap.getOrDefault(product.getId(), List.of());
-
-                        productDto = new GetRoomProductDto(
-                                product.getId(),
-                                product.getTitle(),
-                                imageResponses
-                        );
-                    }
-                    return new GetRoomsResponse(
+                .map(room ->
+                    new GetRoomsResponse(
                             room.roomId(),
                             room.member(),
                             room.messageId(),
@@ -78,9 +49,9 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
                             room.lastMessageType(),
                             room.lastMessageTime(),
                             room.unreadMessageCount(),
-                            productDto
-                    );
-                })
+                            productDtoMap.get(room.productId())
+                    )
+                )
                 .toList();
     }
 }
