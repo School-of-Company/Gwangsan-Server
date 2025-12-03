@@ -23,17 +23,18 @@ import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
-import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
-import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.global.redis.RedisUtil;
 
 @Service
 @RequiredArgsConstructor
 public class SignUpServiceImpl implements SignUpService {
 
     private final MemberRepository memberRepository;
-    private final SmsAuthRepository smsAuthRepository;
+    private static final String VERIFIED_KEY_PREFIX = "sms:verified:";
+
+    private final RedisUtil redisUtil;
     private final DongRepository dongRepository;
     private final PlaceRepository placeRepository;
     private final MemberDetailRepository memberDetailRepository;
@@ -48,10 +49,13 @@ public class SignUpServiceImpl implements SignUpService {
         validateDuplicatePhoneNumber(request.phoneNumber());
         validateDuplicateNickname(request.nickname());
 
-        SmsAuthEntity smsAuthEntity = smsAuthRepository.findByPhoneNumber(request.phoneNumber())
-                .orElseThrow(SmsAuthNotFoundException::new);
+        String verifiedKey = VERIFIED_KEY_PREFIX + request.phoneNumber();
+        Boolean verified = redisUtil.get(verifiedKey, Boolean.class);
+        if (verified == null) {
+            throw new SmsAuthNotFoundException();
+        }
 
-        validateSmsAuthentication(smsAuthEntity);
+        validateSmsAuthentication(verified);
 
         Dong dong = dongRepository.findByName(request.dongName())
                 .orElseThrow(DongNotFoundException::new);
@@ -110,6 +114,8 @@ public class SignUpServiceImpl implements SignUpService {
                 member.getId(),
                 recommender.getId(),
                 team.startup.gwangsan.domain.alert.entity.constant.AlertType.RECOMMENDER));
+
+        redisUtil.delete(verifiedKey);
     }
 
     private void validateDuplicatePhoneNumber(String phoneNumber) {
@@ -124,8 +130,8 @@ public class SignUpServiceImpl implements SignUpService {
         }
     }
 
-    private void validateSmsAuthentication(SmsAuthEntity smsAuthEntity) {
-        if (!smsAuthEntity.getAuthentication()) {
+    private void validateSmsAuthentication(Boolean verified) {
+        if (!Boolean.TRUE.equals(verified)) {
             throw new SmsAuthNotCompletedException();
         }
     }

@@ -30,4 +30,19 @@ public class RedisUtil {
     public boolean deleteBlackList(String key) {
         return redisBlackListTemplate.delete(key);
     }
+
+    public void set(String key, Object value, long milliseconds) {
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(value.getClass()));
+        redisTemplate.opsForValue().set(key, value, milliseconds, TimeUnit.MILLISECONDS);
+    }
+
+    public <T> T get(String key, Class<T> clazz) {
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(clazz));
+        return (T) redisTemplate.opsForValue().get(key);
+    }
+
+    public boolean delete(String key) {
+        return redisTemplate.delete(key);
+    }
+
 }

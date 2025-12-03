@@ -4,29 +4,39 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotFoundException;
-import team.startup.gwangsan.domain.sms.entity.SmsAuthEntity;
 import team.startup.gwangsan.domain.sms.exception.NotMatchRandomCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.VerifyCodeRequest;
-import team.startup.gwangsan.domain.sms.repository.SmsAuthRepository;
 import team.startup.gwangsan.domain.sms.service.VerifyResetPasswordCodeService;
+import team.startup.gwangsan.global.redis.RedisUtil;
 
 @Service
 @RequiredArgsConstructor
 public class VerifyResetPasswordCodeServiceImpl implements VerifyResetPasswordCodeService {
 
-    private final SmsAuthRepository smsAuthRepository;
+    private static final String CODE_KEY_PREFIX = "sms:code:";
+    private static final String VERIFIED_KEY_PREFIX = "sms:verified:";
+
+    private static final long VERIFIED_TTL_MILLIS = 10 * 60 * 1000L;
+
+    private final RedisUtil redisUtil;
 
     @Override
     @Transactional
     public void execute(VerifyCodeRequest request) {
-        SmsAuthEntity smsAuthEntity = smsAuthRepository.findById(request.phoneNumber())
-                .orElseThrow(SmsAuthNotFoundException::new);
+        String phoneNumber = request.phoneNumber();
+        String codeKey = CODE_KEY_PREFIX + phoneNumber;
+        String verifiedKey = VERIFIED_KEY_PREFIX + phoneNumber;
 
-        if (!smsAuthEntity.getRandomValue().equals(request.code())) {
+        String savedCode = redisUtil.get(codeKey, String.class);
+        if (savedCode == null) {
+            throw new SmsAuthNotFoundException();
+        }
+
+        if (!savedCode.equals(request.code())) {
             throw new NotMatchRandomCodeException();
         }
 
-        smsAuthEntity.changeAuthentication();
-        smsAuthRepository.save(smsAuthEntity);
+        redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
+        redisUtil.delete(codeKey);
     }
 }
