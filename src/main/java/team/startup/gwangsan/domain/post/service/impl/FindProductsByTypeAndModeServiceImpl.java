@@ -39,6 +39,10 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
 
         List<Product> products = productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(type, mode, myPlace, ProductStatus.ONGOING);
 
+        if (products.isEmpty()) {
+            return List.of();
+        }
+
         List<Long> memberIds = products.stream()
                 .map(p -> p.getMember().getId())
                 .distinct()
