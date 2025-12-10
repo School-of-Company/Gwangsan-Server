@@ -40,6 +40,10 @@ public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindPr
                 .orElseThrow(NotFoundMemberDetailException::new);
         List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatus(member, type, mode, ProductStatus.ONGOING);
 
+        if (products.isEmpty()) {
+            return List.of();
+        }
+
         List<Long> productIds = products.stream()
                 .map(Product::getId)
                 .toList();
