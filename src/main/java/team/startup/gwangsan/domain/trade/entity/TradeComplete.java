@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_trade_complete",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"product_id", "member_id"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"product_id", "buyer_id", "seller_id", "status"})})
 @EntityListeners(AuditingEntityListener.class)
 public class TradeComplete {
 

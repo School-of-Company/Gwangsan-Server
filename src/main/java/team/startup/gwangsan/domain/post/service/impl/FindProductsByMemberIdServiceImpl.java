@@ -38,6 +38,10 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
 
         List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatus(member, type, mode, null);
 
+        if (products.isEmpty()) {
+            return List.of();
+        }
+
         List<Long> productIds = products.stream()
                 .map(Product::getId)
                 .toList();

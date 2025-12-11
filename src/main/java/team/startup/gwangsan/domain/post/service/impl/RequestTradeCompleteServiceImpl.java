@@ -64,7 +64,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         validateNotSelfTrade(member.getId(), otherMemberId);
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(NotFoundProductException::new);
         validateProductStatus(product);
 
