@@ -4,5 +4,5 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 
 public interface FindAlertByAlertTypeAndPlaceService {
-    GetAdminAlertResponse execute(String placeName, AlertType type);
+    GetAdminAlertResponse execute(Integer placeId, AlertType type);
 }

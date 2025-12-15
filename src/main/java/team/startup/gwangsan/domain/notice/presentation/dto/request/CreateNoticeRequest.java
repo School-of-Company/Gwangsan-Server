@@ -7,6 +7,6 @@ import java.util.List;
 public record CreateNoticeRequest(
         @NotNull String title,
         @NotNull String content,
-        @NotNull String placeName,
+        @NotNull Integer placeId,
         List<Long> imageIds
 ) {}

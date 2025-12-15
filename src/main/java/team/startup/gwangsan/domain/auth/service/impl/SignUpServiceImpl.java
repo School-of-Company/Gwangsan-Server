@@ -60,7 +60,7 @@ public class SignUpServiceImpl implements SignUpService {
         Dong dong = dongRepository.findByName(request.dongName())
                 .orElseThrow(DongNotFoundException::new);
 
-        Place place = placeRepository.findByName(request.placeName())
+        Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(PlaceNotFoundException::new);
 
         Member recommender = memberRepository.findByNickname(request.recommender())

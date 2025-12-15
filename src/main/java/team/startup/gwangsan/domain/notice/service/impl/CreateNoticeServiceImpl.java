@@ -48,7 +48,7 @@ public class CreateNoticeServiceImpl implements CreateNoticeService {
     public void execute(CreateNoticeRequest request) {
         Member admin = memberUtil.getCurrentMember();
 
-        Place place = placeRepository.findByName(request.placeName())
+        Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(PlaceNotFoundException::new);
 
         Notice notice = Notice.builder()
