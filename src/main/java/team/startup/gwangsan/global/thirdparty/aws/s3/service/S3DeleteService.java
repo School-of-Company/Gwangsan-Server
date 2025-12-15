@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import team.startup.gwangsan.domain.image.entity.dto.DeleteResult;
+import team.startup.gwangsan.domain.image.exception.ImageDeleteFailedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +37,7 @@ public class S3DeleteService {
         return s3AsyncClient.deleteObject(deleteObjectRequest).thenAccept(response -> log.debug("파일이 성공적으로 삭제되었습니다: {}", uploadFileName)
         ).exceptionally(throwable -> {
             log.error("파일 삭제에 실패하였습니다: {}", uploadFileName, throwable);
-            // TODO: 커스텀 예외로 변경하기
-            throw new RuntimeException("파일 삭제에 실패했습니다.");
+            throw new ImageDeleteFailedException();
         });
     }
 
