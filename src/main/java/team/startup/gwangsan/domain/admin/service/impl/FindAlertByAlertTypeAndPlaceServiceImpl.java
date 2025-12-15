@@ -61,9 +61,9 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     @Override
     @Transactional
-    public GetAdminAlertResponse execute(String placeName, AlertType type) {
+    public GetAdminAlertResponse execute(Integer placeId, AlertType type) {
         Member admin = memberUtil.getCurrentMember();
-        List<Place> places = findTargetPlaces(placeName, admin);
+        List<Place> places = findTargetPlaces(placeId, admin);
 
         List<AdminAlert> alerts = adminAlertRepository.findAdminAlertByPlacesAndAlertType(places, type);
 
@@ -138,13 +138,13 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         return alerts.stream().filter(a -> a.getType() == type).toList();
     }
 
-    private List<Place> findTargetPlaces(String placeName, Member member) {
+    private List<Place> findTargetPlaces(Integer placeId, Member member) {
         if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
-            if (placeName == null) {
+            if (placeId == null) {
                 Place place = memberDetailRepository.findPlaceByMemberId(member.getId());
                 return placeRepository.findByHead(place.getHead());
             }
-            Place target = placeRepository.findByName(placeName)
+            Place target = placeRepository.findById(placeId)
                     .orElseThrow(PlaceNotFoundException::new);
             return List.of(target);
         }

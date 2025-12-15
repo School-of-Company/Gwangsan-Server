@@ -32,9 +32,9 @@ public class AdminController {
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
             @RequestParam(name = "alert_type", required = false) AlertType type,
-            @RequestParam(name = "place_name", required = false) String placeName
+            @RequestParam(name = "place_id", required = false) Integer placeId
     ) {
-        GetAdminAlertResponse response = findAlertByAlertTypeService.execute(placeName, type);
+        GetAdminAlertResponse response = findAlertByAlertTypeService.execute(placeId, type);
         return ResponseEntity.ok(response);
     }
 
