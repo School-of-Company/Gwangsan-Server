@@ -8,6 +8,7 @@ import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import team.startup.gwangsan.domain.image.exception.ImageDeleteFailedException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,8 +41,7 @@ public class S3UploadService {
             CompletableFuture<PutObjectResponse> responseFuture = s3AsyncClient.putObject(putObjectRequest, requestBody);
             return responseFuture.thenApply(response -> String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, uploadFileName));
         } catch (IOException e) {
-            // TODO: 커스텀 예외로 변경하기
-            throw new RuntimeException(e);
+            throw new ImageDeleteFailedException();
         }
 
     }
