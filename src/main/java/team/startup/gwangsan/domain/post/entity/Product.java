@@ -70,10 +70,10 @@ public class Product {
         this.mode = mode;
     }
 
-    public void update(Type type, Mode mode, String title, String description, Integer gwangsant) {
+    public void update(Type type, Mode mode, String title, String description, Integer gwangsan) {
         this.title = title;
         this.description = description;
-        this.gwangsan = gwangsant;
+        this.gwangsan = gwangsan;
         this.status = ProductStatus.ONGOING;
         this.type = type;
         this.mode = mode;
