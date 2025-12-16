@@ -9,6 +9,7 @@ import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReview
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewDetailResponse;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.service.*;
+import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class ReviewController {
     private final GetReceivedReviewListService getReceivedReviewListService;
     private final GetReviewByMemberService getReviewByMemberService;
     private final GetReviewDetailService getReviewDetailService;
+    private final MemberUtil memberUtil;
 
     @PostMapping
     public ResponseEntity<Void> createReview(@RequestBody @Valid CreateReviewRequest request) {
@@ -37,7 +39,8 @@ public class ReviewController {
 
     @GetMapping("/current")
     public ResponseEntity<List<ReviewResponse>> getMyReceivedReviews() {
-        List<ReviewResponse> response = getReceivedReviewListService.execute();
+        Long currentMemberId = memberUtil.getCurrentMember().getId();
+        List<ReviewResponse> response = getReceivedReviewListService.execute(currentMemberId);
         return ResponseEntity.ok(response);
     }
 
