@@ -41,10 +41,13 @@ public class UpdateMemberRoleServiceImpl implements UpdateMemberRoleService {
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, targetMemberDetail);
 
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(PlaceNotFoundException::new);
+        if (placeId != null) {
+            Place place = placeRepository.findById(placeId)
+                    .orElseThrow(PlaceNotFoundException::new);
+
+            targetMemberDetail.updatePlace(place);
+        }
 
         targetMember.updateMemberRole(role);
-        targetMemberDetail.updatePlace(place);
     }
 }
