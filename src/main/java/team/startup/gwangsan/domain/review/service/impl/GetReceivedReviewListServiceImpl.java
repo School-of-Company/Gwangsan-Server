@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
@@ -8,6 +9,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.entity.Review;
+import team.startup.gwangsan.domain.review.exception.InvalidReviewAccessException;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
@@ -28,8 +30,13 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
     @Override
     @Transactional(readOnly = true)
-    public List<ReviewResponse> execute() {
+    @Cacheable(cacheNames = "receivedReviews", key = "#reviewedId")
+    public List<ReviewResponse> execute(Long reviewedId) {
         Member reviewed = memberUtil.getCurrentMember();
+
+        if (!reviewed.getId().equals(reviewedId)) {
+            throw new InvalidReviewAccessException();
+        }
 
         List<Review> reviews = reviewRepository.findAllByReviewedWithFetch(reviewed);
 
