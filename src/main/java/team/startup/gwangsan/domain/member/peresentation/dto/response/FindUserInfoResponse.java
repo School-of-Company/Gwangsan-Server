@@ -1,5 +1,9 @@
 package team.startup.gwangsan.domain.member.peresentation.dto.response;
 
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record FindUserInfoResponse(
@@ -9,5 +13,10 @@ public record FindUserInfoResponse(
         Integer light,
         Integer gwangsan,
         String description,
-        List<String> specialties
+        List<String> specialties,
+        String name,
+        String phoneNumber,
+        MemberRole role,
+        MemberStatus status,
+        LocalDateTime joinedAt
 ) {}
