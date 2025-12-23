@@ -9,7 +9,6 @@ import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReview
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewDetailResponse;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.service.*;
-import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
 
