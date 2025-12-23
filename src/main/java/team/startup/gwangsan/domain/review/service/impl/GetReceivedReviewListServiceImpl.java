@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
@@ -28,10 +29,16 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            cacheNames = "receivedReviews",
+            key = "#root.target.getCurrentMemberId()"
+    )
     public List<ReviewResponse> execute() {
+
         Member reviewed = memberUtil.getCurrentMember();
 
-        List<Review> reviews = reviewRepository.findAllByReviewedWithFetch(reviewed);
+        List<Review> reviews =
+                reviewRepository.findAllByReviewedWithFetch(reviewed);
 
         if (reviews.isEmpty()) {
             return List.of();
@@ -41,7 +48,8 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                 .map(review -> review.getProduct().getId())
                 .collect(Collectors.toSet());
 
-        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
+        List<ProductImage> productImages =
+                productImageRepository.findAllByProductIdIn(productIds);
 
         Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
                 .collect(Collectors.groupingBy(
@@ -58,7 +66,8 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
         return reviews.stream()
                 .map(review -> {
                     Long productId = review.getProduct().getId();
-                    List<GetImageResponse> images = imageMap.getOrDefault(productId, List.of());
+                    List<GetImageResponse> images =
+                            imageMap.getOrDefault(productId, List.of());
 
                     return new ReviewResponse(
                             review.getId(),
@@ -70,5 +79,9 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                     );
                 })
                 .toList();
+    }
+
+    public Long getCurrentMemberId() {
+        return memberUtil.getCurrentMember().getId();
     }
 }
