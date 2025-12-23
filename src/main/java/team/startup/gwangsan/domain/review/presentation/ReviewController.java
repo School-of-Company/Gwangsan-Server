@@ -23,7 +23,6 @@ public class ReviewController {
     private final GetReceivedReviewListService getReceivedReviewListService;
     private final GetReviewByMemberService getReviewByMemberService;
     private final GetReviewDetailService getReviewDetailService;
-    private final MemberUtil memberUtil;
 
     @PostMapping
     public ResponseEntity<Void> createReview(@RequestBody @Valid CreateReviewRequest request) {
@@ -39,8 +38,7 @@ public class ReviewController {
 
     @GetMapping("/current")
     public ResponseEntity<List<ReviewResponse>> getMyReceivedReviews() {
-        Long currentMemberId = memberUtil.getCurrentMember().getId();
-        List<ReviewResponse> response = getReceivedReviewListService.execute(currentMemberId);
+        List<ReviewResponse> response = getReceivedReviewListService.execute();
         return ResponseEntity.ok(response);
     }
 

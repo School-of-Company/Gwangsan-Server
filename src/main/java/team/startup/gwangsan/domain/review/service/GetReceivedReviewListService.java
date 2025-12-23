@@ -5,5 +5,5 @@ import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewRespo
 import java.util.List;
 
 public interface GetReceivedReviewListService {
-    List<ReviewResponse> execute(Long reviewedId);
+    List<ReviewResponse> execute();
 }

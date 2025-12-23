@@ -9,7 +9,6 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.entity.Review;
-import team.startup.gwangsan.domain.review.exception.InvalidReviewAccessException;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
@@ -30,15 +29,16 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "receivedReviews", key = "#reviewedId")
-    public List<ReviewResponse> execute(Long reviewedId) {
+    @Cacheable(
+            cacheNames = "receivedReviews",
+            key = "#root.target.getCurrentMemberId()"
+    )
+    public List<ReviewResponse> execute() {
+
         Member reviewed = memberUtil.getCurrentMember();
 
-        if (!reviewed.getId().equals(reviewedId)) {
-            throw new InvalidReviewAccessException();
-        }
-
-        List<Review> reviews = reviewRepository.findAllByReviewedWithFetch(reviewed);
+        List<Review> reviews =
+                reviewRepository.findAllByReviewedWithFetch(reviewed);
 
         if (reviews.isEmpty()) {
             return List.of();
@@ -48,7 +48,8 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                 .map(review -> review.getProduct().getId())
                 .collect(Collectors.toSet());
 
-        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
+        List<ProductImage> productImages =
+                productImageRepository.findAllByProductIdIn(productIds);
 
         Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
                 .collect(Collectors.groupingBy(
@@ -65,7 +66,8 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
         return reviews.stream()
                 .map(review -> {
                     Long productId = review.getProduct().getId();
-                    List<GetImageResponse> images = imageMap.getOrDefault(productId, List.of());
+                    List<GetImageResponse> images =
+                            imageMap.getOrDefault(productId, List.of());
 
                     return new ReviewResponse(
                             review.getId(),
@@ -77,5 +79,9 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                     );
                 })
                 .toList();
+    }
+
+    public Long getCurrentMemberId() {
+        return memberUtil.getCurrentMember().getId();
     }
 }
