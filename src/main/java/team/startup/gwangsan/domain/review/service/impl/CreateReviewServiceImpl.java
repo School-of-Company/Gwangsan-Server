@@ -1,7 +1,6 @@
 package team.startup.gwangsan.domain.review.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +34,7 @@ public class CreateReviewServiceImpl implements CreateReviewService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "receivedReviews", key = "#result")
-    public Long execute(CreateReviewRequest request) {
+    public void execute(CreateReviewRequest request) {
         Member reviewer = memberUtil.getCurrentMember();
 
         Product product = productRepository.findById(request.productId())
@@ -72,6 +70,5 @@ public class CreateReviewServiceImpl implements CreateReviewService {
                 AlertType.REVIEW
         ));
 
-        return review.getReviewed().getId();
     }
 }
