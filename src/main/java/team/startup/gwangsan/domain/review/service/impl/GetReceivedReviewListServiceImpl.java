@@ -6,17 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.review.entity.Review;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.domain.review.repository.custom.ReceivedReviewRow;
 import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,44 +31,38 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
         Member reviewed = memberUtil.getCurrentMember();
 
-        List<Review> reviews = reviewRepository.findAllByReviewedWithFetch(reviewed);
+        List<ReceivedReviewRow> rows =
+                reviewRepository.findReceivedReviews(reviewed.getId());
 
-        if (reviews.isEmpty()) {
-            return List.of();
-        }
+        if (rows.isEmpty()) return List.of();
 
-        Set<Long> productIds = reviews.stream()
-                .map(review -> review.getProduct().getId())
-                .collect(Collectors.toSet());
+        List<Long> productIds = rows.stream()
+                .map(ReceivedReviewRow::productId)
+                .distinct()
+                .toList();
 
-        List<ProductImage> productImages = productImageRepository.findAllByProductIdIn(productIds);
+        Map<Long, List<GetImageResponse>> imagesByProductId =
+                productImageRepository.findAllByProduct_IdIn(productIds).stream()
+                        .collect(Collectors.groupingBy(
+                                pi -> pi.getProduct().getId(),
+                                Collectors.mapping(
+                                        pi -> new GetImageResponse(
+                                                pi.getImage().getId(),
+                                                pi.getImage().getImageUrl()
+                                        ),
+                                        Collectors.toList()
+                                )
+                        ));
 
-        Map<Long, List<GetImageResponse>> imageMap = productImages.stream()
-                .collect(Collectors.groupingBy(
-                        pi -> pi.getProduct().getId(),
-                        Collectors.mapping(
-                                pi -> new GetImageResponse(
-                                        pi.getImage().getId(),
-                                        pi.getImage().getImageUrl()
-                                ),
-                                Collectors.toList()
-                        )
-                ));
-
-        return reviews.stream()
-                .map(review -> {
-                    Long productId = review.getProduct().getId();
-                    List<GetImageResponse> images = imageMap.getOrDefault(productId, List.of());
-
-                    return new ReviewResponse(
-                            review.getId(),
-                            productId,
-                            review.getContent(),
-                            review.getLight(),
-                            review.getReviewer().getNickname(),
-                            images
-                    );
-                })
+        return rows.stream()
+                .map(r -> new ReviewResponse(
+                        r.reviewId(),
+                        r.productId(),
+                        r.content(),
+                        r.light(),
+                        r.reviewerNickname(),
+                        imagesByProductId.getOrDefault(r.productId(), List.of())
+                ))
                 .toList();
     }
 }
