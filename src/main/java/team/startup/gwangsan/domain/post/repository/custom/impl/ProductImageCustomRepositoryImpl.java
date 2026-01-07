@@ -22,6 +22,7 @@ public class ProductImageCustomRepositoryImpl implements ProductImageCustomRepos
         return queryFactory
                 .selectFrom(productImage)
                 .join(productImage.image).fetchJoin()
+                .join(productImage.product).fetchJoin()
                 .where(productImage.product.id.in(productIds))
                 .fetch();
     }
@@ -31,6 +32,7 @@ public class ProductImageCustomRepositoryImpl implements ProductImageCustomRepos
         return queryFactory
                 .selectFrom(productImage)
                 .join(productImage.image).fetchJoin()
+                .join(productImage.product).fetchJoin()
                 .where(productImage.product.id.eq(productId))
                 .fetch();
     }
