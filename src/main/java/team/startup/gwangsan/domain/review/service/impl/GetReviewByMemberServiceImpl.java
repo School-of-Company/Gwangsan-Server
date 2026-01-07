@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
-import team.startup.gwangsan.domain.review.repository.custom.ReceivedReviewRow;
+import team.startup.gwangsan.domain.review.repository.projection.ReceivedReviewDto;
 import team.startup.gwangsan.domain.review.service.GetReviewByMemberService;
 
 import java.util.List;
@@ -31,11 +31,11 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
         memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
-        List<ReceivedReviewRow> rows = reviewRepository.findReceivedReviews(memberId);
+        List<ReceivedReviewDto> rows = reviewRepository.findReceivedReviews(memberId);
         if (rows.isEmpty()) return List.of();
 
         List<Long> productIds = rows.stream()
-                .map(ReceivedReviewRow::productId)
+                .map(ReceivedReviewDto::productId)
                 .distinct()
                 .toList();
 

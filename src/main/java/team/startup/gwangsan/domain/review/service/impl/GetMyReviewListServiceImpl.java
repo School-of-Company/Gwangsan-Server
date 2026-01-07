@@ -8,7 +8,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
-import team.startup.gwangsan.domain.review.repository.custom.MyReviewRow;
+import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
 import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -28,11 +28,11 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
     public List<ReviewResponse> execute() {
         Member reviewer = memberUtil.getCurrentMember();
 
-        List<MyReviewRow> rows = reviewRepository.findMyReviews(reviewer.getId());
+        List<MyReviewDto> rows = reviewRepository.findMyReviews(reviewer.getId());
         if (rows.isEmpty()) return List.of();
 
         List<Long> productIds = rows.stream()
-                .map(MyReviewRow::productId)
+                .map(MyReviewDto::productId)
                 .distinct()
                 .toList();
 

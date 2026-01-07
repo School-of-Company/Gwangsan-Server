@@ -1,6 +1,6 @@
-package team.startup.gwangsan.domain.review.repository.custom;
+package team.startup.gwangsan.domain.review.repository.projection;
 
-public record ReceivedReviewRow(
+public record ReceivedReviewDto(
         Long reviewId,
         Long productId,
         String content,
