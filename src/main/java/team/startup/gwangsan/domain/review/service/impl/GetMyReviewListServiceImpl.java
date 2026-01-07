@@ -37,7 +37,7 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
                 .toList();
 
         Map<Long, List<GetImageResponse>> imagesByProductId =
-                productImageRepository.findAllByProduct_IdIn(productIds).stream()
+                productImageRepository.findAllByProductIdIn(productIds).stream()
                         .collect(java.util.stream.Collectors.groupingBy(
                                 pi -> pi.getProduct().getId(),
                                 java.util.stream.Collectors.mapping(

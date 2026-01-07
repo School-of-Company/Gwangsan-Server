@@ -42,7 +42,7 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                 .toList();
 
         Map<Long, List<GetImageResponse>> imagesByProductId =
-                productImageRepository.findAllByProduct_IdIn(productIds).stream()
+                productImageRepository.findAllByProductIdIn(productIds).stream()
                         .collect(Collectors.groupingBy(
                                 pi -> pi.getProduct().getId(),
                                 Collectors.mapping(
