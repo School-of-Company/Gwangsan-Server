@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
 import team.startup.gwangsan.domain.review.repository.projection.ReceivedReviewDto;
 import team.startup.gwangsan.domain.review.repository.custom.ReviewCustomRepository;
+import com.querydsl.core.types.Projections;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     @Override
     public List<MyReviewDto> findMyReviews(Long reviewerId) {
         return queryFactory
-                .select(com.querydsl.core.types.Projections.constructor(
+                .select(Projections.constructor(
                         MyReviewDto.class,
                         review.id,
                         review.product.id,
@@ -36,7 +37,7 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     @Override
     public List<ReceivedReviewDto> findReceivedReviews(Long reviewedId) {
         return queryFactory
-                .select(com.querydsl.core.types.Projections.constructor(
+                .select(Projections.constructor(
                         ReceivedReviewDto.class,
                         review.id,
                         review.product.id,
