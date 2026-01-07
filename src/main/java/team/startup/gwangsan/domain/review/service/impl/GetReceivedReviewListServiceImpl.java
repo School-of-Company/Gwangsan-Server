@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
-import team.startup.gwangsan.domain.review.repository.custom.ReceivedReviewRow;
+import team.startup.gwangsan.domain.review.repository.projection.ReceivedReviewDto;
 import team.startup.gwangsan.domain.review.service.GetReceivedReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -31,13 +31,13 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
         Member reviewed = memberUtil.getCurrentMember();
 
-        List<ReceivedReviewRow> rows =
+        List<ReceivedReviewDto> rows =
                 reviewRepository.findReceivedReviews(reviewed.getId());
 
         if (rows.isEmpty()) return List.of();
 
         List<Long> productIds = rows.stream()
-                .map(ReceivedReviewRow::productId)
+                .map(ReceivedReviewDto::productId)
                 .distinct()
                 .toList();
 

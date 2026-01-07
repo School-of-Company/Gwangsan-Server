@@ -3,8 +3,8 @@ package team.startup.gwangsan.domain.review.repository.custom.impl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.review.repository.custom.MyReviewRow;
-import team.startup.gwangsan.domain.review.repository.custom.ReceivedReviewRow;
+import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
+import team.startup.gwangsan.domain.review.repository.projection.ReceivedReviewDto;
 import team.startup.gwangsan.domain.review.repository.custom.ReviewCustomRepository;
 
 import java.util.List;
@@ -18,10 +18,10 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<MyReviewRow> findMyReviews(Long reviewerId) {
+    public List<MyReviewDto> findMyReviews(Long reviewerId) {
         return queryFactory
                 .select(com.querydsl.core.types.Projections.constructor(
-                        MyReviewRow.class,
+                        MyReviewDto.class,
                         review.id,
                         review.product.id,
                         review.content,
@@ -34,10 +34,10 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     }
 
     @Override
-    public List<ReceivedReviewRow> findReceivedReviews(Long reviewedId) {
+    public List<ReceivedReviewDto> findReceivedReviews(Long reviewedId) {
         return queryFactory
                 .select(com.querydsl.core.types.Projections.constructor(
-                        ReceivedReviewRow.class,
+                        ReceivedReviewDto.class,
                         review.id,
                         review.product.id,
                         review.content,
