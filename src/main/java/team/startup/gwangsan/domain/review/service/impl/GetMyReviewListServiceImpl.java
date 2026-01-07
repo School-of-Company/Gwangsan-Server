@@ -11,7 +11,7 @@ import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
 import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
-
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
 
@@ -38,14 +38,14 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
 
         Map<Long, List<GetImageResponse>> imagesByProductId =
                 productImageRepository.findAllByProductIdIn(productIds).stream()
-                        .collect(java.util.stream.Collectors.groupingBy(
+                        .collect(Collectors.groupingBy(
                                 pi -> pi.getProduct().getId(),
-                                java.util.stream.Collectors.mapping(
+                                Collectors.mapping(
                                         pi -> new GetImageResponse(
                                                 pi.getImage().getId(),
                                                 pi.getImage().getImageUrl()
                                         ),
-                                        java.util.stream.Collectors.toList()
+                                        Collectors.toList()
                                 )
                         ));
 
