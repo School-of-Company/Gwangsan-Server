@@ -3,15 +3,14 @@ package team.startup.gwangsan.domain.review.repository.custom.impl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.review.entity.Review;
+import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
+import team.startup.gwangsan.domain.review.repository.projection.ReceivedReviewDto;
 import team.startup.gwangsan.domain.review.repository.custom.ReviewCustomRepository;
+import com.querydsl.core.types.Projections;
 
 import java.util.List;
 
 import static team.startup.gwangsan.domain.review.entity.QReview.review;
-import static team.startup.gwangsan.domain.post.entity.QProduct.product;
-import static team.startup.gwangsan.domain.member.entity.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,12 +19,35 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Review> findAllByReviewedWithFetch(Member reviewedMember) {
+    public List<MyReviewDto> findMyReviews(Long reviewerId) {
         return queryFactory
-                .selectFrom(review)
-                .join(review.product, product).fetchJoin()
-                .join(review.reviewer, member).fetchJoin()
-                .where(review.reviewed.eq(reviewedMember))
+                .select(Projections.constructor(
+                        MyReviewDto.class,
+                        review.id,
+                        review.product.id,
+                        review.content,
+                        review.light
+                ))
+                .from(review)
+                .where(review.reviewer.id.eq(reviewerId))
+                .orderBy(review.id.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<ReceivedReviewDto> findReceivedReviews(Long reviewedId) {
+        return queryFactory
+                .select(Projections.constructor(
+                        ReceivedReviewDto.class,
+                        review.id,
+                        review.product.id,
+                        review.content,
+                        review.light,
+                        review.reviewer.nickname
+                ))
+                .from(review)
+                .where(review.reviewed.id.eq(reviewedId))
+                .orderBy(review.id.desc())
                 .fetch();
     }
 }

@@ -8,10 +8,12 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.domain.review.repository.projection.MyReviewDto;
 import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
 import team.startup.gwangsan.global.util.MemberUtil;
-
+import java.util.stream.Collectors;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,24 +28,36 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
     public List<ReviewResponse> execute() {
         Member reviewer = memberUtil.getCurrentMember();
 
-        return reviewRepository.findAllByReviewer(reviewer).stream()
-                .map(review -> {
-                    List<GetImageResponse> images = productImageRepository.findAllByProductId(review.getProduct().getId()).stream()
-                            .map(pi -> new GetImageResponse(
-                                    pi.getImage().getId(),
-                                    pi.getImage().getImageUrl()
-                            ))
-                            .toList();
+        List<MyReviewDto> rows = reviewRepository.findMyReviews(reviewer.getId());
+        if (rows.isEmpty()) return List.of();
 
-                    return new ReviewResponse(
-                            review.getId(),
-                            review.getProduct().getId(),
-                            review.getContent(),
-                            review.getLight(),
-                            reviewer.getNickname(),
-                            images
-                    );
-                })
+        List<Long> productIds = rows.stream()
+                .map(MyReviewDto::productId)
+                .distinct()
+                .toList();
+
+        Map<Long, List<GetImageResponse>> imagesByProductId =
+                productImageRepository.findAllByProductIdIn(productIds).stream()
+                        .collect(Collectors.groupingBy(
+                                pi -> pi.getProduct().getId(),
+                                Collectors.mapping(
+                                        pi -> new GetImageResponse(
+                                                pi.getImage().getId(),
+                                                pi.getImage().getImageUrl()
+                                        ),
+                                        Collectors.toList()
+                                )
+                        ));
+
+        return rows.stream()
+                .map(r -> new ReviewResponse(
+                        r.reviewId(),
+                        r.productId(),
+                        r.content(),
+                        r.light(),
+                        reviewer.getNickname(),
+                        imagesByProductId.getOrDefault(r.productId(), List.of())
+                ))
                 .toList();
     }
 }
