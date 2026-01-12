@@ -1,6 +1,9 @@
 package team.startup.gwangsan.domain.member.repository.custom;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.repository.projection.FindAllUserDto;
 import team.startup.gwangsan.domain.place.entity.Place;
 
 import java.util.List;
@@ -24,4 +27,12 @@ public interface MemberDetailCustomRepository {
     MemberDetail findByPhoneNumberWithMember(String phoneNumber);
 
     Optional<MemberDetail> findByMemberIdWithPlaceHeadDong(Long memberId);
+
+    Slice<FindAllUserDto> findAllUserSlice(
+            Integer placeId,
+            Integer headId,
+            String nickname,
+            String placeName,
+            Pageable pageable
+    );
 }
