@@ -2,17 +2,17 @@ package team.startup.gwangsan.domain.member.peresentation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.admin.service.WithDrawnMemberService;
 import team.startup.gwangsan.domain.member.peresentation.dto.request.UpdateMyInfoRequest;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUserInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindUserInfoResponse;
 import team.startup.gwangsan.domain.member.service.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/member")
@@ -43,12 +43,12 @@ public class MemberController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<FindAllUserInfoResponse>> findAllUserInfo(
-            @RequestParam(name = "nickname", required = false) String nickname,
-            @RequestParam(name = "placeName", required = false) String placeName
+    public ResponseEntity<Slice<FindAllUserInfoResponse>> findAllUserInfo(
+            @RequestParam(required = false) String nickname,
+            @RequestParam(required = false) String placeName,
+            @PageableDefault(size = 20) Pageable pageable
     ) {
-        List<FindAllUserInfoResponse> response = findAllUserInfoService.execute(nickname, placeName);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(findAllUserInfoService.execute(nickname, placeName, pageable));
     }
 
     @DeleteMapping
@@ -57,4 +57,3 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
-
