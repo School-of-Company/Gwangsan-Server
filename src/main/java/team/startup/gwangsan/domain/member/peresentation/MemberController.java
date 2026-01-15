@@ -3,7 +3,6 @@ package team.startup.gwangsan.domain.member.peresentation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUse
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindUserInfoResponse;
 import team.startup.gwangsan.domain.member.service.*;
+import team.startup.gwangsan.global.dto.response.SliceResponse;
 
 @RestController
 @RequestMapping("/api/member")
@@ -43,12 +43,14 @@ public class MemberController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Slice<FindAllUserInfoResponse>> findAllUserInfo(
+    public ResponseEntity<SliceResponse<FindAllUserInfoResponse>> findAllUserInfo(
             @RequestParam(required = false) String nickname,
             @RequestParam(required = false) String placeName,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return ResponseEntity.ok(findAllUserInfoService.execute(nickname, placeName, pageable));
+        return ResponseEntity.ok(
+                SliceResponse.from(findAllUserInfoService.execute(nickname, placeName, pageable))
+        );
     }
 
     @DeleteMapping
