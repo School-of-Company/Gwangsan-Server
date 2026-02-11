@@ -49,14 +49,14 @@ public class SignUpServiceImpl implements SignUpService {
         validateDuplicatePhoneNumber(request.phoneNumber());
         validateDuplicateNickname(request.nickname());
 
-        String verifiedKey = VERIFIED_KEY_PREFIX + request.phoneNumber();
+/*        String verifiedKey = VERIFIED_KEY_PREFIX + request.phoneNumber();
         Boolean verified = redisUtil.get(verifiedKey, Boolean.class);
         if (verified == null) {
             throw new SmsAuthNotFoundException();
         }
 
         validateSmsAuthentication(verified);
-
+*/
         Dong dong = dongRepository.findByName(request.dongName())
                 .orElseThrow(DongNotFoundException::new);
 
@@ -115,7 +115,7 @@ public class SignUpServiceImpl implements SignUpService {
                 recommender.getId(),
                 team.startup.gwangsan.domain.alert.entity.constant.AlertType.RECOMMENDER));
 
-        redisUtil.delete(verifiedKey);
+//        redisUtil.delete(verifiedKey);
     }
 
     private void validateDuplicatePhoneNumber(String phoneNumber) {
