@@ -48,7 +48,14 @@ public class SendSmsServiceImpl implements SendSmsService {
     }
 
     private String generateCode() {
-        return "000000";
+        try {
+            Random random = SecureRandom.getInstanceStrong();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < 6; i++) builder.append(random.nextInt(10));
+            return builder.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new AuthCodeGenerationException();
+        }
     }
 
     private void saveAuthInfo(String phoneNumber, String code) {
