@@ -18,14 +18,23 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
     private static final long VERIFIED_TTL_MILLIS = 10 * 60 * 1000L;
 
+    private static final String DEMO_PHONE_NUMBER = "01011111111";
+    private static final String DEMO_FIXED_CODE = "000000";
+
     private final RedisUtil redisUtil;
 
     @Override
     @Transactional
     public void execute(VerifyCodeRequest request) {
         String phoneNumber = request.phoneNumber();
-        String codeKey = CODE_KEY_PREFIX + phoneNumber;
         String verifiedKey = VERIFIED_KEY_PREFIX + phoneNumber;
+
+        if (DEMO_PHONE_NUMBER.equals(phoneNumber) && DEMO_FIXED_CODE.equals(request.code())) {
+            redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
+            return;
+        }
+
+        String codeKey = CODE_KEY_PREFIX + phoneNumber;
 
         String savedCode = redisUtil.get(codeKey, String.class);
         if (savedCode == null) {
