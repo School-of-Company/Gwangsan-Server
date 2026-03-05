@@ -33,7 +33,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
         if (DEMO_PHONE_NUMBER.equals(phoneNumber) && DEMO_FIXED_CODE.equals(request.code())) {
             redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
-            log.info("[SMS] 인증 성공 (데모) - phoneNumber={}", phoneNumber);
+            log.info("[SMS] 인증 성공 (데모) - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
             return;
         }
 
