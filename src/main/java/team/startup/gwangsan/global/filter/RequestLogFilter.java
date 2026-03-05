@@ -2,7 +2,6 @@ package team.startup.gwangsan.global.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,9 +15,15 @@ public class RequestLogFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final Set<String> SENSITIVE_FIELDS = Set.of(
-        "password", "newPassword", "phoneNumber", "code", "deviceToken", "deviceId"
-    );
+    private static final String SENSITIVE_FIELDS_PATTERN;
+
+    static {
+        String fields = String.join("|",
+            "password", "newPassword", "phoneNumber", "code",
+            "deviceToken", "deviceId", "accessToken", "refreshToken"
+        );
+        SENSITIVE_FIELDS_PATTERN = "(?i)(\"(?:" + fields + ")\"\\s*:\\s*)\"[^\"]*\"";
+    }
 
     private String toString(byte[] content, String characterEncoding) {
         if (content == null || content.length == 0) {
@@ -56,14 +61,7 @@ public class RequestLogFilter extends OncePerRequestFilter {
 
     private String maskBody(String body) {
         if (body == null || body.isBlank()) return body;
-        String result = body;
-        for (String field : SENSITIVE_FIELDS) {
-            result = result.replaceAll(
-                "(?i)(\"" + field + "\"\\s*:\\s*)\"[^\"]*\"",
-                "$1\"****\""
-            );
-        }
-        return result;
+        return body.replaceAll(SENSITIVE_FIELDS_PATTERN, "$1\"****\"");
     }
 
     private String maskHeader(String name, String value) {
