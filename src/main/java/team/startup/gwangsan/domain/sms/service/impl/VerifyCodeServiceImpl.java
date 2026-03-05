@@ -50,6 +50,6 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
         redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
         redisUtil.delete(codeKey);
-        log.info("[SMS] 인증 성공 - phoneNumber={}", phoneNumber);
+        log.info("[SMS] 인증 성공 - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
     }
 }
