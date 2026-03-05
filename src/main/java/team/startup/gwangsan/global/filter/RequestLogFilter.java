@@ -2,6 +2,7 @@ package team.startup.gwangsan.global.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,10 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 public class RequestLogFilter extends OncePerRequestFilter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static final Set<String> SENSITIVE_FIELDS = Set.of(
+        "password", "newPassword", "phoneNumber", "code", "deviceToken", "deviceId"
+    );
 
     private String toString(byte[] content, String characterEncoding) {
         if (content == null || content.length == 0) {
@@ -49,6 +54,25 @@ public class RequestLogFilter extends OncePerRequestFilter {
         return body;
     }
 
+    private String maskBody(String body) {
+        if (body == null || body.isBlank()) return body;
+        String result = body;
+        for (String field : SENSITIVE_FIELDS) {
+            result = result.replaceAll(
+                "(?i)(\"" + field + "\"\\s*:\\s*)\"[^\"]*\"",
+                "$1\"****\""
+            );
+        }
+        return result;
+    }
+
+    private String maskHeader(String name, String value) {
+        if ("authorization".equalsIgnoreCase(name) && value != null) {
+            return value.startsWith("Bearer ") ? "Bearer ****" : "****";
+        }
+        return value;
+    }
+
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         ContentCachingRequestWrapper req = new ContentCachingRequestWrapper(request);
@@ -61,19 +85,19 @@ public class RequestLogFilter extends OncePerRequestFilter {
         log.info("client info = {}", req.getHeader("User-Agent"));
 
         req.getHeaderNames().asIterator()
-                .forEachRemaining(name -> log.info("header {} = {}", name, req.getHeader(name)));
+                .forEachRemaining(name -> log.info("header {} = {}", name, maskHeader(name, req.getHeader(name))));
 
         try {
             filterChain.doFilter(req, res);
 
             String requestBody = toString(req.getContentAsByteArray(), req.getCharacterEncoding());
-            String prettyRequestBody = formatBody(requestBody, req.getContentType());
+            String prettyRequestBody = maskBody(formatBody(requestBody, req.getContentType()));
             if (!prettyRequestBody.isBlank()) {
                 log.info("request body =\n{}", prettyRequestBody);
             }
 
             String responseBody = toString(res.getContentAsByteArray(), res.getCharacterEncoding());
-            String prettyResponseBody = formatBody(responseBody, res.getContentType());
+            String prettyResponseBody = maskBody(formatBody(responseBody, res.getContentType()));
             log.info("response status = {}", res.getStatus());
             if (!prettyResponseBody.isBlank()) {
                 log.info("response body =\n{}", prettyResponseBody);
