@@ -47,7 +47,7 @@ public class SendSmsServiceImpl implements SendSmsService {
         message.setText("[시민화폐광산] 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
 
         SingleMessageSentResponse response = messageService.sendOne(new SingleMessageSendingRequest(message));
-        log.info("[SMS] 발송 성공 - phoneNumber={}", request.phoneNumber());
+        log.info("[SMS] 발송 성공 - phoneNumber={}", request.phoneNumber().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
         return response;
     }
 
@@ -75,6 +75,6 @@ public class SendSmsServiceImpl implements SendSmsService {
         redisUtil.set(attemptKey, attempt + 1, 3 * 60 * 1000);
 
         redisUtil.set(codeKey, code, 3 * 60 * 1000);
-        log.info("[SMS] 인증 정보 저장 성공 - phoneNumber={}", phoneNumber);
+        log.info("[SMS] 인증 정보 저장 성공 - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
     }
 }
