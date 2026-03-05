@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.sms.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotFoundException;
@@ -9,6 +10,7 @@ import team.startup.gwangsan.domain.sms.presentation.dto.VerifyCodeRequest;
 import team.startup.gwangsan.domain.sms.service.VerifyCodeService;
 import team.startup.gwangsan.global.redis.RedisUtil;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VerifyCodeServiceImpl implements VerifyCodeService {
@@ -31,6 +33,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
         if (DEMO_PHONE_NUMBER.equals(phoneNumber) && DEMO_FIXED_CODE.equals(request.code())) {
             redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
+            log.info("[SMS] 인증 성공 (데모) - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
             return;
         }
 
@@ -47,5 +50,6 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
         redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
         redisUtil.delete(codeKey);
+        log.info("[SMS] 인증 성공 - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
     }
 }

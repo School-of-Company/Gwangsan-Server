@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.sms.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
@@ -19,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SendSmsServiceImpl implements SendSmsService {
@@ -44,7 +46,9 @@ public class SendSmsServiceImpl implements SendSmsService {
         message.setTo(request.phoneNumber());
         message.setText("[시민화폐광산] 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
 
-        return messageService.sendOne(new SingleMessageSendingRequest(message));
+        SingleMessageSentResponse response = messageService.sendOne(new SingleMessageSendingRequest(message));
+        log.info("[SMS] 발송 성공 - phoneNumber={}", request.phoneNumber().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
+        return response;
     }
 
     private String generateCode() {
@@ -71,5 +75,6 @@ public class SendSmsServiceImpl implements SendSmsService {
         redisUtil.set(attemptKey, attempt + 1, 3 * 60 * 1000);
 
         redisUtil.set(codeKey, code, 3 * 60 * 1000);
+        log.info("[SMS] 인증 정보 저장 성공 - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
     }
 }
