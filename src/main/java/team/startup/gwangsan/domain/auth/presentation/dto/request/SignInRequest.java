@@ -16,10 +16,10 @@ public record SignInRequest(
         @NotBlank
         String password,
 
-        @NotBlank
+//        @NotBlank
         String deviceToken,
 
-        @NotBlank
+//        @NotBlank
         String deviceId,
 
         OsType osType

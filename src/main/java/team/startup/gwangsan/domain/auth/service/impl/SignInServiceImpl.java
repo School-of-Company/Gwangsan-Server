@@ -53,18 +53,22 @@ public class SignInServiceImpl implements SignInService {
                 .token(refreshToken)
                 .build());
 
-        deviceTokenRepository.save(DeviceToken.builder()
-                .deviceId(request.deviceId())
-                .userId(member.getId())
-                .deviceToken(request.deviceToken())
-                .osType(request.osType())
-                .build());
+        if (request.deviceId() != null && request.deviceToken() != null) {
+            deviceTokenRepository.save(DeviceToken.builder()
+                    .deviceId(request.deviceId())
+                    .userId(member.getId())
+                    .deviceToken(request.deviceToken())
+                    .osType(request.osType())
+                    .build());
+        }
+
+        LocalDateTime now = LocalDateTime.now();
 
         return new TokenResponse(
                 accessToken,
                 refreshToken,
-                LocalDateTime.now().plusSeconds(jwtProvider.getAccessTokenTime()),
-                LocalDateTime.now().plusSeconds(jwtProvider.getRefreshTokenTime())
+                now.plusSeconds(jwtProvider.getAccessTokenTime()),
+                now.plusSeconds(jwtProvider.getRefreshTokenTime())
         );
     }
 }
