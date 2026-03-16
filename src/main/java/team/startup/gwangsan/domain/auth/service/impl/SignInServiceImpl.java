@@ -53,20 +53,14 @@ public class SignInServiceImpl implements SignInService {
                 .token(refreshToken)
                 .build());
 
-        if (request.deviceId() != null && request.deviceToken() != null)
+        if (request.deviceId() != null && request.deviceToken() != null) {
             deviceTokenRepository.save(DeviceToken.builder()
                     .deviceId(request.deviceId())
                     .userId(member.getId())
                     .deviceToken(request.deviceToken())
                     .osType(request.osType())
                     .build());
-
-//        deviceTokenRepository.save(DeviceToken.builder()
-//                .deviceId(request.deviceId())
-//                .userId(member.getId())
-//                .deviceToken(request.deviceToken())
-//                .osType(request.osType())
-//                .build());
+        }
 
         LocalDateTime now = LocalDateTime.now();
 
