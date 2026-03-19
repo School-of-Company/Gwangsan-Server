@@ -7,7 +7,7 @@ spring:
   jpa:
     hibernate:
       dialect: ${DB_DIALECT:org.hibernate.dialect.MariaDBDialect}
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
