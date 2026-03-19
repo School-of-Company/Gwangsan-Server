@@ -28,6 +28,8 @@ import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductByI
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
+import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -62,6 +64,9 @@ class FindProductByIdServiceImplTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+    private BlockValidator blockValidator;
 
     @InjectMocks
     private FindProductByIdServiceImpl service;
@@ -284,6 +289,39 @@ class FindProductByIdServiceImplTest {
 
             GetProductMemberResponse memberResponse = result.member();
             assertThat(memberResponse.light()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("현재 유저와 게시글 작성자 사이에 차단 관계가 있으면 BlockedMemberException 을 던진다")
+        void it_throws_BlockedMemberException_when_blocked() {
+            // given
+            Long productId = 1L;
+
+            Member currentMember = mock(Member.class);
+            when(currentMember.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(currentMember);
+
+            Place myPlace = mock(Place.class);
+            when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
+                    .thenReturn(myPlace);
+
+            Member owner = mock(Member.class);
+            when(owner.getId()).thenReturn(2L);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getMember()).thenReturn(owner);
+            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+            doThrow(new BlockedMemberException())
+                    .when(blockValidator).validate(currentMember, owner);
+
+            // when & then
+            assertThrows(BlockedMemberException.class,
+                    () -> service.execute(productId));
+
+            verify(blockValidator).validate(currentMember, owner);
+            verifyNoInteractions(productImageRepository, chatRoomRepository);
         }
 
         @Test
