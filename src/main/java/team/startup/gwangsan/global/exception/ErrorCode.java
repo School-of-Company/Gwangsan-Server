@@ -103,8 +103,13 @@ public enum ErrorCode {
     CANNOT_PENDING_TRADE_CANCEL(400, "거래 철회가 대기중이 아닙니다."),
 
     // suspend
-    NOT_FOUND_SUSPEND(404, "해당하는 정지 내역을 찾을 수 없습니다.");
+    NOT_FOUND_SUSPEND(404, "해당하는 정지 내역을 찾을 수 없습니다."),
 
+    // block
+    ALREADY_BLOCKED(409, "이미 차단한 사용자입니다."),
+    BLOCKED_MEMBER(403, "차단된 사용자입니다."),
+    NOT_FOUND_BLOCK(404, "차단 내역을 찾을 수 없습니다."),
+    SELF_BLOCK_NOT_ALLOWED(403, "본인을 차단할 수 없습니다.");
     private final int status;
     private final String message;
 }
