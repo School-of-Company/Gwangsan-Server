@@ -4,7 +4,7 @@ import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 
 import java.util.List;
 
-public record CreateProductReportRequest(
+public record CreateMemberReportRequest(
         Long sourceId,
         ReportType reportType,
         String content,
