@@ -21,6 +21,7 @@ import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMem
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.service.FindProductByIdService;
+import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
     private final MemberUtil memberUtil;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final BlockValidator blockValidator;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,6 +46,9 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(NotFoundProductException::new);
+
+        blockValidator.validate(member, product.getMember());
+
         Place productPlace = memberDetailRepository.findPlaceByMemberId(product.getMember().getId());
 
         MemberDetail memberDetail = memberDetailRepository.findById(product.getMember().getId())
