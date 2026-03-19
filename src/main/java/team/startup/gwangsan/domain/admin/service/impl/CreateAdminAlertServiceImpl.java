@@ -29,9 +29,11 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
     private final MemberRepository memberRepository;
     private final TradeCancelRepository tradeCancelRepository;
 
-    private static final String REPORT_FRAUD_ALERT_TITLE = "부적절한 거래 신고";
-    private static final String REPORT_BAD_LANGUAGE_ALERT_TITLE = "부적절한 언어 사용";
-    private static final String REPORT_MEMBER_ALERT_TITLE = "부적절한 사용자 신고";
+    private static final String REPORT_SEXUAL_ALERT_TITLE = "음란/성적 콘텐츠 신고";
+    private static final String REPORT_ABUSE_HATE_HARASSMENT_ALERT_TITLE = "욕설/혐오/괴롭힘 신고";
+    private static final String REPORT_SPAM_AD_ALERT_TITLE = "스팸/광고 신고";
+    private static final String REPORT_IMPERSONATION_ALERT_TITLE = "사칭 신고";
+    private static final String REPORT_SELF_HARM_DANGER_ALERT_TITLE = "자해/위험 신고";
     private static final String REPORT_ETC_ALERT_TITLE = "기타 신고";
     private static final String NEW_SIGNUP_MEMBER_TITLE = "새로운 회원가입 요청";
     private static final String TRADE_CANCEL_TITLE = "거래 철회 요청";
@@ -91,9 +93,11 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
     private String resolveReportAlertTitle(Report report) {
         return switch (report.getReportType()) {
-            case FRAUD -> REPORT_FRAUD_ALERT_TITLE;
-            case BAD_LANGUAGE -> REPORT_BAD_LANGUAGE_ALERT_TITLE;
-            case MEMBER -> REPORT_MEMBER_ALERT_TITLE;
+            case SEXUAL -> REPORT_SEXUAL_ALERT_TITLE;
+            case ABUSE_HATE_HARASSMENT -> REPORT_ABUSE_HATE_HARASSMENT_ALERT_TITLE;
+            case SPAM_AD -> REPORT_SPAM_AD_ALERT_TITLE;
+            case IMPERSONATION -> REPORT_IMPERSONATION_ALERT_TITLE;
+            case SELF_HARM_DANGER -> REPORT_SELF_HARM_DANGER_ALERT_TITLE;
             case ETC -> REPORT_ETC_ALERT_TITLE;
         };
     }

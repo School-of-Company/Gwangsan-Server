@@ -10,9 +10,6 @@ import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
@@ -31,7 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CreateProductReportServiceImpl implements CreateProductReportService {
 
-    private final ProductRepository productRepository;
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
@@ -46,15 +42,9 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
         Member reported;
 
         switch (request.reportType()) {
-            case FRAUD -> {
-                Product product = productRepository.findById(request.sourceId())
-                        .orElseThrow(NotFoundProductException::new);
-                reported = product.getMember();
-            }
-
-            case BAD_LANGUAGE, MEMBER -> {
+            case SEXUAL, ABUSE_HATE_HARASSMENT, SPAM_AD, IMPERSONATION, SELF_HARM_DANGER -> {
                 reported = memberRepository.findById(request.sourceId())
-                        .orElseThrow(() -> new NotFoundMemberException());
+                        .orElseThrow(NotFoundMemberException::new);
             }
 
             case ETC -> {
