@@ -35,6 +35,7 @@ import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteRequestE
 import team.startup.gwangsan.domain.trade.exception.TradeCompleteWithoutChattingException;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
+import team.startup.gwangsan.global.aop.CheckBlocked;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 
@@ -57,6 +58,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
     @Override
     @Transactional
+    @CheckBlocked(param = "otherMemberId")
     public void execute(Long productId, Long otherMemberId) {
         String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
         MemberDetail memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);

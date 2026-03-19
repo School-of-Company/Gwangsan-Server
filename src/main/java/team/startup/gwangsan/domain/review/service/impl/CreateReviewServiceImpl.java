@@ -20,6 +20,7 @@ import team.startup.gwangsan.domain.review.presentation.dto.request.CreateReview
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.review.service.CreateReviewService;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -31,6 +32,7 @@ public class CreateReviewServiceImpl implements CreateReviewService {
     private final ProductRepository productRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BlockValidator blockValidator;
 
     @Override
     @Transactional
@@ -39,6 +41,8 @@ public class CreateReviewServiceImpl implements CreateReviewService {
 
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(NotFoundProductException::new);
+
+        blockValidator.validate(reviewer, product.getMember());
 
         if (product.getStatus() != ProductStatus.COMPLETED) {
             throw new CannotReviewBeforeTradeException();

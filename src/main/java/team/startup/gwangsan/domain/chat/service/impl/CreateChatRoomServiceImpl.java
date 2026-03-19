@@ -12,6 +12,7 @@ import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberUtil memberUtil;
     private final ProductRepository productRepository;
+    private final BlockValidator blockValidator;
 
     @Override
     @Transactional
@@ -32,6 +34,8 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(NotFoundProductException::new);
         Member productMember = product.getMember();
+
+        blockValidator.validate(member, productMember);
 
         Member buyer;
         Member seller;
