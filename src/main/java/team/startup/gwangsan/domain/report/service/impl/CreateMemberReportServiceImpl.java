@@ -15,10 +15,10 @@ import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
 import team.startup.gwangsan.domain.report.exception.InvalidReportTypeException;
 import team.startup.gwangsan.domain.report.exception.SelfReportNotAllowedException;
-import team.startup.gwangsan.domain.report.presentation.dto.request.CreateProductReportRequest;
+import team.startup.gwangsan.domain.report.presentation.dto.request.CreateMemberReportRequest;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.report.service.CreateProductReportService;
+import team.startup.gwangsan.domain.report.service.CreateMemberReportService;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -26,7 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CreateProductReportServiceImpl implements CreateProductReportService {
+public class CreateMemberReportServiceImpl implements CreateMemberReportService {
 
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
@@ -37,7 +37,7 @@ public class CreateProductReportServiceImpl implements CreateProductReportServic
 
     @Override
     @Transactional
-    public void execute(CreateProductReportRequest request) {
+    public void execute(CreateMemberReportRequest request) {
         Member reporter = memberUtil.getCurrentMember();
         Member reported;
 

@@ -21,7 +21,7 @@ import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
 import team.startup.gwangsan.domain.report.exception.SelfReportNotAllowedException;
-import team.startup.gwangsan.domain.report.presentation.dto.request.CreateProductReportRequest;
+import team.startup.gwangsan.domain.report.presentation.dto.request.CreateMemberReportRequest;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CreateProductReportServiceImpl 단위 테스트")
-class CreateProductReportServiceImplTest {
+class CreateMemberReportServiceImplTest {
 
     @Mock private MemberUtil memberUtil;
     @Mock private MemberRepository memberRepository;
@@ -46,7 +46,7 @@ class CreateProductReportServiceImplTest {
     @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
-    private CreateProductReportServiceImpl service;
+    private CreateMemberReportServiceImpl service;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -68,7 +68,7 @@ class CreateProductReportServiceImplTest {
             when(reportRepository.findByReporterAndReportedAndReportType(reporter, reported, reportType))
                     .thenReturn(Optional.empty());
 
-            CreateProductReportRequest request = new CreateProductReportRequest(2L, reportType, "신고 내용", null);
+            CreateMemberReportRequest request = new CreateMemberReportRequest(2L, reportType, "신고 내용", null);
 
             ArgumentCaptor<Report> captor = ArgumentCaptor.forClass(Report.class);
 
@@ -93,7 +93,7 @@ class CreateProductReportServiceImplTest {
             when(reporter.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            CreateProductReportRequest request = new CreateProductReportRequest(null, ReportType.ETC, "기타 신고", null);
+            CreateMemberReportRequest request = new CreateMemberReportRequest(null, ReportType.ETC, "기타 신고", null);
 
             ArgumentCaptor<Report> captor = ArgumentCaptor.forClass(Report.class);
 
@@ -124,7 +124,7 @@ class CreateProductReportServiceImplTest {
             Image image2 = mock(Image.class);
             when(imageRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(image1, image2));
 
-            CreateProductReportRequest request = new CreateProductReportRequest(2L, ReportType.SEXUAL, "신고", List.of(10L, 20L));
+            CreateMemberReportRequest request = new CreateMemberReportRequest(2L, ReportType.SEXUAL, "신고", List.of(10L, 20L));
 
             ArgumentCaptor<List<ReportImage>> captor = ArgumentCaptor.forClass(List.class);
 
@@ -148,7 +148,7 @@ class CreateProductReportServiceImplTest {
             when(reported.getId()).thenReturn(1L);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(reported));
 
-            CreateProductReportRequest request = new CreateProductReportRequest(1L, ReportType.SPAM_AD, "신고", null);
+            CreateMemberReportRequest request = new CreateMemberReportRequest(1L, ReportType.SPAM_AD, "신고", null);
 
             // when & then
             assertThrows(SelfReportNotAllowedException.class, () -> service.execute(request));
@@ -170,7 +170,7 @@ class CreateProductReportServiceImplTest {
             when(reportRepository.findByReporterAndReportedAndReportType(reporter, reported, ReportType.IMPERSONATION))
                     .thenReturn(Optional.of(mock(Report.class)));
 
-            CreateProductReportRequest request = new CreateProductReportRequest(2L, ReportType.IMPERSONATION, "신고", null);
+            CreateMemberReportRequest request = new CreateMemberReportRequest(2L, ReportType.IMPERSONATION, "신고", null);
 
             // when & then
             assertThrows(AlreadyReportedException.class, () -> service.execute(request));
@@ -185,7 +185,7 @@ class CreateProductReportServiceImplTest {
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
             when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
-            CreateProductReportRequest request = new CreateProductReportRequest(999L, ReportType.ABUSE_HATE_HARASSMENT, "신고", null);
+            CreateMemberReportRequest request = new CreateMemberReportRequest(999L, ReportType.ABUSE_HATE_HARASSMENT, "신고", null);
 
             // when & then
             assertThrows(NotFoundMemberException.class, () -> service.execute(request));
