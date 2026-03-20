@@ -217,6 +217,70 @@ class FindAlertByCurrentServiceImplTest {
         }
 
         @Test
+        @DisplayName("REPORT_REJECT 타입 알림이 있으면 신고 이미지를 조회한다")
+        void it_fetches_report_images_for_report_reject_alert() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+
+            Alert alert = mock(Alert.class);
+            when(alert.getId()).thenReturn(55L);
+            when(alert.getAlertType()).thenReturn(AlertType.REPORT_REJECT);
+            when(alert.getSourceId()).thenReturn(310L);
+            when(alert.getTitle()).thenReturn("신고 기각");
+            when(alert.getContent()).thenReturn("신고가 기각되었습니다.");
+            when(alert.getSendMember()).thenReturn(null);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+            when(reportImageRepository.findAllByReportIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).alertType()).isEqualTo(AlertType.REPORT_REJECT);
+
+            verify(reportImageRepository).findAllByReportIdIn(anyList());
+        }
+
+        @Test
+        @DisplayName("TRADE_CANCEL_REJECT 타입 알림이 있으면 거래 철회를 조회하고 상품 이미지를 조회한다")
+        void it_fetches_product_images_via_trade_cancel_for_trade_cancel_reject_alert() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+
+            Alert alert = mock(Alert.class);
+            when(alert.getId()).thenReturn(65L);
+            when(alert.getAlertType()).thenReturn(AlertType.TRADE_CANCEL_REJECT);
+            when(alert.getSourceId()).thenReturn(410L);
+            when(alert.getTitle()).thenReturn("거래 철회 기각");
+            when(alert.getContent()).thenReturn("거래 철회 요청이 기각되었습니다.");
+            when(alert.getSendMember()).thenReturn(null);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(510L);
+            TradeComplete tradeComplete = mock(TradeComplete.class);
+            when(tradeComplete.getProduct()).thenReturn(product);
+            TradeCancel tradeCancel = mock(TradeCancel.class);
+            when(tradeCancel.getId()).thenReturn(410L);
+            when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+            when(tradeCancelRepository.findAllById(anyList())).thenReturn(List.of(tradeCancel));
+            when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).alertType()).isEqualTo(AlertType.TRADE_CANCEL_REJECT);
+
+            verify(tradeCancelRepository).findAllById(anyList());
+            verify(productImageRepository).findAllByProductIdIn(anyList());
+        }
+
+        @Test
         @DisplayName("sendMember 가 있는 알림이면 sendMemberId 를 포함해 반환한다")
         void it_includes_send_member_id_when_present() {
             Member member = mock(Member.class);

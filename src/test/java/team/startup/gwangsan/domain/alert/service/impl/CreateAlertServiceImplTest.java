@@ -336,5 +336,45 @@ class CreateAlertServiceImplTest {
             assertThrows(NotFoundTradeCancelException.class,
                     () -> service.execute(99L, 1L, AlertType.TRADE_CANCEL_REJECT, null));
         }
+
+        @Test
+        @DisplayName("TRADE_CANCEL 타입인데 거래 철회가 없으면 NotFoundTradeCancelException 을 던진다")
+        void it_throws_NotFoundTradeCancelException_for_trade_cancel() {
+            Member member = mock(Member.class);
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+            when(tradeCancelRepository.findByIdWithTradeCompleteAndMember(99L)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundTradeCancelException.class,
+                    () -> service.execute(99L, 1L, AlertType.TRADE_CANCEL, null));
+        }
+
+        @Test
+        @DisplayName("RECOMMENDER 타입이면 추천인 조회 후 member 에게 AlertReceipt 를 저장한다")
+        void it_saves_receipt_for_recommender() {
+            Member member = mock(Member.class);
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            Member signUpMember = mock(Member.class);
+            when(memberRepository.findById(50L)).thenReturn(Optional.of(signUpMember));
+
+            Alert savedAlert = mock(Alert.class);
+            when(alertRepository.save(any())).thenReturn(savedAlert);
+
+            service.execute(50L, 1L, AlertType.RECOMMENDER, null);
+
+            verify(alertRepository).save(any());
+            verify(alertReceiptRepository).save(any());
+        }
+
+        @Test
+        @DisplayName("RECOMMENDER 타입인데 추천인이 없으면 NotFoundMemberException 을 던진다")
+        void it_throws_NotFoundMemberException_when_recommender_not_found() {
+            Member member = mock(Member.class);
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+            when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundMemberException.class,
+                    () -> service.execute(99L, 1L, AlertType.RECOMMENDER, null));
+        }
     }
 }
