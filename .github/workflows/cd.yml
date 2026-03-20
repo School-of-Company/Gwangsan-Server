@@ -75,7 +75,8 @@ jobs:
 
           cat > codedeploy/scripts/deploy.sh << EOF
           #!/bin/bash
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+          export PATH=\$PATH:/usr/local/bin:/usr/bin
+          /usr/local/bin/aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
 
           docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
