@@ -13,7 +13,6 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
-import team.startup.gwangsan.domain.report.exception.InvalidReportTypeException;
 import team.startup.gwangsan.domain.report.exception.SelfReportNotAllowedException;
 import team.startup.gwangsan.domain.report.presentation.dto.request.CreateMemberReportRequest;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
@@ -39,31 +38,17 @@ public class CreateMemberReportServiceImpl implements CreateMemberReportService 
     @Transactional
     public void execute(CreateMemberReportRequest request) {
         Member reporter = memberUtil.getCurrentMember();
-        Member reported;
+        Member reported = memberRepository.findById(request.sourceId())
+                .orElseThrow(NotFoundMemberException::new);
 
-        switch (request.reportType()) {
-            case SEXUAL, ABUSE_HATE_HARASSMENT, SPAM_AD, IMPERSONATION, SELF_HARM_DANGER -> {
-                reported = memberRepository.findById(request.sourceId())
-                        .orElseThrow(NotFoundMemberException::new);
-            }
-
-            case ETC -> {
-                reported = null;
-            }
-
-            default -> throw new InvalidReportTypeException();
-        }
-
-        if (reported != null && reporter.getId().equals(reported.getId())) {
+        if (reporter.getId().equals(reported.getId())) {
             throw new SelfReportNotAllowedException();
         }
 
-        if (reported != null) {
-            reportRepository.findByReporterAndReportedAndReportType(reporter, reported, request.reportType())
-                    .ifPresent(report -> {
-                        throw new AlreadyReportedException();
-                    });
-        }
+        reportRepository.findByReporterAndReportedAndReportType(reporter, reported, request.reportType())
+                .ifPresent(report -> {
+                    throw new AlreadyReportedException();
+                });
 
         Report report = Report.builder()
                 .reportType(request.reportType())

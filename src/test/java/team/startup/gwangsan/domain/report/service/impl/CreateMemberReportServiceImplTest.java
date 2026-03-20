@@ -53,8 +53,8 @@ class CreateMemberReportServiceImplTest {
     class Describe_execute {
 
         @ParameterizedTest(name = "reportType={0} 일 때 회원 기반으로 신고를 저장한다")
-        @EnumSource(value = ReportType.class, names = {"SEXUAL", "ABUSE_HATE_HARASSMENT", "SPAM_AD", "IMPERSONATION", "SELF_HARM_DANGER"})
-        @DisplayName("회원 기반 타입은 신고 대상 회원을 조회하고 저장한다")
+        @EnumSource(ReportType.class)
+        @DisplayName("모든 타입은 신고 대상 회원을 조회하고 저장한다")
         void it_saves_report_with_member_based_types(ReportType reportType) {
             // given
             Member reporter = mock(Member.class);
@@ -86,14 +86,21 @@ class CreateMemberReportServiceImplTest {
         }
 
         @Test
-        @DisplayName("ETC 타입은 reported=null 로 저장한다")
-        void it_saves_report_with_null_reported_when_etc() {
+        @DisplayName("ETC 타입도 memberId 로 신고 대상 회원을 조회하고 저장한다")
+        void it_saves_report_with_reported_when_etc() {
             // given
             Member reporter = mock(Member.class);
             when(reporter.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            CreateMemberReportRequest request = new CreateMemberReportRequest(null, ReportType.ETC, "기타 신고", null);
+            Member reported = mock(Member.class);
+            when(reported.getId()).thenReturn(2L);
+            when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
+
+            when(reportRepository.findByReporterAndReportedAndReportType(reporter, reported, ReportType.ETC))
+                    .thenReturn(Optional.empty());
+
+            CreateMemberReportRequest request = new CreateMemberReportRequest(2L, ReportType.ETC, "기타 신고", null);
 
             ArgumentCaptor<Report> captor = ArgumentCaptor.forClass(Report.class);
 
@@ -102,7 +109,8 @@ class CreateMemberReportServiceImplTest {
 
             // then
             verify(reportRepository).save(captor.capture());
-            assertThat(captor.getValue().getReported()).isNull();
+            assertThat(captor.getValue().getReported()).isEqualTo(reported);
+            assertThat(captor.getValue().getReportType()).isEqualTo(ReportType.ETC);
             verify(eventPublisher).publishEvent(any(CreateAdminAlertEvent.class));
         }
 
