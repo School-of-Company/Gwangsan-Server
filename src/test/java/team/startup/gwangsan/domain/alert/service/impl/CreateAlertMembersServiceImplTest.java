@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +20,7 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -73,7 +75,10 @@ class CreateAlertMembersServiceImplTest {
             service.execute(1L, List.of(10L, 20L), AlertType.NOTICE);
 
             verify(alertRepository).save(any());
-            verify(alertReceiptRepository).saveAll(anyList());
+
+            ArgumentCaptor<List> receiptCaptor = ArgumentCaptor.forClass(List.class);
+            verify(alertReceiptRepository).saveAll(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue()).hasSize(2);
         }
 
         @Test
@@ -87,6 +92,17 @@ class CreateAlertMembersServiceImplTest {
                     () -> service.execute(99L, List.of(10L), AlertType.NOTICE));
 
             verifyNoInteractions(alertRepository, alertReceiptRepository);
+        }
+
+        @Test
+        @DisplayName("NOTICE 외 타입이면 알림을 저장하지 않는다")
+        void it_does_nothing_for_non_notice_alert_type() {
+            Member member = mock(Member.class);
+            when(memberRepository.findAllByIdIn(anyList())).thenReturn(List.of(member));
+
+            service.execute(1L, List.of(10L), AlertType.REVIEW);
+
+            verifyNoInteractions(alertRepository, alertReceiptRepository, noticeRepository);
         }
     }
 }
