@@ -64,10 +64,8 @@ public class UpdateProductServiceImpl implements UpdateProductService {
 
         deleteObsoleteImages(existingImages, toDeleteImageIds);
 
-        List<Image> images = ids.isEmpty() ? List.of() : imageRepository.findByIdIn(ids);
-        if (!ids.isEmpty()) {
-            ImageValidateUtil.validateExistence(ids, images);
-        }
+        List<Image> images = imageRepository.findByIdIn(ids);
+        ImageValidateUtil.validateExistence(ids, images);
 
         List<ProductImage> toSave = buildProductImagesToSave(toAddImageIds, images, product);
         saveNewImages(toSave);

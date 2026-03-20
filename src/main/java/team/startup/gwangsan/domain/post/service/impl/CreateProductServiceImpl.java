@@ -37,11 +37,8 @@ public class CreateProductServiceImpl implements CreateProductService {
             throw new ObjectRequiredImageException();
         }
 
-        List<Image> images = ids.isEmpty() ? List.of() : imageRepository.findByIdIn(ids);
-
-        if (!ids.isEmpty()) {
-            ImageValidateUtil.validateExistence(ids, images);
-        }
+        List<Image> images = imageRepository.findByIdIn(ids);
+        ImageValidateUtil.validateExistence(ids, images);
 
         Product product = Product.builder()
                 .title(title)
@@ -56,10 +53,7 @@ public class CreateProductServiceImpl implements CreateProductService {
         productRepository.save(product);
 
         List<ProductImage> productImages = mapToProductImages(images, product);
-
-        if (!productImages.isEmpty()) {
-            productImageRepository.saveAll(productImages);
-        }
+        productImageRepository.saveAll(productImages);
     }
 
     private List<ProductImage> mapToProductImages(List<Image> images, Product product) {
