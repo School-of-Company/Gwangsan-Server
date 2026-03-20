@@ -12,6 +12,7 @@ import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.service.CreateProductService;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -30,9 +31,17 @@ public class CreateProductServiceImpl implements CreateProductService {
     @Override
     @Transactional
     public void execute(Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
-        List<Image> images = imageRepository.findByIdIn(imageIds);
+        List<Long> ids = imageIds != null ? imageIds : List.of();
 
-        ImageValidateUtil.validateExistence(imageIds, images);
+        if (type == Type.OBJECT && mode == Mode.GIVER && ids.isEmpty()) {
+            throw new ObjectRequiredImageException();
+        }
+
+        List<Image> images = ids.isEmpty() ? List.of() : imageRepository.findByIdIn(ids);
+
+        if (!ids.isEmpty()) {
+            ImageValidateUtil.validateExistence(ids, images);
+        }
 
         Product product = Product.builder()
                 .title(title)
@@ -48,7 +57,9 @@ public class CreateProductServiceImpl implements CreateProductService {
 
         List<ProductImage> productImages = mapToProductImages(images, product);
 
-        productImageRepository.saveAll(productImages);
+        if (!productImages.isEmpty()) {
+            productImageRepository.saveAll(productImages);
+        }
     }
 
     private List<ProductImage> mapToProductImages(List<Image> images, Product product) {

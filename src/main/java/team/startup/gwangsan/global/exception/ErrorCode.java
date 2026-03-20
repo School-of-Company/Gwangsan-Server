@@ -46,6 +46,7 @@ public enum ErrorCode {
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
+    OBJECT_REQUIRED_IMAGE(400, "해당 게시글은 이미지가 필수입니다."),
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
     IMAGE_UPLOAD_FAILED(500, "이미지 업로드에 실패했습니다."),
     IMAGE_DELETE_FAILED(500, "이미지 삭제에 실패했습니다."),

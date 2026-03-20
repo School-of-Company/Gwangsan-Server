@@ -13,6 +13,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.service.UpdateProductService;
@@ -48,17 +49,25 @@ public class UpdateProductServiceImpl implements UpdateProductService {
 
         product.update(type, mode, title, description, gwangsan);
 
+        List<Long> ids = imageIds != null ? imageIds : List.of();
+
+        if (type == Type.OBJECT && mode == Mode.GIVER && ids.isEmpty()) {
+            throw new ObjectRequiredImageException();
+        }
+
         List<ProductImage> existingImages = productImageRepository.findAllByProductId(productId);
         Set<Long> existingImageIds = extractImageIds(existingImages);
-        Set<Long> requestImageIds = new HashSet<>(imageIds);
+        Set<Long> requestImageIds = new HashSet<>(ids);
 
         Set<Long> toDeleteImageIds = findToDeleteIds(existingImageIds, requestImageIds);
         Set<Long> toAddImageIds = findToAddIds(existingImageIds, requestImageIds);
 
         deleteObsoleteImages(existingImages, toDeleteImageIds);
 
-        List<Image> images = imageRepository.findByIdIn(imageIds);
-        ImageValidateUtil.validateExistence(imageIds, images);
+        List<Image> images = ids.isEmpty() ? List.of() : imageRepository.findByIdIn(ids);
+        if (!ids.isEmpty()) {
+            ImageValidateUtil.validateExistence(ids, images);
+        }
 
         List<ProductImage> toSave = buildProductImagesToSave(toAddImageIds, images, product);
         saveNewImages(toSave);

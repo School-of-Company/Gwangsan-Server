@@ -1,6 +1,5 @@
 package team.startup.gwangsan.domain.post.presentation.dto.request;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -14,6 +13,6 @@ public record PatchProductRequest(
         @NotNull @Size(max = 20) String title,
         @NotNull String content,
         @NotNull Integer gwangsan,
-        @NotEmpty List<Long> imageIds
+        List<Long> imageIds
 ) {
 }
