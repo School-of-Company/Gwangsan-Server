@@ -11,7 +11,6 @@ import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
-import team.startup.gwangsan.domain.admin.exception.NotFoundAlertTypeException;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;

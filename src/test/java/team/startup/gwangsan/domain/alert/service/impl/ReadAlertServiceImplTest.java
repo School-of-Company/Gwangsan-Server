@@ -63,6 +63,7 @@ class ReadAlertServiceImplTest {
 
             service.execute(10L);
 
+            verify(alertReceiptRepository).findByMemberIdAndCheckedAndAlertId(1L, false, 10L);
             verifyNoMoreInteractions(alertReceiptRepository);
         }
     }

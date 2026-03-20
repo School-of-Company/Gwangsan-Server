@@ -93,8 +93,8 @@ class FindAlertByCurrentServiceImplTest {
         }
 
         @Test
-        @DisplayName("TRADE_COMPLETE 타입 알림이 있으면 상품 이미지를 포함해 반환한다")
-        void it_returns_trade_complete_alert_with_product_images() {
+        @DisplayName("TRADE_COMPLETE 타입 알림이 있으면 상품 이미지를 조회한다")
+        void it_fetches_product_images_for_trade_complete_alert() {
             Member member = mock(Member.class);
             when(member.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
