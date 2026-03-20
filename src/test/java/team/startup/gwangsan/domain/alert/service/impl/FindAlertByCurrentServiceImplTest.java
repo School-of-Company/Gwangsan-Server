@@ -18,6 +18,10 @@ import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import team.startup.gwangsan.domain.trade.entity.TradeCancel;
+import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.post.entity.Product;
+
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,6 +121,98 @@ class FindAlertByCurrentServiceImplTest {
             assertThat(result.get(0).alertType()).isEqualTo(AlertType.TRADE_COMPLETE);
             assertThat(result.get(0).images()).isEmpty();
 
+            verify(productImageRepository).findAllByProductIdIn(anyList());
+        }
+
+        @Test
+        @DisplayName("NOTICE 타입 알림이 있으면 공지 이미지를 조회한다")
+        void it_fetches_notice_images_for_notice_alert() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+
+            Alert alert = mock(Alert.class);
+            when(alert.getId()).thenReturn(40L);
+            when(alert.getAlertType()).thenReturn(AlertType.NOTICE);
+            when(alert.getSourceId()).thenReturn(200L);
+            when(alert.getTitle()).thenReturn("공지사항");
+            when(alert.getContent()).thenReturn("새로운 공지가 등록되었습니다.");
+            when(alert.getSendMember()).thenReturn(null);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).alertType()).isEqualTo(AlertType.NOTICE);
+            assertThat(result.get(0).images()).isEmpty();
+
+            verify(noticeImageRepository).findAllByNoticeIdIn(anyList());
+        }
+
+        @Test
+        @DisplayName("REPORT 타입 알림이 있으면 신고 이미지를 조회한다")
+        void it_fetches_report_images_for_report_alert() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+
+            Alert alert = mock(Alert.class);
+            when(alert.getId()).thenReturn(50L);
+            when(alert.getAlertType()).thenReturn(AlertType.REPORT);
+            when(alert.getSourceId()).thenReturn(300L);
+            when(alert.getTitle()).thenReturn("신고 접수");
+            when(alert.getContent()).thenReturn("신고가 접수되었습니다.");
+            when(alert.getSendMember()).thenReturn(null);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+            when(reportImageRepository.findAllByReportIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).alertType()).isEqualTo(AlertType.REPORT);
+            assertThat(result.get(0).images()).isEmpty();
+
+            verify(reportImageRepository).findAllByReportIdIn(anyList());
+        }
+
+        @Test
+        @DisplayName("TRADE_CANCEL 타입 알림이 있으면 거래 철회를 조회하고 상품 이미지를 조회한다")
+        void it_fetches_product_images_via_trade_cancel_for_trade_cancel_alert() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+
+            Alert alert = mock(Alert.class);
+            when(alert.getId()).thenReturn(60L);
+            when(alert.getAlertType()).thenReturn(AlertType.TRADE_CANCEL);
+            when(alert.getSourceId()).thenReturn(400L);
+            when(alert.getTitle()).thenReturn("거래 철회 요청");
+            when(alert.getContent()).thenReturn("거래 철회 요청이 접수되었습니다.");
+            when(alert.getSendMember()).thenReturn(null);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(500L);
+            TradeComplete tradeComplete = mock(TradeComplete.class);
+            when(tradeComplete.getProduct()).thenReturn(product);
+            TradeCancel tradeCancel = mock(TradeCancel.class);
+            when(tradeCancel.getId()).thenReturn(400L);
+            when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+            when(tradeCancelRepository.findAllById(anyList())).thenReturn(List.of(tradeCancel));
+            when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).alertType()).isEqualTo(AlertType.TRADE_CANCEL);
+
+            verify(tradeCancelRepository).findAllById(anyList());
             verify(productImageRepository).findAllByProductIdIn(anyList());
         }
 
