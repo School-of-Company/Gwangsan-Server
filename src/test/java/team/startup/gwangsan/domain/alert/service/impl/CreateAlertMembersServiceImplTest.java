@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
@@ -74,7 +75,10 @@ class CreateAlertMembersServiceImplTest {
 
             service.execute(1L, List.of(10L, 20L), AlertType.NOTICE);
 
-            verify(alertRepository).save(any());
+            ArgumentCaptor<Alert> alertCaptor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(alertCaptor.capture());
+            assertThat(alertCaptor.getValue().getTitle()).isEqualTo("공지 제목");
+            assertThat(alertCaptor.getValue().getContent()).isEqualTo("공지가 등록되었습니다.");
 
             ArgumentCaptor<List> receiptCaptor = ArgumentCaptor.forClass(List.class);
             verify(alertReceiptRepository).saveAll(receiptCaptor.capture());

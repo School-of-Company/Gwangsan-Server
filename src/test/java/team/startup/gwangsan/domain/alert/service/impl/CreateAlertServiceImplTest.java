@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAlertTypeException;
 import team.startup.gwangsan.domain.alert.entity.Alert;
+import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
@@ -106,18 +107,27 @@ class CreateAlertServiceImplTest {
             when(tradeComplete.getSeller()).thenReturn(seller);
             when(tradeCompleteRepository.findById(100L)).thenReturn(Optional.of(tradeComplete));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(100L, 1L, AlertType.TRADE_COMPLETE, null);
 
-            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
-            verify(alertRepository, times(2)).save(captor.capture());
-            verify(alertReceiptRepository, times(2)).save(any());
+            ArgumentCaptor<Alert> alertCaptor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository, times(2)).save(alertCaptor.capture());
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository, times(2)).save(receiptCaptor.capture());
 
-            List<Alert> savedAlerts = captor.getAllValues();
+            List<Alert> savedAlerts = alertCaptor.getAllValues();
+            assertThat(savedAlerts.get(0).getSourceId()).isEqualTo(10L);
+            assertThat(savedAlerts.get(0).getAlertType()).isEqualTo(AlertType.TRADE_COMPLETE);
+            assertThat(savedAlerts.get(0).getSendMember()).isSameAs(seller);
             assertThat(savedAlerts.get(0).getContent()).isEqualTo("광산이 차감되었습니다.");
+            assertThat(savedAlerts.get(1).getSourceId()).isEqualTo(10L);
+            assertThat(savedAlerts.get(1).getSendMember()).isSameAs(seller);
             assertThat(savedAlerts.get(1).getContent()).isEqualTo("광산이 추가되었습니다.");
+
+            List<AlertReceipt> receipts = receiptCaptor.getAllValues();
+            assertThat(receipts.get(0).getMember()).isSameAs(buyer);
+            assertThat(receipts.get(1).getMember()).isSameAs(seller);
         }
 
         @Test
@@ -136,13 +146,18 @@ class CreateAlertServiceImplTest {
             when(product.getTitle()).thenReturn("상품명");
             when(productRepository.findById(100L)).thenReturn(Optional.of(product));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(100L, 1L, AlertType.TRADE_COMPLETE_REJECT, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getAlertType()).isEqualTo(AlertType.TRADE_COMPLETE_REJECT);
+            assertThat(captor.getValue().getTitle()).isEqualTo("상품명");
+            assertThat(captor.getValue().getContent()).isEqualTo("거래 완료가 거절되었습니다.");
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
@@ -170,13 +185,18 @@ class CreateAlertServiceImplTest {
             when(tradeComplete.getSeller()).thenReturn(seller);
             when(tradeCompleteRepository.findById(100L)).thenReturn(Optional.of(tradeComplete));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(100L, 1L, AlertType.OTHER_MEMBER_TRADE_COMPLETE, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getSourceId()).isEqualTo(10L);
+            assertThat(captor.getValue().getContent()).isEqualTo("구매자님이 거래를 완료하였습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(seller);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
@@ -188,13 +208,18 @@ class CreateAlertServiceImplTest {
             when(review.getReviewer()).thenReturn(reviewer);
             when(reviewRepository.findById(50L)).thenReturn(Optional.of(review));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(50L, 1L, AlertType.REVIEW, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getTitle()).isEqualTo("리뷰어리뷰 등록");
+            assertThat(captor.getValue().getContent()).isEqualTo("나에 대한 후기가 등록되었습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(reviewer);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
@@ -217,13 +242,18 @@ class CreateAlertServiceImplTest {
             when(report.getReported()).thenReturn(reported);
             when(reportRepository.findById(30L)).thenReturn(Optional.of(report));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(30L, 1L, AlertType.REPORT_REJECT, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getTitle()).isEqualTo("신고 기각");
+            assertThat(captor.getValue().getContent()).isEqualTo("신고대상님에 대한 신고가 기각되었습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(reporter);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
@@ -247,13 +277,29 @@ class CreateAlertServiceImplTest {
             when(suspend.getSuspendedDays()).thenReturn(7);
             when(suspendRepository.findById(5L)).thenReturn(Optional.of(suspend));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(30L, 1L, AlertType.REPORT, 5L);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getTitle()).isEqualTo("신고 결과");
+            assertThat(captor.getValue().getContent()).isEqualTo("7일 정지 조치되었습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(reporter);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
+        }
+
+        @Test
+        @DisplayName("REPORT 타입인데 suspendId 가 null 이면 NotFoundSuspendException 을 던진다")
+        void it_throws_NotFoundSuspendException_when_suspend_id_is_null() {
+            Report report = mock(Report.class);
+            when(reportRepository.findById(30L)).thenReturn(Optional.of(report));
+            when(suspendRepository.findById(null)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundSuspendException.class,
+                    () -> service.execute(30L, 1L, AlertType.REPORT, null));
         }
 
         @Test
@@ -283,13 +329,21 @@ class CreateAlertServiceImplTest {
             when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
             when(tradeCancelRepository.findByIdWithTradeCompleteAndMember(20L)).thenReturn(Optional.of(tradeCancel));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(20L, 1L, AlertType.TRADE_CANCEL, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository, times(2)).save(any());
+            ArgumentCaptor<Alert> alertCaptor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(alertCaptor.capture());
+            assertThat(alertCaptor.getValue().getTitle()).isEqualTo("거래 철회 완료");
+            assertThat(alertCaptor.getValue().getContent()).isEqualTo("거래가 철회되었습니다.");
+            assertThat(alertCaptor.getValue().getSendMember()).isSameAs(cancelMember);
+
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository, times(2)).save(receiptCaptor.capture());
+            List<AlertReceipt> receipts = receiptCaptor.getAllValues();
+            assertThat(receipts.get(0).getMember()).isSameAs(buyer);
+            assertThat(receipts.get(1).getMember()).isSameAs(seller);
         }
 
         @Test
@@ -300,13 +354,18 @@ class CreateAlertServiceImplTest {
             when(tradeCancel.getMember()).thenReturn(cancelMember);
             when(tradeCancelRepository.findById(20L)).thenReturn(Optional.of(tradeCancel));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(20L, 1L, AlertType.TRADE_CANCEL_REJECT, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getTitle()).isEqualTo("거래 철회 기각");
+            assertThat(captor.getValue().getContent()).isEqualTo("거래 철회 요청이 기각되었습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(cancelMember);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
@@ -333,13 +392,18 @@ class CreateAlertServiceImplTest {
             Member signUpMember = mock(Member.class);
             when(memberRepository.findById(50L)).thenReturn(Optional.of(signUpMember));
 
-            Alert savedAlert = mock(Alert.class);
-            when(alertRepository.save(any())).thenReturn(savedAlert);
+            when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             service.execute(50L, 1L, AlertType.RECOMMENDER, null);
 
-            verify(alertRepository).save(any());
-            verify(alertReceiptRepository).save(any());
+            ArgumentCaptor<Alert> captor = ArgumentCaptor.forClass(Alert.class);
+            verify(alertRepository).save(captor.capture());
+            assertThat(captor.getValue().getTitle()).isEqualTo("추천인 등록");
+            assertThat(captor.getValue().getContent()).isEqualTo("추천인으로 등록되어 5000 광산이 지급되었습니다.");
+            assertThat(captor.getValue().getSendMember()).isSameAs(signUpMember);
+            ArgumentCaptor<AlertReceipt> receiptCaptor = ArgumentCaptor.forClass(AlertReceipt.class);
+            verify(alertReceiptRepository).save(receiptCaptor.capture());
+            assertThat(receiptCaptor.getValue().getMember()).isSameAs(member);
         }
 
         @Test
