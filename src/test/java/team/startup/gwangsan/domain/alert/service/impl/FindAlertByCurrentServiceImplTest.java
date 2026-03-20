@@ -1,5 +1,6 @@
 package team.startup.gwangsan.domain.alert.service.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,14 +57,20 @@ class FindAlertByCurrentServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
+        private Member member;
+
+        @BeforeEach
+        void setUp() {
+            member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
+        }
+
         @Test
         @DisplayName("알림이 없으면 빈 리스트를 반환한다")
         void it_returns_empty_list_when_no_alerts() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of());
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
 
@@ -73,10 +80,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("REVIEW 타입 알림이 있으면 이미지 없이 응답을 반환한다")
         void it_returns_review_alert_with_empty_images() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(10L);
             when(alert.getAlertType()).thenReturn(AlertType.REVIEW);
@@ -86,7 +89,6 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(null);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
 
@@ -99,10 +101,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("TRADE_COMPLETE 타입 알림이 있으면 상품 이미지를 조회한다")
         void it_fetches_product_images_for_trade_complete_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(20L);
             when(alert.getAlertType()).thenReturn(AlertType.TRADE_COMPLETE);
@@ -112,7 +110,6 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(null);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
             when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
@@ -127,10 +124,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("NOTICE 타입 알림이 있으면 공지 이미지를 조회한다")
         void it_fetches_notice_images_for_notice_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(40L);
             when(alert.getAlertType()).thenReturn(AlertType.NOTICE);
@@ -140,7 +133,6 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(null);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
 
@@ -154,10 +146,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("REPORT 타입 알림이 있으면 신고 이미지를 조회한다")
         void it_fetches_report_images_for_report_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(50L);
             when(alert.getAlertType()).thenReturn(AlertType.REPORT);
@@ -167,7 +155,6 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(null);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
             when(reportImageRepository.findAllByReportIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
@@ -182,10 +169,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("TRADE_CANCEL 타입 알림이 있으면 거래 철회를 조회하고 상품 이미지를 조회한다")
         void it_fetches_product_images_via_trade_cancel_for_trade_cancel_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(60L);
             when(alert.getAlertType()).thenReturn(AlertType.TRADE_CANCEL);
@@ -203,7 +186,6 @@ class FindAlertByCurrentServiceImplTest {
             when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
             when(tradeCancelRepository.findAllById(anyList())).thenReturn(List.of(tradeCancel));
             when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
 
@@ -219,10 +201,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("REPORT_REJECT 타입 알림이 있으면 신고 이미지를 조회한다")
         void it_fetches_report_images_for_report_reject_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(55L);
             when(alert.getAlertType()).thenReturn(AlertType.REPORT_REJECT);
@@ -232,7 +210,6 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(null);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
             when(reportImageRepository.findAllByReportIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
@@ -246,10 +223,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("TRADE_CANCEL_REJECT 타입 알림이 있으면 거래 철회를 조회하고 상품 이미지를 조회한다")
         void it_fetches_product_images_via_trade_cancel_for_trade_cancel_reject_alert() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Alert alert = mock(Alert.class);
             when(alert.getId()).thenReturn(65L);
             when(alert.getAlertType()).thenReturn(AlertType.TRADE_CANCEL_REJECT);
@@ -267,7 +240,6 @@ class FindAlertByCurrentServiceImplTest {
             when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
             when(tradeCancelRepository.findAllById(anyList())).thenReturn(List.of(tradeCancel));
             when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
 
@@ -283,10 +255,6 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("sendMember 가 있는 알림이면 sendMemberId 를 포함해 반환한다")
         void it_includes_send_member_id_when_present() {
-            Member member = mock(Member.class);
-            when(member.getId()).thenReturn(1L);
-            when(memberUtil.getCurrentMember()).thenReturn(member);
-
             Member sendMember = mock(Member.class);
             when(sendMember.getId()).thenReturn(200L);
 
@@ -299,12 +267,40 @@ class FindAlertByCurrentServiceImplTest {
             when(alert.getSendMember()).thenReturn(sendMember);
 
             when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
-            when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
 
             List<GetAlertResponse> result = service.execute();
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).sendMemberId()).isEqualTo(200L);
+        }
+
+        @Test
+        @DisplayName("NOTICE 와 REPORT 알림이 혼재하면 각각 올바른 이미지 저장소에서 이미지를 조회한다")
+        void it_fetches_images_from_correct_repositories_for_mixed_alert_types() {
+            Alert noticeAlert = mock(Alert.class);
+            when(noticeAlert.getId()).thenReturn(70L);
+            when(noticeAlert.getAlertType()).thenReturn(AlertType.NOTICE);
+            when(noticeAlert.getSourceId()).thenReturn(600L);
+            when(noticeAlert.getTitle()).thenReturn("공지");
+            when(noticeAlert.getContent()).thenReturn("공지 내용");
+            when(noticeAlert.getSendMember()).thenReturn(null);
+
+            Alert reportAlert = mock(Alert.class);
+            when(reportAlert.getId()).thenReturn(80L);
+            when(reportAlert.getAlertType()).thenReturn(AlertType.REPORT);
+            when(reportAlert.getSourceId()).thenReturn(700L);
+            when(reportAlert.getTitle()).thenReturn("신고");
+            when(reportAlert.getContent()).thenReturn("신고 내용");
+            when(reportAlert.getSendMember()).thenReturn(null);
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(noticeAlert, reportAlert));
+            when(reportImageRepository.findAllByReportIdIn(anyList())).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).hasSize(2);
+            verify(noticeImageRepository).findAllByNoticeIdIn(anyList());
+            verify(reportImageRepository).findAllByReportIdIn(anyList());
         }
     }
 }
