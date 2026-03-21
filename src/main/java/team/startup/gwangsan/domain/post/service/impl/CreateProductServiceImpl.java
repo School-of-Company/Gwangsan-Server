@@ -31,14 +31,14 @@ public class CreateProductServiceImpl implements CreateProductService {
     @Override
     @Transactional
     public void execute(Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
-        List<Long> ids = imageIds != null ? imageIds : List.of();
+        List<Long> validImageIds = imageIds != null ? imageIds : List.of();
 
-        if (type == Type.OBJECT && mode == Mode.GIVER && ids.isEmpty()) {
+        if (type == Type.OBJECT && mode == Mode.GIVER && validImageIds.isEmpty()) {
             throw new ObjectRequiredImageException();
         }
 
-        List<Image> images = imageRepository.findByIdIn(ids);
-        ImageValidateUtil.validateExistence(ids, images);
+        List<Image> images = imageRepository.findByIdIn(validImageIds);
+        ImageValidateUtil.validateExistence(validImageIds, images);
 
         Product product = Product.builder()
                 .title(title)

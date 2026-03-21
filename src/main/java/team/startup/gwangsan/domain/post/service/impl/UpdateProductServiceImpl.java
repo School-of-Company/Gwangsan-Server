@@ -49,23 +49,23 @@ public class UpdateProductServiceImpl implements UpdateProductService {
 
         product.update(type, mode, title, description, gwangsan);
 
-        List<Long> ids = imageIds != null ? imageIds : List.of();
+        List<Long> validImageIds = imageIds != null ? imageIds : List.of();
 
-        if (type == Type.OBJECT && mode == Mode.GIVER && ids.isEmpty()) {
+        if (type == Type.OBJECT && mode == Mode.GIVER && validImageIds.isEmpty()) {
             throw new ObjectRequiredImageException();
         }
 
         List<ProductImage> existingImages = productImageRepository.findAllByProductId(productId);
         Set<Long> existingImageIds = extractImageIds(existingImages);
-        Set<Long> requestImageIds = new HashSet<>(ids);
+        Set<Long> requestImageIds = new HashSet<>(validImageIds);
 
         Set<Long> toDeleteImageIds = findToDeleteIds(existingImageIds, requestImageIds);
         Set<Long> toAddImageIds = findToAddIds(existingImageIds, requestImageIds);
 
         deleteObsoleteImages(existingImages, toDeleteImageIds);
 
-        List<Image> images = imageRepository.findByIdIn(ids);
-        ImageValidateUtil.validateExistence(ids, images);
+        List<Image> images = imageRepository.findByIdIn(validImageIds);
+        ImageValidateUtil.validateExistence(validImageIds, images);
 
         List<ProductImage> toSave = buildProductImagesToSave(toAddImageIds, images, product);
         saveNewImages(toSave);
