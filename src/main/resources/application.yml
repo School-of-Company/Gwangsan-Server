@@ -56,3 +56,13 @@ cloud:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
 
+chat:
+  stream:
+    group: ${CHAT_STREAM_GROUP:chat-message-persistors}
+    batchSize: ${CHAT_STREAM_BATCH_SIZE:10}
+    blockMs: ${CHAT_STREAM_BLOCK_MS:500}
+    claimIdleMs: ${CHAT_STREAM_CLAIM_IDLE_MS:30000}
+    retryMax: ${CHAT_STREAM_RETRY_MAX:5}
+    retryKey: ${CHAT_STREAM_RETRY_KEY:chat:retry:messages}
+    dlqKey: ${CHAT_STREAM_DLQ_KEY:chat:dlq:messages}
+

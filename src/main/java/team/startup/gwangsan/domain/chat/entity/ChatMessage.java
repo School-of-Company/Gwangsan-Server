@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.member.entity.Member;
 
@@ -15,11 +13,9 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_chat_message")
-@EntityListeners(AuditingEntityListener.class)
 public class ChatMessage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
     private Long id;
 
@@ -30,7 +26,6 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
-    @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -46,12 +41,14 @@ public class ChatMessage {
     private Member sender;
 
     @Builder
-    public ChatMessage(String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender) {
+    public ChatMessage(Long id, String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender, LocalDateTime createdAt) {
+        this.id = id;
         this.content = content;
         this.messageType = messageType;
         this.checked = checked;
         this.room = room;
         this.sender = sender;
+        this.createdAt = createdAt;
     }
 
     public void updateChecked(Boolean checked) {
