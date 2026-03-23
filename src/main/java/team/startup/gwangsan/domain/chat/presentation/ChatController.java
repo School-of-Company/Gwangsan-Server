@@ -4,10 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.chat.presentation.dto.request.SaveChatMessageRequest;
 import team.startup.gwangsan.domain.chat.presentation.dto.request.UpdateMessageCheckedRequest;
-import team.startup.gwangsan.domain.chat.presentation.dto.response.*;
-import team.startup.gwangsan.domain.chat.service.*;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.CreateChatRoomResponse;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.GetChatMessagesResponse;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
+import team.startup.gwangsan.domain.chat.service.CreateChatRoomService;
+import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
+import team.startup.gwangsan.domain.chat.service.FindRoomsByCurrentUserService;
+import team.startup.gwangsan.domain.chat.service.ReadChatMessageService;
+import team.startup.gwangsan.domain.chat.service.FindRoomIdByProductIdService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +23,6 @@ import java.util.List;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final SaveChatMessageService saveChatMessageService;
     private final CreateChatRoomService createChatRoomService;
     private final FindChatMessageByRoomIdService findChatMessageByRoomIdService;
     private final ReadChatMessageService readChatMessageService;
@@ -28,12 +33,6 @@ public class ChatController {
     public ResponseEntity<CreateChatRoomResponse> createChatRoom(@PathVariable("product_id") Long productId) {
         CreateChatRoomResponse response = createChatRoomService.execute(productId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @PostMapping("/message")
-    public ResponseEntity<SaveChatMessageResponse> saveChatMessage(@RequestBody SaveChatMessageRequest request) {
-        SaveChatMessageResponse response = saveChatMessageService.execute(request.roomId(), request.content(), request.imageIds(), request.messageType());
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{room_id}")
