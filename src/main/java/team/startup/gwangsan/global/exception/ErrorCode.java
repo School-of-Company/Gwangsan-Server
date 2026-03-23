@@ -89,6 +89,7 @@ public enum ErrorCode {
     // chat
     NOT_FOUND_CHAT_ROOM(404, "해당하는 채팅방을 찾을 수 없습니다."),
     NOT_FOUND_CHAT_MESSAGE(404, "해당하는 채팅 메세지를 찾을 수 없습니다."),
+    INVALID_CHAT_STREAM_PAYLOAD(400, "잘못된 채팅 스트림 페이로드입니다."),
 
     // trade
     CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
