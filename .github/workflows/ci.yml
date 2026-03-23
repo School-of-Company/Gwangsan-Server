@@ -29,13 +29,14 @@ jobs:
       - name: Run tests
         run: ./gradlew test
 
-      - name: Upload coverage to Coveralls
-        uses: coverallsapp/github-action@v2
+      - name: Add coverage to PR
+        uses: madrapps/jacoco-report@v1.6.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          file: build/reports/jacoco/test/jacocoTestReport.xml
-          format: jacoco
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "테스트 커버리지"
+          min-coverage-overall: 60
+          min-coverage-changed-files: 60
 
       - name: Build
         run: ./gradlew build -x test
