@@ -32,11 +32,9 @@ jobs:
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
           file: build/reports/jacoco/test/jacocoTestReport.xml
           format: jacoco
-          flag-name: unit-test
 
       - name: Build
         run: ./gradlew build -x test
