@@ -1,5 +1,7 @@
 package team.startup.gwangsan.global.chat.stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.stream.MapRecord;
@@ -16,6 +18,8 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class ChatStreamMessageProcessor {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final List<ChatStreamHandler> handlers;
     private final ChatStreamRedisAdapter redisAdapter;
@@ -64,12 +68,10 @@ public class ChatStreamMessageProcessor {
         redisAdapter.ack(streamKey, record.getId());
     }
 
-    @SuppressWarnings("unchecked")
     private List<Long> parseImageIds(String raw) {
         if (raw == null || raw.isBlank() || raw.equals("[]")) return null;
         try {
-            List<Double> doubles = gson.fromJson(raw, List.class);
-            return doubles.stream().map(Double::longValue).toList();
+            return objectMapper.readValue(raw, new TypeReference<List<Long>>() {});
         } catch (Exception e) {
             throw new InvalidChatStreamPayloadException();
         }
