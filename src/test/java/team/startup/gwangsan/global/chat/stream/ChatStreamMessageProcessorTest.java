@@ -1,5 +1,6 @@
 package team.startup.gwangsan.global.chat.stream;
 
+import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,7 +49,7 @@ class ChatStreamMessageProcessorTest {
         when(props.getDlqKey()).thenReturn(dlqKey);
         when(props.getRetryMax()).thenReturn(5);
 
-        processor = new ChatStreamMessageProcessor(List.of(handler), redisAdapter, props);
+        processor = new ChatStreamMessageProcessor(List.of(handler), redisAdapter, props, new Gson());
     }
 
     @Nested
@@ -60,7 +61,7 @@ class ChatStreamMessageProcessorTest {
         void it_calls_handler_when_payload_valid() {
             MapRecord<String, String, String> record = MapRecord.create(
                     streamKey,
-                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "안녕하세요", "messageType", "TEXT")
+                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "안녕하세요", "messageType", "TEXT", "createdAt", "1700000000000")
             ).withId(RecordId.of("1700000000000-0"));
 
             processor.process(streamKey, record, 0);
@@ -117,7 +118,7 @@ class ChatStreamMessageProcessorTest {
 
             MapRecord<String, String, String> record = MapRecord.create(
                     streamKey,
-                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello", "attempt", "5")
+                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello", "attempt", "5", "createdAt", "1700000000000")
             ).withId(RecordId.of("1700000000000-0"));
 
             processor.process(streamKey, record, 5);
@@ -133,7 +134,7 @@ class ChatStreamMessageProcessorTest {
 
             MapRecord<String, String, String> record = MapRecord.create(
                     streamKey,
-                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello")
+                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello", "createdAt", "1700000000000")
             ).withId(RecordId.of("1700000000000-0"));
 
             processor.process(streamKey, record, 0);
@@ -149,7 +150,7 @@ class ChatStreamMessageProcessorTest {
         void it_acks_on_success() {
             MapRecord<String, String, String> record = MapRecord.create(
                     streamKey,
-                    Map.of("messageId", "999", "roomId", "1", "senderId", "2", "content", "hi")
+                    Map.of("messageId", "999", "roomId", "1", "senderId", "2", "content", "hi", "createdAt", "1700000000000")
             ).withId(RecordId.of("1700000000000-0"));
 
             processor.process(streamKey, record, 0);

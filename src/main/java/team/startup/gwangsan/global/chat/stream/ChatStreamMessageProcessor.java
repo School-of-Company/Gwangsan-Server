@@ -20,7 +20,7 @@ public class ChatStreamMessageProcessor {
     private final List<ChatStreamHandler> handlers;
     private final ChatStreamRedisAdapter redisAdapter;
     private final ChatStreamProperties props;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     public void process(String streamKey, MapRecord<String, String, String> record, int attempt) {
         Map<String, String> body = record.getValue();
@@ -71,16 +71,18 @@ public class ChatStreamMessageProcessor {
             List<Double> doubles = gson.fromJson(raw, List.class);
             return doubles.stream().map(Double::longValue).toList();
         } catch (Exception e) {
-            return null;
+            throw new InvalidChatStreamPayloadException();
         }
     }
 
     private LocalDateTime parseCreatedAt(String raw) {
-        if (raw == null || raw.isBlank()) return LocalDateTime.now();
+        if (raw == null || raw.isBlank()) {
+            throw new InvalidChatStreamPayloadException();
+        }
         try {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(raw.trim())), ZoneId.systemDefault());
-        } catch (Exception e) {
-            return LocalDateTime.now();
+        } catch (NumberFormatException e) {
+            throw new InvalidChatStreamPayloadException();
         }
     }
 

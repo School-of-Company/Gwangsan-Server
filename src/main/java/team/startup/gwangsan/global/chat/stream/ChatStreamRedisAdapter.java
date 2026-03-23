@@ -27,8 +27,7 @@ public class ChatStreamRedisAdapter {
 
     private final StringRedisTemplate redisTemplate;
     private final ChatStreamProperties props;
-
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private String consumerName;
     private final Set<String> knownStreamKeys = ConcurrentHashMap.newKeySet();
     private final Set<String> initializedGroups = ConcurrentHashMap.newKeySet();

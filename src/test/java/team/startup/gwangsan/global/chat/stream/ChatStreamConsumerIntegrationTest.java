@@ -17,6 +17,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import com.google.gson.Gson;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.service.SaveChatMessageService;
 
@@ -70,11 +71,12 @@ class ChatStreamConsumerIntegrationTest {
         props.setRetryKey(RETRY_KEY);
         props.setDlqKey(DLQ_KEY);
 
-        ChatStreamRedisAdapter adapter = new ChatStreamRedisAdapter(redisTemplate, props);
+        Gson gson = new Gson();
+        ChatStreamRedisAdapter adapter = new ChatStreamRedisAdapter(redisTemplate, props, gson);
         adapter.init();
 
         SaveChatMessageHandler handler = new SaveChatMessageHandler(saveChatMessageService);
-        ChatStreamMessageProcessor processor = new ChatStreamMessageProcessor(List.of(handler), adapter, props);
+        ChatStreamMessageProcessor processor = new ChatStreamMessageProcessor(List.of(handler), adapter, props, gson);
         worker = new ChatStreamConsumerWorker(adapter, processor, props);
     }
 
@@ -97,7 +99,8 @@ class ChatStreamConsumerIntegrationTest {
                                 "roomId", "1",
                                 "senderId", "2",
                                 "content", "통합 테스트 메시지",
-                                "messageType", "TEXT"
+                                "messageType", "TEXT",
+                                "createdAt", "1700000000000"
                         ))
         );
 
@@ -142,7 +145,8 @@ class ChatStreamConsumerIntegrationTest {
                                 "roomId", "1",
                                 "senderId", "2",
                                 "content", "저장 실패 메시지",
-                                "messageType", "TEXT"
+                                "messageType", "TEXT",
+                                "createdAt", "1700000000000"
                         ))
         );
 
@@ -169,7 +173,8 @@ class ChatStreamConsumerIntegrationTest {
                                 "senderId", "2",
                                 "content", "이미지 메시지",
                                 "messageType", "TEXT",
-                                "imageIds", "[10,20,30]"
+                                "imageIds", "[10,20,30]",
+                                "createdAt", "1700000000000"
                         ))
         );
 
@@ -190,7 +195,8 @@ class ChatStreamConsumerIntegrationTest {
                                     "roomId", "1",
                                     "senderId", "2",
                                     "content", "메시지 " + i,
-                                    "messageType", "TEXT"
+                                    "messageType", "TEXT",
+                                    "createdAt", "1700000000000"
                             ))
             );
         }
