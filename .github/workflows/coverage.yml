@@ -1,13 +1,11 @@
-name: CI
+gitname: Coverage
 
 on:
-  push:
-    branches: ["develop", "main"]
   pull_request:
-    branches: ["*"]
+    branches: ["develop", "main"]
 
 jobs:
-  CI:
+  coverage:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,5 +27,11 @@ jobs:
       - name: Run tests
         run: ./gradlew test
 
-      - name: Build
-        run: ./gradlew build -x test
+      - name: Add coverage to PR
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "테스트 커버리지"
+          min-coverage-overall: 60
+          min-coverage-changed-files: 60
