@@ -37,59 +37,149 @@ jobs:
           path: base-coverage
         continue-on-error: true
 
-      - name: Compare coverage
-        id: compare
+      - name: Get changed Java files
+        id: changed_files
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const javaFiles = files.data
+              .filter(f => f.filename.endsWith('.java') && f.status !== 'removed')
+              .map(f => f.filename);
+            return JSON.stringify(javaFiles);
+
+      - name: Generate coverage report
+        id: coverage
+        env:
+          CHANGED_FILES: ${{ steps.changed_files.outputs.result }}
         run: |
-          python3 - <<'EOF'
+          python3 - <<'PYEOF'
           import xml.etree.ElementTree as ET
           import os
+          import json
 
-          def get_coverage(path):
+          MIN_COVERAGE = 60
+
+          def get_overall(path):
               try:
-                  tree = ET.parse(path)
-                  root = tree.getroot()
+                  root = ET.parse(path).getroot()
                   for counter in root.findall('counter'):
                       if counter.get('type') == 'INSTRUCTION':
                           missed = int(counter.get('missed'))
                           covered = int(counter.get('covered'))
-                          return round(covered / (missed + covered) * 100, 2)
+                          total = missed + covered
+                          return round(covered / total * 100, 2) if total else 0.0
               except Exception:
-                  return None
+                  pass
               return None
 
-          current = get_coverage('build/reports/jacoco/test/jacocoTestReport.xml')
-          base_path = 'base-coverage/jacocoTestReport.xml'
-          base = get_coverage(base_path) if os.path.exists(base_path) else None
+          def get_file_cov(root, package_name, file_name):
+              for pkg in root.findall('package'):
+                  if pkg.get('name') == package_name:
+                      for sf in pkg.findall('sourcefile'):
+                          if sf.get('name') == file_name:
+                              for counter in sf.findall('counter'):
+                                  if counter.get('type') == 'INSTRUCTION':
+                                      missed = int(counter.get('missed'))
+                                      covered = int(counter.get('covered'))
+                                      total = missed + covered
+                                      return round(covered / total * 100, 2) if total else 0.0
+              return None
 
-          if base is not None:
-              diff = round(current - base, 2)
+          changed_files = json.loads(os.environ.get('CHANGED_FILES', '[]'))
+
+          current_path = 'build/reports/jacoco/test/jacocoTestReport.xml'
+          current_root = ET.parse(current_path).getroot()
+          current_overall = get_overall(current_path)
+
+          base_path = 'base-coverage/jacocoTestReport.xml'
+          base_exists = os.path.exists(base_path)
+          base_overall = get_overall(base_path) if base_exists else None
+          base_root = ET.parse(base_path).getroot() if base_exists else None
+
+          overall_ok = current_overall >= MIN_COVERAGE
+
+          if base_overall is not None:
+              diff = round(current_overall - base_overall, 2)
               sign = '+' if diff >= 0 else ''
               emoji = '📈' if diff >= 0 else '📉'
-              summary = f"{emoji} {base}% → {current}% ({sign}{diff}%)"
+              overall_change = f"{emoji} {sign}{diff}%"
+              base_str = f"{base_overall}%"
           else:
-              summary = f"📊 {current}% (기준 데이터 없음)"
+              overall_change = "📊 기준 없음"
+              base_str = "-"
+
+          lines = [
+              "## 테스트 커버리지",
+              "",
+              f"| 항목 | 이전 | 현재 | 변화 | 상태 |",
+              f"|------|------|------|------|:----:|",
+              f"| 전체 | {base_str} | {current_overall}% | {overall_change} | {'✅' if overall_ok else '❌'} |",
+          ]
+
+          file_rows = []
+          for filepath in changed_files:
+              if 'src/main/java/' not in filepath or not filepath.endswith('.java'):
+                  continue
+              rel = filepath.split('src/main/java/')[1]
+              parts = rel.rsplit('/', 1)
+              if len(parts) != 2:
+                  continue
+              package_name, file_name = parts
+
+              current_cov = get_file_cov(current_root, package_name, file_name)
+              if current_cov is None:
+                  continue
+
+              if base_root:
+                  base_cov = get_file_cov(base_root, package_name, file_name)
+                  if base_cov is not None:
+                      diff = round(current_cov - base_cov, 2)
+                      sign = '+' if diff >= 0 else ''
+                      emoji = '📈' if diff >= 0 else '📉'
+                      change = f"{emoji} {sign}{diff}%"
+                      f_base_str = f"{base_cov}%"
+                  else:
+                      change = "🆕 신규"
+                      f_base_str = "-"
+              else:
+                  change = "📊 기준 없음"
+                  f_base_str = "-"
+
+              file_ok = current_cov >= MIN_COVERAGE
+              file_rows.append(f"| `{file_name}` | {f_base_str} | {current_cov}% | {change} | {'✅' if file_ok else '❌'} |")
+
+          if file_rows:
+              lines += [
+                  "",
+                  "### 변경된 파일",
+                  "| 파일 | 이전 | 현재 | 변화 | 상태 |",
+                  "|------|------|------|------|:----:|",
+              ] + file_rows
+
+          body = "\n".join(lines)
+
+          with open('coverage-body.md', 'w') as f:
+              f.write(body)
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f"summary={summary}\n")
-          EOF
+              f.write(f"overall_ok={'true' if overall_ok else 'false'}\n")
+          PYEOF
 
-      - name: Add coverage to PR
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "테스트 커버리지"
-          min-coverage-overall: 60
-          min-coverage-changed-files: 60
-          update-comment: true
-
-      - name: Comment coverage diff
+      - name: Comment coverage
         uses: actions/github-script@v7
         with:
           script: |
-            const summary = '${{ steps.compare.outputs.summary }}';
-            const marker = '<!-- coverage-diff -->';
-            const body = `${marker}\n### 커버리지 변화\n${summary}`;
+            const fs = require('fs');
+            const marker = '<!-- coverage-report -->';
+            const content = fs.readFileSync('coverage-body.md', 'utf8');
+            const body = `${marker}\n${content}`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -113,3 +203,9 @@ jobs:
                 body,
               });
             }
+
+      - name: Check coverage threshold
+        if: steps.coverage.outputs.overall_ok == 'false'
+        run: |
+          echo "Overall coverage is below 60%"
+          exit 1
