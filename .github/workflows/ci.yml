@@ -29,5 +29,13 @@ jobs:
       - name: Run tests
         run: ./gradlew test
 
+      - name: Upload coverage artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/reports/jacoco/test/jacocoTestReport.xml
+          retention-days: 90
+
       - name: Build
         run: ./gradlew build -x test
