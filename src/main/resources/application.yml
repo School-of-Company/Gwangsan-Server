@@ -1,0 +1,68 @@
+spring:
+  datasource:
+    driver-class-name: ${DB_DRIVER_CLASS:org.mariadb.jdbc.Driver}
+    url: jdbc:${RDB_TYPE:mariadb}://${RDB_HOST:localhost}:${RDB_PORT:3306}/${RDB_SCHEMA:gwangsan_db}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:12345678}
+  jpa:
+    hibernate:
+      dialect: ${DB_DIALECT:org.hibernate.dialect.MariaDBDialect}
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+
+
+    show-sql: true
+  sql:
+    init:
+      mode: always
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+jwt:
+  accessSecret: ${JWT_ACCESS_SECRET:qXWbwKO97FDyg8AdNGh5SakyMHgdEdyfUZi3WPxKZ/c=}
+  refreshSecret: ${JWT_REFRESH_SECRET:bddf2bea2033a184add4770ca6fe8957de4e175f2a295658d3dca73a458573c6}
+
+sms:
+  apiKey: ${SMS_API_KEY}
+  apiSecret: ${SMS_API_SECRET}
+  fromnumber: ${SMS_FROM_NUMBER}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_STATIC}
+    s3:
+      bucket: ${AWS_BUCKET}
+    stack:
+      auto: false
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
+chat:
+  stream:
+    group: ${CHAT_STREAM_GROUP:chat-message-persistors}
+    batchSize: ${CHAT_STREAM_BATCH_SIZE:10}
+    blockMs: ${CHAT_STREAM_BLOCK_MS:500}
+    claimIdleMs: ${CHAT_STREAM_CLAIM_IDLE_MS:30000}
+    retryMax: ${CHAT_STREAM_RETRY_MAX:5}
+    retryKey: ${CHAT_STREAM_RETRY_KEY:chat:retry:messages}
+    dlqKey: ${CHAT_STREAM_DLQ_KEY:chat:dlq:messages}
+

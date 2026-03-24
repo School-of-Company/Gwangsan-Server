@@ -1,0 +1,46 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+jwt:
+  accessSecret: ${JWT_ACCESS_SECRET:test-secret}
+  refreshSecret: test-refresh-secret
+
+sms:
+  apiKey: dummy
+  apiSecret: dummy
+  fromnumber: "01000000000"
+
+cloud:
+  aws:
+    credentials:
+      access-key: dummy
+      secret-key: dummy
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: dummy
+    stack:
+      auto: false
+
+cors:
+  allowed-origins: http://localhost:3000
+
+chat:
+  stream:
+    group: chat-message-persistors
+    batchSize: 10
+    blockMs: 500
+    claimIdleMs: 30000
+    retryMax: 5
+    retryKey: chat:retry:messages
+    dlqKey: chat:dlq:messages

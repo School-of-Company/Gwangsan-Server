@@ -35,3 +35,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### DS Store ###
+.DS_Store
+
+### SQL ###
+src/main/resources/data.sql
+
+### ENVIRONMENT ###
+.env
+
+### FCM ###
+src/main/resources/firebase-service-account.json
+
+### GCP ###
+src/main/resources/google-service-account.json

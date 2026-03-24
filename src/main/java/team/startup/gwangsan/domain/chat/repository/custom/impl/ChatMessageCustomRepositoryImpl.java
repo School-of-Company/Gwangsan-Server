@@ -1,0 +1,66 @@
+package team.startup.gwangsan.domain.chat.repository.custom.impl;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import team.startup.gwangsan.domain.chat.entity.ChatMessage;
+import team.startup.gwangsan.domain.chat.repository.custom.ChatMessageCustomRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static team.startup.gwangsan.domain.chat.entity.QChatMessage.chatMessage;
+import static team.startup.gwangsan.domain.member.entity.QMember.member;
+
+@Repository
+@RequiredArgsConstructor
+public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomRepository {
+
+    private final JPAQueryFactory queryFactory;
+    @PersistenceContext
+    private EntityManager em;
+
+    @Override
+    public List<ChatMessage> findChatMessageByRoomIdWithCursorPaging(Long roomId, LocalDateTime lastCreatedAt, Long lastMessageId, int limit) {
+        return queryFactory
+                .selectFrom(chatMessage)
+                .join(chatMessage.sender, member).fetchJoin()
+                .where(
+                        chatMessage.room.id.eq(roomId),
+                        buildCursorCondition(lastCreatedAt, lastMessageId)
+                )
+                .orderBy(chatMessage.createdAt.desc(), chatMessage.id.desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public void readMessage(Long roomId, Long lastMessageId, Long readerId) {
+        long updated = queryFactory
+                .update(chatMessage)
+                .set(chatMessage.checked, true)
+                .where(
+                        chatMessage.room.id.eq(roomId),
+                        chatMessage.checked.isFalse(),
+                        chatMessage.id.loe(lastMessageId),
+                        chatMessage.sender.id.ne(readerId)
+                )
+                .execute();
+
+        em.flush();
+        em.clear();
+    }
+
+    private BooleanExpression buildCursorCondition(LocalDateTime lastCreatedAt, Long lastMessageId) {
+        if (lastCreatedAt == null || lastMessageId == null) {
+            return null;
+        }
+        return chatMessage.createdAt.lt(lastCreatedAt)
+                .or(chatMessage.createdAt.eq(lastCreatedAt)
+                        .and(chatMessage.id.lt(lastMessageId)));
+    }
+
+}

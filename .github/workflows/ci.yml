@@ -9,12 +9,15 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Setup Java 21
         uses: actions/setup-java@v3
         with:
           java-version: "21"
@@ -23,5 +26,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload coverage artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: build/reports/jacoco/test/jacocoTestReport.xml
+          retention-days: 90
+
+      - name: Build
+        run: ./gradlew build -x test

@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 }
 
 group = 'team.startup'
@@ -24,20 +25,114 @@ repositories {
 }
 
 dependencies {
+	// spring-boot-starter
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// querydsl
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.1'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.1:jpa'
+
+	// jakarta
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// docker
+	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	// DB
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	annotationProcessor 'org.projectlombok:lombok'
+
+	// aop
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testRuntimeOnly 'com.h2database:h2'
+
+	// cloud
+	implementation 'software.amazon.awssdk:s3:2.29.49'
+
+	// sms
+	implementation("net.nurigo:sdk:4.3.0")
+
+	// fcm
+	implementation 'com.google.firebase:firebase-admin:9.5.0'
+
+	// gson
+	implementation 'com.google.code.gson:gson:2.8.9'
+
+    // retry
+    implementation("org.springframework.retry:spring-retry")
+}
+
+jacoco {
+	toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/GwangsanApplication*',
+				'**/global/config/**',
+				'**/global/security/config/**',
+				'**/global/querydsl/**',
+				'**/global/sms/**',
+				'**/*Exception*',
+				'**/*Properties*',
+				'**/dto/**',
+				'**/entity/**',
+				'**/projection/**',
+				'**/constant/**',
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			element = 'CLASS'
+			enabled = true
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
+			limit {
+				counter = 'METHOD'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
+		}
+	}
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
