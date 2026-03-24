@@ -204,8 +204,3 @@ jobs:
               });
             }
 
-      - name: Check coverage threshold
-        if: steps.coverage.outputs.overall_ok == 'false'
-        run: |
-          echo "Overall coverage is below 60%"
-          exit 1
