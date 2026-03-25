@@ -72,6 +72,33 @@ class UpdateMyInfoServiceImplTest {
         }
 
         @Nested
+        @DisplayName("존재하지 않는 특기가 주어졌을 때")
+        class Context_with_new_specialty {
+
+            @Test
+            @DisplayName("새로운 RelatedKeyword를 생성하고 저장한다")
+            void it_creates_and_saves_new_related_keyword() {
+                Member member = mock(Member.class);
+                when(member.getId()).thenReturn(1L);
+                when(member.getNickname()).thenReturn("테스터일");
+
+                MemberDetail detail = mock(MemberDetail.class);
+                UpdateMyInfoRequest request = new UpdateMyInfoRequest("테스터일", "새 설명", List.of("NewSkill"));
+                RelatedKeyword newKeyword = new RelatedKeyword("NewSkill");
+
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(detail));
+                when(relatedKeywordRepository.findByName("NewSkill")).thenReturn(Optional.empty());
+                when(relatedKeywordRepository.save(any(RelatedKeyword.class))).thenReturn(newKeyword);
+
+                service.execute(request);
+
+                verify(relatedKeywordRepository).save(any(RelatedKeyword.class));
+                verify(memberRelatedKeywordRepository).saveAll(any());
+            }
+        }
+
+        @Nested
         @DisplayName("닉네임이 변경된 경우")
         class Context_with_new_nickname {
 
