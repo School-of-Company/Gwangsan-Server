@@ -16,6 +16,7 @@ import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
+import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -23,6 +24,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +49,18 @@ class CreateProductServiceImplTest {
     @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
+
+        @Nested
+        @DisplayName("OBJECT+GIVER 타입에 이미지가 없을 때")
+        class Context_with_object_giver_no_image {
+
+            @Test
+            @DisplayName("ObjectRequiredImageException을 던진다")
+            void it_throws_object_required_image_exception() {
+                assertThatThrownBy(() -> service.execute(Type.OBJECT, Mode.GIVER, "제목", "설명", 100, List.of()))
+                        .isInstanceOf(ObjectRequiredImageException.class);
+            }
+        }
 
         @Nested
         @DisplayName("정상적인 입력이 주어졌을 때")
