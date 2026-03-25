@@ -1,10 +1,6 @@
 package team.startup.gwangsan.domain.sms.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.message.model.Message;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
-import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
@@ -14,6 +10,7 @@ import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeExceptio
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.service.SendResetPasswordSmsService;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsSendHelper;
 import team.startup.gwangsan.global.sms.SmsProperties;
 
 import java.security.NoSuchAlgorithmException;
@@ -24,14 +21,14 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class SendResetPasswordSmsServiceImpl implements SendResetPasswordSmsService {
 
-    private final DefaultMessageService messageService;
+    private final SmsSendHelper smsSendHelper;
     private final SmsProperties smsProperties;
     private final MemberRepository memberRepository;
     private final RedisUtil redisUtil;
 
     @Override
     @Transactional
-    public SingleMessageSentResponse execute(SendSmsRequest request) {
+    public void execute(SendSmsRequest request) {
 
         if (!memberRepository.existsByPhoneNumber(request.phoneNumber())) {
             throw new NotRegisteredPhoneNumberException();
@@ -41,12 +38,11 @@ public class SendResetPasswordSmsServiceImpl implements SendResetPasswordSmsServ
 
         saveAuthInfo(request.phoneNumber(), code);
 
-        Message message = new Message();
-        message.setFrom(smsProperties.getFromNumber());
-        message.setTo(request.phoneNumber());
-        message.setText("[시민화폐광산] 비밀번호 재설정 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요.");
-
-        return messageService.sendOne(new SingleMessageSendingRequest(message));
+        smsSendHelper.sendAsync(
+                smsProperties.getFromNumber(),
+                request.phoneNumber(),
+                "[시민화폐광산] 비밀번호 재설정 인증번호는 " + code + "입니다. 3분 이내에 입력해주세요."
+        );
     }
 
     private String generateCode() {

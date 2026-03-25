@@ -2,7 +2,6 @@ package team.startup.gwangsan.domain.sms.presentation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
@@ -23,9 +22,9 @@ public class SmsController {
     private final VerifyResetPasswordCodeService verifyResetPasswordCodeService;
 
     @PostMapping
-    public ResponseEntity<SingleMessageSentResponse> sendSms(@RequestBody @Valid SendSmsRequest request) {
-        SingleMessageSentResponse response = sendSmsService.execute(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Void> sendSms(@RequestBody @Valid SendSmsRequest request) {
+        sendSmsService.execute(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify")
@@ -35,9 +34,9 @@ public class SmsController {
     }
 
     @PostMapping("/password")
-    public ResponseEntity<SingleMessageSentResponse> sendResetPasswordSms(@RequestBody @Valid SendSmsRequest request) {
-        SingleMessageSentResponse response = sendResetPasswordSmsService.execute(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Void> sendResetPasswordSms(@RequestBody @Valid SendSmsRequest request) {
+        sendResetPasswordSmsService.execute(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/password/verify")
