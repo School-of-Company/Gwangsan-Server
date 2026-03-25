@@ -74,6 +74,22 @@ class FindProductsByMemberIdServiceImplTest {
         }
 
         @Test
+        @DisplayName("상품이 없으면 빈 리스트를 반환한다")
+        void returnsEmptyList_whenNoProducts() {
+            MemberDetail memberDetail = mock(MemberDetail.class);
+            Member member = mock(Member.class);
+            when(memberDetailRepository.findById(MEMBER_ID)).thenReturn(Optional.of(memberDetail));
+            when(memberDetail.getMember()).thenReturn(member);
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, TYPE, MODE, null))
+                    .thenReturn(List.of());
+
+            List<GetProductResponse> result = service.execute(MEMBER_ID, TYPE, MODE);
+
+            assertThat(result).isEmpty();
+            verifyNoInteractions(productImageRepository);
+        }
+
+        @Test
         @DisplayName("memberId, type, mode에 해당하는 상품과 이미지 정보를 조회하여 응답 DTO 리스트를 반환한다")
         void returnsProductResponses_whenProductsExist() {
             // given

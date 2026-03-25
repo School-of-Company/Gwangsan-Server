@@ -18,6 +18,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.event.DeleteNotUsedImageEvent;
@@ -68,6 +69,17 @@ class UpdateProductServiceImplTest {
     @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
+
+        @Test
+        @DisplayName("OBJECT+GIVER 타입에 이미지가 없으면 ObjectRequiredImageException을 던진다")
+        void givenObjectGiverWithNoImages_whenUpdateProduct_thenThrowsObjectRequiredException() {
+            Long productId = 1L;
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+            assertThrows(ObjectRequiredImageException.class, () ->
+                    updateProductService.execute(productId, Type.OBJECT, Mode.GIVER, "T", "D", 100, Collections.emptyList()));
+        }
 
         @Test
         @DisplayName("상품 작성자가 요청하면 상품 정보가 업데이트된다")
