@@ -93,7 +93,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 Alert sellerAlert = saveAlert(
                         product.getId(),
                         alertType,
-                        seller,
+                        buyer,
                         product.getTitle(),
                         SELLER_TRADE_BODY
                 );
