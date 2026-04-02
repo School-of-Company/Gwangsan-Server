@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Check;
 import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.place.entity.Place;
 
@@ -12,7 +11,6 @@ import team.startup.gwangsan.domain.place.entity.Place;
 @Table(name = "tbl_member_detail")
 @NoArgsConstructor
 @Getter
-@Check(constraints = "light >= 1 AND light <= 100")
 public class MemberDetail {
 
     @Id
@@ -61,6 +59,10 @@ public class MemberDetail {
 
     public void plusGwangsan(Integer gwangsan) {
         this.gwangsan = this.gwangsan + gwangsan;
+    }
+
+    public void plusLight(Integer light) {
+        this.light = Math.max(0, this.light + light);
     }
 
     public void updatePlace(Place place) {

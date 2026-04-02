@@ -70,6 +70,22 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
         }
 
         @Test
+        @DisplayName("상품이 없으면 빈 리스트를 반환한다")
+        void it_returns_empty_list_when_no_products() {
+            Member member = mock(Member.class);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+            when(member.getId()).thenReturn(1L);
+            MemberDetail memberDetail = mock(MemberDetail.class);
+            when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(memberDetail));
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING))
+                    .thenReturn(List.of());
+
+            var result = service.execute(Type.SERVICE, Mode.GIVER);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
         @DisplayName("정상적으로 Product 리스트와 이미지 리스트를 매핑하여 반환한다")
         void it_returns_GetProductResponse_list_properly() {
             // given

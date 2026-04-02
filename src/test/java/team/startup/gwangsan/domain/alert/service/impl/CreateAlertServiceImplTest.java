@@ -122,7 +122,7 @@ class CreateAlertServiceImplTest {
             assertThat(savedAlerts.get(0).getSendMember()).isSameAs(seller);
             assertThat(savedAlerts.get(0).getContent()).isEqualTo("광산이 차감되었습니다.");
             assertThat(savedAlerts.get(1).getSourceId()).isEqualTo(10L);
-            assertThat(savedAlerts.get(1).getSendMember()).isSameAs(seller);
+            assertThat(savedAlerts.get(1).getSendMember()).isSameAs(buyer);
             assertThat(savedAlerts.get(1).getContent()).isEqualTo("광산이 추가되었습니다.");
 
             List<AlertReceipt> receipts = receiptCaptor.getAllValues();

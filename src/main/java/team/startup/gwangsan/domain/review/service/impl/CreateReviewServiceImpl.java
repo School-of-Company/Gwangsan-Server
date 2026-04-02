@@ -52,25 +52,27 @@ public class CreateReviewServiceImpl implements CreateReviewService {
             throw new AlreadyReviewedException();
         }
 
-        MemberDetail reviewerDetail = memberDetailRepository.findByMember(reviewer)
+        Member reviewed = product.getMember();
+        MemberDetail reviewedDetail = memberDetailRepository.findByMember(reviewed)
                 .orElseThrow(NotFoundMemberDetailException::new);
 
         int rawLight = request.light();
-        int light = Math.max(1, rawLight / 10);
 
         Review review = Review.builder()
                 .product(product)
                 .reviewer(reviewer)
-                .reviewed(product.getMember())
+                .reviewed(reviewed)
                 .content(request.content())
-                .light(light)
+                .light(rawLight)
                 .build();
 
         reviewRepository.save(review);
 
+        reviewedDetail.plusLight(rawLight);
+
         applicationEventPublisher.publishEvent(new CreateAlertEvent(
                 review.getId(),
-                product.getMember().getId(),
+                reviewed.getId(),
                 AlertType.REVIEW
         ));
 

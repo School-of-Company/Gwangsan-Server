@@ -30,6 +30,7 @@ import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.trade.exception.*;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 
@@ -118,6 +119,19 @@ class RequestTradeCompleteServiceImplTest {
                     () -> service.execute(10L, memberId));
 
             verify(productRepository, never()).findByIdWithLock(anyLong());
+        }
+
+        @Test
+        @DisplayName("상품이 존재하지 않으면 NotFoundProductException을 던진다")
+        void execute_shouldThrowNotFoundProductException_whenProductNotFound() {
+            Long memberId = 1L;
+            Long otherMemberId = 2L;
+
+            MemberDetail memberDetail = mockMemberDetail(memberId);
+            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(memberDetail);
+            when(productRepository.findByIdWithLock(100L)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundProductException.class, () -> service.execute(100L, otherMemberId));
         }
 
         @Test
