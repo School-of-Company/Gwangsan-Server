@@ -62,11 +62,7 @@ public class MemberDetail {
     }
 
     public void plusLight(Integer light) {
-        this.light = this.light + light;
-    }
-
-    public void updateLight(Integer light) {
-        this.light = light;
+        this.light = Math.max(0, this.light + light);
     }
 
     public void updatePlace(Place place) {
