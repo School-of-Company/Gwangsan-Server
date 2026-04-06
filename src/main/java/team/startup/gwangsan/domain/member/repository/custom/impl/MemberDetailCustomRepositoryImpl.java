@@ -4,11 +4,14 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.custom.MemberDetailCustomRepository;
+import team.startup.gwangsan.domain.member.repository.projection.FindAllUserDto;
 import team.startup.gwangsan.domain.place.entity.Place;
 
 import java.util.List;
@@ -37,6 +40,42 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                         .where(memberDetail.id.eq(id))
                         .fetchOne())
                 .orElseThrow(NotFoundMemberException::new);
+    }
+
+    @Override
+    public Slice<FindAllUserDto> findAllUserSlice(Integer placeId, Integer headId, String nickname, String placeName, Pageable pageable) {
+        List<FindAllUserDto> content = queryFactory
+                .select(Projections.constructor(
+                        FindAllUserDto.class,
+                        member.id,
+                        member.nickname,
+                        member.name,
+                        member.phoneNumber,
+                        member.role,
+                        member.status,
+                        member.joinedAt,
+                        memberDetail.gwangsan
+                ))
+                .from(memberDetail)
+                .join(memberDetail.member, member)
+                .join(memberDetail.place, place)
+                .join(place.head, head)
+                .where(
+                        roleCondition(placeId, headId),
+                        nicknameContains(nickname),
+                        placeNameContains(placeName)
+                )
+                .orderBy(member.joinedAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = content.size() > pageable.getPageSize();
+        if (hasNext) {
+            content = content.subList(0, pageable.getPageSize());
+        }
+
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     @Override
@@ -108,7 +147,6 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
         );
     }
 
-
     private BooleanExpression roleCondition(Integer placeId, Integer headId) {
         if (placeId != null) {
             return place.id.eq(placeId);
@@ -125,6 +163,14 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
 
     private BooleanExpression placeNameEq(String placeName) {
         return placeName != null ? place.name.eq(placeName) : null;
+    }
+
+    private BooleanExpression nicknameContains(String nickname) {
+        return nickname != null && !nickname.isBlank() ? member.nickname.contains(nickname) : null;
+    }
+
+    private BooleanExpression placeNameContains(String placeName) {
+        return placeName != null && !placeName.isBlank() ? place.name.contains(placeName) : null;
     }
 
     private BooleanExpression placeIdEq(Integer placeId) {
