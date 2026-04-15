@@ -70,6 +70,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/nickname").permitAll()
 
                                 // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
