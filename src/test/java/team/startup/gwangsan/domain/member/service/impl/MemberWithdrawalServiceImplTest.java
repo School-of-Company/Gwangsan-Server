@@ -13,8 +13,8 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
+import team.startup.gwangsan.domain.member.service.MemberDeletionService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -31,9 +31,9 @@ class MemberWithdrawalServiceImplTest {
     private MemberWithdrawalServiceImpl service;
 
     @Mock private MemberUtil memberUtil;
-    @Mock private MemberRepository memberRepository;
     @Mock private WithdrawalRecordRepository withdrawalRecordRepository;
     @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDeletionService memberDeletionService;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -61,7 +61,7 @@ class MemberWithdrawalServiceImplTest {
                 assertThat(captor.getValue().getPhoneNumber()).isEqualTo("01012345678");
                 assertThat(captor.getValue().getGwangsan()).isEqualTo(500);
 
-                verify(memberRepository).delete(member);
+                verify(memberDeletionService).delete(member);
             }
         }
 
@@ -79,7 +79,7 @@ class MemberWithdrawalServiceImplTest {
                 assertThatThrownBy(() -> service.execute())
                         .isInstanceOf(NotFoundMemberDetailException.class);
 
-                verify(memberRepository, never()).delete(any());
+                verify(memberDeletionService, never()).delete(any());
             }
         }
     }

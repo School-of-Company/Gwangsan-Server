@@ -19,6 +19,7 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
+import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
 import team.startup.gwangsan.global.redis.RedisUtil;
@@ -46,6 +47,7 @@ class SignUpServiceImplTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private RelatedKeywordRepository relatedKeywordRepository;
     @Mock private MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    @Mock private WithdrawalRecordRepository withdrawalRecordRepository;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
 
     private SignUpRequest validRequest() {
