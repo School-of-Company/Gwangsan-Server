@@ -69,6 +69,7 @@ public enum ErrorCode {
 
     // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
+    BANNED_PHONE_NUMBER(403, "강제 탈퇴 처리된 회원입니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
     NOT_FOUND_USER(401, "존재하지 않는 사용자입니다."),
 
