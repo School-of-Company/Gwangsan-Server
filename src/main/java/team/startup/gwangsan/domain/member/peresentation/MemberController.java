@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team.startup.gwangsan.domain.admin.service.WithDrawnMemberService;
 import team.startup.gwangsan.domain.member.peresentation.dto.request.UpdateMyInfoRequest;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUserInfoResponse;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindMyInfoResponse;
