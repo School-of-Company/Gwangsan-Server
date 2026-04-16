@@ -27,13 +27,17 @@ public class WithdrawalRecord {
     @Column(name = "gwangsan", nullable = false)
     private Integer gwangsan;
 
+    @Column(name = "banned", nullable = false)
+    private boolean banned;
+
     @CreatedDate
     @Column(name = "withdrawal_at", nullable = false)
     private LocalDateTime withdrawalAt;
 
     @Builder
-    public WithdrawalRecord(String phoneNumber, Integer gwangsan) {
+    public WithdrawalRecord(String phoneNumber, Integer gwangsan, boolean banned) {
         this.phoneNumber = phoneNumber;
         this.gwangsan = gwangsan;
+        this.banned = banned;
     }
 }
