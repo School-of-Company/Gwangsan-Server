@@ -10,7 +10,8 @@ import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.member.exception.DummyMemberDeletionNotAllowedException;
+import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.member.service.MemberDeletionService;
@@ -50,8 +51,9 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     @Transactional
     public void delete(Member member) {
         Member dummy = memberRepository.findByNickname(WITHDRAWN_NICKNAME)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(NotFoundDummyMemberException::new);
 
+        validateDummyMember(member, dummy);
         reassignReferences(member, dummy);
         deletePersonalData(member);
         memberRepository.delete(member);
@@ -82,5 +84,11 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
         memberBlockRepository.deleteAllByBlockerOrBlocked(member);
         alertReceiptRepository.deleteAllByMember(member);
         memberDetailRepository.deleteByMember(member);
+    }
+
+    private void validateDummyMember(Member member, Member dummy) {
+        if (member.getId().equals(dummy.getId())) {
+            throw new DummyMemberDeletionNotAllowedException();
+        }
     }
 }
