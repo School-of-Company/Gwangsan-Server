@@ -45,7 +45,7 @@ public class UpdateMemberStatusServiceImpl implements UpdateMemberStatusService 
         if (status == MemberStatus.WITHDRAWN) {
             withdrawalRecordRepository.save(WithdrawalRecord.builder()
                     .phoneNumber(targetMember.getPhoneNumber())
-                    .gwangsan(0)
+                    .gwangsan(targetMemberDetail.getGwangsan())
                     .banned(true)
                     .build());
             memberDeletionService.delete(targetMember);
