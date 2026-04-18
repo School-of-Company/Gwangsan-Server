@@ -13,9 +13,11 @@ public enum ErrorCode {
 
     // member
     INVALID_MEMBER_PRINCIPAL(401, "현재 인증된 사용자의 정보가 유효하지 않습니다."),
+    DUMMY_MEMBER_DELETION_NOT_ALLOWED(403, "더미 사용자는 삭제할 수 없습니다."),
     NOT_FOUND_MEMBER(404, "해당 회원을 찾을 수 없습니다."),
     DUPLICATE_PHONE_NUMBER(409, "이미 존재하는 전화번호입니다."),
     DUPLICATE_NICKNAME(409, "이미 존재하는 닉네임입니다."),
+    NOT_FOUND_DUMMY_MEMBER(404, "더미 사용자가 존재하지 않습니다."),
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
     NOT_ALLOWED_USER_ACCESS(403, "사용자 목록 조회 권한이 없습니다."),
