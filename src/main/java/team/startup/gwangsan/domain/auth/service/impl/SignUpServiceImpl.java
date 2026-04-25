@@ -17,6 +17,7 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
@@ -41,11 +42,13 @@ public class SignUpServiceImpl implements SignUpService {
     private final PasswordEncoder passwordEncoder;
     private final RelatedKeywordRepository relatedKeywordRepository;
     private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    private final WithdrawalRecordRepository withdrawalRecordRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
     public void execute(SignUpRequest request) {
+        validateBannedPhoneNumber(request.phoneNumber());
         validateDuplicatePhoneNumber(request.phoneNumber());
         validateDuplicateNickname(request.nickname());
 
@@ -133,6 +136,12 @@ public class SignUpServiceImpl implements SignUpService {
     private void validateSmsAuthentication(Boolean verified) {
         if (!Boolean.TRUE.equals(verified)) {
             throw new SmsAuthNotCompletedException();
+        }
+    }
+
+    private void validateBannedPhoneNumber(String phoneNumber) {
+        if (withdrawalRecordRepository.existsByPhoneNumberAndBannedIsTrue(phoneNumber)) {
+            throw new  BannedPhoneNumberException();
         }
     }
 }

@@ -9,7 +9,6 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.AdminSignInRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberRoleRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberStatusRequest;
-import team.startup.gwangsan.domain.admin.presentation.dto.request.WithDrawnMemberRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
 import team.startup.gwangsan.domain.admin.service.*;
@@ -25,7 +24,6 @@ public class AdminController {
     private final UpdateMemberStatusService updateMemberStatusService;
     private final RejectAdminAlertService rejectAdminAlertService;
     private final VerificationSignUpService verificationSignUpService;
-    private final WithDrawnMemberService withDrawnMemberService;
     private final DeleteAdminAlertService deleteAdminAlertService;
     private final ApproveTradeCancelService approveTradeCancelService;
 
@@ -71,15 +69,6 @@ public class AdminController {
     @PatchMapping("/verify/signup/{alert_id}")
     public ResponseEntity<Void> verifySignUp(@PathVariable("alert_id") Long alertId) {
         verificationSignUpService.execute(alertId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @PatchMapping("/ban/{member_id}")
-    public ResponseEntity<Void> ban(
-            @PathVariable("member_id") Long memberId,
-            @RequestBody WithDrawnMemberRequest request
-            ) {
-        withDrawnMemberService.execute(memberId, request.alertId());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

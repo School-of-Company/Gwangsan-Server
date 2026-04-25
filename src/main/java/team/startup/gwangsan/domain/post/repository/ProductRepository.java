@@ -3,7 +3,10 @@ package team.startup.gwangsan.domain.post.repository;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.repository.custom.ProductCustomRepository;
@@ -16,4 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
     Optional<Product> findByIdWithLock(Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Product p SET p.member = :dummy WHERE p.member = :target")
+    void reassignMember(@Param("target") Member target, @Param("dummy") Member dummy);
 }
