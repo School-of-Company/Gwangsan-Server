@@ -2,8 +2,8 @@
 # .claude/hooks/preToolUse.sh
 # Block dangerous commands before execution
 
-if [[ "$TOOL_NAME" == "Bash" ]]; then
-    COMMAND="$TOOL_PARAMS_COMMAND"
+if [[ "$CLAUDE_TOOL_NAME" == "Bash" ]]; then
+    COMMAND="$CLAUDE_TOOL_ARG_command"
     BLOCKED_PATTERNS=(
         "rm[[:space:]]+-rf[[:space:]]+/"
         "sudo[[:space:]]+rm[[:space:]]+-rf"

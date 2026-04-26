@@ -3,7 +3,7 @@
 # Run compileJava before commit if any staged file is a Java file
 
 # Only run for git commit commands
-if [[ "$TOOL_PARAMS_COMMAND" != *"git commit"* ]]; then
+if [[ "$CLAUDE_TOOL_ARG_command" != *"git commit"* ]]; then
     exit 0
 fi
 

@@ -49,7 +49,9 @@ git push
 Always quote variables to prevent shell injection. `path` and `comment_id` come from external PR data and may contain special characters.
 
 ```bash
-gh api "repos/<owner>/<repo>/pulls/<pr_number>/comments/<comment_id>/replies" \
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+PR_NUMBER=$(gh pr view --json number -q .number)
+gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments/<comment_id>/replies" \
   -f body="<short_hash> 에서 해결했습니다."
 ```
 
