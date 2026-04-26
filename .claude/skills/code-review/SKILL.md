@@ -7,8 +7,8 @@ allowed-tools: Bash(git *:*), Read, Glob, Grep
 ## Step 1 — Gather Changed Files
 
 ```bash
-git diff develop...HEAD --name-only 2>/dev/null || git diff HEAD~5...HEAD --name-only
-git diff develop...HEAD 2>/dev/null || git diff HEAD~5...HEAD
+git diff origin/develop...HEAD --name-only 2>/dev/null || git diff HEAD~5...HEAD --name-only
+git diff origin/develop...HEAD 2>/dev/null || git diff HEAD~5...HEAD
 ```
 
 Read each changed `.java` file with the Read tool for detailed analysis.
