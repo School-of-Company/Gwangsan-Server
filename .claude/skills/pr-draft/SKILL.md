@@ -21,10 +21,10 @@ Also read the PR template:
 cat .github/PULL_REQUEST_TEMPLATE.md
 ```
 
-Search open issues to find the related one:
+Search all issues (open and closed) to find the related one:
 
 ```bash
-gh issue list --state open --limit 50
+gh issue list --state all --limit 100 --json number,title,state,labels
 ```
 
 Match the most relevant issue by comparing issue titles and labels against the branch name and commit messages. Note the issue number for use in Steps 3–5.
@@ -36,8 +36,8 @@ Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate lab
 ## Step 3 — Generate PR Content
 
 **Title** — Generate 3 options:
-- Format: `type :: description` (no brackets — follow git commit convention: add/update/fix/delete/docs/test)
-- Description: Korean, concise, **derived from the related issue title/content**, no period, max 50 characters total
+- Format: description only — Korean, concise, **derived from the related issue title/content**, no period, max 50 characters
+- Do NOT prepend a type prefix (no `add ::`, `fix ::`, etc.)
 - Mark the best option with `← 추천`
 
 **Body** — Follow `.github/PULL_REQUEST_TEMPLATE.md` structure:
