@@ -75,7 +75,15 @@ Then fill in each section of `PR_BODY.md` with the generated content — do not 
 
 Ask the user to confirm which title to use. If no answer, proceed with the recommended title.
 
-## Step 5 — Create PR
+## Step 5 — Push & Create PR
+
+Push the current branch to remote first:
+
+```bash
+git push -u origin HEAD
+```
+
+Then create the PR:
 
 ```bash
 bash "${CLAUDE_SKILL_DIR}/scripts/create-pr.sh" "<confirmed-title>" "PR_BODY.md" "<label1>,<label2>"
