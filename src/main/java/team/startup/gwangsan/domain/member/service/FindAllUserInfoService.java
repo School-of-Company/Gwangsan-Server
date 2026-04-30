@@ -1,10 +1,9 @@
 package team.startup.gwangsan.domain.member.service;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindAllUserInfoResponse;
 
-import java.util.List;
-
 public interface FindAllUserInfoService {
-    List<FindAllUserInfoResponse> execute(String nickname, String placeName);
+    Slice<FindAllUserInfoResponse> execute(String nickname, String placeName, Pageable pageable);
 }
-
