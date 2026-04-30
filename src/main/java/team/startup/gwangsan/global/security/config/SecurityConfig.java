@@ -70,12 +70,15 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/auth/password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/nickname").permitAll()
 
                                 // sms
                                 .requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/password").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/sms/password/verify").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/sms/nickname").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/sms/nickname/verify").permitAll()
 
                                 // post
                                 .requestMatchers(HttpMethod.POST, "/api/post").authenticated()

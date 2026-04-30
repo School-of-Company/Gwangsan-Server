@@ -6,10 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.presentation.dto.VerifyCodeRequest;
-import team.startup.gwangsan.domain.sms.service.SendResetPasswordSmsService;
-import team.startup.gwangsan.domain.sms.service.SendSmsService;
-import team.startup.gwangsan.domain.sms.service.VerifyCodeService;
-import team.startup.gwangsan.domain.sms.service.VerifyResetPasswordCodeService;
+import team.startup.gwangsan.domain.sms.service.*;
 
 @RestController
 @RequestMapping("/api/sms")
@@ -20,6 +17,8 @@ public class SmsController {
     private final VerifyCodeService verifyCodeService;
     private final SendResetPasswordSmsService sendResetPasswordSmsService;
     private final VerifyResetPasswordCodeService verifyResetPasswordCodeService;
+    private final SendFindNicknameSmsService sendFindNicknameSmsService;
+    private final VerifyFindNicknameCodeService verifyFindNicknameCodeService;
 
     @PostMapping
     public ResponseEntity<Void> sendSms(@RequestBody @Valid SendSmsRequest request) {
@@ -42,6 +41,18 @@ public class SmsController {
     @PostMapping("/password/verify")
     public ResponseEntity<Void> verifyResetPasswordSms(@RequestBody @Valid VerifyCodeRequest request) {
         verifyResetPasswordCodeService.execute(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/nickname")
+    public ResponseEntity<Void> sendFindNicknameSms(@RequestBody @Valid SendSmsRequest request) {
+        sendFindNicknameSmsService.execute(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/nickname/verify")
+    public ResponseEntity<Void> verifyFindNicknameSms(@RequestBody @Valid VerifyCodeRequest request) {
+        verifyFindNicknameCodeService.execute(request);
         return ResponseEntity.ok().build();
     }
 
