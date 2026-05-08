@@ -40,7 +40,7 @@ class TradeHistoryByHeadServiceImplTest {
             @Test
             @DisplayName("지점별 거래 건수를 반환한다")
             void it_returns_trade_history_by_head() {
-                when(tradeCompleteRepository.countByHeadId(eq(7), any(), eq(1)))
+                when(tradeCompleteRepository.countByHeadId(eq(Period.WEEK.getValue()), any(), eq(1)))
                         .thenReturn(Map.of(10, 5L, 11, 3L));
 
                 Place place1 = mock(Place.class);

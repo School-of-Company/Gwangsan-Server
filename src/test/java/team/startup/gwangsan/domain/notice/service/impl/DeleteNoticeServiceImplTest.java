@@ -51,6 +51,7 @@ class DeleteNoticeServiceImplTest {
 
                 service.execute(1L);
 
+                verify(noticeImageRepository).deleteAllByNotice(notice);
                 verify(noticeRepository).delete(notice);
             }
         }
@@ -73,6 +74,7 @@ class DeleteNoticeServiceImplTest {
 
                 service.execute(1L);
 
+                verify(noticeImageRepository).deleteAllByNotice(notice);
                 verify(noticeRepository).delete(notice);
             }
         }

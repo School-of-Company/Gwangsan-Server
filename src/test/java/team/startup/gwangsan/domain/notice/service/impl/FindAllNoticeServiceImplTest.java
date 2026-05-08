@@ -20,10 +20,13 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoticeResponse;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,8 +66,9 @@ class FindAllNoticeServiceImplTest {
                 when(noticeRepository.findByPlaceOrderByIdDesc(eq(place), any())).thenReturn(Collections.emptyList());
                 when(noticeImageRepository.findAllByNoticeIdIn(any())).thenReturn(Collections.emptyList());
 
-                service.execute(null, 10);
+                List<FindAllNoticeResponse> result = service.execute(null, 10);
 
+                assertThat(result).isEmpty();
                 verify(noticeRepository).findByPlaceOrderByIdDesc(eq(place), any());
                 verify(noticeRepository, never()).findByPlaceAndIdLessThanOrderByIdDesc(any(), any(), any());
             }
@@ -88,8 +92,9 @@ class FindAllNoticeServiceImplTest {
                 when(noticeRepository.findByPlaceAndIdLessThanOrderByIdDesc(eq(place), eq(5L), any())).thenReturn(Collections.emptyList());
                 when(noticeImageRepository.findAllByNoticeIdIn(any())).thenReturn(Collections.emptyList());
 
-                service.execute(5L, 10);
+                List<FindAllNoticeResponse> result = service.execute(5L, 10);
 
+                assertThat(result).isEmpty();
                 verify(noticeRepository).findByPlaceAndIdLessThanOrderByIdDesc(eq(place), eq(5L), any());
                 verify(noticeRepository, never()).findByPlaceOrderByIdDesc(any(), any());
             }
@@ -116,8 +121,9 @@ class FindAllNoticeServiceImplTest {
                 when(noticeRepository.findByPlaceInOrderByIdDesc(any(), any())).thenReturn(Collections.emptyList());
                 when(noticeImageRepository.findAllByNoticeIdIn(any())).thenReturn(Collections.emptyList());
 
-                service.execute(null, 10);
+                List<FindAllNoticeResponse> result = service.execute(null, 10);
 
+                assertThat(result).isEmpty();
                 verify(noticeRepository).findByPlaceInOrderByIdDesc(any(), any());
                 verify(noticeRepository, never()).findByPlaceInAndIdLessThanOrderByIdDesc(any(), any(), any());
             }
@@ -144,8 +150,9 @@ class FindAllNoticeServiceImplTest {
                 when(noticeRepository.findByPlaceInAndIdLessThanOrderByIdDesc(any(), eq(5L), any())).thenReturn(Collections.emptyList());
                 when(noticeImageRepository.findAllByNoticeIdIn(any())).thenReturn(Collections.emptyList());
 
-                service.execute(5L, 10);
+                List<FindAllNoticeResponse> result = service.execute(5L, 10);
 
+                assertThat(result).isEmpty();
                 verify(noticeRepository).findByPlaceInAndIdLessThanOrderByIdDesc(any(), eq(5L), any());
                 verify(noticeRepository, never()).findByPlaceInOrderByIdDesc(any(), any());
             }

@@ -34,7 +34,7 @@ class TradeHistoryByPlaceServiceImplTest {
             @Test
             @DisplayName("지점 거래 건수를 반환한다")
             void it_returns_trade_count_by_place() {
-                when(tradeCompleteRepository.countByPlaceId(eq(30), any(), eq(5))).thenReturn(12L);
+                when(tradeCompleteRepository.countByPlaceId(eq(Period.MONTH.getValue()), any(), eq(5))).thenReturn(12L);
 
                 PlaceTradeHistoryResponse result = service.execute(Period.MONTH, 5);
 
