@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
@@ -84,7 +85,7 @@ class TradeCancelServiceImplTest {
 
                 verify(tradeCancelRepository).save(any());
                 verify(tradeCancelImageRepository).saveAll(any());
-                verify(applicationEventPublisher).publishEvent(any(Object.class));
+                verify(applicationEventPublisher).publishEvent(any(CreateAdminAlertEvent.class));
             }
         }
 
