@@ -24,6 +24,7 @@ import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +46,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                         productId, TradeStatus.COMPLETED)
                 .orElseThrow(NotFoundTradeCompleteException::new);
 
-        if (tradeComplete.getBuyer().getId().equals(member.getId())
-                && tradeComplete.getSeller().getId().equals(member.getId())) {
+        if (!Objects.equals(tradeComplete.getBuyer().getId(), member.getId())
+                && !Objects.equals(tradeComplete.getSeller().getId(), member.getId())) {
             throw new TradeParticipantOnlyException();
         }
 
