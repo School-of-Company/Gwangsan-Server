@@ -61,13 +61,10 @@ class TradeCancelServiceImplTest {
 
                 Member buyer = mock(Member.class);
                 when(buyer.getId()).thenReturn(1L);
-                Member seller = mock(Member.class);
-                when(seller.getId()).thenReturn(2L);
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getId()).thenReturn(10L);
                 when(tradeComplete.getBuyer()).thenReturn(buyer);
-                when(tradeComplete.getSeller()).thenReturn(seller);
 
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
@@ -147,13 +144,10 @@ class TradeCancelServiceImplTest {
 
                 Member buyer = mock(Member.class);
                 when(buyer.getId()).thenReturn(1L);
-                Member seller = mock(Member.class);
-                when(seller.getId()).thenReturn(2L);
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getId()).thenReturn(10L);
                 when(tradeComplete.getBuyer()).thenReturn(buyer);
-                when(tradeComplete.getSeller()).thenReturn(seller);
 
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
