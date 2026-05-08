@@ -181,5 +181,24 @@ class FindNoticeServiceImplTest {
                         .isInstanceOf(NoticeNotFoundException.class);
             }
         }
+
+        @Nested
+        @DisplayName("MemberDetail이 없을 때")
+        class Context_with_member_detail_not_found {
+
+            @Test
+            @DisplayName("NotFoundMemberDetailException을 던진다")
+            void it_throws_not_found_member_detail_exception() {
+                Member member = mock(Member.class);
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+
+                Notice notice = mock(Notice.class);
+                when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
+                when(memberDetailRepository.findByMember(member)).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> service.execute(1L))
+                        .isInstanceOf(NotFoundMemberDetailException.class);
+            }
+        }
     }
 }

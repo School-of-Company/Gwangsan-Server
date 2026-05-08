@@ -56,13 +56,13 @@ class UpdateNoticeServiceImplTest {
                 when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
                 when(notice.getMember()).thenReturn(member);
                 when(member.getId()).thenReturn(1L);
-                when(notice.getMember().getId()).thenReturn(1L);
                 when(imageRepository.findAllById(List.of(10L))).thenReturn(List.of(image));
 
                 UpdateNoticeRequest request = new UpdateNoticeRequest("새 제목", "새 내용", List.of(10L));
                 service.execute(1L, request);
 
                 verify(notice).update("새 제목", "새 내용");
+                verify(noticeImageRepository).deleteAllByNotice(notice);
                 verify(noticeImageRepository).saveAll(any());
             }
         }
@@ -123,7 +123,6 @@ class UpdateNoticeServiceImplTest {
                 when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
                 when(notice.getMember()).thenReturn(member);
                 when(member.getId()).thenReturn(1L);
-                when(notice.getMember().getId()).thenReturn(1L);
                 when(imageRepository.findAllById(List.of(10L, 20L))).thenReturn(List.of(mock(Image.class)));
 
                 UpdateNoticeRequest request = new UpdateNoticeRequest("제목", "내용", List.of(10L, 20L));

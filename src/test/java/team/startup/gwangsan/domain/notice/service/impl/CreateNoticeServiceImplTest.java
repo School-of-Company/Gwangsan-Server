@@ -22,6 +22,8 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.global.event.CreateAlertMembersEvent;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Collections;
@@ -76,7 +78,8 @@ class CreateNoticeServiceImplTest {
 
                 verify(noticeRepository).save(any());
                 verify(noticeImageRepository).saveAll(any());
-                verify(applicationEventPublisher, times(2)).publishEvent(any(Object.class));
+                verify(applicationEventPublisher).publishEvent(any(SendNotificationEvent.class));
+                verify(applicationEventPublisher).publishEvent(any(CreateAlertMembersEvent.class));
             }
         }
 
