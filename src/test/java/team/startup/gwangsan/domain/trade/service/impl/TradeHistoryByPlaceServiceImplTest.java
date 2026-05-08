@@ -49,7 +49,7 @@ class TradeHistoryByPlaceServiceImplTest {
             @Test
             @DisplayName("count가 0인 응답을 반환한다")
             void it_returns_zero_count() {
-                when(tradeCompleteRepository.countByPlaceId(anyInt(), any(), anyInt())).thenReturn(0L);
+                when(tradeCompleteRepository.countByPlaceId(eq(Period.WEEK.getValue()), any(), eq(5))).thenReturn(0L);
 
                 PlaceTradeHistoryResponse result = service.execute(Period.WEEK, 5);
 

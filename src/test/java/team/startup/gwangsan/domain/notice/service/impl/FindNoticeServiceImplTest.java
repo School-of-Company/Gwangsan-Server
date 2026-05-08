@@ -134,6 +134,8 @@ class FindNoticeServiceImplTest {
                 FindNoticeResponse response = service.execute(1L);
 
                 assertThat(response).isNotNull();
+                assertThat(response.title()).isEqualTo("제목");
+                assertThat(response.content()).isEqualTo("내용");
             }
         }
 

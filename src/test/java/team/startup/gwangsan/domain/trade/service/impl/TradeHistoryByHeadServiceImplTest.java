@@ -66,7 +66,7 @@ class TradeHistoryByHeadServiceImplTest {
             @Test
             @DisplayName("빈 리스트를 반환한다")
             void it_returns_empty_list() {
-                when(tradeCompleteRepository.countByHeadId(eq(1), any(), eq(1)))
+                when(tradeCompleteRepository.countByHeadId(eq(Period.DAY.getValue()), any(), eq(1)))
                         .thenReturn(Map.of());
                 when(placeRepository.findAllById(any())).thenReturn(List.of());
 
