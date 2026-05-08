@@ -1,0 +1,2 @@
+#!/bin/bash
+find /Users/suuuuuuminnnnn/Desktop/workspace/Gwangsan-Server-clean/src/main -name "*.java" | xargs grep -l "CreateAdminAlertService\|CreateAlertService\|CreateAlertMembersService\|SendNotificationService\|DeleteNotUsedImage\|CreateAdminAlertEvent\|CreateAlertEvent\|CreateAlertMembersEvent\|SendNotificationEvent\|DeleteNotUsedImageEvent\|ImageType\|DeviceToken\|NotificationType" 2>/dev/null | head -50
