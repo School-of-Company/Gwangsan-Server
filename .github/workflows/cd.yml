@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: gwangsan-app
-  DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/1387943644601913365/sYVG9ylcYE6yFucoThqvz1l0pgwZylBfsGZhNU7NmCvStq4fB-GZ037bEDxCOSbfhMuH
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
 jobs:
   ci-cd:
