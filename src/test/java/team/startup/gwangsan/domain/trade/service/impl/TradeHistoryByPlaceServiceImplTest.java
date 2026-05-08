@@ -27,29 +27,34 @@ class TradeHistoryByPlaceServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        @Test
-        @DisplayName("지점 거래 건수를 반환한다")
-        void it_returns_trade_count_by_place() {
-            when(tradeCompleteRepository.countByPlaceId(eq(30), any(), eq(5))).thenReturn(12L);
+        @Nested
+        @DisplayName("거래 내역이 있을 때")
+        class Context_with_history {
 
-            PlaceTradeHistoryResponse result = service.execute(Period.MONTH, 5);
+            @Test
+            @DisplayName("지점 거래 건수를 반환한다")
+            void it_returns_trade_count_by_place() {
+                when(tradeCompleteRepository.countByPlaceId(eq(30), any(), eq(5))).thenReturn(12L);
 
-            assertThat(result.count()).isEqualTo(12L);
+                PlaceTradeHistoryResponse result = service.execute(Period.MONTH, 5);
+
+                assertThat(result.count()).isEqualTo(12L);
+            }
         }
-    }
 
-    @Nested
-    @DisplayName("거래 내역이 없을 때")
-    class Context_with_no_history {
+        @Nested
+        @DisplayName("거래 내역이 없을 때")
+        class Context_with_no_history {
 
-        @Test
-        @DisplayName("count가 0인 응답을 반환한다")
-        void it_returns_zero_count() {
-            when(tradeCompleteRepository.countByPlaceId(anyInt(), any(), anyInt())).thenReturn(0L);
+            @Test
+            @DisplayName("count가 0인 응답을 반환한다")
+            void it_returns_zero_count() {
+                when(tradeCompleteRepository.countByPlaceId(anyInt(), any(), anyInt())).thenReturn(0L);
 
-            PlaceTradeHistoryResponse result = service.execute(Period.WEEK, 5);
+                PlaceTradeHistoryResponse result = service.execute(Period.WEEK, 5);
 
-            assertThat(result.count()).isEqualTo(0L);
+                assertThat(result.count()).isEqualTo(0L);
+            }
         }
     }
 }
