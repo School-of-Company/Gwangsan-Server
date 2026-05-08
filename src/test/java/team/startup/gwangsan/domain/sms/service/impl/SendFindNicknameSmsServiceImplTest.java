@@ -59,6 +59,7 @@ class SendFindNicknameSmsServiceImplTest {
 
                 verify(messageService).sendOne(any());
                 verify(redisUtil).set(eq("sms:code:01012345678"), anyString(), anyLong());
+                verify(redisUtil).set(eq("sms:attempt:01012345678"), eq(1), anyLong());
             }
         }
 
