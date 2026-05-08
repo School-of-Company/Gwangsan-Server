@@ -38,7 +38,7 @@ public class TradeCancelWithdrawServiceImpl implements TradeCancelWithdrawServic
         TradeCancel tradeCancel = tradeCancelRepository.findByTradeCompleteIdAndStatus(tradeComplete.getId(), TradeCancelStatus.PENDING)
                 .orElseThrow(NotFoundTradeCancelException::new);
 
-        if (tradeCancel.getMember().getId().equals(member.getId())) {
+        if (!tradeCancel.getMember().getId().equals(member.getId())) {
             throw new NotTradeCancelRequesterException();
         }
 

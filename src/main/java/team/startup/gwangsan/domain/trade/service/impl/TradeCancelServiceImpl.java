@@ -45,8 +45,8 @@ public class TradeCancelServiceImpl implements TradeCancelService {
                         productId, TradeStatus.COMPLETED)
                 .orElseThrow(NotFoundTradeCompleteException::new);
 
-        if (tradeComplete.getBuyer().getId().equals(member.getId())
-                && tradeComplete.getSeller().getId().equals(member.getId())) {
+        if (!tradeComplete.getBuyer().getId().equals(member.getId())
+                && !tradeComplete.getSeller().getId().equals(member.getId())) {
             throw new TradeParticipantOnlyException();
         }
 
