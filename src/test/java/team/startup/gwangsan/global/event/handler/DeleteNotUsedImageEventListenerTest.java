@@ -88,6 +88,26 @@ class DeleteNotUsedImageEventListenerTest {
         }
 
         @Nested
+        @DisplayName("imageIds에 여러 이미지가 있을 때")
+        class Context_with_multiple_image_ids {
+
+            @Test
+            @DisplayName("모든 이미지에 대해 반복 삭제를 수행한다")
+            void it_deletes_all_images() {
+                Long sourceId = 10L;
+                Set<Long> imageIds = Set.of(20L, 21L, 22L);
+                DeleteNotUsedImageEvent event = new DeleteNotUsedImageEvent(sourceId, imageIds, ImageType.NOTICE);
+
+                listener.handleDeleteNotUsedImageEvent(event);
+
+                imageIds.forEach(imageId -> {
+                    verify(noticeImageRepository).deleteByNoticeIdAndImageId(sourceId, imageId);
+                    verify(imageRepository).deleteById(imageId);
+                });
+            }
+        }
+
+        @Nested
         @DisplayName("imageIds가 비어있을 때")
         class Context_with_empty_image_ids {
 

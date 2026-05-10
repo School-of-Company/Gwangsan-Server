@@ -20,7 +20,10 @@ import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
 
+import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,7 +106,11 @@ class UpdateMemberStatusServiceImplTest {
 
                 service.execute(2L, MemberStatus.WITHDRAWN);
 
-                verify(withdrawalRecordRepository).save(any());
+                verify(withdrawalRecordRepository).save(argThat((WithdrawalRecord record) ->
+                        "01012345678".equals(record.getPhoneNumber())
+                                && record.getGwangsan() == 5000
+                                && record.isBanned()
+                ));
                 verify(memberDeletionService).delete(target);
             }
         }
