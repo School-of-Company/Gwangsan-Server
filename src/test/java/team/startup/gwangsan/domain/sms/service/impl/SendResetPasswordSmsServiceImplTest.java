@@ -99,5 +99,25 @@ class SendResetPasswordSmsServiceImplTest {
                 verifyNoInteractions(smsSendHelper);
             }
         }
+
+        @Nested
+        @DisplayName("시도 횟수 정보가 없을 때 (최초 요청)")
+        class Context_with_null_attempt {
+
+            @Test
+            @DisplayName("시도 횟수를 1로 초기화하고 SMS를 발송한다")
+            void it_initializes_attempt_and_sends_sms() {
+                SendSmsRequest request = new SendSmsRequest("01099999999");
+
+                when(memberRepository.existsByPhoneNumber("01099999999")).thenReturn(true);
+                when(redisUtil.get("sms:attempt:01099999999", Integer.class)).thenReturn(null);
+                when(smsProperties.getFromNumber()).thenReturn("01000000000");
+
+                service.execute(request);
+
+                verify(redisUtil).set(eq("sms:attempt:01099999999"), eq(1), anyLong());
+                verify(smsSendHelper).sendAsync(eq("01000000000"), eq("01099999999"), anyString());
+            }
+        }
     }
 }

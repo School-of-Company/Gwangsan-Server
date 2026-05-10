@@ -20,6 +20,9 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.domain.notice.entity.Notice;
+import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoticeResponse;
 
 import java.util.Collections;
@@ -155,6 +158,50 @@ class FindAllNoticeServiceImplTest {
                 assertThat(result).isEmpty();
                 verify(noticeRepository).findByPlaceInAndIdLessThanOrderByIdDesc(any(), eq(5L), any());
                 verify(noticeRepository, never()).findByPlaceInOrderByIdDesc(any(), any());
+            }
+        }
+
+        @Nested
+        @DisplayName("공지 목록과 이미지가 있을 때")
+        class Context_with_notices_and_images {
+
+            @Test
+            @DisplayName("이미지가 포함된 FindAllNoticeResponse 목록을 반환한다")
+            void it_returns_notice_responses_with_images() {
+                Member member = mock(Member.class);
+                when(member.getId()).thenReturn(1L);
+                MemberDetail memberDetail = mock(MemberDetail.class);
+                Place place = mock(Place.class);
+
+                Notice notice = mock(Notice.class);
+                when(notice.getId()).thenReturn(100L);
+                when(notice.getTitle()).thenReturn("공지 제목");
+                when(notice.getContent()).thenReturn("공지 내용");
+                Member noticeMember = mock(Member.class);
+                when(noticeMember.getId()).thenReturn(1L);
+                when(notice.getMember()).thenReturn(noticeMember);
+
+                Image image = mock(Image.class);
+                when(image.getId()).thenReturn(10L);
+                when(image.getImageUrl()).thenReturn("https://s3.example.com/img.png");
+
+                NoticeImage noticeImage = mock(NoticeImage.class);
+                when(noticeImage.getNotice()).thenReturn(notice);
+                when(noticeImage.getImage()).thenReturn(image);
+
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(memberDetailRepository.findByMember(member)).thenReturn(Optional.of(memberDetail));
+                when(memberDetail.getPlace()).thenReturn(place);
+                when(member.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
+                when(noticeRepository.findByPlaceOrderByIdDesc(eq(place), any())).thenReturn(List.of(notice));
+                when(noticeImageRepository.findAllByNoticeIdIn(List.of(100L))).thenReturn(List.of(noticeImage));
+
+                List<FindAllNoticeResponse> result = service.execute(null, 10);
+
+                assertThat(result).hasSize(1);
+                assertThat(result.get(0).title()).isEqualTo("공지 제목");
+                assertThat(result.get(0).images()).hasSize(1);
+                assertThat(result.get(0).isMe()).isTrue();
             }
         }
 
