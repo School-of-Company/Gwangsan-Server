@@ -179,11 +179,12 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 product.getId()
         ));
 
+        LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
                 product.getId(),
                 true,
-                pending.getCompletedAt() != null ? pending.getCompletedAt() : LocalDateTime.now()
+                changedAt
         ));
     }
 
@@ -209,11 +210,12 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 AlertType.OTHER_MEMBER_TRADE_COMPLETE
         ));
 
+        LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
                 product.getId(),
                 false,
-                newTradeComplete.getCreatedAt() != null ? newTradeComplete.getCreatedAt() : LocalDateTime.now()
+                changedAt
         ));
     }
 }

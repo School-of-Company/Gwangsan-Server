@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -605,12 +604,6 @@ class RequestTradeCompleteServiceImplTest {
         assertEquals(productId, event.productId());
         assertEquals(completed, event.completed());
         assertTrue(event.changedAt() != null);
-
-        if (completed) {
-            assertTrue(event.completed());
-        } else {
-            assertFalse(event.completed());
-        }
     }
 
 }
