@@ -44,3 +44,8 @@ chat:
     retryMax: 5
     retryKey: chat:retry:messages
     dlqKey: chat:dlq:messages
+
+chatting:
+  server:
+    url: ""
+    internal-secret: ""
