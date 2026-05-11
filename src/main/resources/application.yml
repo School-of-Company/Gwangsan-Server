@@ -66,3 +66,7 @@ chat:
     retryKey: ${CHAT_STREAM_RETRY_KEY:chat:retry:messages}
     dlqKey: ${CHAT_STREAM_DLQ_KEY:chat:dlq:messages}
 
+chatting:
+  server:
+    url: ${CHATTING_SERVER_URL:}
+    internal-secret: ${CHATTING_SERVER_INTERNAL_SECRET:}

@@ -38,7 +38,9 @@ import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
 import team.startup.gwangsan.global.aop.CheckBlocked;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,9 +85,9 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         validateChatExists(chatRoom, member.getId());
 
         if (isBuyer) {
-            handleBuyerTradeCompletion(product, buyerDetail, sellerDetail, reservation);
+            handleBuyerTradeCompletion(chatRoom, product, buyerDetail, sellerDetail, reservation);
         } else {
-            handleSellerTradeCompletion(product, sellerDetail.getMember(), buyerDetail.getMember());
+            handleSellerTradeCompletion(chatRoom, product, sellerDetail.getMember(), buyerDetail.getMember());
         }
 
     }
@@ -140,7 +142,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         return reservation;
     }
 
-    private void handleBuyerTradeCompletion(Product product, MemberDetail buyerDetail, MemberDetail sellerDetail, ProductReservation reservation) {
+    private void handleBuyerTradeCompletion(ChatRoom chatRoom, Product product, MemberDetail buyerDetail, MemberDetail sellerDetail, ProductReservation reservation) {
         TradeComplete pending = tradeCompleteRepository
                 .findByProductAndBuyerAndSellerAndStatus(
                         product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING)
@@ -176,9 +178,17 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 NotificationType.TRADE_COMPLETE,
                 product.getId()
         ));
+
+        LocalDateTime changedAt = LocalDateTime.now();
+        applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                chatRoom.getId(),
+                product.getId(),
+                true,
+                changedAt
+        ));
     }
 
-    private void handleSellerTradeCompletion(Product product, Member seller, Member buyer) {
+    private void handleSellerTradeCompletion(ChatRoom chatRoom, Product product, Member seller, Member buyer) {
         boolean existsTradeComplete = tradeCompleteRepository
                 .existsByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING);
 
@@ -198,6 +208,14 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 newTradeComplete.getId(),
                 newTradeComplete.getBuyer().getId(),
                 AlertType.OTHER_MEMBER_TRADE_COMPLETE
+        ));
+
+        LocalDateTime changedAt = LocalDateTime.now();
+        applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                chatRoom.getId(),
+                product.getId(),
+                false,
+                changedAt
         ));
     }
 }
