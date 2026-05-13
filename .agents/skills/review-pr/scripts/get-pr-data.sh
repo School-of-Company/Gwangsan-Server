@@ -16,6 +16,8 @@ gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/comments" \
   --jq '.[] | {id, path, line, body, user: .user.login}' \
   | jq -s '.' > .pr-tmp/pr_comments.json
 
+git fetch origin "$BASE" --quiet
+
 git log "origin/$BASE..HEAD" --pretty=format:"%H %h %s" > .pr-tmp/pr_commits.txt
 
 git diff "origin/$BASE...HEAD" --name-only > .pr-tmp/pr_changed_files.txt
