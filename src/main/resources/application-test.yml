@@ -47,5 +47,6 @@ chat:
 
 chatting:
   server:
+    # Keep empty in tests to disable external chatting server calls by default.
     url: ""
     internal-secret: ""

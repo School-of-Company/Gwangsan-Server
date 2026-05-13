@@ -68,5 +68,6 @@ chat:
 
 chatting:
   server:
+    # Internal API settings for propagating trade status changes to the chatting server.
     url: ${CHATTING_SERVER_URL:}
     internal-secret: ${CHATTING_SERVER_INTERNAL_SECRET:}

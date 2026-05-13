@@ -182,7 +182,6 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                sellerDetail.getMember().getId(),
                 product.getId(),
                 true,
                 changedAt
@@ -214,7 +213,6 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                buyer.getId(),
                 product.getId(),
                 false,
                 changedAt
