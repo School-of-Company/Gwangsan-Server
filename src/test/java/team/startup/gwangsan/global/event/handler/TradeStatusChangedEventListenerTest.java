@@ -20,7 +20,7 @@ class TradeStatusChangedEventListenerTest {
     void it_does_not_propagate_exception_when_chatting_server_notification_fails() {
         ChattingServerTradeStatusNotifier notifier = mock(ChattingServerTradeStatusNotifier.class);
         TradeStatusChangedEventListener listener = new TradeStatusChangedEventListener(notifier);
-        TradeStatusChangedEvent event = new TradeStatusChangedEvent(1L, 10L, false, LocalDateTime.now());
+        TradeStatusChangedEvent event = new TradeStatusChangedEvent(1L, 2L, 10L, false, LocalDateTime.now());
 
         doThrow(new RuntimeException("chatting server unavailable"))
                 .when(notifier)
