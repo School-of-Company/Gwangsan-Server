@@ -350,7 +350,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verify(reservation).complete();
-            verifyTradeStatusChangedEvent(roomId, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -412,7 +412,7 @@ class RequestTradeCompleteServiceImplTest {
 
             // then
             verify(tradeCompleteRepository).save(any(TradeComplete.class));
-            verifyTradeStatusChangedEvent(roomId, productId, false);
+            verifyTradeStatusChangedEvent(roomId, buyerId, productId, false);
         }
 
         @Test
@@ -535,7 +535,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verifyNoInteractions(productReservationRepository);
-            verifyTradeStatusChangedEvent(roomId, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -593,7 +593,7 @@ class RequestTradeCompleteServiceImplTest {
         }
     }
 
-    private void verifyTradeStatusChangedEvent(Long roomId, Long productId, boolean completed) {
+    private void verifyTradeStatusChangedEvent(Long roomId, Long targetMemberId, Long productId, boolean completed) {
         ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
         verify(applicationEventPublisher, atLeastOnce()).publishEvent(eventCaptor.capture());
 
@@ -604,6 +604,7 @@ class RequestTradeCompleteServiceImplTest {
                 .orElseThrow();
 
         assertEquals(roomId, event.roomId());
+        assertEquals(targetMemberId, event.targetMemberId());
         assertEquals(productId, event.productId());
         assertEquals(completed, event.completed());
         assertTrue(event.changedAt() != null);

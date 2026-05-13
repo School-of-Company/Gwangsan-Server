@@ -33,6 +33,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
                 .header(INTERNAL_SECRET_HEADER, properties.internalSecret())
                 .body(new TradeStatusChangedRequest(
                         event.roomId(),
+                        event.targetMemberId(),
                         event.productId(),
                         event.completed(),
                         event.changedAt()
@@ -43,6 +44,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
 
     private record TradeStatusChangedRequest(
             Long roomId,
+            Long targetMemberId,
             Long productId,
             boolean isCompleted,
             LocalDateTime createdAt
