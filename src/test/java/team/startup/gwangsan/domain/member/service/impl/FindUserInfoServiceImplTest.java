@@ -63,7 +63,7 @@ class FindUserInfoServiceImplTest {
                 when(mrk.getRelatedKeyword()).thenReturn(keyword);
 
                 when(detail.getMember()).thenReturn(member);
-                when(memberDetailRepository.findByMemberIdWithPlaceHeadDong(2L)).thenReturn(Optional.of(detail));
+                when(memberDetailRepository.findByMemberIdWithMemberAndPlace(2L)).thenReturn(Optional.of(detail));
                 when(memberRelatedKeywordRepository.findAllByMember(member)).thenReturn(List.of(mrk));
 
                 FindUserInfoResponse response = service.execute(2L);
@@ -81,7 +81,7 @@ class FindUserInfoServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                when(memberDetailRepository.findByMemberIdWithPlaceHeadDong(99L)).thenReturn(Optional.empty());
+                when(memberDetailRepository.findByMemberIdWithMemberAndPlace(99L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(99L))
                         .isInstanceOf(NotFoundMemberException.class);

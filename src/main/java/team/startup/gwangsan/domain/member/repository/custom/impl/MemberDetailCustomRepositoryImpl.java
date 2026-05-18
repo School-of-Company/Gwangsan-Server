@@ -108,6 +108,18 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
         );
     }
 
+    @Override
+    public Optional<MemberDetail> findByMemberIdWithMemberAndPlace(Long memberId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(memberDetail)
+                        .join(memberDetail.member, member).fetchJoin()
+                        .join(memberDetail.place, place).fetchJoin()
+                        .where(memberDetail.member.id.eq(memberId))
+                        .fetchOne()
+        );
+    }
+
 
     private BooleanExpression roleCondition(Integer placeId, Integer headId) {
         if (placeId != null) {

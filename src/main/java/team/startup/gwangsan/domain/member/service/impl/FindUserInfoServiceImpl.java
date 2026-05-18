@@ -23,7 +23,7 @@ public class FindUserInfoServiceImpl implements FindUserInfoService {
     @Override
     @Transactional(readOnly = true)
     public FindUserInfoResponse execute(Long memberId) {
-        MemberDetail detail = memberDetailRepository.findByMemberIdWithPlaceHeadDong(memberId)
+        MemberDetail detail = memberDetailRepository.findByMemberIdWithMemberAndPlace(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         Member member = detail.getMember();
