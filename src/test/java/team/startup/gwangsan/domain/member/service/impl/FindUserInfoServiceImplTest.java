@@ -12,7 +12,6 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.peresentation.dto.response.FindUserInfoResponse;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
@@ -32,7 +31,6 @@ class FindUserInfoServiceImplTest {
     @InjectMocks
     private FindUserInfoServiceImpl service;
 
-    @Mock private MemberRepository memberRepository;
     @Mock private MemberDetailRepository memberDetailRepository;
     @Mock private MemberRelatedKeywordRepository memberRelatedKeywordRepository;
 
@@ -64,8 +62,8 @@ class FindUserInfoServiceImplTest {
                 MemberRelatedKeyword mrk = mock(MemberRelatedKeyword.class);
                 when(mrk.getRelatedKeyword()).thenReturn(keyword);
 
-                when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
-                when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(detail));
+                when(detail.getMember()).thenReturn(member);
+                when(memberDetailRepository.findByMemberIdWithPlaceHeadDong(2L)).thenReturn(Optional.of(detail));
                 when(memberRelatedKeywordRepository.findAllByMember(member)).thenReturn(List.of(mrk));
 
                 FindUserInfoResponse response = service.execute(2L);
@@ -83,25 +81,9 @@ class FindUserInfoServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+                when(memberDetailRepository.findByMemberIdWithPlaceHeadDong(99L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(99L))
-                        .isInstanceOf(NotFoundMemberException.class);
-            }
-        }
-
-        @Nested
-        @DisplayName("MemberDetail이 없을 때")
-        class Context_with_detail_not_found {
-
-            @Test
-            @DisplayName("NotFoundMemberException을 던진다")
-            void it_throws_not_found_member_exception() {
-                Member member = mock(Member.class);
-                when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
-                when(memberDetailRepository.findById(2L)).thenReturn(Optional.empty());
-
-                assertThatThrownBy(() -> service.execute(2L))
                         .isInstanceOf(NotFoundMemberException.class);
             }
         }
