@@ -288,6 +288,7 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
+            Long roomId = 700L;
 
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
@@ -318,7 +319,7 @@ class RequestTradeCompleteServiceImplTest {
             when(reservation.getReserver()).thenReturn(buyerMember);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
-            when(chatRoom.getId()).thenReturn(300L);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -349,7 +350,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verify(reservation).complete();
-            verifyTradeStatusChangedEvent(300L, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -359,6 +360,7 @@ class RequestTradeCompleteServiceImplTest {
             Long sellerId = 1L;
             Long buyerId = 2L;
             Long productId = 100L;
+            Long roomId = 701L;
 
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
@@ -381,7 +383,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(Optional.of(product));
 
             ChatRoom chatRoom = mock(ChatRoom.class);
-            when(chatRoom.getId()).thenReturn(300L);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -410,7 +412,7 @@ class RequestTradeCompleteServiceImplTest {
 
             // then
             verify(tradeCompleteRepository).save(any(TradeComplete.class));
-            verifyTradeStatusChangedEvent(300L, productId, false);
+            verifyTradeStatusChangedEvent(roomId, buyerId, productId, false);
         }
 
         @Test
@@ -473,6 +475,7 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
+            Long roomId = 702L;
 
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
@@ -501,7 +504,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(Optional.empty());
 
             ChatRoom chatRoom = mock(ChatRoom.class);
-            when(chatRoom.getId()).thenReturn(300L);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -532,7 +535,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verifyNoInteractions(productReservationRepository);
-            verifyTradeStatusChangedEvent(300L, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -590,7 +593,7 @@ class RequestTradeCompleteServiceImplTest {
         }
     }
 
-    private void verifyTradeStatusChangedEvent(Long roomId, Long productId, boolean completed) {
+    private void verifyTradeStatusChangedEvent(Long roomId, Long targetMemberId, Long productId, boolean completed) {
         ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
         verify(applicationEventPublisher, atLeastOnce()).publishEvent(eventCaptor.capture());
 
@@ -601,9 +604,9 @@ class RequestTradeCompleteServiceImplTest {
                 .orElseThrow();
 
         assertEquals(roomId, event.roomId());
+        assertEquals(targetMemberId, event.targetMemberId());
         assertEquals(productId, event.productId());
         assertEquals(completed, event.completed());
         assertTrue(event.changedAt() != null);
     }
-
 }

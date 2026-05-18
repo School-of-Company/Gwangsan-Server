@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Component
 public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTradeStatusNotifier {
 
-    private static final String INTERNAL_SECRET_HEADER = "X-Internal-Secret";
-    private static final String TRADE_STATUS_PATH = "/internal/trade-status";
+    private static final String INTERNAL_SECRET_HEADER = "x-internal-secret";
+    private static final String TRADE_STATUS_PATH = "/api/internal/chat/transaction-state";
 
     private final ChattingServerProperties properties;
     private final RestClient restClient;
@@ -33,6 +33,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
                 .header(INTERNAL_SECRET_HEADER, properties.internalSecret())
                 .body(new TradeStatusChangedRequest(
                         event.roomId(),
+                        event.targetMemberId(),
                         event.productId(),
                         event.completed(),
                         event.changedAt()
@@ -43,6 +44,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
 
     private record TradeStatusChangedRequest(
             Long roomId,
+            Long targetMemberId,
             Long productId,
             boolean isCompleted,
             LocalDateTime createdAt
