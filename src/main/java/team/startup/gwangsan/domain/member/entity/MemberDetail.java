@@ -62,7 +62,7 @@ public class MemberDetail {
     }
 
     public void adjustGwangsan(Integer gwangsan) {
-        this.gwangsan = this.gwangsan + gwangsan;
+        this.gwangsan = Math.max(0, this.gwangsan + gwangsan);
     }
 
     public void plusLight(Integer light) {

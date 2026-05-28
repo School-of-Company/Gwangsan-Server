@@ -17,7 +17,6 @@ import team.startup.gwangsan.global.util.MemberUtil;
 @RequiredArgsConstructor
 public class AdjustGwangsanServiceImpl implements AdjustGwangsanService {
 
-    private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final ValidatePlaceUtil validatePlaceUtil;
