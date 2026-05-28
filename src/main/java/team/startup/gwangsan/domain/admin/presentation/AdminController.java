@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.presentation.dto.request.AdjustGwangsanRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.AdminSignInRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberRoleRequest;
 import team.startup.gwangsan.domain.admin.presentation.dto.request.UpdateMemberStatusRequest;
@@ -26,6 +27,7 @@ public class AdminController {
     private final VerificationSignUpService verificationSignUpService;
     private final DeleteAdminAlertService deleteAdminAlertService;
     private final ApproveTradeCancelService approveTradeCancelService;
+    private final AdjustGwangsanService adjustGwangsanService;
 
     @GetMapping("/alert")
     public ResponseEntity<GetAdminAlertResponse> getAdminAlert(
@@ -52,6 +54,15 @@ public class AdminController {
     ) {
         updateMemberStatusService.execute(memberId, request.status());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/gwangsan/{member_id}")
+    public ResponseEntity<Void> adjustGwangsan(
+            @PathVariable("member_id") Long memberId,
+            @RequestBody @Valid AdjustGwangsanRequest request
+    ) {
+        adjustGwangsanService.execute(memberId, request.gwangsan());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signin")
