@@ -10,7 +10,6 @@ import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -28,10 +27,8 @@ public class AdjustGwangsanServiceImpl implements AdjustGwangsanService {
         MemberDetail adminDetail = memberDetailRepository.findById(admin.getId())
                 .orElseThrow(NotFoundMemberDetailException::new);
 
-        Member targetMember = memberRepository.findById(memberId)
+        MemberDetail targetMemberDetail = memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
-        MemberDetail targetMemberDetail = memberDetailRepository.findById(targetMember.getId())
-                .orElseThrow(NotFoundMemberDetailException::new);
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, targetMemberDetail);
         targetMemberDetail.adjustGwangsan(gwangsan);

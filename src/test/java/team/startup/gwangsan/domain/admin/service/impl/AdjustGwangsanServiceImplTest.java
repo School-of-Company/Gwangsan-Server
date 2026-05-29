@@ -12,7 +12,6 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -28,9 +27,6 @@ class AdjustGwangsanServiceImplTest {
 
     @InjectMocks
     private AdjustGwangsanServiceImpl service;
-
-    @Mock
-    private MemberRepository memberRepository;
 
     @Mock
     private MemberDetailRepository memberDetailRepository;
@@ -56,13 +52,10 @@ class AdjustGwangsanServiceImplTest {
                 when(admin.getId()).thenReturn(1L);
                 MemberDetail adminDetail = mock(MemberDetail.class);
 
-                Member target = mock(Member.class);
-                when(target.getId()).thenReturn(2L);
                 MemberDetail targetDetail = mock(MemberDetail.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
-                when(memberRepository.findById(2L)).thenReturn(Optional.of(target));
                 when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(targetDetail));
 
                 service.execute(2L, 1000);
@@ -83,13 +76,10 @@ class AdjustGwangsanServiceImplTest {
                 when(admin.getId()).thenReturn(1L);
                 MemberDetail adminDetail = mock(MemberDetail.class);
 
-                Member target = mock(Member.class);
-                when(target.getId()).thenReturn(2L);
                 MemberDetail targetDetail = mock(MemberDetail.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
-                when(memberRepository.findById(2L)).thenReturn(Optional.of(target));
                 when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(targetDetail));
 
                 service.execute(2L, -1000);
@@ -111,7 +101,7 @@ class AdjustGwangsanServiceImplTest {
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
-                when(memberRepository.findById(2L)).thenReturn(Optional.empty());
+                when(memberDetailRepository.findById(2L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(2L, 1000))
                         .isInstanceOf(NotFoundMemberException.class);
