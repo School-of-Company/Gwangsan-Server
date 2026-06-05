@@ -107,9 +107,7 @@ public class SecurityConfig {
 
                                 // admin
                                 .requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/admin/**")
-                                .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name() )
-                                .requestMatchers(HttpMethod.PATCH, "/api/admin/**")
+                                .requestMatchers("/api/admin/**")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
                                 // review
