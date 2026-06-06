@@ -13,9 +13,11 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
+import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
 import team.startup.gwangsan.domain.post.service.CreateProductService;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 
 import java.util.List;
 
@@ -27,10 +29,15 @@ public class CreateProductServiceImpl implements CreateProductService {
     private final ImageRepository imageRepository;
     private final ProductImageRepository productImageRepository;
     private final MemberUtil memberUtil;
+    private final AiModerationClient aiModerationClient;
 
     @Override
     @Transactional
     public void execute(Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
+        if (aiModerationClient.containsProfanity(title + "\n" + description)) {
+            throw new InappropriateContentException();
+        }
+
         List<Long> validImageIds = imageIds != null ? imageIds : List.of();
 
         if (type == Type.OBJECT && mode == Mode.GIVER && validImageIds.isEmpty()) {

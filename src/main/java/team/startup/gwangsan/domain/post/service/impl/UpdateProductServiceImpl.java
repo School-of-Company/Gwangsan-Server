@@ -14,6 +14,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
+import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.service.UpdateProductService;
@@ -21,6 +22,7 @@ import team.startup.gwangsan.global.event.DeleteNotUsedImageEvent;
 import team.startup.gwangsan.global.event.constant.ImageType;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,10 +38,15 @@ public class UpdateProductServiceImpl implements UpdateProductService {
     private final ProductImageRepository productImageRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MemberUtil memberUtil;
+    private final AiModerationClient aiModerationClient;
 
     @Override
     @Transactional
     public void execute(Long productId, Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
+        if (aiModerationClient.containsProfanity(title + "\n" + description)) {
+            throw new InappropriateContentException();
+        }
+
         Member member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findById(productId)

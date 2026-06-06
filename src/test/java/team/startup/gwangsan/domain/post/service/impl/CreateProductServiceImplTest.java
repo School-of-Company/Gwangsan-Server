@@ -17,9 +17,11 @@ import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
+import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 
 import java.util.List;
 
@@ -46,6 +48,9 @@ class CreateProductServiceImplTest {
     @Mock
     private MemberUtil memberUtil;
 
+    @Mock
+    private AiModerationClient aiModerationClient;
+
     @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
@@ -59,6 +64,23 @@ class CreateProductServiceImplTest {
             void it_throws_object_required_image_exception() {
                 assertThatThrownBy(() -> service.execute(Type.OBJECT, Mode.GIVER, "제목", "설명", 100, List.of()))
                         .isInstanceOf(ObjectRequiredImageException.class);
+            }
+        }
+
+        @Nested
+        @DisplayName("제목이나 설명에 부적절한 내용이 있을 때")
+        class Context_with_inappropriate_content {
+
+            @Test
+            @DisplayName("InappropriateContentException을 던지고 저장하지 않는다")
+            void it_rejects_content_before_save() {
+                when(aiModerationClient.containsProfanity("제목\n설명")).thenReturn(true);
+
+                assertThatThrownBy(() -> service.execute(
+                        Type.SERVICE, Mode.GIVER, "제목", "설명", 100, List.of()
+                )).isInstanceOf(InappropriateContentException.class);
+
+                verifyNoInteractions(productRepository, imageRepository, productImageRepository, memberUtil);
             }
         }
 

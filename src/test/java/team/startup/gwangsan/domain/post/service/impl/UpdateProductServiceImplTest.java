@@ -17,11 +17,13 @@ import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
+import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.event.DeleteNotUsedImageEvent;
+import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.*;
@@ -51,6 +53,9 @@ class UpdateProductServiceImplTest {
     @Mock
     private MemberUtil memberUtil;
 
+    @Mock
+    private AiModerationClient aiModerationClient;
+
     private Member author;
     private Member otherUser;
     private Product product;
@@ -69,6 +74,17 @@ class UpdateProductServiceImplTest {
     @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
+
+        @Test
+        @DisplayName("부적절한 내용이 있으면 상품을 조회하거나 수정하지 않는다")
+        void givenInappropriateContent_whenUpdateProduct_thenThrowsException() {
+            when(aiModerationClient.containsProfanity("T\nD")).thenReturn(true);
+
+            assertThrows(InappropriateContentException.class, () ->
+                    updateProductService.execute(1L, Type.SERVICE, Mode.GIVER, "T", "D", 100, List.of()));
+
+            verifyNoInteractions(productRepository, imageRepository, productImageRepository, memberUtil);
+        }
 
         @Test
         @DisplayName("OBJECT+GIVER 타입에 이미지가 없으면 ObjectRequiredImageException을 던진다")
