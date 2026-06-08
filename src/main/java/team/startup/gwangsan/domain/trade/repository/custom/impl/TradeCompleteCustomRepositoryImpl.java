@@ -55,7 +55,7 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                 .leftJoin(memberDetail).on(memberDetail.place.eq(place))
                 .leftJoin(memberDetail.member, member)
                 .leftJoin(tradeComplete).on(
-                        tradeComplete.product.member.eq(member),
+                        tradeComplete.seller.eq(member),
                         tradeComplete.completedAt.goe(start),
                         tradeComplete.completedAt.lt(end),
                         tradeComplete.status.eq(TradeStatus.COMPLETED))
@@ -80,7 +80,7 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                 .leftJoin(memberDetail).on(memberDetail.place.eq(place))
                 .leftJoin(memberDetail.member, member)
                 .leftJoin(tradeComplete).on(
-                        tradeComplete.product.member.eq(member),
+                        tradeComplete.seller.eq(member),
                         tradeComplete.completedAt.goe(start),
                         tradeComplete.completedAt.lt(end),
                         tradeComplete.status.eq(TradeStatus.COMPLETED))
