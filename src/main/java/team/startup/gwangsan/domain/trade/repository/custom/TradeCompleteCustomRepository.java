@@ -12,6 +12,10 @@ public interface TradeCompleteCustomRepository {
 
     Long countByPlaceId(int period, LocalDateTime now, Integer placeId);
 
+    Map<Integer, Long> countByHeadIdBetween(Integer headId, LocalDateTime start, LocalDateTime end);
+
+    Long countByPlaceIdBetween(Integer placeId, LocalDateTime start, LocalDateTime end);
+
     Optional<TradeComplete> findByProductIdAndStatus(Long productId, TradeStatus status);
 
     Optional<TradeComplete> findByIdWithProductAndMember(Long id);
