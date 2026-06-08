@@ -9,6 +9,7 @@ import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomR
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,11 +28,25 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
 
     @Override
     public Map<Integer, Long> countByHeadId(int period, LocalDateTime now, Integer headId) {
-        var cnt = tradeComplete.id.count();
-
         LocalDate today = now.toLocalDate();
         LocalDateTime start = today.minusDays(period - 1L).atStartOfDay();
         LocalDateTime nextDayStart = today.plusDays(1L).atStartOfDay();
+
+        return countByHeadIdBetween(headId, start, nextDayStart);
+    }
+
+    @Override
+    public Long countByPlaceId(int period, LocalDateTime now, Integer placeId) {
+        LocalDate today = now.toLocalDate();
+        LocalDateTime start = today.minusDays(period - 1L).atStartOfDay();
+        LocalDateTime nextDayStart = today.plusDays(1L).atStartOfDay();
+
+        return countByPlaceIdBetween(placeId, start, nextDayStart);
+    }
+
+    @Override
+    public Map<Integer, Long> countByHeadIdBetween(Integer headId, LocalDateTime start, LocalDateTime end) {
+        var cnt = tradeComplete.id.count();
 
         return queryFactory
                 .select(place.id, cnt)
@@ -42,23 +57,23 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                 .leftJoin(tradeComplete).on(
                         tradeComplete.product.member.eq(member),
                         tradeComplete.completedAt.goe(start),
-                        tradeComplete.completedAt.lt(nextDayStart))
+                        tradeComplete.completedAt.lt(end),
+                        tradeComplete.status.eq(TradeStatus.COMPLETED))
                 .where(head.id.eq(headId))
                 .groupBy(place.id)
+                .orderBy(place.id.asc())
                 .fetch()
                 .stream()
                 .collect(Collectors.toMap(
                         t -> t.get(place.id),
-                        t -> t.get(cnt)
+                        t -> t.get(cnt),
+                        (left, right) -> left,
+                        LinkedHashMap::new
                 ));
     }
 
     @Override
-    public Long countByPlaceId(int period, LocalDateTime now, Integer placeId) {
-        LocalDate today = now.toLocalDate();
-        LocalDateTime start = today.minusDays(period - 1L).atStartOfDay();
-        LocalDateTime nextDayStart = today.plusDays(1L).atStartOfDay();
-
+    public Long countByPlaceIdBetween(Integer placeId, LocalDateTime start, LocalDateTime end) {
         Long count = queryFactory
                 .select(tradeComplete.id.count())
                 .from(place)
@@ -67,7 +82,8 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                 .leftJoin(tradeComplete).on(
                         tradeComplete.product.member.eq(member),
                         tradeComplete.completedAt.goe(start),
-                        tradeComplete.completedAt.lt(nextDayStart))
+                        tradeComplete.completedAt.lt(end),
+                        tradeComplete.status.eq(TradeStatus.COMPLETED))
                 .where(place.id.eq(placeId))
                 .fetchOne();
 

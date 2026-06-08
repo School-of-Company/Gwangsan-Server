@@ -106,6 +106,7 @@ public enum ErrorCode {
     TRADE_PARTICIPANT_ONLY(403, "거래 당사자만 요청할 수 있습니다."),
     NOT_TRADE_CANCEL_REQUESTER(403, "거래 철회 요청자가 아닙니다."),
     CANNOT_PENDING_TRADE_CANCEL(400, "거래 철회가 대기중이 아닙니다."),
+    INVALID_TRADE_STATISTICS_PERIOD(400, "거래 통계 조회 기간이 올바르지 않습니다."),
 
     // suspend
     NOT_FOUND_SUSPEND(404, "해당하는 정지 내역을 찾을 수 없습니다."),
