@@ -104,5 +104,28 @@ class TradeHistoryByPlaceServiceImplTest {
                 verify(tradeCompleteRepository, never()).countByPlaceIdBetween(any(), any(), any());
             }
         }
+
+        @Nested
+        @DisplayName("기간이 null일 때")
+        class Context_with_null_period {
+
+            @Test
+            @DisplayName("InvalidTradeStatisticsPeriodException을 던진다")
+            void it_throws_invalid_trade_statistics_period_exception() {
+                assertThatThrownBy(() -> service.execute(
+                        5,
+                        null,
+                        LocalDate.of(2026, 6, 8)
+                )).isInstanceOf(InvalidTradeStatisticsPeriodException.class);
+
+                assertThatThrownBy(() -> service.execute(
+                        5,
+                        LocalDate.of(2026, 6, 1),
+                        null
+                )).isInstanceOf(InvalidTradeStatisticsPeriodException.class);
+
+                verify(tradeCompleteRepository, never()).countByPlaceIdBetween(any(), any(), any());
+            }
+        }
     }
 }

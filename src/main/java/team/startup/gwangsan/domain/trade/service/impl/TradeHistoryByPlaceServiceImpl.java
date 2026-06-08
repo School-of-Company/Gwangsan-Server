@@ -39,6 +39,9 @@ public class TradeHistoryByPlaceServiceImpl implements TradeHistoryByPlaceServic
     }
 
     private void validatePeriod(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new InvalidTradeStatisticsPeriodException();
+        }
         if (startDate.isAfter(endDate)) {
             throw new InvalidTradeStatisticsPeriodException();
         }
