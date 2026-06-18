@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.chat.repository.custom.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -57,6 +58,8 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
     @Override
     public List<GetRoomsDto> findRoomsByMemberId(Long memberId) {
         QChatMessage message = QChatMessage.chatMessage;
+        QChatMessage subMessage = new QChatMessage("subMessage");
+        QChatMessage subMessage2 = new QChatMessage("subMessage2");
         QChatMessage unreadMessage = new QChatMessage("unreadMessage");
         QMember buyer = new QMember("buyer");
         QMember seller = new QMember("seller");
@@ -101,16 +104,26 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         message.createdAt
                 ))
                 .from(message)
-                .where(message.room.id.in(roomIds))
-                .orderBy(message.room.id.asc(),
-                        message.createdAt.desc(),
-                        message.id.desc())
+                .where(
+                        message.room.id.in(roomIds),
+                        message.createdAt.eq(
+                                JPAExpressions.select(subMessage.createdAt.max())
+                                        .from(subMessage)
+                                        .where(subMessage.room.id.eq(message.room.id))
+                        ),
+                        message.id.eq(
+                                JPAExpressions.select(subMessage2.id.max())
+                                        .from(subMessage2)
+                                        .where(
+                                                subMessage2.room.id.eq(message.room.id),
+                                                subMessage2.createdAt.eq(message.createdAt)
+                                        )
+                        )
+                )
                 .fetch();
 
-        Map<Long, LatestMessageDto> latestMessageMap = new LinkedHashMap<>();
-        for (LatestMessageDto lm : latestMessages) {
-            latestMessageMap.putIfAbsent(lm.roomId(), lm);
-        }
+        Map<Long, LatestMessageDto> latestMessageMap = latestMessages.stream()
+                .collect(Collectors.toMap(LatestMessageDto::roomId, lm -> lm));
 
         List<UnreadCountDto> unreadCounts = queryFactory
                 .select(Projections.constructor(UnreadCountDto.class,
