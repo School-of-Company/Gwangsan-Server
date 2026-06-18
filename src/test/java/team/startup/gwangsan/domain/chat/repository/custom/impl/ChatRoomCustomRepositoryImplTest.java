@@ -39,7 +39,7 @@ class ChatRoomCustomRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
-        repository = new ChatRoomCustomRepositoryImpl(new JPAQueryFactory(em.getEntityManager()));
+        repository = new ChatRoomCustomRepositoryImpl(new JPAQueryFactory(em.getEntityManager()), em.getEntityManager());
     }
 
     private Member createMember(String nickname, String phone) {
