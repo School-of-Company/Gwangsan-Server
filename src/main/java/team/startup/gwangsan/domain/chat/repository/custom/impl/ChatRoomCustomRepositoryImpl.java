@@ -123,7 +123,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .fetch();
 
         Map<Long, LatestMessageDto> latestMessageMap = latestMessages.stream()
-                .collect(Collectors.toMap(LatestMessageDto::roomId, lm -> lm));
+                .collect(Collectors.toMap(LatestMessageDto::roomId, lm -> lm, (existing, replacement) -> existing));
 
         List<UnreadCountDto> unreadCounts = queryFactory
                 .select(Projections.constructor(UnreadCountDto.class,
