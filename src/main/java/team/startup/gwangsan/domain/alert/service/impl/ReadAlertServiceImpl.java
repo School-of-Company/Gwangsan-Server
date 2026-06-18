@@ -22,7 +22,7 @@ public class ReadAlertServiceImpl implements ReadAlertService {
     @Transactional
     public void execute(Long alertId) {
         Member member = memberUtil.getCurrentMember();
-        List<AlertReceipt> alertReceipts = alertReceiptRepository.findByMemberIdAndCheckedAndAlertId(member.getId(), false, alertId);
+        List<AlertReceipt> alertReceipts = alertReceiptRepository.findByMemberIdAndCheckedUpToAlertId(member.getId(), false, alertId);
 
         for (AlertReceipt alert : alertReceipts) {
             alert.markChecked();

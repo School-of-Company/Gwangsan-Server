@@ -48,7 +48,7 @@ class ReadAlertServiceImplTest {
         void it_marks_all_unchecked_receipts_as_checked() {
             AlertReceipt receipt1 = mock(AlertReceipt.class);
             AlertReceipt receipt2 = mock(AlertReceipt.class);
-            when(alertReceiptRepository.findByMemberIdAndCheckedAndAlertId(1L, false, 10L))
+            when(alertReceiptRepository.findByMemberIdAndCheckedUpToAlertId(1L, false, 10L))
                     .thenReturn(List.of(receipt1, receipt2));
 
             service.execute(10L);
@@ -60,12 +60,12 @@ class ReadAlertServiceImplTest {
         @Test
         @DisplayName("해당 알림에 읽지 않은 receipt 가 없으면 markChecked() 를 호출하지 않는다")
         void it_does_nothing_when_no_unchecked_receipts() {
-            when(alertReceiptRepository.findByMemberIdAndCheckedAndAlertId(1L, false, 10L))
+            when(alertReceiptRepository.findByMemberIdAndCheckedUpToAlertId(1L, false, 10L))
                     .thenReturn(List.of());
 
             service.execute(10L);
 
-            verify(alertReceiptRepository).findByMemberIdAndCheckedAndAlertId(1L, false, 10L);
+            verify(alertReceiptRepository).findByMemberIdAndCheckedUpToAlertId(1L, false, 10L);
             verifyNoMoreInteractions(alertReceiptRepository);
         }
     }
