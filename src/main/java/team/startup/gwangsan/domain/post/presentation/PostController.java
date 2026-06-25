@@ -22,6 +22,7 @@ import java.util.List;
 public class PostController {
 
     private final CreateProductService postProductService;
+    private final ProductContentValidationService productContentValidationService;
     private final FindProductByIdService findProductByIdService;
     private final FindProductsByTypeAndModeService findProductsByTypeAndModeService;
     private final FindProductByCurrentUserAndTypeAndModeService findProductByCurrentUserAndTypeAndModeService;
@@ -34,6 +35,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Void> createProduct(@RequestBody @Valid CreateProductRequest request) {
+        productContentValidationService.validate(request.title(), request.content());
         postProductService.execute(
                 request.type(),
                 request.mode(),
@@ -73,6 +75,7 @@ public class PostController {
             @PathVariable("post_id") Long postId,
             @RequestBody @Valid PatchProductRequest request
     ) {
+        productContentValidationService.validate(request.title(), request.content());
         updateProductService.execute(
                 postId,
                 request.type(),
