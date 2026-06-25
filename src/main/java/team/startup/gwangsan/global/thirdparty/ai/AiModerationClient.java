@@ -26,7 +26,7 @@ public class AiModerationClient {
             return;
         }
 
-        RestClient.Builder builder = restClientBuilder.baseUrl(properties.url());
+RestClient.Builder builder = restClientBuilder.clone().baseUrl(properties.url());
 
         if (properties.connectTimeout() != null && properties.readTimeout() != null) {
             SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
