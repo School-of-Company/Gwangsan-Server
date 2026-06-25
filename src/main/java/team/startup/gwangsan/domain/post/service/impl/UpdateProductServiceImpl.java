@@ -21,7 +21,6 @@ import team.startup.gwangsan.global.event.DeleteNotUsedImageEvent;
 import team.startup.gwangsan.global.event.constant.ImageType;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

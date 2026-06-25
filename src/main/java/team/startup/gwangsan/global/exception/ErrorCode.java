@@ -45,6 +45,7 @@ public enum ErrorCode {
     PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
     PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
     RESERVATION_PARTICIPANT_ONLY(403, "예약자 또는 상품 등록자만 예약을 취소할 수 있습니다."),
+    INAPPROPRIATE_CONTENT(400, "부적절한 내용이 포함되어 있습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
@@ -52,6 +53,7 @@ public enum ErrorCode {
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
     IMAGE_UPLOAD_FAILED(500, "이미지 업로드에 실패했습니다."),
     IMAGE_DELETE_FAILED(500, "이미지 삭제에 실패했습니다."),
+    INAPPROPRIATE_IMAGE(400, "부적절한 이미지가 포함되어 있습니다."),
 
     // report
     NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다."),

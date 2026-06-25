@@ -17,6 +17,7 @@ import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
+import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;

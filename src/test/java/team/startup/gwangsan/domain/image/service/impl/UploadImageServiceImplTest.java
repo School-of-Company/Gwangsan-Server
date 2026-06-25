@@ -9,9 +9,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import team.startup.gwangsan.domain.image.exception.ImageUploadFailedException;
+import team.startup.gwangsan.domain.image.exception.InappropriateImageException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.UploadImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.global.thirdparty.aws.s3.service.S3UploadService;
+import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,6 +33,7 @@ class UploadImageServiceImplTest {
 
     @Mock private S3UploadService s3UploadService;
     @Mock private ImageRepository imageRepository;
+    @Mock private AiModerationClient aiModerationClient;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -54,6 +57,23 @@ class UploadImageServiceImplTest {
                 assertThat(response).isNotNull();
                 assertThat(response.imageUrl()).isEqualTo("https://s3.example.com/test.png");
                 verify(imageRepository).save(any());
+            }
+        }
+
+        @Nested
+        @DisplayName("부적절한 이미지일 때")
+        class Context_with_inappropriate_image {
+
+            @Test
+            @DisplayName("InappropriateImageException을 던지고 업로드하지 않는다")
+            void it_rejects_image_before_upload() {
+                MultipartFile file = mock(MultipartFile.class);
+                when(aiModerationClient.isNsfw(file)).thenReturn(true);
+
+                assertThatThrownBy(() -> service.execute(file))
+                        .isInstanceOf(InappropriateImageException.class);
+
+                verifyNoInteractions(s3UploadService, imageRepository);
             }
         }
 
