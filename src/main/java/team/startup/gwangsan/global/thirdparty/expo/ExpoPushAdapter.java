@@ -44,15 +44,17 @@ public class ExpoPushAdapter implements NotificationPort {
     }
 
     boolean isExpoPushToken(String t) {
-        return t.startsWith("ExponentPushToken[");
+        return t != null && t.startsWith("ExponentPushToken[");
     }
 
     Map<String, String> buildData(NotificationType type, Long sourceId) {
         Map<String, String> data = new HashMap<>();
         data.put("alertType", type.name());
-        data.put("sourceId", String.valueOf(sourceId));
-        if (type == NotificationType.CHATTING) {
-            data.put("roomId", String.valueOf(sourceId));
+        if (sourceId != null) {
+            data.put("sourceId", String.valueOf(sourceId));
+            if (type == NotificationType.CHATTING) {
+                data.put("roomId", String.valueOf(sourceId));
+            }
         }
         return data;
     }
@@ -68,13 +70,15 @@ public class ExpoPushAdapter implements NotificationPort {
             List<String> chunk = expoTokens.subList(i, Math.min(i + LIMIT, expoTokens.size()));
 
             List<Map<String, Object>> payload = chunk.stream()
-                    .map(t -> Map.<String, Object>of(
-                            "to", t,
-                            "title", title,
-                            "body", body,
-                            "sound", "default",
-                            "data", buildData(type, sourceId)
-                    ))
+                    .map(t -> {
+                        Map<String, Object> message = new HashMap<>();
+                        message.put("to", t);
+                        message.put("title", title);
+                        message.put("body", body);
+                        message.put("sound", "default");
+                        message.put("data", buildData(type, sourceId));
+                        return message;
+                    })
                     .toList();
 
             try {

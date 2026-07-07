@@ -38,6 +38,12 @@ class ExpoPushAdapterTest {
         void it_returns_false_for_native_fcm_token() {
             assertThat(adapter.isExpoPushToken("fcm-native-registration-token")).isFalse();
         }
+
+        @Test
+        @DisplayName("null이면 false를 반환한다")
+        void it_returns_false_for_null() {
+            assertThat(adapter.isExpoPushToken(null)).isFalse();
+        }
     }
 
     @Nested
@@ -63,6 +69,17 @@ class ExpoPushAdapterTest {
             assertThat(data)
                     .containsEntry("alertType", "TRADE_COMPLETE")
                     .containsEntry("sourceId", "7")
+                    .doesNotContainKey("roomId");
+        }
+
+        @Test
+        @DisplayName("sourceId가 null이면 sourceId, roomId 없이 alertType만 포함한다")
+        void it_omits_source_id_and_room_id_when_source_id_is_null() {
+            Map<String, String> data = adapter.buildData(NotificationType.CHATTING, null);
+
+            assertThat(data)
+                    .containsEntry("alertType", "CHATTING")
+                    .doesNotContainKey("sourceId")
                     .doesNotContainKey("roomId");
         }
     }
