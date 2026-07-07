@@ -79,6 +79,7 @@ class GetReviewDetailServiceImplTest {
                 ReviewDetailResponse response = service.execute(1L);
 
                 assertThat(response.reviewId()).isEqualTo(1L);
+                assertThat(response.productId()).isEqualTo(100L);
                 assertThat(response.title()).isEqualTo("상품명");
                 assertThat(response.content()).isEqualTo("좋았어요");
                 assertThat(response.light()).isEqualTo(8);
