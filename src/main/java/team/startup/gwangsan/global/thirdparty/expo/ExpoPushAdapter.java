@@ -1,6 +1,5 @@
 package team.startup.gwangsan.global.thirdparty.expo;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,6 +10,7 @@ import team.startup.gwangsan.domain.notification.NotificationPort;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,19 +18,26 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ExpoPushAdapter implements NotificationPort {
 
     private final RetryTemplate retryTemplate;
+    private final WebClient expoClient;
 
-    private final WebClient expoClient = WebClient.builder()
-            .baseUrl("https://exp.host")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
+    public ExpoPushAdapter(RetryTemplate retryTemplate, WebClient.Builder webClientBuilder) {
+        this.retryTemplate = retryTemplate;
+        this.expoClient = webClientBuilder
+                .baseUrl("https://exp.host")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
 
     @Override
     public void sendNotification(List<DeviceToken> deviceTokens, String title, String body, NotificationType type, Long sourceId) {
         if (deviceTokens == null || deviceTokens.isEmpty()) return;
+        if (type == null) {
+            log.warn("[Expo] NotificationType이 null이므로 푸시 알림 전송을 중단합니다.");
+            return;
+        }
 
         List<String> expoTokens = deviceTokens.stream()
                 .map(DeviceToken::getDeviceToken)
@@ -66,6 +73,8 @@ public class ExpoPushAdapter implements NotificationPort {
                              Long sourceId) {
 
         final int LIMIT = 100;
+        Map<String, String> data = buildData(type, sourceId);
+
         for (int i = 0; i < expoTokens.size(); i += LIMIT) {
             List<String> chunk = expoTokens.subList(i, Math.min(i + LIMIT, expoTokens.size()));
 
@@ -76,7 +85,7 @@ public class ExpoPushAdapter implements NotificationPort {
                         message.put("title", title);
                         message.put("body", body);
                         message.put("sound", "default");
-                        message.put("data", buildData(type, sourceId));
+                        message.put("data", data);
                         return message;
                     })
                     .toList();
@@ -88,7 +97,7 @@ public class ExpoPushAdapter implements NotificationPort {
                             .bodyValue(payload)
                             .retrieve()
                             .bodyToMono(String.class)
-                            .block();
+                            .block(Duration.ofSeconds(5));
 
                     log.info("[Expo] 응답: {}", resp);
                     return null;
