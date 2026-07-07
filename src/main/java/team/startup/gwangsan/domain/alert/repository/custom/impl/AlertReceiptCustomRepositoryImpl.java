@@ -19,7 +19,7 @@ public class AlertReceiptCustomRepositoryImpl implements AlertReceiptCustomRepos
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<AlertReceipt> findByMemberIdAndCheckedAndAlertId(Long memberId, boolean check, Long alertId) {
+    public List<AlertReceipt> findByMemberIdAndCheckedUpToAlertId(Long memberId, boolean check, Long alertId) {
         return queryFactory
                 .selectFrom(alertReceipt)
                 .where(

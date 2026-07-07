@@ -2,6 +2,7 @@ package team.startup.gwangsan.domain.post.service.impl;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,11 +34,14 @@ import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.trade.exception.*;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -284,6 +288,7 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
+            Long roomId = 700L;
 
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
@@ -314,6 +319,7 @@ class RequestTradeCompleteServiceImplTest {
             when(reservation.getReserver()).thenReturn(buyerMember);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -344,6 +350,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verify(reservation).complete();
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -353,6 +360,7 @@ class RequestTradeCompleteServiceImplTest {
             Long sellerId = 1L;
             Long buyerId = 2L;
             Long productId = 100L;
+            Long roomId = 701L;
 
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
@@ -375,6 +383,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(Optional.of(product));
 
             ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -403,6 +412,7 @@ class RequestTradeCompleteServiceImplTest {
 
             // then
             verify(tradeCompleteRepository).save(any(TradeComplete.class));
+            verifyTradeStatusChangedEvent(roomId, buyerId, productId, false);
         }
 
         @Test
@@ -434,6 +444,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(Optional.of(product));
 
             ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(300L);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -464,6 +475,7 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
+            Long roomId = 702L;
 
             MemberDetail buyerDetail = mockMemberDetail(buyerId);
             MemberDetail sellerDetail = mockMemberDetail(sellerId);
@@ -492,6 +504,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(Optional.empty());
 
             ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(roomId);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
                     productId,
                     buyerMember,
@@ -522,6 +535,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verifyNoInteractions(productReservationRepository);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
         }
 
         @Test
@@ -579,4 +593,20 @@ class RequestTradeCompleteServiceImplTest {
         }
     }
 
+    private void verifyTradeStatusChangedEvent(Long roomId, Long targetMemberId, Long productId, boolean completed) {
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(applicationEventPublisher, atLeastOnce()).publishEvent(eventCaptor.capture());
+
+        TradeStatusChangedEvent event = eventCaptor.getAllValues().stream()
+                .filter(TradeStatusChangedEvent.class::isInstance)
+                .map(TradeStatusChangedEvent.class::cast)
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(roomId, event.roomId());
+        assertEquals(targetMemberId, event.targetMemberId());
+        assertEquals(productId, event.productId());
+        assertEquals(completed, event.completed());
+        assertTrue(event.changedAt() != null);
+    }
 }

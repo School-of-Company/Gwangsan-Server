@@ -16,7 +16,6 @@ import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.service.CreateProductService;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
-
 import java.util.List;
 
 @Service

@@ -44,3 +44,15 @@ chat:
     retryMax: 5
     retryKey: chat:retry:messages
     dlqKey: chat:dlq:messages
+
+chatting:
+  server:
+    # Keep empty in tests to disable external chatting server calls by default.
+    url: ""
+    internal-secret: ""
+
+ai:
+  server:
+    url: ""
+    connect-timeout: 100ms
+    read-timeout: 100ms

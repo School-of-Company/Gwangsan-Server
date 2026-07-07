@@ -3,10 +3,13 @@ package team.startup.gwangsan.domain.chat.repository.custom.impl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.QChatMessage;
+import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomMemberResponse;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatRoomCustomRepository;
@@ -16,6 +19,7 @@ import team.startup.gwangsan.domain.chat.repository.projection.UnreadCountDto;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.QMember;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +31,7 @@ import static team.startup.gwangsan.domain.chat.entity.QChatRoom.chatRoom;
 public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
 
     @Override
     public Optional<ChatRoom> findChatRoomByRoomId(Long roomId) {
@@ -56,7 +61,6 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
 
     @Override
     public List<GetRoomsDto> findRoomsByMemberId(Long memberId) {
-        QChatMessage message = QChatMessage.chatMessage;
         QChatMessage unreadMessage = new QChatMessage("unreadMessage");
         QMember buyer = new QMember("buyer");
         QMember seller = new QMember("seller");
@@ -92,25 +96,10 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         Map<Long, ChatRoomDto> roomMap = rooms.stream()
                 .collect(Collectors.toMap(ChatRoomDto::roomId, r -> r));
 
-        List<LatestMessageDto> latestMessages = queryFactory
-                .select(Projections.constructor(LatestMessageDto.class,
-                        message.room.id,
-                        message.id,
-                        message.content,
-                        message.messageType,
-                        message.createdAt
-                ))
-                .from(message)
-                .where(message.room.id.in(roomIds))
-                .orderBy(message.room.id.asc(),
-                        message.createdAt.desc(),
-                        message.id.desc())
-                .fetch();
+        List<LatestMessageDto> latestMessages = findLatestMessagesByRoomIds(roomIds);
 
-        Map<Long, LatestMessageDto> latestMessageMap = new LinkedHashMap<>();
-        for (LatestMessageDto lm : latestMessages) {
-            latestMessageMap.putIfAbsent(lm.roomId(), lm);
-        }
+        Map<Long, LatestMessageDto> latestMessageMap = latestMessages.stream()
+                .collect(Collectors.toMap(LatestMessageDto::roomId, lm -> lm, (existing, replacement) -> existing));
 
         List<UnreadCountDto> unreadCounts = queryFactory
                 .select(Projections.constructor(UnreadCountDto.class,
@@ -174,5 +163,58 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         .where(chatRoom.id.eq(roomId))
                         .fetchFirst()
         );
+    }
+
+    private List<LatestMessageDto> findLatestMessagesByRoomIds(List<Long> roomIds) {
+        String placeholders = roomIds.stream()
+                .map(roomId -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = """
+                SELECT room_id, message_id, content, message_type, created_at
+                FROM (
+                    SELECT
+                        room_id,
+                        message_id,
+                        content,
+                        message_type,
+                        created_at,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY room_id
+                            ORDER BY created_at DESC, message_id DESC
+                        ) AS row_num
+                    FROM tbl_chat_message
+                    WHERE room_id IN (%s)
+                ) ranked_message
+                WHERE row_num = 1
+                """.formatted(placeholders);
+
+        Query query = entityManager.createNativeQuery(sql);
+        for (int i = 0; i < roomIds.size(); i++) {
+            query.setParameter(i + 1, roomIds.get(i));
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = query.getResultList();
+
+        return rows.stream()
+                .map(row -> new LatestMessageDto(
+                        ((Number) row[0]).longValue(),
+                        ((Number) row[1]).longValue(),
+                        (String) row[2],
+                        MessageType.valueOf(String.valueOf(row[3])),
+                        toLocalDateTime(row[4])
+                ))
+                .toList();
+    }
+
+    private LocalDateTime toLocalDateTime(Object value) {
+        if (value instanceof LocalDateTime localDateTime) {
+            return localDateTime;
+        }
+        if (value instanceof Timestamp timestamp) {
+            return timestamp.toLocalDateTime();
+        }
+        throw new IllegalArgumentException("Unsupported created_at type: " + value.getClass());
     }
 }

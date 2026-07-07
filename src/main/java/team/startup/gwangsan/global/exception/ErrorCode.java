@@ -45,6 +45,7 @@ public enum ErrorCode {
     PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
     PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
     RESERVATION_PARTICIPANT_ONLY(403, "예약자 또는 상품 등록자만 예약을 취소할 수 있습니다."),
+    INAPPROPRIATE_CONTENT(400, "부적절한 내용이 포함되어 있습니다."),
 
     // image
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
@@ -52,6 +53,7 @@ public enum ErrorCode {
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
     IMAGE_UPLOAD_FAILED(500, "이미지 업로드에 실패했습니다."),
     IMAGE_DELETE_FAILED(500, "이미지 삭제에 실패했습니다."),
+    INAPPROPRIATE_IMAGE(400, "부적절한 이미지가 포함되어 있습니다."),
 
     // report
     NOT_FOUND_REPORT(404, "신고 내역을 찾을 수 없습니다."),
@@ -62,9 +64,6 @@ public enum ErrorCode {
     // admin
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
     NOT_FOUND_ADMIN_ALERT(404, "존재하지 않는 어드민 알림입니다."),
-
-    // fcm
-    FAILED_TO_INITIALIZE_FIREBASE(500, "Firebase 초기화에 실패했습니다."),
 
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."),
@@ -106,6 +105,7 @@ public enum ErrorCode {
     TRADE_PARTICIPANT_ONLY(403, "거래 당사자만 요청할 수 있습니다."),
     NOT_TRADE_CANCEL_REQUESTER(403, "거래 철회 요청자가 아닙니다."),
     CANNOT_PENDING_TRADE_CANCEL(400, "거래 철회가 대기중이 아닙니다."),
+    INVALID_TRADE_STATISTICS_PERIOD(400, "거래 통계 조회 기간이 올바르지 않습니다."),
 
     // suspend
     NOT_FOUND_SUSPEND(404, "해당하는 정지 내역을 찾을 수 없습니다."),

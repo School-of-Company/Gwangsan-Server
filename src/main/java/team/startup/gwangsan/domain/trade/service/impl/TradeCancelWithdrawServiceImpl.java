@@ -17,6 +17,8 @@ import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.trade.service.TradeCancelWithdrawService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class TradeCancelWithdrawServiceImpl implements TradeCancelWithdrawService {
@@ -38,7 +40,7 @@ public class TradeCancelWithdrawServiceImpl implements TradeCancelWithdrawServic
         TradeCancel tradeCancel = tradeCancelRepository.findByTradeCompleteIdAndStatus(tradeComplete.getId(), TradeCancelStatus.PENDING)
                 .orElseThrow(NotFoundTradeCancelException::new);
 
-        if (tradeCancel.getMember().getId().equals(member.getId())) {
+        if (!Objects.equals(tradeCancel.getMember().getId(), member.getId())) {
             throw new NotTradeCancelRequesterException();
         }
 

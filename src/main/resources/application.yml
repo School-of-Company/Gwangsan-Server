@@ -4,6 +4,8 @@ spring:
     url: jdbc:${RDB_TYPE:mariadb}://${RDB_HOST:localhost}:${RDB_PORT:3306}/${RDB_SCHEMA:gwangsan_db}
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:12345678}
+  flyway:
+    enabled: false
   jpa:
     hibernate:
       dialect: ${DB_DIALECT:org.hibernate.dialect.MariaDBDialect}
@@ -21,7 +23,7 @@ spring:
     show-sql: true
   sql:
     init:
-      mode: always
+      mode: never
   servlet:
     multipart:
       max-file-size: 10MB
@@ -66,3 +68,14 @@ chat:
     retryKey: ${CHAT_STREAM_RETRY_KEY:chat:retry:messages}
     dlqKey: ${CHAT_STREAM_DLQ_KEY:chat:dlq:messages}
 
+chatting:
+  server:
+    # Internal API settings for propagating trade status changes to the chatting server.
+    url: ${CHATTING_SERVER_URL:}
+    internal-secret: ${CHATTING_SERVER_INTERNAL_SECRET:}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL:}
+    connect-timeout: ${AI_CONNECT_TIMEOUT:2s}
+    read-timeout: ${AI_READ_TIMEOUT:10s}

@@ -20,7 +20,6 @@ import team.startup.gwangsan.domain.post.exception.ObjectRequiredImageException;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;

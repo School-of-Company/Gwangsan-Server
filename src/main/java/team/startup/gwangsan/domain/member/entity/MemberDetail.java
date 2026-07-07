@@ -61,8 +61,12 @@ public class MemberDetail {
         this.gwangsan = this.gwangsan + gwangsan;
     }
 
+    public void adjustGwangsan(Integer gwangsan) {
+        this.gwangsan = Math.max(0, this.gwangsan + gwangsan);
+    }
+
     public void plusLight(Integer light) {
-        this.light = Math.max(0, this.light + light);
+        this.light = Math.min(100, Math.max(0, (this.light != null ? this.light : 0) + (light != null ? light : 0)));
     }
 
     public void updatePlace(Place place) {

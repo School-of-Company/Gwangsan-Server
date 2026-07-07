@@ -5,11 +5,13 @@ import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.presentation.dto.PlaceDto;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.exception.InvalidTradeStatisticsPeriodException;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.constant.Period;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.HeadTradeHistoryResponse;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.domain.trade.service.TradeHistoryByHeadService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,23 @@ public class TradeHistoryByHeadServiceImpl implements TradeHistoryByHeadService 
         LocalDateTime now = LocalDateTime.now();
         Map<Integer, Long> history = tradeCompleteRepository.countByHeadId(periodValue, now, headId);
 
+        return toResponse(history);
+    }
+
+    @Override
+    public List<HeadTradeHistoryResponse> execute(Integer headId, LocalDate startDate, LocalDate endDate) {
+        validatePeriod(startDate, endDate);
+
+        Map<Integer, Long> history = tradeCompleteRepository.countByHeadIdBetween(
+                headId,
+                startDate.atStartOfDay(),
+                endDate.plusDays(1).atStartOfDay()
+        );
+
+        return toResponse(history);
+    }
+
+    private List<HeadTradeHistoryResponse> toResponse(Map<Integer, Long> history) {
         List<Place> places = placeRepository.findAllById(history.keySet());
         Map<Integer, PlaceDto> placeMap = places.stream()
                 .collect(Collectors.toMap(
@@ -41,5 +60,14 @@ public class TradeHistoryByHeadServiceImpl implements TradeHistoryByHeadService 
                         e.getValue()
                 ))
                 .toList();
+    }
+
+    private void validatePeriod(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new InvalidTradeStatisticsPeriodException();
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new InvalidTradeStatisticsPeriodException();
+        }
     }
 }

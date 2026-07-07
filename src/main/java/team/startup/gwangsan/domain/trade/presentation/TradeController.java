@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.trade.presentation;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import team.startup.gwangsan.domain.trade.service.TradeCancelWithdrawService;
 import team.startup.gwangsan.domain.trade.service.TradeHistoryByHeadService;
 import team.startup.gwangsan.domain.trade.service.TradeHistoryByPlaceService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -40,6 +42,26 @@ public class TradeController {
             @RequestParam(name = "place_id") Integer placeId
     ) {
         PlaceTradeHistoryResponse response = tradeHistoryByPlaceService.execute(period, placeId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/statistics/head")
+    public ResponseEntity<List<HeadTradeHistoryResponse>> getHeadStatistics(
+            @RequestParam(name = "head_id") Integer headId,
+            @RequestParam(name = "start_date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "end_date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        List<HeadTradeHistoryResponse> response = tradeHistoryByHeadService.execute(headId, startDate, endDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/statistics/place")
+    public ResponseEntity<PlaceTradeHistoryResponse> getPlaceStatistics(
+            @RequestParam(name = "place_id") Integer placeId,
+            @RequestParam(name = "start_date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "end_date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        PlaceTradeHistoryResponse response = tradeHistoryByPlaceService.execute(placeId, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 
