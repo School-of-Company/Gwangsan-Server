@@ -76,8 +76,6 @@ dependencies {
 	// sms
 	implementation("net.nurigo:sdk:4.3.0")
 
-	// fcm
-	implementation 'com.google.firebase:firebase-admin:9.5.0'
 
 	// gson
 	implementation 'com.google.code.gson:gson:2.8.9'

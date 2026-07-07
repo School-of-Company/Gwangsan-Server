@@ -65,9 +65,6 @@ public enum ErrorCode {
     NOT_FOUND_ALERT_TYPE(404, "존재하지 않는 Alert Type 입니다."),
     NOT_FOUND_ADMIN_ALERT(404, "존재하지 않는 어드민 알림입니다."),
 
-    // fcm
-    FAILED_TO_INITIALIZE_FIREBASE(500, "Firebase 초기화에 실패했습니다."),
-
     // server
     INTERNAL_SERVER_ERROR(500, "예기치 못한 서버 에러가 발생했습니다."),
 
