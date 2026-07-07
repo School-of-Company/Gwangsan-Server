@@ -35,6 +35,7 @@ public class GetReviewDetailServiceImpl implements GetReviewDetailService {
 
         return new ReviewDetailResponse(
                 review.getId(),
+                review.getProduct().getId(),
                 review.getProduct().getTitle(),
                 review.getContent(),
                 review.getLight(),
