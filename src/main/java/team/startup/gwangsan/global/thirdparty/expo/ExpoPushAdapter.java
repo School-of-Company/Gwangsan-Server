@@ -113,6 +113,7 @@ public class ExpoPushAdapter implements NotificationPort {
 
     List<String> expoTokens(List<DeviceToken> deviceTokens) {
         return deviceTokens.stream()
+                .filter(Objects::nonNull)
                 .map(DeviceToken::getDeviceToken)
                 .filter(Objects::nonNull)
                 .filter(this::isExpoPushToken)

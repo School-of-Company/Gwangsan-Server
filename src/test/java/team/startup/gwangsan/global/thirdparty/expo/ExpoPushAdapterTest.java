@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -122,11 +123,12 @@ class ExpoPushAdapterTest {
         @Test
         @DisplayName("Expo 토큰만 중복 없이 반환한다")
         void it_returns_distinct_expo_tokens() {
-            List<DeviceToken> tokens = List.of(
+            List<DeviceToken> tokens = Arrays.asList(
                     DeviceToken.builder().deviceToken("ExponentPushToken[abc]").build(),
                     DeviceToken.builder().deviceToken("ExponentPushToken[abc]").build(),
                     DeviceToken.builder().deviceToken("fcm-token").build(),
-                    DeviceToken.builder().deviceToken(null).build()
+                    DeviceToken.builder().deviceToken(null).build(),
+                    null
             );
 
             assertThat(adapter.expoTokens(tokens)).containsExactly("ExponentPushToken[abc]");
