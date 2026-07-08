@@ -167,8 +167,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         List<DeviceToken> deviceTokens = new ArrayList<>();
 
         for (Long memberId : memberIds) {
-            deviceTokenRepository.findByUserId(memberId)
-                    .ifPresent(deviceTokens::add);
+            deviceTokens.addAll(deviceTokenRepository.findAllByUserId(memberId));
         }
 
         tradeCompleteRepository.deleteByProductAndStatus(product, TradeStatus.PENDING);

@@ -1,29 +1,31 @@
 package team.startup.gwangsan.global.thirdparty.expo;
 
+import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ExpoPushAdapter 단위 테스트")
 class ExpoPushAdapterTest {
 
-    @InjectMocks
     private ExpoPushAdapter adapter;
 
     @Mock
@@ -31,6 +33,12 @@ class ExpoPushAdapterTest {
 
     @Mock(answer = Answers.RETURNS_SELF)
     private WebClient.Builder webClientBuilder;
+
+    @BeforeEach
+    void setUp() {
+        when(webClientBuilder.build()).thenReturn(mock(WebClient.class));
+        adapter = new ExpoPushAdapter(retryTemplate, webClientBuilder, new Gson());
+    }
 
     @Nested
     @DisplayName("isExpoPushToken() 메서드는")
@@ -105,6 +113,43 @@ class ExpoPushAdapterTest {
             adapter.sendNotification(tokens, "title", "body", null, 1L);
 
             verifyNoInteractions(retryTemplate);
+        }
+    }
+
+    @Nested
+    @DisplayName("expoTokens() 메서드는")
+    class Describe_expoTokens {
+
+        @Test
+        @DisplayName("Expo 토큰만 중복 없이 반환한다")
+        void it_returns_distinct_expo_tokens() {
+            List<DeviceToken> tokens = Arrays.asList(
+                    DeviceToken.builder().deviceToken("ExponentPushToken[abc]").build(),
+                    DeviceToken.builder().deviceToken("ExponentPushToken[abc]").build(),
+                    DeviceToken.builder().deviceToken("fcm-token").build(),
+                    DeviceToken.builder().deviceToken(null).build(),
+                    null
+            );
+
+            assertThat(adapter.expoTokens(tokens)).containsExactly("ExponentPushToken[abc]");
+        }
+    }
+
+    @Nested
+    @DisplayName("logExpoErrors() 메서드는")
+    class Describe_logExpoErrors {
+
+        @Test
+        @DisplayName("Expo error ticket 개수를 반환한다")
+        void it_returns_error_ticket_count() {
+            String response = """
+                    {"data":[
+                      {"status":"ok","id":"ticket-id"},
+                      {"status":"error","message":"DeviceNotRegistered","details":{"error":"DeviceNotRegistered"}}
+                    ]}
+                    """;
+
+            assertThat(adapter.logExpoErrors(response)).isEqualTo(1);
         }
     }
 }
