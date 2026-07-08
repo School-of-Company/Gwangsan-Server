@@ -114,6 +114,20 @@ class ExpoPushAdapterTest {
 
             verifyNoInteractions(retryTemplate);
         }
+
+        @Test
+        @DisplayName("Expo 형식이 아닌 토큰만 있으면 전송을 시도하지 않는다")
+        void it_does_not_attempt_to_send_when_no_token_is_expo_format() {
+            DeviceToken nativeToken = DeviceToken.builder()
+                    .deviceId("device-1")
+                    .userId(1L)
+                    .deviceToken("fcm-native-registration-token")
+                    .build();
+
+            adapter.sendNotification(List.of(nativeToken), "title", "body", NotificationType.CHATTING, 1L);
+
+            verifyNoInteractions(retryTemplate);
+        }
     }
 
     @Nested

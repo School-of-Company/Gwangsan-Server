@@ -47,9 +47,12 @@ public class ExpoPushAdapter implements NotificationPort {
 
         List<String> expoTokens = expoTokens(deviceTokens);
 
-        if (!expoTokens.isEmpty()) {
-            sendByExpo(expoTokens, title, body, type, sourceId);
+        if (expoTokens.isEmpty()) {
+            log.warn("[Expo] 대상 디바이스 토큰 {}건 중 Expo 형식(ExponentPushToken[...]) 토큰이 없어 전송을 건너뜁니다.", deviceTokens.size());
+            return;
         }
+
+        sendByExpo(expoTokens, title, body, type, sourceId);
     }
 
     boolean isExpoPushToken(String t) {
