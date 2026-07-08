@@ -71,7 +71,7 @@ class CreateNoticeServiceImplTest {
                 when(imageRepository.findAllById(List.of(10L))).thenReturn(List.of(image));
                 when(memberDetailRepository.findAllByPlace(place)).thenReturn(List.of(memberDetail));
                 when(memberDetail.getId()).thenReturn(1L);
-                when(deviceTokenRepository.findByUserId(1L)).thenReturn(Optional.empty());
+                when(deviceTokenRepository.findAllByUserId(1L)).thenReturn(List.of());
 
                 CreateNoticeRequest request = new CreateNoticeRequest("제목", "내용", 1, List.of(10L));
                 service.execute(request);
@@ -99,7 +99,7 @@ class CreateNoticeServiceImplTest {
                 when(noticeRepository.save(any())).thenReturn(mock(Notice.class));
                 when(memberDetailRepository.findAllByPlace(place)).thenReturn(List.of(memberDetail));
                 when(memberDetail.getId()).thenReturn(1L);
-                when(deviceTokenRepository.findByUserId(1L)).thenReturn(Optional.empty());
+                when(deviceTokenRepository.findAllByUserId(1L)).thenReturn(List.of());
 
                 CreateNoticeRequest request = new CreateNoticeRequest("제목", "내용", 1, Collections.emptyList());
                 service.execute(request);

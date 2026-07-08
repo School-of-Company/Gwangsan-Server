@@ -20,6 +20,7 @@ import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
@@ -68,10 +69,12 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
 
         Member otherMember = member.getId().equals(chatRoom.getBuyer().getId()) ? chatRoom.getSeller() : chatRoom.getBuyer();
 
-        deviceTokenRepository.findByUserId(otherMember.getId())
-                .ifPresent(token -> applicationEventPublisher.publishEvent(
-                        new SendNotificationEvent(List.of(token), NotificationType.CHATTING, roomId)
-                ));
+        List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());
+        if (!deviceTokens.isEmpty()) {
+            applicationEventPublisher.publishEvent(
+                    new SendNotificationEvent(deviceTokens, NotificationType.CHATTING, roomId)
+            );
+        }
 
         return new SaveChatMessageResponse(
                 chatMessage.getId(),

@@ -76,7 +76,7 @@ class SaveChatMessageServiceImplTest {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
             when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-            when(deviceTokenRepository.findByUserId(any())).thenReturn(Optional.empty());
+            when(deviceTokenRepository.findAllByUserId(any())).thenReturn(List.of());
         }
 
         @Test
@@ -176,8 +176,9 @@ class SaveChatMessageServiceImplTest {
         @DisplayName("상대방 디바이스 토큰이 있으면 CHATTING 타입 알림 이벤트를 발행한다")
         void it_publishes_notification_event_when_device_token_exists() {
             arrangeDefaultScenario();
-            DeviceToken token = mock(DeviceToken.class);
-            when(deviceTokenRepository.findByUserId(2L)).thenReturn(Optional.of(token));
+            DeviceToken token1 = mock(DeviceToken.class);
+            DeviceToken token2 = mock(DeviceToken.class);
+            when(deviceTokenRepository.findAllByUserId(2L)).thenReturn(List.of(token1, token2));
 
             service.execute(1L, 10L, "안녕", null, MessageType.TEXT, 1L, now);
 
@@ -185,7 +186,7 @@ class SaveChatMessageServiceImplTest {
             verify(applicationEventPublisher).publishEvent(captor.capture());
             assertThat(captor.getValue().type()).isEqualTo(NotificationType.CHATTING);
             assertThat(captor.getValue().sourceId()).isEqualTo(10L);
-            assertThat(captor.getValue().deviceTokens()).containsExactly(token);
+            assertThat(captor.getValue().deviceTokens()).containsExactly(token1, token2);
         }
 
         @Test
@@ -205,7 +206,7 @@ class SaveChatMessageServiceImplTest {
 
             service.execute(1L, 10L, "안녕", null, MessageType.TEXT, 1L, now);
 
-            verify(deviceTokenRepository).findByUserId(2L);
+            verify(deviceTokenRepository).findAllByUserId(2L);
         }
 
         @Test
@@ -221,11 +222,11 @@ class SaveChatMessageServiceImplTest {
             when(memberRepository.findById(3L)).thenReturn(Optional.of(sellerMember));
             when(chatRoomRepository.findChatRoomByRoomId(20L)).thenReturn(Optional.of(room));
             when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-            when(deviceTokenRepository.findByUserId(any())).thenReturn(Optional.empty());
+            when(deviceTokenRepository.findAllByUserId(any())).thenReturn(List.of());
 
             service.execute(1L, 20L, "안녕", null, MessageType.TEXT, 3L, now);
 
-            verify(deviceTokenRepository).findByUserId(4L);
+            verify(deviceTokenRepository).findAllByUserId(4L);
         }
     }
 }

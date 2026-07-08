@@ -36,6 +36,7 @@ import team.startup.gwangsan.domain.trade.exception.*;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -337,10 +338,10 @@ class RequestTradeCompleteServiceImplTest {
                     TradeStatus.PENDING
             )).thenReturn(Optional.of(pending));
 
-            when(deviceTokenRepository.findByUserId(buyerId))
-                    .thenReturn(Optional.of(mock(DeviceToken.class)));
-            when(deviceTokenRepository.findByUserId(sellerId))
-                    .thenReturn(Optional.empty());
+            when(deviceTokenRepository.findAllByUserId(buyerId))
+                    .thenReturn(List.of(mock(DeviceToken.class)));
+            when(deviceTokenRepository.findAllByUserId(sellerId))
+                    .thenReturn(List.of());
 
             // when
             assertDoesNotThrow(() -> service.execute(productId, sellerId));
@@ -522,10 +523,10 @@ class RequestTradeCompleteServiceImplTest {
                     TradeStatus.PENDING
             )).thenReturn(Optional.of(pending));
 
-            when(deviceTokenRepository.findByUserId(buyerId))
-                    .thenReturn(Optional.of(mock(DeviceToken.class)));
-            when(deviceTokenRepository.findByUserId(sellerId))
-                    .thenReturn(Optional.empty());
+            when(deviceTokenRepository.findAllByUserId(buyerId))
+                    .thenReturn(List.of(mock(DeviceToken.class)));
+            when(deviceTokenRepository.findAllByUserId(sellerId))
+                    .thenReturn(List.of());
 
             // when
             assertDoesNotThrow(() -> service.execute(productId, sellerId));
