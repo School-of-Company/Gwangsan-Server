@@ -283,7 +283,7 @@ class RequestTradeCompleteServiceImplTest {
         }
 
         @Test
-        @DisplayName("구매자가 예약 상태 상품에 대해 거래 완료 요청 시 거래를 완료 처리한다")
+        @DisplayName("판매자가 이미 요청을 보낸 상태에서 구매자가 예약 상품에 대해 확정하면 거래를 완료 처리한다")
         void execute_asBuyer_withReservation_shouldCompleteTrade() {
             // given
             Long buyerId = 1L;
@@ -330,7 +330,9 @@ class RequestTradeCompleteServiceImplTest {
             when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, buyerId))
                     .thenReturn(true);
 
+            // 판매자가 먼저 요청을 보낸 상태(requestedBySeller = true)
             TradeComplete pending = mock(TradeComplete.class);
+            when(pending.isRequestedBySeller()).thenReturn(true);
             when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product,
                     buyerMember,
@@ -355,7 +357,7 @@ class RequestTradeCompleteServiceImplTest {
         }
 
         @Test
-        @DisplayName("판매자가 최초로 거래 완료 요청 시 PENDING 거래 완료 엔티티를 생성한다")
+        @DisplayName("판매자가 최초로 거래 완료를 요청하면 PENDING 거래 완료 엔티티를 생성한다")
         void execute_asSeller_shouldCreatePendingTrade_whenNoExistingPending() {
             // given
             Long sellerId = 1L;
@@ -394,16 +396,15 @@ class RequestTradeCompleteServiceImplTest {
             when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, sellerId))
                     .thenReturn(true);
 
-            when(tradeCompleteRepository.existsByProductAndBuyerAndSellerAndStatus(
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product,
                     buyerMember,
                     sellerMember,
                     TradeStatus.PENDING
-            )).thenReturn(false);
+            )).thenReturn(Optional.empty());
 
             TradeComplete newTradeComplete = mock(TradeComplete.class);
             when(newTradeComplete.getId()).thenReturn(999L);
-            when(newTradeComplete.getBuyer()).thenReturn(buyerMember);
 
             when(tradeCompleteRepository.save(any(TradeComplete.class)))
                     .thenReturn(newTradeComplete);
@@ -412,13 +413,80 @@ class RequestTradeCompleteServiceImplTest {
             assertDoesNotThrow(() -> service.execute(productId, buyerId));
 
             // then
-            verify(tradeCompleteRepository).save(any(TradeComplete.class));
+            ArgumentCaptor<TradeComplete> savedCaptor = ArgumentCaptor.forClass(TradeComplete.class);
+            verify(tradeCompleteRepository).save(savedCaptor.capture());
+            assertTrue(savedCaptor.getValue().isRequestedBySeller());
             verifyTradeStatusChangedEvent(roomId, buyerId, productId, false);
         }
 
         @Test
-        @DisplayName("판매자가 이미 PENDING 거래 완료 요청이 있을 때 다시 요청하면 TradeAlreadyCompleteRequestException 을 던진다")
-        void execute_asSeller_shouldThrowTradeAlreadyCompleteRequestException_whenPendingExists() {
+        @DisplayName("구매자가 최초로 거래 완료를 요청하면 PENDING 거래 완료 엔티티를 생성한다")
+        void execute_asBuyer_shouldCreatePendingTrade_whenNoExistingPending() {
+            // given
+            Long buyerId = 1L;
+            Long sellerId = 2L;
+            Long productId = 100L;
+            Long roomId = 703L;
+
+            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+
+            Member buyerMember = buyerDetail.getMember();
+            Member sellerMember = sellerDetail.getMember();
+
+            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
+                    .thenReturn(buyerDetail);
+            when(memberDetailRepository.findByMemberIdWithMember(sellerId))
+                    .thenReturn(sellerDetail);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(product.getMode()).thenReturn(Mode.GIVER);
+
+            Member productOwner = mock(Member.class);
+            when(product.getMember()).thenReturn(productOwner);
+
+            when(productRepository.findByIdWithLock(productId))
+                    .thenReturn(Optional.of(product));
+
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(roomId);
+            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
+                    productId,
+                    buyerMember,
+                    sellerMember
+            )).thenReturn(Optional.of(chatRoom));
+
+            when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, buyerId))
+                    .thenReturn(true);
+
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                    product,
+                    buyerMember,
+                    sellerMember,
+                    TradeStatus.PENDING
+            )).thenReturn(Optional.empty());
+
+            TradeComplete newTradeComplete = mock(TradeComplete.class);
+            when(newTradeComplete.getId()).thenReturn(998L);
+
+            when(tradeCompleteRepository.save(any(TradeComplete.class)))
+                    .thenReturn(newTradeComplete);
+
+            // when
+            assertDoesNotThrow(() -> service.execute(productId, sellerId));
+
+            // then
+            ArgumentCaptor<TradeComplete> savedCaptor = ArgumentCaptor.forClass(TradeComplete.class);
+            verify(tradeCompleteRepository).save(savedCaptor.capture());
+            assertTrue(!savedCaptor.getValue().isRequestedBySeller());
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, false);
+        }
+
+        @Test
+        @DisplayName("자신이 이미 보낸 PENDING 요청을 스스로 다시 확정하려 하면 TradeAlreadyCompleteRequestException 을 던진다")
+        void execute_shouldThrowTradeAlreadyCompleteRequestException_whenCallerIsTheRequester() {
             // given
             Long sellerId = 1L;
             Long buyerId = 2L;
@@ -455,22 +523,26 @@ class RequestTradeCompleteServiceImplTest {
             when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, sellerId))
                     .thenReturn(true);
 
-            when(tradeCompleteRepository.existsByProductAndBuyerAndSellerAndStatus(
+            // 판매자 본인이 이미 요청을 보낸 상태(requestedBySeller = true)에서 판매자가 다시 호출
+            TradeComplete pending = mock(TradeComplete.class);
+            when(pending.isRequestedBySeller()).thenReturn(true);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product,
                     buyerMember,
                     sellerMember,
                     TradeStatus.PENDING
-            )).thenReturn(true);
+            )).thenReturn(Optional.of(pending));
 
             // when & then
             assertThrows(TradeAlreadyCompleteRequestException.class,
                     () -> service.execute(productId, buyerId));
 
             verify(tradeCompleteRepository, never()).save(any());
+            verify(product, never()).updateStatus(any());
         }
 
         @Test
-        @DisplayName("예약이 없는 상품에 대해 구매자가 거래 완료 요청 시 예약 없이 거래를 완료 처리한다")
+        @DisplayName("예약이 없는 상품에 대해 구매자가 확정하면 예약 없이 거래를 완료 처리한다")
         void execute_asBuyer_withoutReservation_shouldCompleteTrade() {
             // given
             Long buyerId = 1L;
@@ -516,6 +588,7 @@ class RequestTradeCompleteServiceImplTest {
                     .thenReturn(true);
 
             TradeComplete pending = mock(TradeComplete.class);
+            when(pending.isRequestedBySeller()).thenReturn(true);
             when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product,
                     buyerMember,
@@ -537,60 +610,6 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateCompletedAt();
             verifyNoInteractions(productReservationRepository);
             verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
-        }
-
-        @Test
-        @DisplayName("구매자가 거래 완료 요청 시 판매자의 PENDING 거래 완료 요청이 없으면 SellerNotTradeCompleteException 을 던진다")
-        void execute_asBuyer_shouldThrowSellerNotTradeCompleteException_whenNoPendingTradeFromSeller() {
-            // given
-            Long buyerId = 1L;
-            Long sellerId = 2L;
-            Long productId = 100L;
-
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-
-            Member buyerMember = buyerDetail.getMember();
-            Member sellerMember = sellerDetail.getMember();
-
-            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
-                    .thenReturn(buyerDetail);
-            when(memberDetailRepository.findByMemberIdWithMember(sellerId))
-                    .thenReturn(sellerDetail);
-
-            Product product = mock(Product.class);
-            when(product.getId()).thenReturn(productId);
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
-            when(product.getMode()).thenReturn(Mode.GIVER);
-
-            Member productOwner = mock(Member.class);
-            when(product.getMember()).thenReturn(productOwner);
-
-            when(productRepository.findByIdWithLock(productId))
-                    .thenReturn(Optional.of(product));
-
-            ChatRoom chatRoom = mock(ChatRoom.class);
-            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(
-                    productId,
-                    buyerMember,
-                    sellerMember
-            )).thenReturn(Optional.of(chatRoom));
-
-            when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, buyerId))
-                    .thenReturn(true);
-
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
-                    product,
-                    buyerMember,
-                    sellerMember,
-                    TradeStatus.PENDING
-            )).thenReturn(Optional.empty());
-
-            // when & then
-            assertThrows(SellerNotTradeCompleteException.class,
-                    () -> service.execute(productId, sellerId));
-
-            verify(product, never()).updateStatus(any());
         }
     }
 

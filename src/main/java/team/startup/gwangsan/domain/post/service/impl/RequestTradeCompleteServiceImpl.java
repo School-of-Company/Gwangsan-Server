@@ -29,7 +29,6 @@ import team.startup.gwangsan.domain.post.exception.*;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.exception.*;
 import team.startup.gwangsan.domain.trade.exception.CannotSelectSelfException;
-import team.startup.gwangsan.domain.trade.exception.SellerNotTradeCompleteException;
 import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteException;
 import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteRequestException;
 import team.startup.gwangsan.domain.trade.exception.TradeCompleteWithoutChattingException;
@@ -43,6 +42,7 @@ import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -84,12 +84,14 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         ChatRoom chatRoom = findChatRoom(product, buyerDetail.getMember(), sellerDetail.getMember());
         validateChatExists(chatRoom, member.getId());
 
-        if (isBuyer) {
-            handleBuyerTradeCompletion(chatRoom, product, buyerDetail, sellerDetail, reservation);
-        } else {
-            handleSellerTradeCompletion(chatRoom, product, sellerDetail.getMember(), buyerDetail.getMember());
-        }
+        Optional<TradeComplete> pending = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING);
 
+        if (pending.isPresent()) {
+            confirmTradeCompletion(pending.get(), isBuyer, chatRoom, product, buyerDetail, sellerDetail, otherMemberDetail.getMember(), reservation);
+        } else {
+            requestTradeCompletion(chatRoom, product, isBuyer, buyerDetail.getMember(), sellerDetail.getMember(), otherMemberDetail.getMember());
+        }
     }
 
     private void validateNotSelfTrade(Long memberId, Long otherMemberId) {
@@ -142,11 +144,20 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         return reservation;
     }
 
-    private void handleBuyerTradeCompletion(ChatRoom chatRoom, Product product, MemberDetail buyerDetail, MemberDetail sellerDetail, ProductReservation reservation) {
-        TradeComplete pending = tradeCompleteRepository
-                .findByProductAndBuyerAndSellerAndStatus(
-                        product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING)
-                .orElseThrow(SellerNotTradeCompleteException::new);
+    /**
+     * PENDING 요청을 만든 쪽(requestedBySeller)과 현재 호출자(isBuyer)의 역할이 같다면,
+     * 본인이 만든 요청을 스스로 확정하려는 것이므로 확정을 막는다.
+     */
+    private boolean isCallerTheRequester(boolean isBuyer, TradeComplete pending) {
+        return isBuyer != pending.isRequestedBySeller();
+    }
+
+    private void confirmTradeCompletion(TradeComplete pending, boolean isBuyer, ChatRoom chatRoom, Product product,
+                                         MemberDetail buyerDetail, MemberDetail sellerDetail, Member requester,
+                                         ProductReservation reservation) {
+        if (isCallerTheRequester(isBuyer, pending)) {
+            throw new TradeAlreadyCompleteRequestException();
+        }
 
         product.updateStatus(ProductStatus.COMPLETED);
         pending.updateStatus(TradeStatus.COMPLETED);
@@ -181,39 +192,34 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                sellerDetail.getMember().getId(),
+                requester.getId(),
                 product.getId(),
                 true,
                 changedAt
         ));
     }
 
-    private void handleSellerTradeCompletion(ChatRoom chatRoom, Product product, Member seller, Member buyer) {
-        boolean existsTradeComplete = tradeCompleteRepository
-                .existsByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING);
-
-        if (existsTradeComplete) {
-            throw new TradeAlreadyCompleteRequestException();
-        }
+    private void requestTradeCompletion(ChatRoom chatRoom, Product product, boolean isBuyer, Member buyer, Member seller, Member requestTarget) {
         TradeComplete newTradeComplete = TradeComplete.builder()
                 .product(product)
                 .buyer(buyer)
                 .seller(seller)
                 .status(TradeStatus.PENDING)
+                .requestedBySeller(!isBuyer)
                 .build();
 
         newTradeComplete = tradeCompleteRepository.save(newTradeComplete);
 
         applicationEventPublisher.publishEvent(new CreateAlertEvent(
                 newTradeComplete.getId(),
-                newTradeComplete.getBuyer().getId(),
+                requestTarget.getId(),
                 AlertType.OTHER_MEMBER_TRADE_COMPLETE
         ));
 
         LocalDateTime changedAt = LocalDateTime.now();
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                buyer.getId(),
+                requestTarget.getId(),
                 product.getId(),
                 false,
                 changedAt
