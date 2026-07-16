@@ -48,12 +48,16 @@ public class TradeComplete {
     @Column(name = "status", nullable = false)
     private TradeStatus status;
 
+    @Column(name = "requested_by_seller", nullable = false)
+    private boolean requestedBySeller;
+
     @Builder
-    public TradeComplete(Product product, Member buyer, Member seller, TradeStatus status) {
+    public TradeComplete(Product product, Member buyer, Member seller, TradeStatus status, boolean requestedBySeller) {
         this.product = product;
         this.buyer = buyer;
         this.seller = seller;
         this.status = status;
+        this.requestedBySeller = requestedBySeller;
     }
 
     public void updateStatus(TradeStatus status) {

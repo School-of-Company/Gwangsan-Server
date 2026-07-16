@@ -13,10 +13,6 @@ import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomR
 import java.util.Optional;
 
 public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long>, TradeCompleteCustomRepository {
-    Optional<TradeComplete> findByProductAndSeller(Product product, Member seller);
-
-    boolean existsByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus status);
-
     Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus tradeStatus);
 
     void deleteByProductAndStatus(Product product, TradeStatus tradeStatus);
