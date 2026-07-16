@@ -66,10 +66,10 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
         Optional<TradeComplete> pendingTradeComplete = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                 product, chatRoom.getBuyer(), chatRoom.getSeller(), TradeStatus.PENDING);
-        boolean isCompletable = pendingTradeComplete
+        boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
+        boolean isCompletable = !isCompleted && pendingTradeComplete
                 .map(tc -> tc.isRequestedBySeller() != isSeller)
                 .orElse(true);
-        boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),

@@ -283,6 +283,19 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
+        @DisplayName("상품이 이미 COMPLETED 상태이면 PENDING 요청이 없어도 isCompletable 이 false 이다")
+        void it_sets_isCompletable_false_when_product_already_completed() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isCompletable()).isFalse();
+            assertThat(response.product().isCompleted()).isTrue();
+        }
+
+        @Test
         @DisplayName("메시지가 있으면 가장 최근 메시지 id 까지 읽음 처리한다")
         void it_marks_messages_as_read_using_latest_message_id_when_messages_exist() {
             arrangeRoomAsSellerView();
