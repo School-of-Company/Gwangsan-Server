@@ -20,6 +20,7 @@ import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -41,7 +42,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
     private final TradeCompleteRepository tradeCompleteRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public GetChatMessagesResponse execute(Long roomId, LocalDateTime lastCreatedAt, Long lastMessageId, int limit) {
         Long memberId = memberUtil.getCurrentMember().getId();
 
@@ -63,16 +64,18 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .toList();
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
-        Optional<TradeComplete> tradeComplete = tradeCompleteRepository.findByProductAndSeller(product, chatRoom.getSeller());
-        boolean sellerCompleted = tradeComplete.isPresent();
-        boolean isCompletable = isSeller ? !sellerCompleted : sellerCompleted;
+        Optional<TradeComplete> pendingTradeComplete = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                product, chatRoom.getBuyer(), chatRoom.getSeller(), TradeStatus.PENDING);
+        boolean isCompletable = pendingTradeComplete
+                .map(tc -> tc.isRequestedBySeller() != isSeller)
+                .orElse(true);
         boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
                 product.getTitle(),
                 imageResponses,
-                tradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
+                pendingTradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
                 isSeller,
                 isCompletable,
                 isCompleted
@@ -110,6 +113,11 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                         message.getSender().getId().equals(memberId)
                 ))
                 .toList();
+
+        if (!messages.isEmpty()) {
+            Long latestMessageId = messages.get(0).getId();
+            chatMessageRepository.readMessage(roomId, latestMessageId, memberId);
+        }
 
         return new GetChatMessagesResponse(productDto, chatMessageDtos);
     }

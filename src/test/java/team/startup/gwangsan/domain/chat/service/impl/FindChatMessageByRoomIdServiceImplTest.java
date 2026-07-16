@@ -23,6 +23,7 @@ import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -73,13 +74,15 @@ class FindChatMessageByRoomIdServiceImplTest {
         // seller == currentMember 인 기본 happy path 공통 설정
         private void arrangeRoomAsSellerView() {
             when(chatRoom.getSeller()).thenReturn(currentMember);
+            when(chatRoom.getBuyer()).thenReturn(otherMember);
             when(chatRoom.getProduct()).thenReturn(product);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            when(tradeCompleteRepository.findByProductAndSeller(any(), any())).thenReturn(Optional.empty());
+            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
+                    .thenReturn(Optional.empty());
         }
 
         // buyer == currentMember 인 happy path 공통 설정
@@ -92,7 +95,8 @@ class FindChatMessageByRoomIdServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            when(tradeCompleteRepository.findByProductAndSeller(any(), any())).thenReturn(Optional.empty());
+            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
+                    .thenReturn(Optional.empty());
         }
 
         private void arrangeEmptyMessages() {
@@ -212,8 +216,8 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
-        @DisplayName("seller 이고 tradeComplete 없으면 isCompletable 이 true 이다")
-        void it_sets_isCompletable_true_when_seller_and_no_trade_complete() {
+        @DisplayName("seller 이고 PENDING 요청이 없으면 isCompletable 이 true 이다 (판매자가 먼저 요청 가능)")
+        void it_sets_isCompletable_true_when_seller_and_no_pending_request() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
 
@@ -223,12 +227,14 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
-        @DisplayName("seller 이고 tradeComplete 있으면 isCompletable 이 false 이다")
-        void it_sets_isCompletable_false_when_seller_already_completed() {
+        @DisplayName("seller 본인이 이미 PENDING 요청을 보냈으면 isCompletable 이 false 이다 (상대 확정 대기)")
+        void it_sets_isCompletable_false_when_seller_already_requested() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
             TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeCompleteRepository.findByProductAndSeller(any(), any())).thenReturn(Optional.of(tradeComplete));
+            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
+                    .thenReturn(Optional.of(tradeComplete));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -236,27 +242,68 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
-        @DisplayName("buyer 이고 seller 가 tradeComplete 하지 않았으면 isCompletable 이 false 이다")
-        void it_sets_isCompletable_false_when_buyer_and_seller_not_completed() {
+        @DisplayName("buyer 이고 PENDING 요청이 없으면 isCompletable 이 true 이다 (구매자가 먼저 요청 가능)")
+        void it_sets_isCompletable_true_when_buyer_and_no_pending_request() {
             arrangeRoomAsBuyerView();
             arrangeEmptyMessages();
-
-            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
-
-            assertThat(response.product().isCompletable()).isFalse();
-        }
-
-        @Test
-        @DisplayName("buyer 이고 seller 가 tradeComplete 했으면 isCompletable 이 true 이다")
-        void it_sets_isCompletable_true_when_buyer_and_seller_completed() {
-            arrangeRoomAsBuyerView();
-            arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeCompleteRepository.findByProductAndSeller(any(), any())).thenReturn(Optional.of(tradeComplete));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().isCompletable()).isTrue();
+        }
+
+        @Test
+        @DisplayName("seller 가 PENDING 요청을 보냈으면 buyer 의 isCompletable 이 true 이다 (구매자가 확정 가능)")
+        void it_sets_isCompletable_true_when_buyer_and_seller_requested() {
+            arrangeRoomAsBuyerView();
+            arrangeEmptyMessages();
+            TradeComplete tradeComplete = mock(TradeComplete.class);
+            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
+                    .thenReturn(Optional.of(tradeComplete));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isCompletable()).isTrue();
+        }
+
+        @Test
+        @DisplayName("buyer 본인이 이미 PENDING 요청을 보냈으면 isCompletable 이 false 이다 (상대 확정 대기)")
+        void it_sets_isCompletable_false_when_buyer_already_requested() {
+            arrangeRoomAsBuyerView();
+            arrangeEmptyMessages();
+            TradeComplete tradeComplete = mock(TradeComplete.class);
+            when(tradeComplete.isRequestedBySeller()).thenReturn(false);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
+                    .thenReturn(Optional.of(tradeComplete));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isCompletable()).isFalse();
+        }
+
+        @Test
+        @DisplayName("메시지가 있으면 가장 최근 메시지 id 까지 읽음 처리한다")
+        void it_marks_messages_as_read_using_latest_message_id_when_messages_exist() {
+            arrangeRoomAsSellerView();
+            ChatMessage msg = buildTextMessage(7L, "안녕");
+            when(chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(eq(5L), any(), any(), anyInt()))
+                    .thenReturn(List.of(msg));
+
+            service.execute(5L, null, null, 20);
+
+            verify(chatMessageRepository).readMessage(5L, 7L, 1L);
+        }
+
+        @Test
+        @DisplayName("메시지가 없으면 읽음 처리를 호출하지 않는다")
+        void it_does_not_mark_as_read_when_no_messages() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+
+            service.execute(5L, null, null, 20);
+
+            verify(chatMessageRepository, never()).readMessage(anyLong(), anyLong(), anyLong());
         }
 
         private ChatMessage buildTextMessage(Long id, String content) {
