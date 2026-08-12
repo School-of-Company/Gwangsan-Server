@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreateReviewRequest(
         @NotNull Long productId,
+        @NotNull Long otherMemberId,
         @NotBlank String content,
         @Min(0) @Max(100) Integer light
 ) {}
