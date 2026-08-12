@@ -61,6 +61,7 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
                         r.content(),
                         r.light(),
                         r.reviewerNickname(),
+                        reviewed.getNickname(),
                         imagesByProductId.getOrDefault(r.productId(), List.of())
                 ))
                 .toList();

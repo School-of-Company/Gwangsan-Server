@@ -67,7 +67,7 @@ class GetMyReviewListServiceImplTest {
                 when(member.getNickname()).thenReturn("리뷰어");
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
-                MyReviewDto dto = new MyReviewDto(10L, 100L, "좋았어요", 8);
+                MyReviewDto dto = new MyReviewDto(10L, 100L, "좋았어요", 8, "대상자");
                 when(reviewRepository.findMyReviews(1L)).thenReturn(List.of(dto));
 
                 ProductImage pi = mock(ProductImage.class);
@@ -87,6 +87,7 @@ class GetMyReviewListServiceImplTest {
                 assertThat(result.get(0).reviewId()).isEqualTo(10L);
                 assertThat(result.get(0).content()).isEqualTo("좋았어요");
                 assertThat(result.get(0).reviewerName()).isEqualTo("리뷰어");
+                assertThat(result.get(0).targetName()).isEqualTo("대상자");
                 assertThat(result.get(0).imageUrls()).hasSize(1);
             }
         }
