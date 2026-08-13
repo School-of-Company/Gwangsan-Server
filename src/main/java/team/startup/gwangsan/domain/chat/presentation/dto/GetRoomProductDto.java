@@ -7,6 +7,7 @@ import java.util.List;
 public record GetRoomProductDto(
         Long productId,
         String title,
+        boolean isCompleted,
         List<GetImageResponse> images
 ) {
 }

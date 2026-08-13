@@ -66,7 +66,7 @@ class FindRoomsByCurrentUserServiceImplTest {
                     10L, null, 1L, "마지막 메시지", MessageType.TEXT,
                     LocalDateTime.now(), 0L, 100L
             );
-            GetRoomProductDto productDto = new GetRoomProductDto(100L, "상품명", List.of());
+            GetRoomProductDto productDto = new GetRoomProductDto(100L, "상품명", false, List.of());
 
             when(chatRoomRepository.findRoomsByMemberId(1L)).thenReturn(List.of(roomDto));
             when(productRepository.findRoomProductsWithImagesByIds(Set.of(100L))).thenReturn(List.of(productDto));
@@ -84,8 +84,8 @@ class FindRoomsByCurrentUserServiceImplTest {
         void it_maps_each_room_to_correct_product() {
             GetRoomsDto room1 = new GetRoomsDto(1L, null, 1L, "msg1", MessageType.TEXT, LocalDateTime.now(), 0L, 100L);
             GetRoomsDto room2 = new GetRoomsDto(2L, null, 2L, "msg2", MessageType.TEXT, LocalDateTime.now(), 1L, 200L);
-            GetRoomProductDto product1 = new GetRoomProductDto(100L, "상품1", List.of());
-            GetRoomProductDto product2 = new GetRoomProductDto(200L, "상품2", List.of());
+            GetRoomProductDto product1 = new GetRoomProductDto(100L, "상품1", false, List.of());
+            GetRoomProductDto product2 = new GetRoomProductDto(200L, "상품2", true, List.of());
 
             when(chatRoomRepository.findRoomsByMemberId(1L)).thenReturn(List.of(room1, room2));
             when(productRepository.findRoomProductsWithImagesByIds(Set.of(100L, 200L)))

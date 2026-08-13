@@ -26,7 +26,8 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                         review.id,
                         review.product.id,
                         review.content,
-                        review.light
+                        review.light,
+                        review.reviewed.nickname
                 ))
                 .from(review)
                 .where(review.reviewer.id.eq(reviewerId))

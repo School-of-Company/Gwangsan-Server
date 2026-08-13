@@ -56,6 +56,7 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
                         r.content(),
                         r.light(),
                         reviewer.getNickname(),
+                        r.reviewedNickname(),
                         imagesByProductId.getOrDefault(r.productId(), List.of())
                 ))
                 .toList();

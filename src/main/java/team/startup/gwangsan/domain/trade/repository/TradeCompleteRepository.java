@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long>, TradeCompleteCustomRepository {
     Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus tradeStatus);
 
+    Optional<TradeComplete> findByProductAndStatus(Product product, TradeStatus tradeStatus);
+
     void deleteByProductAndStatus(Product product, TradeStatus tradeStatus);
 
     @Modifying(clearAutomatically = true)

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -28,7 +29,7 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
     @Transactional(readOnly = true)
     public List<ReviewResponse> execute(Long memberId) {
 
-        memberRepository.findById(memberId)
+        Member target = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         List<ReceivedReviewDto> rows = reviewRepository.findReceivedReviews(memberId);
@@ -59,6 +60,7 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
                         r.content(),
                         r.light(),
                         r.reviewerNickname(),
+                        target.getNickname(),
                         imagesByProductId.getOrDefault(r.productId(), List.of())
                 ))
                 .toList();
