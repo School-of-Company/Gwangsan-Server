@@ -38,7 +38,8 @@ public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindPr
         Member member = memberUtil.getCurrentMember();
         MemberDetail memberDetail = memberDetailRepository.findById(member.getId())
                 .orElseThrow(NotFoundMemberDetailException::new);
-        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatus(member, type, mode, ProductStatus.ONGOING);
+        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
+                member, type, mode, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED));
 
         if (products.isEmpty()) {
             return List.of();
@@ -80,7 +81,8 @@ public class FindProductByCurrentUserAndTypeAndModeServiceImpl implements FindPr
                         product.getType(),
                         product.getMode(),
                         memberResponse,
-                        imageMap.getOrDefault(product.getId(), List.of())
+                        imageMap.getOrDefault(product.getId(), List.of()),
+                        product.getStatus() == ProductStatus.COMPLETED
                 ))
                 .toList();
     }

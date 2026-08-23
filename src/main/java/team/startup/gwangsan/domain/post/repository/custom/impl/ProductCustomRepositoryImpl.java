@@ -51,14 +51,14 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
     @Override
-    public List<Product> findProductByMemberAndTypeAndModeAndStatus(Member member, Type type, Mode mode, ProductStatus status) {
+    public List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .where(
                         product.member.id.eq(member.getId()),
                         typeEq(type),
                         modeEq(mode),
-                        statusEq(status)
+                        statusIn(statuses)
                 )
                 .fetch()
                 .stream()
@@ -117,5 +117,9 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
     private BooleanExpression statusEq(ProductStatus status) {
         return status != null ? product.status.eq(status) : null;
+    }
+
+    private BooleanExpression statusIn(Collection<ProductStatus> statuses) {
+        return (statuses == null || statuses.isEmpty()) ? null : product.status.in(statuses);
     }
 }

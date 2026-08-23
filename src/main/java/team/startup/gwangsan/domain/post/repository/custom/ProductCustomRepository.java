@@ -14,7 +14,7 @@ import java.util.List;
 public interface ProductCustomRepository {
     List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status);
 
-    List<Product> findProductByMemberAndTypeAndModeAndStatus(Member member, Type type, Mode mode, ProductStatus status);
+    List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses);
 
     List<GetRoomProductDto> findRoomProductsWithImagesByIds(Collection<Long> productIds);
 }

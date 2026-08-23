@@ -14,6 +14,7 @@ public record GetProductResponse(
         Type type,
         Mode mode,
         GetProductMemberResponse member,
-        List<GetImageResponse> images
+        List<GetImageResponse> images,
+        boolean isCompleted
 ) {
 }
