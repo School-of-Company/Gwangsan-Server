@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
@@ -36,7 +37,7 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
                 .orElseThrow(NotFoundMemberDetailException::new);
         Member member = memberDetail.getMember();
 
-        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatus(member, type, mode, null);
+        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, type, mode, null);
 
         if (products.isEmpty()) {
             return List.of();
@@ -78,7 +79,8 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
                         product.getType(),
                         product.getMode(),
                         memberResponse,
-                        imageMap.getOrDefault(product.getId(), List.of())
+                        imageMap.getOrDefault(product.getId(), List.of()),
+                        product.getStatus() == ProductStatus.COMPLETED
                 ))
                 .toList();
     }

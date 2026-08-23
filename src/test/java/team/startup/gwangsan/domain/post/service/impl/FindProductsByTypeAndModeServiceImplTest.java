@@ -81,6 +81,7 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(product1.getType()).thenReturn(TYPE);
             when(product1.getMode()).thenReturn(MODE);
             when(product1.getMember()).thenReturn(member1);
+            when(product1.getStatus()).thenReturn(ProductStatus.ONGOING);
 
             when(product2.getId()).thenReturn(101L);
             when(product2.getTitle()).thenReturn("상품2");
@@ -89,6 +90,7 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(product2.getType()).thenReturn(TYPE);
             when(product2.getMode()).thenReturn(MODE);
             when(product2.getMember()).thenReturn(member2);
+            when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
             when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
                     TYPE, MODE, myPlace, ProductStatus.ONGOING
@@ -140,11 +142,13 @@ class FindProductsByTypeAndModeServiceImplTest {
             assertThat(r1.id()).isEqualTo(100L);
             assertThat(r1.member().light()).isEqualTo(3);
             assertThat(r1.images().get(0).imageId()).isEqualTo(1000L);
+            assertThat(r1.isCompleted()).isFalse();
 
             GetProductResponse r2 = result.get(1);
             assertThat(r2.id()).isEqualTo(101L);
             assertThat(r2.member().light()).isEqualTo(1);
             assertThat(r2.images().get(0).imageId()).isEqualTo(1001L);
+            assertThat(r2.isCompleted()).isTrue();
 
             verify(productRepository).findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
                     TYPE, MODE, myPlace, ProductStatus.ONGOING

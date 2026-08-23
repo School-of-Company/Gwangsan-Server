@@ -91,7 +91,8 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
                             product.getType(),
                             product.getMode(),
                             memberResponse,
-                            imageMap.getOrDefault(product.getId(), List.of())
+                            imageMap.getOrDefault(product.getId(), List.of()),
+                            product.getStatus() == ProductStatus.COMPLETED
                     );
                 })
                 .toList();
