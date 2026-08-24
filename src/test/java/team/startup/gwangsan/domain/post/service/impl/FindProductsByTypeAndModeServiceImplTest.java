@@ -55,7 +55,7 @@ class FindProductsByTypeAndModeServiceImplTest {
     class Describe_execute {
 
         @Test
-        @DisplayName("현재 사용자 동네의 진행중·예약중 상품을 조회하고 DTO 리스트를 반환한다")
+        @DisplayName("현재 사용자 동네와 동일한 동네의 상품을 조회하고 DTO 리스트를 반환한다")
         void execute() {
             // given
             Member me = mock(Member.class);
@@ -90,10 +90,10 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(product2.getType()).thenReturn(TYPE);
             when(product2.getMode()).thenReturn(MODE);
             when(product2.getMember()).thenReturn(member2);
-            when(product2.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(
-                    TYPE, MODE, myPlace, List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION)
+            when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
+                    TYPE, MODE, myPlace, ProductStatus.ONGOING
             )).thenReturn(List.of(product1, product2));
 
             MemberDetail detail1 = mock(MemberDetail.class);
@@ -149,11 +149,11 @@ class FindProductsByTypeAndModeServiceImplTest {
             assertThat(r2.id()).isEqualTo(101L);
             assertThat(r2.member().light()).isEqualTo(1);
             assertThat(r2.images().get(0).imageId()).isEqualTo(1001L);
-            assertThat(r2.isCompleted()).isFalse();
-            assertThat(r2.isReserved()).isTrue();
+            assertThat(r2.isCompleted()).isTrue();
+            assertThat(r2.isReserved()).isFalse();
 
-            verify(productRepository).findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(
-                    TYPE, MODE, myPlace, List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION)
+            verify(productRepository).findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
+                    TYPE, MODE, myPlace, ProductStatus.ONGOING
             );
             verify(memberDetailRepository).findAllByMemberIdIn(anyList());
             verify(productImageRepository).findAllByProductIdIn(anyList());
@@ -170,8 +170,8 @@ class FindProductsByTypeAndModeServiceImplTest {
             Place myPlace = mock(Place.class);
             when(memberDetailRepository.findPlaceByMemberId(me.getId())).thenReturn(myPlace);
 
-            when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(
-                    TYPE, MODE, myPlace, List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION)
+            when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
+                    TYPE, MODE, myPlace, ProductStatus.ONGOING
             )).thenReturn(List.of());
 
             // when

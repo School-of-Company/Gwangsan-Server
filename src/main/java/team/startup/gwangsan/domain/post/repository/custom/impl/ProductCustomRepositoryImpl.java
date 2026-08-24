@@ -34,7 +34,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(Type type, Mode mode, Place place, Collection<ProductStatus> statuses) {
+    public List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .join(product.member, member).fetchJoin()
@@ -43,7 +43,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                         typeEq(type),
                         modeEq(mode),
                         memberDetail.place.eq(place),
-                        statusIn(statuses)
+                        statusEq(status)
                 )
                 .fetch()
                 .stream()
@@ -113,6 +113,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
     private BooleanExpression modeEq(Mode mode) {
         return mode != null ? product.mode.eq(mode) : null;
+    }
+
+    private BooleanExpression statusEq(ProductStatus status) {
+        return status != null ? product.status.eq(status) : null;
     }
 
     private BooleanExpression statusIn(Collection<ProductStatus> statuses) {
