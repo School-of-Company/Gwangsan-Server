@@ -23,10 +23,11 @@ public class TradeStatusChangedEventListener {
             notifier.notifyTradeStatusChanged(event);
         } catch (Exception e) {
             log.warn(
-                    "Failed to notify chatting server of trade status change. roomId={}, productId={}, completed={}",
+                    "Failed to notify chatting server of trade status change. roomId={}, productId={}, completed={}, reserved={}",
                     event.roomId(),
                     event.productId(),
                     event.completed(),
+                    event.reserved(),
                     e
             );
         }
