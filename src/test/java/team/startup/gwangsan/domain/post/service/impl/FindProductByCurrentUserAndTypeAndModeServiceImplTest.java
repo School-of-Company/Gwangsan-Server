@@ -78,7 +78,7 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             MemberDetail memberDetail = mock(MemberDetail.class);
             when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(memberDetail));
             when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
-                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED)))
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
                     .thenReturn(List.of());
 
             var result = service.execute(Type.SERVICE, Mode.GIVER);
@@ -105,6 +105,7 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
 
             Product product1 = mock(Product.class);
             Product product2 = mock(Product.class);
+            Product product3 = mock(Product.class);
 
             when(product1.getId()).thenReturn(101L);
             when(product1.getTitle()).thenReturn("상품1");
@@ -122,9 +123,17 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             when(product2.getMode()).thenReturn(Mode.GIVER);
             when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
+            when(product3.getId()).thenReturn(103L);
+            when(product3.getTitle()).thenReturn("상품3");
+            when(product3.getDescription()).thenReturn("설명3");
+            when(product3.getGwangsan()).thenReturn(7);
+            when(product3.getType()).thenReturn(Type.SERVICE);
+            when(product3.getMode()).thenReturn(Mode.GIVER);
+            when(product3.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
             when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
-                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED)
-            )).thenReturn(List.of(product1, product2));
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)
+            )).thenReturn(List.of(product1, product2, product3));
 
             Image img1 = mock(Image.class);
             Image img2 = mock(Image.class);
@@ -144,34 +153,41 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             when(pi2.getProduct()).thenReturn(product2);
             when(pi2.getImage()).thenReturn(img2);
 
-            when(productImageRepository.findAllByProductIdIn(List.of(101L, 102L)))
+            when(productImageRepository.findAllByProductIdIn(List.of(101L, 102L, 103L)))
                     .thenReturn(List.of(pi1, pi2));
 
             // when
             var result = service.execute(Type.SERVICE, Mode.GIVER);
 
             // then
-            assertThat(result).hasSize(2);
+            assertThat(result).hasSize(3);
 
             assertThat(result.get(0).id()).isEqualTo(101L);
             assertThat(result.get(0).images()).containsExactly(
                     new GetImageResponse(201L, "url1")
             );
             assertThat(result.get(0).isCompleted()).isFalse();
+            assertThat(result.get(0).isReserved()).isFalse();
 
             assertThat(result.get(1).id()).isEqualTo(102L);
             assertThat(result.get(1).images()).containsExactly(
                     new GetImageResponse(202L, "url2")
             );
             assertThat(result.get(1).isCompleted()).isTrue();
+            assertThat(result.get(1).isReserved()).isFalse();
+
+            assertThat(result.get(2).id()).isEqualTo(103L);
+            assertThat(result.get(2).images()).isEmpty();
+            assertThat(result.get(2).isCompleted()).isFalse();
+            assertThat(result.get(2).isReserved()).isTrue();
 
             assertThat(result.get(0).member().light()).isEqualTo(3);
 
             verify(memberUtil).getCurrentMember();
             verify(memberDetailRepository).findById(1L);
             verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(
-                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED));
-            verify(productImageRepository).findAllByProductIdIn(List.of(101L, 102L));
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION));
+            verify(productImageRepository).findAllByProductIdIn(List.of(101L, 102L, 103L));
         }
     }
 }

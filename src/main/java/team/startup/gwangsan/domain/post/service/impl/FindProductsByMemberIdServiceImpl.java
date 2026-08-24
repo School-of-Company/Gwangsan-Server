@@ -80,7 +80,8 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
                         product.getMode(),
                         memberResponse,
                         imageMap.getOrDefault(product.getId(), List.of()),
-                        product.getStatus() == ProductStatus.COMPLETED
+                        product.getStatus() == ProductStatus.COMPLETED,
+                        product.getStatus() == ProductStatus.RESERVATION
                 ))
                 .toList();
     }

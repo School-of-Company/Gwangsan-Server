@@ -143,12 +143,14 @@ class FindProductsByTypeAndModeServiceImplTest {
             assertThat(r1.member().light()).isEqualTo(3);
             assertThat(r1.images().get(0).imageId()).isEqualTo(1000L);
             assertThat(r1.isCompleted()).isFalse();
+            assertThat(r1.isReserved()).isFalse();
 
             GetProductResponse r2 = result.get(1);
             assertThat(r2.id()).isEqualTo(101L);
             assertThat(r2.member().light()).isEqualTo(1);
             assertThat(r2.images().get(0).imageId()).isEqualTo(1001L);
             assertThat(r2.isCompleted()).isTrue();
+            assertThat(r2.isReserved()).isFalse();
 
             verify(productRepository).findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
                     TYPE, MODE, myPlace, ProductStatus.ONGOING

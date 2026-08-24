@@ -109,6 +109,7 @@ class FindProductsByMemberIdServiceImplTest {
 
             Product product1 = mock(Product.class);
             Product product2 = mock(Product.class);
+            Product product3 = mock(Product.class);
 
             when(product1.getId()).thenReturn(100L);
             when(product1.getTitle()).thenReturn("제목1");
@@ -126,8 +127,16 @@ class FindProductsByMemberIdServiceImplTest {
             when(product2.getMode()).thenReturn(MODE);
             when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
+            when(product3.getId()).thenReturn(102L);
+            when(product3.getTitle()).thenReturn("제목3");
+            when(product3.getDescription()).thenReturn("설명3");
+            when(product3.getGwangsan()).thenReturn(30);
+            when(product3.getType()).thenReturn(TYPE);
+            when(product3.getMode()).thenReturn(MODE);
+            when(product3.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
             when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
-                    .thenReturn(List.of(product1, product2));
+                    .thenReturn(List.of(product1, product2, product3));
 
             Image image1 = mock(Image.class);
             when(image1.getId()).thenReturn(1000L);
@@ -152,7 +161,7 @@ class FindProductsByMemberIdServiceImplTest {
             List<GetProductResponse> responses = service.execute(MEMBER_ID, TYPE, MODE);
 
             // then
-            assertThat(responses).hasSize(2);
+            assertThat(responses).hasSize(3);
 
             GetProductResponse r1 = responses.get(0);
             assertThat(r1.id()).isEqualTo(100L);
@@ -169,6 +178,7 @@ class FindProductsByMemberIdServiceImplTest {
                     .extracting(GetImageResponse::imageId)
                     .containsExactly(1000L);
             assertThat(r1.isCompleted()).isFalse();
+            assertThat(r1.isReserved()).isFalse();
 
             GetProductResponse r2 = responses.get(1);
             assertThat(r2.id()).isEqualTo(101L);
@@ -182,10 +192,17 @@ class FindProductsByMemberIdServiceImplTest {
                     .extracting(GetImageResponse::imageId)
                     .containsExactly(1001L);
             assertThat(r2.isCompleted()).isTrue();
+            assertThat(r2.isReserved()).isFalse();
+
+            GetProductResponse r3 = responses.get(2);
+            assertThat(r3.id()).isEqualTo(102L);
+            assertThat(r3.images()).isEmpty();
+            assertThat(r3.isCompleted()).isFalse();
+            assertThat(r3.isReserved()).isTrue();
 
             ArgumentCaptor<List<Long>> productIdsCaptor = ArgumentCaptor.forClass(List.class);
             verify(productImageRepository).findAllByProductIdIn(productIdsCaptor.capture());
-            assertThat(productIdsCaptor.getValue()).containsExactlyInAnyOrder(100L, 101L);
+            assertThat(productIdsCaptor.getValue()).containsExactlyInAnyOrder(100L, 101L, 102L);
 
             verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null);
         }
