@@ -20,6 +20,7 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -80,7 +81,7 @@ class FindProductsByMemberIdServiceImplTest {
             Member member = mock(Member.class);
             when(memberDetailRepository.findById(MEMBER_ID)).thenReturn(Optional.of(memberDetail));
             when(memberDetail.getMember()).thenReturn(member);
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
                     .thenReturn(List.of());
 
             List<GetProductResponse> result = service.execute(MEMBER_ID, TYPE, MODE);
@@ -115,6 +116,7 @@ class FindProductsByMemberIdServiceImplTest {
             when(product1.getGwangsan()).thenReturn(10);
             when(product1.getType()).thenReturn(TYPE);
             when(product1.getMode()).thenReturn(MODE);
+            when(product1.getStatus()).thenReturn(ProductStatus.ONGOING);
 
             when(product2.getId()).thenReturn(101L);
             when(product2.getTitle()).thenReturn("제목2");
@@ -122,8 +124,9 @@ class FindProductsByMemberIdServiceImplTest {
             when(product2.getGwangsan()).thenReturn(20);
             when(product2.getType()).thenReturn(TYPE);
             when(product2.getMode()).thenReturn(MODE);
+            when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
                     .thenReturn(List.of(product1, product2));
 
             Image image1 = mock(Image.class);
@@ -165,6 +168,7 @@ class FindProductsByMemberIdServiceImplTest {
             assertThat(r1.images())
                     .extracting(GetImageResponse::imageId)
                     .containsExactly(1000L);
+            assertThat(r1.isCompleted()).isFalse();
 
             GetProductResponse r2 = responses.get(1);
             assertThat(r2.id()).isEqualTo(101L);
@@ -177,12 +181,13 @@ class FindProductsByMemberIdServiceImplTest {
             assertThat(r2.images())
                     .extracting(GetImageResponse::imageId)
                     .containsExactly(1001L);
+            assertThat(r2.isCompleted()).isTrue();
 
             ArgumentCaptor<List<Long>> productIdsCaptor = ArgumentCaptor.forClass(List.class);
             verify(productImageRepository).findAllByProductIdIn(productIdsCaptor.capture());
             assertThat(productIdsCaptor.getValue()).containsExactlyInAnyOrder(100L, 101L);
 
-            verify(productRepository).findProductByMemberAndTypeAndModeAndStatus(member, TYPE, MODE, null);
+            verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null);
         }
 
         @Test
@@ -210,7 +215,7 @@ class FindProductsByMemberIdServiceImplTest {
             when(product.getType()).thenReturn(TYPE);
             when(product.getMode()).thenReturn(MODE);
 
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
                     .thenReturn(List.of(product));
 
             when(productImageRepository.findAllByProductIdIn(anyList()))

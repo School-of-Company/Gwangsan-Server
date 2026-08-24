@@ -77,7 +77,8 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             when(member.getId()).thenReturn(1L);
             MemberDetail memberDetail = mock(MemberDetail.class);
             when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(memberDetail));
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(member, Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED)))
                     .thenReturn(List.of());
 
             var result = service.execute(Type.SERVICE, Mode.GIVER);
@@ -111,6 +112,7 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             when(product1.getGwangsan()).thenReturn(3);
             when(product1.getType()).thenReturn(Type.SERVICE);
             when(product1.getMode()).thenReturn(Mode.GIVER);
+            when(product1.getStatus()).thenReturn(ProductStatus.ONGOING);
 
             when(product2.getId()).thenReturn(102L);
             when(product2.getTitle()).thenReturn("상품2");
@@ -118,9 +120,10 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             when(product2.getGwangsan()).thenReturn(5);
             when(product2.getType()).thenReturn(Type.SERVICE);
             when(product2.getMode()).thenReturn(Mode.GIVER);
+            when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatus(
-                    member, Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED)
             )).thenReturn(List.of(product1, product2));
 
             Image img1 = mock(Image.class);
@@ -154,17 +157,20 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
             assertThat(result.get(0).images()).containsExactly(
                     new GetImageResponse(201L, "url1")
             );
+            assertThat(result.get(0).isCompleted()).isFalse();
 
             assertThat(result.get(1).id()).isEqualTo(102L);
             assertThat(result.get(1).images()).containsExactly(
                     new GetImageResponse(202L, "url2")
             );
+            assertThat(result.get(1).isCompleted()).isTrue();
 
             assertThat(result.get(0).member().light()).isEqualTo(3);
 
             verify(memberUtil).getCurrentMember();
             verify(memberDetailRepository).findById(1L);
-            verify(productRepository).findProductByMemberAndTypeAndModeAndStatus(member, Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING);
+            verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(
+                    member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED));
             verify(productImageRepository).findAllByProductIdIn(List.of(101L, 102L));
         }
     }

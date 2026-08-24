@@ -1,5 +1,9 @@
 package team.startup.gwangsan.global.thirdparty.expo;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,9 +26,11 @@ public class ExpoPushAdapter implements NotificationPort {
 
     private final RetryTemplate retryTemplate;
     private final WebClient expoClient;
+    private final Gson gson;
 
-    public ExpoPushAdapter(RetryTemplate retryTemplate, WebClient.Builder webClientBuilder) {
+    public ExpoPushAdapter(RetryTemplate retryTemplate, WebClient.Builder webClientBuilder, Gson gson) {
         this.retryTemplate = retryTemplate;
+        this.gson = gson;
         this.expoClient = webClientBuilder
                 .baseUrl("https://exp.host")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -39,15 +45,14 @@ public class ExpoPushAdapter implements NotificationPort {
             return;
         }
 
-        List<String> expoTokens = deviceTokens.stream()
-                .map(DeviceToken::getDeviceToken)
-                .filter(Objects::nonNull)
-                .filter(this::isExpoPushToken)
-                .toList();
+        List<String> expoTokens = expoTokens(deviceTokens);
 
-        if (!expoTokens.isEmpty()) {
-            sendByExpo(expoTokens, title, body, type, sourceId);
+        if (expoTokens.isEmpty()) {
+            log.warn("[Expo] 대상 디바이스 토큰 {}건 중 Expo 형식(ExponentPushToken[...]) 토큰이 없어 전송을 건너뜁니다.", deviceTokens.size());
+            return;
         }
+
+        sendByExpo(expoTokens, title, body, type, sourceId);
     }
 
     boolean isExpoPushToken(String t) {
@@ -100,11 +105,57 @@ public class ExpoPushAdapter implements NotificationPort {
                             .block(Duration.ofSeconds(5));
 
                     log.info("[Expo] 응답: {}", resp);
+                    logExpoErrors(resp);
                     return null;
                 });
             } catch (Exception e) {
                 log.error("[Expo] 전송 실패: {}", e.getMessage(), e);
             }
         }
+    }
+
+    List<String> expoTokens(List<DeviceToken> deviceTokens) {
+        return deviceTokens.stream()
+                .filter(Objects::nonNull)
+                .map(DeviceToken::getDeviceToken)
+                .filter(Objects::nonNull)
+                .filter(this::isExpoPushToken)
+                .distinct()
+                .toList();
+    }
+
+    int logExpoErrors(String response) {
+        if (response == null || response.isBlank()) return 0;
+        try {
+            JsonObject root = gson.fromJson(response, JsonObject.class);
+            if (root == null || !root.has("data") || !root.get("data").isJsonArray()) return 0;
+
+            JsonArray data = root.getAsJsonArray("data");
+            int errors = 0;
+            for (JsonElement element : data) {
+                if (!element.isJsonObject()) continue;
+                JsonObject ticket = element.getAsJsonObject();
+                if (!"error".equals(asString(ticket, "status"))) continue;
+                errors++;
+
+                JsonObject details = ticket.has("details") && ticket.get("details").isJsonObject()
+                        ? ticket.getAsJsonObject("details")
+                        : null;
+                log.warn(
+                        "[Expo] ticket error: message={}, error={}, details={}",
+                        asString(ticket, "message"),
+                        details == null ? null : asString(details, "error"),
+                        details
+                );
+            }
+            return errors;
+        } catch (Exception e) {
+            log.warn("[Expo] 응답 파싱 실패: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    private String asString(JsonObject object, String key) {
+        return object.has(key) && !object.get(key).isJsonNull() ? object.get(key).getAsString() : null;
     }
 }

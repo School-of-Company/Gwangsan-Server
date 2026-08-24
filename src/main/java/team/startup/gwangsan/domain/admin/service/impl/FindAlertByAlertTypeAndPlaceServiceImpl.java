@@ -22,6 +22,7 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -304,7 +305,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 product.getType(),
                 product.getMode(),
                 memberDto,
-                images
+                images,
+                product.getStatus() == ProductStatus.COMPLETED
         );
     }
 }

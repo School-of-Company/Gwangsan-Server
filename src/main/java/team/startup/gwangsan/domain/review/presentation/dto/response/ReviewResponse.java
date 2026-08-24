@@ -10,5 +10,6 @@ public record ReviewResponse(
         String content,
         Integer light,
         String reviewerName,
+        String targetName,
         List<GetImageResponse> imageUrls
 ) {}

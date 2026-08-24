@@ -51,14 +51,14 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
     @Override
-    public List<Product> findProductByMemberAndTypeAndModeAndStatus(Member member, Type type, Mode mode, ProductStatus status) {
+    public List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .where(
                         product.member.id.eq(member.getId()),
                         typeEq(type),
                         modeEq(mode),
-                        statusEq(status)
+                        statusIn(statuses)
                 )
                 .fetch()
                 .stream()
@@ -75,12 +75,13 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .select(
                         product.id,
                         product.title,
+                        product.status,
                         image.id,
                         image.imageUrl
                 )
-                .from(productImage)
-                .join(productImage.product, product)
-                .join(productImage.image, image)
+                .from(product)
+                .leftJoin(productImage).on(productImage.product.eq(product))
+                .leftJoin(image).on(productImage.image.eq(image))
                 .where(product.id.in(productIds))
                 .fetch();
 
@@ -89,15 +90,18 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         for (Tuple row : rows) {
             Long productId = row.get(product.id);
             String title = row.get(product.title);
+            ProductStatus status = row.get(product.status);
             Long imageId = row.get(image.id);
             String imageUrl = row.get(image.imageUrl);
 
             GetRoomProductDto dto = resultMap.computeIfAbsent(
                     productId,
-                    id -> new GetRoomProductDto(id, title, new ArrayList<>())
+                    id -> new GetRoomProductDto(id, title, status == ProductStatus.COMPLETED, new ArrayList<>())
             );
 
-            dto.images().add(new GetImageResponse(imageId, imageUrl));
+            if (imageId != null) {
+                dto.images().add(new GetImageResponse(imageId, imageUrl));
+            }
         }
 
         return new ArrayList<>(resultMap.values());
@@ -113,5 +117,9 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
     private BooleanExpression statusEq(ProductStatus status) {
         return status != null ? product.status.eq(status) : null;
+    }
+
+    private BooleanExpression statusIn(Collection<ProductStatus> statuses) {
+        return (statuses == null || statuses.isEmpty()) ? null : product.status.in(statuses);
     }
 }
