@@ -17,6 +17,7 @@ public record GetProductByIdResponse(
         List<GetImageResponse> images,
         boolean isMine,
         boolean isCompletable,
-        boolean isCompleted
+        boolean isCompleted,
+        boolean isReserved
 ) {
 }

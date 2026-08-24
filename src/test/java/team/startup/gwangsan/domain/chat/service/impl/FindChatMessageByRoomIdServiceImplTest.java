@@ -296,6 +296,18 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
+        @DisplayName("상품이 예약 상태이면 isReserved 가 true 이다")
+        void it_sets_isReserved_true_when_product_is_reserved() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isReserved()).isTrue();
+        }
+
+        @Test
         @DisplayName("메시지가 있으면 가장 최근 메시지 id 까지 읽음 처리한다")
         void it_marks_messages_as_read_using_latest_message_id_when_messages_exist() {
             arrangeRoomAsSellerView();
