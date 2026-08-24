@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductCustomRepository {
-    List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status);
+    List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(Type type, Mode mode, Place place, Collection<ProductStatus> statuses);
 
     List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses);
 

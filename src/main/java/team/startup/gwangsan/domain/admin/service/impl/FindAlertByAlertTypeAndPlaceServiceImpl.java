@@ -306,7 +306,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 product.getMode(),
                 memberDto,
                 images,
-                product.getStatus() == ProductStatus.COMPLETED
+                product.getStatus() == ProductStatus.COMPLETED,
+                product.getStatus() == ProductStatus.RESERVATION
         );
     }
 }

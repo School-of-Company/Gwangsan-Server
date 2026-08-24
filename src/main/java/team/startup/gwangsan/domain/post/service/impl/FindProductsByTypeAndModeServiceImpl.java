@@ -37,7 +37,7 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
     public List<GetProductResponse> execute(Type type, Mode mode) {
         Place myPlace = memberDetailRepository.findPlaceByMemberId(memberUtil.getCurrentMember().getId());
 
-        List<Product> products = productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(type, mode, myPlace, ProductStatus.ONGOING);
+        List<Product> products = productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatusIn(type, mode, myPlace, List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION));
 
         if (products.isEmpty()) {
             return List.of();
@@ -92,7 +92,8 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
                             product.getMode(),
                             memberResponse,
                             imageMap.getOrDefault(product.getId(), List.of()),
-                            product.getStatus() == ProductStatus.COMPLETED
+                            product.getStatus() == ProductStatus.COMPLETED,
+                            product.getStatus() == ProductStatus.RESERVATION
                     );
                 })
                 .toList();
