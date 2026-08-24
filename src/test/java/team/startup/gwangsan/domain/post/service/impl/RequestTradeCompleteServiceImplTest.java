@@ -353,7 +353,7 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verify(reservation).complete();
-            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true, false);
         }
 
         @Test
@@ -416,7 +416,7 @@ class RequestTradeCompleteServiceImplTest {
             ArgumentCaptor<TradeComplete> savedCaptor = ArgumentCaptor.forClass(TradeComplete.class);
             verify(tradeCompleteRepository).save(savedCaptor.capture());
             assertTrue(savedCaptor.getValue().isRequestedBySeller());
-            verifyTradeStatusChangedEvent(roomId, buyerId, productId, false);
+            verifyTradeStatusChangedEvent(roomId, buyerId, productId, false, false);
         }
 
         @Test
@@ -481,7 +481,7 @@ class RequestTradeCompleteServiceImplTest {
             ArgumentCaptor<TradeComplete> savedCaptor = ArgumentCaptor.forClass(TradeComplete.class);
             verify(tradeCompleteRepository).save(savedCaptor.capture());
             assertTrue(!savedCaptor.getValue().isRequestedBySeller());
-            verifyTradeStatusChangedEvent(roomId, sellerId, productId, false);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, false, false);
         }
 
         @Test
@@ -609,11 +609,17 @@ class RequestTradeCompleteServiceImplTest {
             verify(pending).updateStatus(TradeStatus.COMPLETED);
             verify(pending).updateCompletedAt();
             verifyNoInteractions(productReservationRepository);
-            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true);
+            verifyTradeStatusChangedEvent(roomId, sellerId, productId, true, false);
         }
     }
 
-    private void verifyTradeStatusChangedEvent(Long roomId, Long targetMemberId, Long productId, boolean completed) {
+    private void verifyTradeStatusChangedEvent(
+            Long roomId,
+            Long targetMemberId,
+            Long productId,
+            boolean completed,
+            boolean reserved
+    ) {
         ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
         verify(applicationEventPublisher, atLeastOnce()).publishEvent(eventCaptor.capture());
 
@@ -627,6 +633,7 @@ class RequestTradeCompleteServiceImplTest {
         assertEquals(targetMemberId, event.targetMemberId());
         assertEquals(productId, event.productId());
         assertEquals(completed, event.completed());
+        assertEquals(reserved, event.reserved());
         assertTrue(event.changedAt() != null);
     }
 }

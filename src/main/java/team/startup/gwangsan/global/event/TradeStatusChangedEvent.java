@@ -7,6 +7,7 @@ public record TradeStatusChangedEvent(
         Long targetMemberId,
         Long productId,
         boolean completed,
+        boolean reserved,
         LocalDateTime changedAt
 ) {
 }

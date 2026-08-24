@@ -67,6 +67,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         Optional<TradeComplete> pendingTradeComplete = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                 product, chatRoom.getBuyer(), chatRoom.getSeller(), TradeStatus.PENDING);
         boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
+        boolean isReserved = product.getStatus() == ProductStatus.RESERVATION;
         boolean isCompletable = !isCompleted && pendingTradeComplete
                 .map(tc -> tc.isRequestedBySeller() != isSeller)
                 .orElse(true);
@@ -78,7 +79,8 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 pendingTradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
                 isSeller,
                 isCompletable,
-                isCompleted
+                isCompleted,
+                isReserved
         );
 
         List<ChatMessage> messages = chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(roomId, lastCreatedAt, lastMessageId, limit);

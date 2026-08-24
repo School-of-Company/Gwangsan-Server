@@ -82,6 +82,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
             isCompletable = chatMessageRepository.existsByRoomAndSenderId(chatRoom, member.getId());
         }
         boolean isCompleted = product.getStatus().equals(ProductStatus.COMPLETED);
+        boolean isReserved = product.getStatus().equals(ProductStatus.RESERVATION);
 
         return new GetProductByIdResponse(
                 product.getId(),
@@ -94,7 +95,8 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
                 images,
                 isMine,
                 isCompletable,
-                isCompleted
+                isCompleted,
+                isReserved
         );
     }
 

@@ -4,9 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -16,12 +20,17 @@ import team.startup.gwangsan.domain.post.exception.ProductAlreadyReservationExce
 import team.startup.gwangsan.domain.post.exception.ProductNotOngoingException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +45,12 @@ class ReservationProductServiceImplTest {
 
     @Mock
     private MemberUtil memberUtil;
+
+    @Mock
+    private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private ReservationProductServiceImpl service;
@@ -105,12 +120,26 @@ class ReservationProductServiceImplTest {
 
             when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoomRepository.findByProductIdAndMember(productId, reserver))
+                    .thenReturn(Optional.of(chatRoom));
+
             // when
             assertDoesNotThrow(() -> service.execute(productId));
 
             // then
             verify(productReservationRepository).save(any(ProductReservation.class));
             verify(product).updateStatus(ProductStatus.RESERVATION);
+
+            ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+            verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+            TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
+            assertEquals(10L, event.roomId());
+            assertNull(event.targetMemberId());
+            assertEquals(productId, event.productId());
+            assertFalse(event.completed());
+            assertTrue(event.reserved());
         }
     }
 }

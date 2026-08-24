@@ -195,6 +195,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 requester.getId(),
                 product.getId(),
                 true,
+                false,
                 changedAt
         ));
     }
@@ -222,6 +223,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 requestTarget.getId(),
                 product.getId(),
                 false,
+                product.getStatus() == ProductStatus.RESERVATION,
                 changedAt
         ));
     }

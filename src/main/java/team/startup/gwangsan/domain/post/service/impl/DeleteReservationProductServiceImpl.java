@@ -1,8 +1,10 @@
 package team.startup.gwangsan.domain.post.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -12,7 +14,10 @@ import team.startup.gwangsan.domain.post.exception.ReservationParticipantOnlyExc
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.post.service.DeleteReservationProductService;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,8 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     private final ProductRepository productRepository;
     private final MemberUtil memberUtil;
     private final ProductReservationRepository productReservationRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -36,5 +43,15 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
         productReservation.cancel();
 
         product.updateStatus(ProductStatus.ONGOING);
+
+        chatRoomRepository.findByProductIdAndMember(product.getId(), productReservation.getReserver())
+                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                        chatRoom.getId(),
+                        null,
+                        product.getId(),
+                        false,
+                        false,
+                        LocalDateTime.now()
+                )));
     }
 }

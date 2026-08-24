@@ -76,8 +76,8 @@ class FindProductByIdServiceImplTest {
     class Describe_execute {
 
         @Test
-        @DisplayName("정상 케이스에서 상품 상세 정보를 반환하고 isMine=false, isCompletable=true, isCompleted=false 를 설정한다")
-        void it_returns_product_detail_with_flags_for_normal_case() {
+        @DisplayName("예약 상품 상세 정보를 반환하고 isReserved=true 를 설정한다")
+        void it_returns_reserved_product_detail_with_flags() {
             // given
             Long productId = 1L;
 
@@ -102,7 +102,7 @@ class FindProductByIdServiceImplTest {
             when(product.getGwangsan()).thenReturn(10);
             when(product.getType()).thenReturn(Type.SERVICE);
             when(product.getMode()).thenReturn(Mode.GIVER);
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
             when(product.getMember()).thenReturn(owner);
 
             when(productRepository.findById(productId)).thenReturn(Optional.of(product));
@@ -163,6 +163,7 @@ class FindProductByIdServiceImplTest {
             assertThat(result.isMine()).isFalse();
             assertThat(result.isCompletable()).isTrue();
             assertThat(result.isCompleted()).isFalse();
+            assertThat(result.isReserved()).isTrue();
 
             verify(productRepository).findById(productId);
             verify(productImageRepository).findAllByProductId(productId);
@@ -286,6 +287,7 @@ class FindProductByIdServiceImplTest {
             assertThat(result.isMine()).isTrue();
             assertThat(result.isCompleted()).isTrue();
             assertThat(result.isCompletable()).isFalse();
+            assertThat(result.isReserved()).isFalse();
 
             GetProductMemberResponse memberResponse = result.member();
             assertThat(memberResponse.light()).isEqualTo(1);

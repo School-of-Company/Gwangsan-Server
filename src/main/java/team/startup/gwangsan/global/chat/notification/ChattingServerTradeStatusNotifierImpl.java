@@ -36,6 +36,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
                         event.targetMemberId(),
                         event.productId(),
                         event.completed(),
+                        event.reserved(),
                         event.changedAt()
                 ))
                 .retrieve()
@@ -47,6 +48,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
             Long targetMemberId,
             Long productId,
             boolean isCompleted,
+            boolean isReserved,
             LocalDateTime createdAt
     ) {
     }
