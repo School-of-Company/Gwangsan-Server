@@ -100,6 +100,21 @@ class CreateChatRoomServiceImplTest {
         }
 
         @Test
+        @DisplayName("이미 채팅방이 존재하면 요청자 쪽의 숨김 상태를 해제한다")
+        void it_unhides_room_for_requester_when_room_already_exists() {
+            arrangeDefaultScenario();
+            when(product.getMode()).thenReturn(Mode.GIVER);
+            ChatRoom existingRoom = mock(ChatRoom.class);
+            when(existingRoom.getId()).thenReturn(100L);
+            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(eq(10L), eq(currentMember), eq(productOwner)))
+                    .thenReturn(Optional.of(existingRoom));
+
+            service.execute(10L);
+
+            verify(existingRoom).unhideFor(currentMember);
+        }
+
+        @Test
         @DisplayName("GIVER 모드이면 현재 사용자가 buyer, 상품주가 seller 로 방을 생성한다")
         void it_creates_room_with_current_user_as_buyer_when_mode_is_giver() {
             arrangeDefaultScenario();

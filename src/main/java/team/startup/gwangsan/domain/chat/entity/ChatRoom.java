@@ -42,6 +42,12 @@ public class ChatRoom {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @Column(name = "hidden_by_buyer_at")
+    private LocalDateTime hiddenByBuyerAt;
+
+    @Column(name = "hidden_by_seller_at")
+    private LocalDateTime hiddenBySellerAt;
+
     @Builder
     public ChatRoom(LocalDateTime createdAt, Boolean isActive, Member buyer, Member seller, Product product) {
         this.createdAt = createdAt;
@@ -49,5 +55,25 @@ public class ChatRoom {
         this.buyer = buyer;
         this.seller = seller;
         this.product = product;
+    }
+
+    public boolean isParticipant(Member member) {
+        return buyer.getId().equals(member.getId()) || seller.getId().equals(member.getId());
+    }
+
+    public void hideFor(Member member, LocalDateTime hiddenAt) {
+        if (buyer.getId().equals(member.getId())) {
+            this.hiddenByBuyerAt = hiddenAt;
+        } else if (seller.getId().equals(member.getId())) {
+            this.hiddenBySellerAt = hiddenAt;
+        }
+    }
+
+    public void unhideFor(Member member) {
+        if (buyer.getId().equals(member.getId())) {
+            this.hiddenByBuyerAt = null;
+        } else if (seller.getId().equals(member.getId())) {
+            this.hiddenBySellerAt = null;
+        }
     }
 }

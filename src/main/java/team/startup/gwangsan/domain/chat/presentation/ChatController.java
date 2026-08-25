@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.chat.presentation.dto.response.GetChatMessag
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
 import team.startup.gwangsan.domain.chat.service.CreateChatRoomService;
+import team.startup.gwangsan.domain.chat.service.DeleteChatRoomService;
 import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.chat.service.FindRoomsByCurrentUserService;
 import team.startup.gwangsan.domain.chat.service.ReadChatMessageService;
@@ -28,6 +29,7 @@ public class ChatController {
     private final ReadChatMessageService readChatMessageService;
     private final FindRoomsByCurrentUserService findRoomsByCurrentUserService;
     private final FindRoomIdByProductIdService findRoomIdByProductIdService;
+    private final DeleteChatRoomService deleteChatRoomService;
 
     @PostMapping("/room/{product_id}")
     public ResponseEntity<CreateChatRoomResponse> createChatRoom(@PathVariable("product_id") Long productId) {
@@ -62,5 +64,11 @@ public class ChatController {
     public ResponseEntity<GetRoomIdResponse> getRoom(@PathVariable("product_id") Long productId) {
         GetRoomIdResponse response = findRoomIdByProductIdService.execute(productId);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/room/{room_id}")
+    public ResponseEntity<Void> deleteChatRoom(@PathVariable("room_id") Long roomId) {
+        deleteChatRoomService.execute(roomId);
+        return ResponseEntity.noContent().build();
     }
 }

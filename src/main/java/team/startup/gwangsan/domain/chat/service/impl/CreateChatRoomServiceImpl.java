@@ -51,7 +51,9 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
         Optional<ChatRoom> existsChatRoom = chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller);
 
         if (existsChatRoom.isPresent()) {
-            return new CreateChatRoomResponse(existsChatRoom.get().getId());
+            ChatRoom room = existsChatRoom.get();
+            room.unhideFor(member);
+            return new CreateChatRoomResponse(room.getId());
         }
 
         ChatRoom chatRoom = ChatRoom.builder()
