@@ -84,7 +84,10 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .join(chatRoom.buyer, buyer)
                 .join(chatRoom.seller, seller)
                 .where(chatRoom.isActive.isTrue()
-                        .and(chatRoom.buyer.id.eq(memberId).or(chatRoom.seller.id.eq(memberId))))
+                        .and(
+                                chatRoom.buyer.id.eq(memberId).and(chatRoom.hiddenByBuyerAt.isNull())
+                                        .or(chatRoom.seller.id.eq(memberId).and(chatRoom.hiddenBySellerAt.isNull()))
+                        ))
                 .fetch();
 
         if (rooms.isEmpty()) {

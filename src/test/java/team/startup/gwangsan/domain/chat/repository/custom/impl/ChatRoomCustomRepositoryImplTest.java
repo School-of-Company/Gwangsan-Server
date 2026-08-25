@@ -136,6 +136,36 @@ class ChatRoomCustomRepositoryImplTest {
             assertThat(result.get(0).lastMessage()).isEqualTo("나중에 온 메시지");
         }
 
+        @Test
+        @DisplayName("요청자 쪽에서 숨김 처리한 채팅방은 결과에서 제외한다")
+        void it_excludes_room_hidden_by_requester() {
+            Member buyer = createMember("buyer3", "010-0003-0001");
+            Member seller = createMember("seller3", "010-0003-0002");
+            ChatRoom room = createRoom(buyer, seller, createProduct(seller));
+            room.hideFor(buyer, LocalDateTime.of(2024, 1, 1, 0, 0));
+            em.persist(room);
+
+            em.flush();
+            em.getEntityManager().clear();
+
+            assertThat(repository.findRoomsByMemberId(buyer.getId())).isEmpty();
+        }
+
+        @Test
+        @DisplayName("상대방이 숨김 처리해도 요청자의 결과에는 그대로 노출된다")
+        void it_keeps_room_visible_for_the_other_participant() {
+            Member buyer = createMember("buyer4", "010-0004-0001");
+            Member seller = createMember("seller4", "010-0004-0002");
+            ChatRoom room = createRoom(buyer, seller, createProduct(seller));
+            room.hideFor(buyer, LocalDateTime.of(2024, 1, 1, 0, 0));
+            em.persist(room);
+
+            em.flush();
+            em.getEntityManager().clear();
+
+            assertThat(repository.findRoomsByMemberId(seller.getId())).hasSize(1);
+        }
+
     }
 
     @Nested
