@@ -144,7 +144,7 @@ class CreateAlertServiceImplTest {
         void it_saves_receipt_for_trade_complete_reject() {
             Product product = mock(Product.class);
             when(product.getTitle()).thenReturn("상품명");
-            when(productRepository.findById(100L)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(100L)).thenReturn(Optional.of(product));
 
             when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -163,7 +163,7 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("TRADE_COMPLETE_REJECT 타입인데 상품이 없으면 NotFoundProductException 을 던진다")
         void it_throws_NotFoundProductException_for_trade_complete_reject() {
-            when(productRepository.findById(99L)).thenReturn(Optional.empty());
+            when(productRepository.findActiveById(99L)).thenReturn(Optional.empty());
 
             assertThrows(NotFoundProductException.class,
                     () -> service.execute(99L, 1L, AlertType.TRADE_COMPLETE_REJECT, null));

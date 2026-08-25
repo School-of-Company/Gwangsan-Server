@@ -14,10 +14,17 @@ import team.startup.gwangsan.domain.post.repository.custom.ProductCustomReposito
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, ProductCustomRepository {
-    Optional<Product> findByIdAndStatus(Long id, ProductStatus status);
+    Optional<Product> findByIdAndStatusNot(Long id, ProductStatus status);
+
+    /**
+     * 삭제되지 않은 게시글만 조회한다. 단건 조회는 이 메서드를 사용한다.
+     */
+    default Optional<Product> findActiveById(Long id) {
+        return findByIdAndStatusNot(id, ProductStatus.DELETED);
+    }
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Product p where p.id = :id")
+    @Query("select p from Product p where p.id = :id and p.status <> team.startup.gwangsan.domain.post.entity.constant.ProductStatus.DELETED")
     Optional<Product> findByIdWithLock(Long id);
 
     @Modifying(clearAutomatically = true)

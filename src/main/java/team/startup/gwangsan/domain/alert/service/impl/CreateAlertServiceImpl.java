@@ -215,7 +215,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
     }
 
     private Product getProduct(Long id) {
-        return productRepository.findById(id)
+        return productRepository.findActiveById(id)
                 .orElseThrow(NotFoundProductException::new);
     }
 

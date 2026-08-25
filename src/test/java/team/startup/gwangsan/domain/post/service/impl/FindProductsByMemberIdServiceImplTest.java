@@ -81,7 +81,7 @@ class FindProductsByMemberIdServiceImplTest {
             Member member = mock(Member.class);
             when(memberDetailRepository.findById(MEMBER_ID)).thenReturn(Optional.of(memberDetail));
             when(memberDetail.getMember()).thenReturn(member);
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
                     .thenReturn(List.of());
 
             List<GetProductResponse> result = service.execute(MEMBER_ID, TYPE, MODE);
@@ -135,7 +135,7 @@ class FindProductsByMemberIdServiceImplTest {
             when(product3.getMode()).thenReturn(MODE);
             when(product3.getStatus()).thenReturn(ProductStatus.RESERVATION);
 
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
                     .thenReturn(List.of(product1, product2, product3));
 
             Image image1 = mock(Image.class);
@@ -204,7 +204,7 @@ class FindProductsByMemberIdServiceImplTest {
             verify(productImageRepository).findAllByProductIdIn(productIdsCaptor.capture());
             assertThat(productIdsCaptor.getValue()).containsExactlyInAnyOrder(100L, 101L, 102L);
 
-            verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null);
+            verify(productRepository).findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION));
         }
 
         @Test
@@ -232,7 +232,7 @@ class FindProductsByMemberIdServiceImplTest {
             when(product.getType()).thenReturn(TYPE);
             when(product.getMode()).thenReturn(MODE);
 
-            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, null))
+            when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
                     .thenReturn(List.of(product));
 
             when(productImageRepository.findAllByProductIdIn(anyList()))

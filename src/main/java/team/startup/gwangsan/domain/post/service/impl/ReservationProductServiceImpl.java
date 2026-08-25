@@ -36,7 +36,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
     public void execute(Long productId) {
         Member reserver = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
 
         if (product.getStatus() == ProductStatus.RESERVATION) {

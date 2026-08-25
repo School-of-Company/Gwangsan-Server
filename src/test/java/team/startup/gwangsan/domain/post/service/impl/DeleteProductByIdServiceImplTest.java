@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -57,18 +58,19 @@ class DeleteProductByIdServiceImplTest {
         class Context_with_author {
 
             @Test
-            @DisplayName("정상적으로 상품을 삭제한다")
-            void it_deletes_product() {
+            @DisplayName("물리 삭제하지 않고 상태를 DELETED 로 변경한다")
+            void it_marks_product_as_deleted() {
                 // given
                 Long productId = 1L;
                 when(memberUtil.getCurrentMember()).thenReturn(author);
-                when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
                 // when
                 deleteProductByIdService.execute(productId);
 
                 // then
-                verify(productRepository).delete(product);
+                verify(product).updateStatus(ProductStatus.DELETED);
+                verify(productRepository, never()).delete(any());
             }
         }
 
@@ -82,13 +84,13 @@ class DeleteProductByIdServiceImplTest {
                 // given
                 Long productId = 1L;
                 when(memberUtil.getCurrentMember()).thenReturn(otherUser);
-                when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
                 // when & then
                 assertThrows(ForbiddenProductException.class,
                         () -> deleteProductByIdService.execute(productId));
 
-                verify(productRepository, never()).delete(any());
+                verify(product, never()).updateStatus(any());
             }
         }
 
@@ -102,13 +104,13 @@ class DeleteProductByIdServiceImplTest {
                 // given
                 Long productId = 99L;
                 when(memberUtil.getCurrentMember()).thenReturn(author);
-                when(productRepository.findById(productId)).thenReturn(Optional.empty());
+                when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
 
                 // when & then
                 assertThrows(NotFoundProductException.class,
                         () -> deleteProductByIdService.execute(productId));
 
-                verify(productRepository, never()).delete(any());
+                verify(product, never()).updateStatus(any());
             }
         }
     }

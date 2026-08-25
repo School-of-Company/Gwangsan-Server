@@ -44,7 +44,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
         Member member = memberUtil.getCurrentMember();
         Place myPlace = memberDetailRepository.findPlaceByMemberId(member.getId());
 
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findActiveById(id)
                 .orElseThrow(NotFoundProductException::new);
 
         blockValidator.validate(member, product.getMember());

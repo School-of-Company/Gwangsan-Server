@@ -76,7 +76,7 @@ class UpdateProductServiceImplTest {
         void givenObjectGiverWithNoImages_whenUpdateProduct_thenThrowsObjectRequiredException() {
             Long productId = 1L;
             when(memberUtil.getCurrentMember()).thenReturn(author);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             assertThrows(ObjectRequiredImageException.class, () ->
                     updateProductService.execute(productId, Type.OBJECT, Mode.GIVER, "T", "D", 100, Collections.emptyList()));
@@ -88,7 +88,7 @@ class UpdateProductServiceImplTest {
             // given
             Long productId = 1L;
             when(memberUtil.getCurrentMember()).thenReturn(author);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             ProductImage pi1 = mock(ProductImage.class);
             ProductImage pi2 = mock(ProductImage.class);
@@ -136,7 +136,7 @@ class UpdateProductServiceImplTest {
             Long productId = 1L;
 
             when(memberUtil.getCurrentMember()).thenReturn(otherUser);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ForbiddenProductException.class, () ->
@@ -158,7 +158,7 @@ class UpdateProductServiceImplTest {
             Long productId = 99L;
 
             when(memberUtil.getCurrentMember()).thenReturn(author);
-            when(productRepository.findById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class, () ->
@@ -179,7 +179,7 @@ class UpdateProductServiceImplTest {
             // given
             Long productId = 1L;
             when(memberUtil.getCurrentMember()).thenReturn(author);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             ProductImage pi = mock(ProductImage.class);
             Image img = mock(Image.class);
@@ -216,7 +216,7 @@ class UpdateProductServiceImplTest {
             Long productId = 1L;
 
             when(memberUtil.getCurrentMember()).thenReturn(author);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             ProductImage pi = mock(ProductImage.class);
             Image existing = mock(Image.class);
@@ -252,7 +252,7 @@ class UpdateProductServiceImplTest {
         Long productId = 1L;
 
         when(memberUtil.getCurrentMember()).thenReturn(author);
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
         ProductImage pi = mock(ProductImage.class);
         Image existingImg = mock(Image.class);
