@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.QChatMessage;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static team.startup.gwangsan.domain.chat.entity.QChatRoom.chatRoom;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
@@ -198,14 +200,37 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         List<Object[]> rows = query.getResultList();
 
         return rows.stream()
-                .map(row -> new LatestMessageDto(
-                        ((Number) row[0]).longValue(),
-                        ((Number) row[1]).longValue(),
-                        (String) row[2],
-                        MessageType.valueOf(String.valueOf(row[3])),
-                        toLocalDateTime(row[4])
-                ))
+                .map(this::toLatestMessageDto)
+                .filter(Objects::nonNull)
                 .toList();
+    }
+
+    LatestMessageDto toLatestMessageDto(Object[] row) {
+        Long roomId = ((Number) row[0]).longValue();
+        MessageType messageType = toMessageType(row[3]);
+        LocalDateTime createdAt = toLocalDateTime(row[4]);
+
+        if (messageType == null || createdAt == null) {
+            log.warn("Skipping malformed chat message row for room {} (message_type={}, created_at={})",
+                    roomId, row[3], row[4]);
+            return null;
+        }
+
+        return new LatestMessageDto(
+                roomId,
+                ((Number) row[1]).longValue(),
+                (String) row[2],
+                messageType,
+                createdAt
+        );
+    }
+
+    private MessageType toMessageType(Object value) {
+        try {
+            return MessageType.valueOf(String.valueOf(value));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private LocalDateTime toLocalDateTime(Object value) {
@@ -215,6 +240,6 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         if (value instanceof Timestamp timestamp) {
             return timestamp.toLocalDateTime();
         }
-        throw new IllegalArgumentException("Unsupported created_at type: " + value.getClass());
+        return null;
     }
 }
