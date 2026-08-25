@@ -65,13 +65,13 @@ class ReservationProductServiceImplTest {
             Long productId = 1L;
 
             // given
-            when(productRepository.findById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class,
                     () -> service.execute(productId));
 
-            verify(productRepository).findById(productId);
+            verify(productRepository).findActiveById(productId);
         }
 
         @Test
@@ -83,7 +83,7 @@ class ReservationProductServiceImplTest {
             Product product = mock(Product.class);
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductAlreadyReservationException.class,
@@ -99,7 +99,7 @@ class ReservationProductServiceImplTest {
             Product product = mock(Product.class);
             when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductNotOngoingException.class,
@@ -118,7 +118,7 @@ class ReservationProductServiceImplTest {
             Product product = mock(Product.class);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.getId()).thenReturn(10L);

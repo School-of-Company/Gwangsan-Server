@@ -59,14 +59,14 @@ class CreateChatRoomServiceImplTest {
 
         private void arrangeDefaultScenario() {
             when(product.getMember()).thenReturn(productOwner);
-            when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
             doNothing().when(blockValidator).validate(any(Member.class), any(Member.class));
         }
 
         @Test
         @DisplayName("상품이 존재하지 않으면 NotFoundProductException 을 던진다")
         void it_throws_NotFoundProductException_when_product_not_found() {
-            when(productRepository.findById(99L)).thenReturn(Optional.empty());
+            when(productRepository.findActiveById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.execute(99L))
                     .isInstanceOf(NotFoundProductException.class);
@@ -76,7 +76,7 @@ class CreateChatRoomServiceImplTest {
         @DisplayName("차단 관계이면 BlockedMemberException 을 던진다")
         void it_throws_BlockedMemberException_when_blocked() {
             when(product.getMember()).thenReturn(productOwner);
-            when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
             doThrow(new BlockedMemberException()).when(blockValidator).validate(any(Member.class), any(Member.class));
 
             assertThatThrownBy(() -> service.execute(10L))
@@ -143,7 +143,7 @@ class CreateChatRoomServiceImplTest {
         @DisplayName("현재 사용자가 상품 등록자와 동일하면 buyer 와 seller 가 같은 채팅방이 생성된다")
         void it_creates_room_where_buyer_and_seller_are_same_when_self_product() {
             when(product.getMember()).thenReturn(currentMember);
-            when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
             doNothing().when(blockValidator).validate(any(Member.class), any(Member.class));
             when(product.getMode()).thenReturn(Mode.GIVER);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(eq(10L), eq(currentMember), eq(currentMember)))

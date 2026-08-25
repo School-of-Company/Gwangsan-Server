@@ -31,7 +31,7 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
     public CreateChatRoomResponse execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
         Member productMember = product.getMember();
 

@@ -84,7 +84,7 @@ class CreateReviewServiceImplTest {
                 TradeComplete completedTrade = mockCompletedTrade(reviewer, reviewed);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(reviewed));
                 when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(completedTrade));
@@ -124,7 +124,7 @@ class CreateReviewServiceImplTest {
             void it_throws_not_found_product_exception() {
                 Member reviewer = mockMember(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(99L)).thenReturn(Optional.empty());
+                when(productRepository.findActiveById(99L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(new CreateReviewRequest(99L, 2L, "내용", 50)))
                         .isInstanceOf(NotFoundProductException.class);
@@ -144,7 +144,7 @@ class CreateReviewServiceImplTest {
                 when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
 
                 assertThatThrownBy(() -> service.execute(new CreateReviewRequest(1L, 2L, "내용", 50)))
                         .isInstanceOf(CannotReviewBeforeTradeException.class);
@@ -164,7 +164,7 @@ class CreateReviewServiceImplTest {
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(new CreateReviewRequest(1L, 2L, "내용", 50)))
@@ -186,7 +186,7 @@ class CreateReviewServiceImplTest {
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(reviewed));
                 when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
                         .thenReturn(Optional.empty());
@@ -213,7 +213,7 @@ class CreateReviewServiceImplTest {
                 TradeComplete completedTrade = mockCompletedTrade(reviewer, thirdParty);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(reviewed));
                 when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(completedTrade));
@@ -239,7 +239,7 @@ class CreateReviewServiceImplTest {
                 TradeComplete completedTrade = mockCompletedTrade(reviewer, reviewed);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(reviewed));
                 when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(completedTrade));
@@ -266,7 +266,7 @@ class CreateReviewServiceImplTest {
                 TradeComplete completedTrade = mockCompletedTrade(reviewer, reviewed);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
-                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(reviewed));
                 when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(completedTrade));

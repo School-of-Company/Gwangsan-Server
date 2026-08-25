@@ -37,7 +37,8 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
                 .orElseThrow(NotFoundMemberDetailException::new);
         Member member = memberDetail.getMember();
 
-        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, type, mode, null);
+        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
+                member, type, mode, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION));
 
         if (products.isEmpty()) {
             return List.of();
