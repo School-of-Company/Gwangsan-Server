@@ -14,6 +14,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
+import team.startup.gwangsan.domain.chat.repository.projection.LatestMessageDto;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
@@ -133,6 +134,47 @@ class ChatRoomCustomRepositoryImplTest {
             assertThat(result).hasSize(1);
             assertThat(result.get(0).messageId()).isEqualTo(20L);
             assertThat(result.get(0).lastMessage()).isEqualTo("나중에 온 메시지");
+        }
+
+    }
+
+    @Nested
+    @DisplayName("toLatestMessageDto()는")
+    class Describe_toLatestMessageDto {
+
+        @Test
+        @DisplayName("message_type이 알 수 없는 값이면 예외 대신 null을 반환한다")
+        void it_returns_null_when_message_type_is_unknown() {
+            Object[] row = {1L, 100L, "손상된 메시지", "CORRUPTED_TYPE", LocalDateTime.of(2024, 1, 1, 10, 0)};
+
+            LatestMessageDto result = repository.toLatestMessageDto(row);
+
+            assertThat(result).isNull();
+        }
+
+        @Test
+        @DisplayName("created_at이 지원하지 않는 타입이면 예외 대신 null을 반환한다")
+        void it_returns_null_when_created_at_type_is_unsupported() {
+            Object[] row = {1L, 100L, "메시지", "TEXT", "2024-01-01"};
+
+            LatestMessageDto result = repository.toLatestMessageDto(row);
+
+            assertThat(result).isNull();
+        }
+
+        @Test
+        @DisplayName("정상적인 데이터면 LatestMessageDto를 반환한다")
+        void it_returns_dto_when_row_is_valid() {
+            LocalDateTime createdAt = LocalDateTime.of(2024, 1, 1, 10, 0);
+            Object[] row = {1L, 100L, "정상 메시지", "TEXT", createdAt};
+
+            LatestMessageDto result = repository.toLatestMessageDto(row);
+
+            assertThat(result.roomId()).isEqualTo(1L);
+            assertThat(result.messageId()).isEqualTo(100L);
+            assertThat(result.content()).isEqualTo("정상 메시지");
+            assertThat(result.messageType()).isEqualTo(MessageType.TEXT);
+            assertThat(result.createdAt()).isEqualTo(createdAt);
         }
     }
 }
