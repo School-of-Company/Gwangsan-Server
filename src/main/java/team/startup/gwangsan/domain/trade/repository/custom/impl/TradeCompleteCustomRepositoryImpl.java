@@ -3,6 +3,7 @@ package team.startup.gwangsan.domain.trade.repository.custom.impl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomRepository;
@@ -10,6 +11,7 @@ import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomR
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -116,5 +118,18 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
                         .where(tradeComplete.id.eq(id))
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<TradeComplete> findAllByMemberAndStatus(Member member, TradeStatus status) {
+        return queryFactory
+                .selectFrom(tradeComplete)
+                .join(tradeComplete.product).fetchJoin()
+                .where(
+                        tradeComplete.buyer.eq(member).or(tradeComplete.seller.eq(member)),
+                        tradeComplete.status.eq(status)
+                )
+                .orderBy(tradeComplete.completedAt.desc().nullsLast(), tradeComplete.id.desc())
+                .fetch();
     }
 }
