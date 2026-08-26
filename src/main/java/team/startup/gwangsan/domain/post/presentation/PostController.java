@@ -116,7 +116,15 @@ public class PostController {
             @PathVariable("product_id") Long productId,
             @RequestBody @Valid ReservationRequest request
     ) {
-        reservationProductService.execute(productId, request.roomId(), request.scheduledAt(), request.location());
+        reservationProductService.execute(
+                productId,
+                request.roomId(),
+                request.scheduledAt(),
+                request.placeName(),
+                request.address(),
+                request.latitude(),
+                request.longitude()
+        );
         return ResponseEntity.ok().build();
     }
 

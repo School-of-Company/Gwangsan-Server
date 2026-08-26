@@ -60,7 +60,10 @@ class ReservationProductServiceImplTest {
 
     private static final Long ROOM_ID = 5L;
     private static final LocalDateTime SCHEDULED_AT = LocalDateTime.of(2026, 9, 1, 14, 0);
-    private static final String LOCATION = "광산구청 1층 로비";
+    private static final String PLACE_NAME = "광산구청";
+    private static final String ADDRESS = "광주광역시 광산구 광산로29번길 15";
+    private static final Double LATITUDE = 35.1397;
+    private static final Double LONGITUDE = 126.7935;
 
     @Nested
     @DisplayName("execute()는")
@@ -78,7 +81,7 @@ class ReservationProductServiceImplTest {
 
             // when & then
             assertThrows(NotFoundProductException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             verify(productRepository).findActiveById(productId);
         }
@@ -100,7 +103,7 @@ class ReservationProductServiceImplTest {
             when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             assertThrows(ForbiddenProductException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             verifyNoInteractions(chatRoomRepository, productReservationRepository, applicationEventPublisher);
         }
@@ -123,7 +126,7 @@ class ReservationProductServiceImplTest {
 
             // when & then
             assertThrows(ProductAlreadyReservationException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -144,7 +147,7 @@ class ReservationProductServiceImplTest {
 
             // when & then
             assertThrows(ProductNotOngoingException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -164,7 +167,7 @@ class ReservationProductServiceImplTest {
             when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.empty());
 
             assertThrows(NotFoundChatRoomException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -189,7 +192,7 @@ class ReservationProductServiceImplTest {
             when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
 
             assertThrows(NotFoundChatRoomException.class,
-                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -219,7 +222,7 @@ class ReservationProductServiceImplTest {
             when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
 
             // when
-            assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, SCHEDULED_AT, LOCATION));
+            assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             // then
             verify(productReservationRepository).save(any(ProductReservation.class));

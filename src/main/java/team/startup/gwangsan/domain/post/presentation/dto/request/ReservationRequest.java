@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 public record ReservationRequest(
         @NotNull Long roomId,
         @NotNull LocalDateTime scheduledAt,
-        @NotNull @Size(max = 100) String location
+        @NotNull @Size(max = 100) String placeName,
+        @NotNull @Size(max = 255) String address,
+        @NotNull Double latitude,
+        @NotNull Double longitude
 ) {
 }

@@ -36,7 +36,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
 
     @Override
     @Transactional
-    public void execute(Long productId, Long roomId, LocalDateTime scheduledAt, String location) {
+    public void execute(Long productId, Long roomId, LocalDateTime scheduledAt, String placeName, String address, Double latitude, Double longitude) {
         Member member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findActiveById(productId)
@@ -71,7 +71,10 @@ public class ReservationProductServiceImpl implements ReservationProductService 
                         .reserver(reserver)
                         .status(ReservationStatus.PENDING)
                         .scheduledAt(scheduledAt)
-                        .location(location)
+                        .placeName(placeName)
+                        .address(address)
+                        .latitude(latitude)
+                        .longitude(longitude)
                         .build()
         );
 

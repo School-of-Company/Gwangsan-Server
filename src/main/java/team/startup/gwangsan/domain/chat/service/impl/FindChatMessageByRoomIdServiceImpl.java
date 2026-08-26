@@ -90,7 +90,10 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 isCompleted,
                 isReserved,
                 reservation.map(ProductReservation::getScheduledAt).orElse(null),
-                reservation.map(ProductReservation::getLocation).orElse(null)
+                reservation.map(ProductReservation::getPlaceName).orElse(null),
+                reservation.map(ProductReservation::getAddress).orElse(null),
+                reservation.map(ProductReservation::getLatitude).orElse(null),
+                reservation.map(ProductReservation::getLongitude).orElse(null)
         );
 
         List<ChatMessage> messages = chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(roomId, lastCreatedAt, lastMessageId, limit);

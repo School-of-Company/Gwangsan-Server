@@ -314,8 +314,8 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
-        @DisplayName("상품이 예약 상태이면 예약 일시와 장소를 함께 반환한다")
-        void it_returns_reservation_schedule_and_location_when_reserved() {
+        @DisplayName("상품이 예약 상태이면 예약 일시와 장소 정보를 함께 반환한다")
+        void it_returns_reservation_schedule_and_place_when_reserved() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
@@ -323,18 +323,24 @@ class FindChatMessageByRoomIdServiceImplTest {
             ProductReservation reservation = mock(ProductReservation.class);
             LocalDateTime scheduledAt = LocalDateTime.of(2026, 9, 1, 14, 0);
             when(reservation.getScheduledAt()).thenReturn(scheduledAt);
-            when(reservation.getLocation()).thenReturn("광산구청 1층 로비");
+            when(reservation.getPlaceName()).thenReturn("광산구청");
+            when(reservation.getAddress()).thenReturn("광주광역시 광산구 광산로29번길 15");
+            when(reservation.getLatitude()).thenReturn(35.1397);
+            when(reservation.getLongitude()).thenReturn(126.7935);
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.of(reservation));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().reservationScheduledAt()).isEqualTo(scheduledAt);
-            assertThat(response.product().reservationLocation()).isEqualTo("광산구청 1층 로비");
+            assertThat(response.product().reservationPlaceName()).isEqualTo("광산구청");
+            assertThat(response.product().reservationAddress()).isEqualTo("광주광역시 광산구 광산로29번길 15");
+            assertThat(response.product().reservationLatitude()).isEqualTo(35.1397);
+            assertThat(response.product().reservationLongitude()).isEqualTo(126.7935);
         }
 
         @Test
-        @DisplayName("상품이 예약 상태가 아니면 예약 조회 없이 예약 일시/장소는 null 이다")
+        @DisplayName("상품이 예약 상태가 아니면 예약 조회 없이 예약 정보는 null 이다")
         void it_does_not_query_reservation_when_not_reserved() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
@@ -342,7 +348,10 @@ class FindChatMessageByRoomIdServiceImplTest {
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().reservationScheduledAt()).isNull();
-            assertThat(response.product().reservationLocation()).isNull();
+            assertThat(response.product().reservationPlaceName()).isNull();
+            assertThat(response.product().reservationAddress()).isNull();
+            assertThat(response.product().reservationLatitude()).isNull();
+            assertThat(response.product().reservationLongitude()).isNull();
             verifyNoInteractions(productReservationRepository);
         }
 
