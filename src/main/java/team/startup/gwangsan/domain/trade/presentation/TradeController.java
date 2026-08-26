@@ -5,10 +5,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.TradeCancelRequest;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.constant.Period;
+import team.startup.gwangsan.domain.trade.presentation.dto.response.GetTradeHistoryResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.HeadTradeHistoryResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.PlaceTradeHistoryResponse;
+import team.startup.gwangsan.domain.trade.service.FindMyTradeHistoryService;
 import team.startup.gwangsan.domain.trade.service.TradeCancelService;
 import team.startup.gwangsan.domain.trade.service.TradeCancelWithdrawService;
 import team.startup.gwangsan.domain.trade.service.TradeHistoryByHeadService;
@@ -26,6 +29,15 @@ public class TradeController {
     private final TradeHistoryByPlaceService tradeHistoryByPlaceService;
     private final TradeCancelService tradeCancelService;
     private final TradeCancelWithdrawService tradeCancelWithdrawService;
+    private final FindMyTradeHistoryService findMyTradeHistoryService;
+
+    @GetMapping("/history")
+    public ResponseEntity<List<GetTradeHistoryResponse>> getMyTradeHistory(
+            @RequestParam(name = "status", defaultValue = "COMPLETED") TradeStatus status
+    ) {
+        List<GetTradeHistoryResponse> response = findMyTradeHistoryService.execute(status);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/graph/head")
     public ResponseEntity<List<HeadTradeHistoryResponse>> getHeadHistory(
