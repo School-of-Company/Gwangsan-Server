@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
+import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ProductAlreadyReservationException;
 import team.startup.gwangsan.domain.post.exception.ProductNotOngoingException;
@@ -33,11 +36,15 @@ public class ReservationProductServiceImpl implements ReservationProductService 
 
     @Override
     @Transactional
-    public void execute(Long productId) {
-        Member reserver = memberUtil.getCurrentMember();
+    public void execute(Long productId, Long roomId, LocalDateTime scheduledAt, String location) {
+        Member member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
+
+        if (!product.getMember().getId().equals(member.getId())) {
+            throw new ForbiddenProductException();
+        }
 
         if (product.getStatus() == ProductStatus.RESERVATION) {
             throw new ProductAlreadyReservationException();
@@ -47,24 +54,36 @@ public class ReservationProductServiceImpl implements ReservationProductService 
             throw new ProductNotOngoingException();
         }
 
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
+                .orElseThrow(NotFoundChatRoomException::new);
+
+        if (!chatRoom.getProduct().getId().equals(productId)) {
+            throw new NotFoundChatRoomException();
+        }
+
+        Member reserver = chatRoom.getBuyer().getId().equals(member.getId())
+                ? chatRoom.getSeller()
+                : chatRoom.getBuyer();
+
         productReservationRepository.save(
                 ProductReservation.builder()
                         .product(product)
                         .reserver(reserver)
                         .status(ReservationStatus.PENDING)
+                        .scheduledAt(scheduledAt)
+                        .location(location)
                         .build()
         );
 
         product.updateStatus(ProductStatus.RESERVATION);
 
-        chatRoomRepository.findByProductIdAndMember(productId, reserver)
-                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
-                        chatRoom.getId(),
-                        null,
-                        productId,
-                        false,
-                        true,
-                        LocalDateTime.now()
-                )));
+        applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                chatRoom.getId(),
+                null,
+                productId,
+                false,
+                true,
+                LocalDateTime.now()
+        ));
     }
 }

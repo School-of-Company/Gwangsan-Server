@@ -38,6 +38,12 @@ public class ProductReservation {
     @Column(name = "status", nullable = false)
     private ReservationStatus status;
 
+    @Column(name = "scheduled_at")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "location", length = 100)
+    private String location;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -46,10 +52,12 @@ public class ProductReservation {
     private LocalDateTime cancelledAt;
 
     @Builder
-    public ProductReservation(Product product, Member reserver, ReservationStatus status) {
+    public ProductReservation(Product product, Member reserver, ReservationStatus status, LocalDateTime scheduledAt, String location) {
         this.product = product;
         this.reserver = reserver;
         this.status = status == null ? ReservationStatus.PENDING : status;
+        this.scheduledAt = scheduledAt;
+        this.location = location;
     }
 
     public void cancel() {

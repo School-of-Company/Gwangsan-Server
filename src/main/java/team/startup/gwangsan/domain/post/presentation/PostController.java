@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.request.CreateProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.PatchProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.request.ReservationRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductByIdResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.service.*;
@@ -111,8 +112,11 @@ public class PostController {
     }
 
     @PatchMapping("/reservation/{product_id}")
-    public ResponseEntity<Void> reservation(@PathVariable("product_id") Long productId) {
-        reservationProductService.execute(productId);
+    public ResponseEntity<Void> reservation(
+            @PathVariable("product_id") Long productId,
+            @RequestBody @Valid ReservationRequest request
+    ) {
+        reservationProductService.execute(productId, request.roomId(), request.scheduledAt(), request.location());
         return ResponseEntity.ok().build();
     }
 

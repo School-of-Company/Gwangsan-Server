@@ -20,8 +20,11 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
@@ -46,6 +49,7 @@ class FindChatMessageByRoomIdServiceImplTest {
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ProductImageRepository productImageRepository;
     @Mock private TradeCompleteRepository tradeCompleteRepository;
+    @Mock private ProductReservationRepository productReservationRepository;
 
     @InjectMocks
     private FindChatMessageByRoomIdServiceImpl service;
@@ -301,10 +305,45 @@ class FindChatMessageByRoomIdServiceImplTest {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.empty());
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().isReserved()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 예약 상태이면 예약 일시와 장소를 함께 반환한다")
+        void it_returns_reservation_schedule_and_location_when_reserved() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
+            ProductReservation reservation = mock(ProductReservation.class);
+            LocalDateTime scheduledAt = LocalDateTime.of(2026, 9, 1, 14, 0);
+            when(reservation.getScheduledAt()).thenReturn(scheduledAt);
+            when(reservation.getLocation()).thenReturn("광산구청 1층 로비");
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().reservationScheduledAt()).isEqualTo(scheduledAt);
+            assertThat(response.product().reservationLocation()).isEqualTo("광산구청 1층 로비");
+        }
+
+        @Test
+        @DisplayName("상품이 예약 상태가 아니면 예약 조회 없이 예약 일시/장소는 null 이다")
+        void it_does_not_query_reservation_when_not_reserved() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().reservationScheduledAt()).isNull();
+            assertThat(response.product().reservationLocation()).isNull();
+            verifyNoInteractions(productReservationRepository);
         }
 
         @Test

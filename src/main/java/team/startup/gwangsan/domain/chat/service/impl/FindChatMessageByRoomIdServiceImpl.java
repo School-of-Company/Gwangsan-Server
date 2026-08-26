@@ -17,9 +17,12 @@ import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
+import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -40,6 +43,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final ProductImageRepository productImageRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
+    private final ProductReservationRepository productReservationRepository;
 
     @Override
     @Transactional
@@ -72,6 +76,10 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .map(tc -> tc.isRequestedBySeller() != isSeller)
                 .orElse(true);
 
+        Optional<ProductReservation> reservation = isReserved
+                ? productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING)
+                : Optional.empty();
+
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
                 product.getTitle(),
@@ -80,7 +88,9 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 isSeller,
                 isCompletable,
                 isCompleted,
-                isReserved
+                isReserved,
+                reservation.map(ProductReservation::getScheduledAt).orElse(null),
+                reservation.map(ProductReservation::getLocation).orElse(null)
         );
 
         List<ChatMessage> messages = chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(roomId, lastCreatedAt, lastMessageId, limit);
