@@ -19,6 +19,8 @@ import team.startup.gwangsan.domain.post.exception.ProductNotOngoingException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.post.service.ReservationProductService;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -32,6 +34,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
     private final ProductReservationRepository productReservationRepository;
     private final MemberUtil memberUtil;
     private final ChatRoomRepository chatRoomRepository;
+    private final TradeStateReader tradeStateReader;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -80,13 +83,14 @@ public class ReservationProductServiceImpl implements ReservationProductService 
 
         product.updateStatus(ProductStatus.RESERVATION);
 
+        TradeStateSnapshot tradeState = tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                null,
                 productId,
-                false,
-                true,
-                LocalDateTime.now()
+                tradeState.completed(),
+                tradeState.reserved(),
+                tradeState.requestedBySeller(),
+                tradeState.requestedAt()
         ));
     }
 }

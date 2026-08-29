@@ -54,22 +54,28 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
                 .header(INTERNAL_SECRET_HEADER, properties.internalSecret())
                 .body(new TradeStatusChangedRequest(
                         event.roomId(),
-                        event.targetMemberId(),
                         event.productId(),
                         event.completed(),
                         event.reserved(),
-                        event.changedAt()
+                        event.requestedBySeller(),
+                        event.requestedAt()
                 ))
                 .retrieve()
                 .toBodilessEntity();
     }
 
+    /**
+     * 채팅 서버 내부 API 의 요청 스키마.
+     *
+     * <p>필드명은 클라이언트가 읽는 이름을 그대로 따른다. createdAt 은 상품 생성 시각이
+     * 아니라 거래 요청 생성 시각이며, 채팅방 조회 응답의 같은 이름 필드와 값이 일치한다.
+     */
     private record TradeStatusChangedRequest(
             Long roomId,
-            Long targetMemberId,
             Long productId,
             boolean isCompleted,
             boolean isReserved,
+            Boolean requestedBySeller,
             LocalDateTime createdAt
     ) {
     }

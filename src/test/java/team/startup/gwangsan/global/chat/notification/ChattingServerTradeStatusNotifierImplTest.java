@@ -40,17 +40,21 @@ class ChattingServerTradeStatusNotifierImplTest {
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("x-internal-secret", "test-secret"))
                 .andExpect(jsonPath("$.roomId").value(1))
-                .andExpect(jsonPath("$.targetMemberId").value(2))
                 .andExpect(jsonPath("$.productId").value(3))
                 .andExpect(jsonPath("$.isCompleted").value(false))
                 .andExpect(jsonPath("$.isReserved").value(true))
+                // isCompletable 은 보는 사람마다 달라 방 전체로 보낼 수 없으므로,
+                // 클라이언트가 계산할 근거인 requestedBySeller 를 대신 싣는다.
+                .andExpect(jsonPath("$.requestedBySeller").value(true))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.targetMemberId").doesNotExist())
                 .andRespond(withSuccess());
 
         notifier.notifyTradeStatusChanged(new TradeStatusChangedEvent(
                 1L,
-                2L,
                 3L,
                 false,
+                true,
                 true,
                 LocalDateTime.of(2026, 8, 24, 13, 15)
         ));

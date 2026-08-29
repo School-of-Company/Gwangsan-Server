@@ -14,10 +14,11 @@ import team.startup.gwangsan.domain.post.exception.ReservationParticipantOnlyExc
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.post.service.DeleteReservationProductService;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     private final MemberUtil memberUtil;
     private final ProductReservationRepository productReservationRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final TradeStateReader tradeStateReader;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -45,13 +47,17 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
         product.updateStatus(ProductStatus.ONGOING);
 
         chatRoomRepository.findByProductIdAndMember(product.getId(), productReservation.getReserver())
-                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
-                        chatRoom.getId(),
-                        null,
-                        product.getId(),
-                        false,
-                        false,
-                        LocalDateTime.now()
-                )));
+                .ifPresent(chatRoom -> {
+                    TradeStateSnapshot tradeState =
+                            tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
+                    applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                            chatRoom.getId(),
+                            product.getId(),
+                            tradeState.completed(),
+                            tradeState.reserved(),
+                            tradeState.requestedBySeller(),
+                            tradeState.requestedAt()
+                    ));
+                });
     }
 }
