@@ -67,6 +67,10 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
 
+        // 나간 방에 새 메시지가 오면 양쪽 모두에게 다시 보여야 한다.
+        chatRoom.unhideFor(chatRoom.getBuyer());
+        chatRoom.unhideFor(chatRoom.getSeller());
+
         Member otherMember = member.getId().equals(chatRoom.getBuyer().getId()) ? chatRoom.getSeller() : chatRoom.getBuyer();
 
         List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());

@@ -116,6 +116,17 @@ class SaveChatMessageServiceImplTest {
         }
 
         @Test
+        @DisplayName("새 메시지가 오면 양쪽 모두에게 숨긴 방을 다시 노출한다")
+        void it_unhides_room_for_both_participants() {
+            arrangeDefaultScenario();
+
+            service.execute(1L, 10L, "안녕하세요", null, MessageType.TEXT, 1L, now);
+
+            verify(chatRoom).unhideFor(sender);
+            verify(chatRoom).unhideFor(otherMember);
+        }
+
+        @Test
         @DisplayName("IMAGE 타입이고 imageIds 가 있으면 이미지를 저장한다")
         void it_saves_images_when_message_type_is_image() {
             arrangeDefaultScenario();
