@@ -21,13 +21,11 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -43,12 +41,14 @@ import static org.mockito.Mockito.*;
 @DisplayName("FindChatMessageByRoomIdServiceImpl 단위 테스트")
 class FindChatMessageByRoomIdServiceImplTest {
 
+    private static final LocalDateTime TRADE_REQUESTED_AT = LocalDateTime.of(2026, 8, 30, 11, 20);
+
     @Mock private ChatRoomRepository chatRoomRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private ChatMessageRepository chatMessageRepository;
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ProductImageRepository productImageRepository;
-    @Mock private TradeCompleteRepository tradeCompleteRepository;
+    @Mock private TradeStateReader tradeStateReader;
     @Mock private ProductReservationRepository productReservationRepository;
 
     @InjectMocks
@@ -82,11 +82,9 @@ class FindChatMessageByRoomIdServiceImplTest {
             when(chatRoom.getProduct()).thenReturn(product);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.empty());
+            givenTradeState(false, false, null);
         }
 
         // buyer == currentMember 인 happy path 공통 설정
@@ -96,11 +94,15 @@ class FindChatMessageByRoomIdServiceImplTest {
             when(chatRoom.getProduct()).thenReturn(product);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.empty());
+            givenTradeState(false, false, null);
+        }
+
+        /** 거래 상태 스냅샷을 지정한다. isCompletable 은 실제 record 로직으로 계산된다. */
+        private void givenTradeState(boolean completed, boolean reserved, Boolean requestedBySeller) {
+            lenient().when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(completed, reserved, requestedBySeller, TRADE_REQUESTED_AT));
         }
 
         private void arrangeEmptyMessages() {
@@ -235,10 +237,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_seller_already_requested() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, true);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -261,10 +260,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_true_when_buyer_and_seller_requested() {
             arrangeRoomAsBuyerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, true);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -276,10 +272,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_buyer_already_requested() {
             arrangeRoomAsBuyerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(false);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, false);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -291,7 +284,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_product_already_completed() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
+            givenTradeState(true, false, null);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -300,11 +293,52 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
+        @DisplayName("거래 요청 시각을 그대로 응답의 createdAt 으로 내려준다")
+        void it_returns_trade_requested_at_as_created_at() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            givenTradeState(false, false, true);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            // 상품 생성 시각이 아니라 거래 요청 시각이며, 거래 상태 변경 이벤트와 같은 값이다.
+            assertThat(response.product().createdAt()).isEqualTo(TRADE_REQUESTED_AT);
+        }
+
+        @Test
+        @DisplayName("거래가 완료된 뒤에도 createdAt 이 남아 거래 카드가 유지된다")
+        void it_keeps_created_at_after_trade_completion() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            givenTradeState(true, false, null);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            // null 이 되면 클라이언트가 거래 카드를 숨겨 완료 표시와 리뷰 작성 진입점이 사라진다.
+            assertThat(response.product().createdAt()).isEqualTo(TRADE_REQUESTED_AT);
+            assertThat(response.product().isCompleted()).isTrue();
+        }
+
+        @Test
+        @DisplayName("철회가 승인되면 createdAt 이 null 이 되어 다시 거래를 요청할 수 있다")
+        void it_clears_created_at_after_rollback() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            lenient().when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, false, null, null));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().createdAt()).isNull();
+            assertThat(response.product().isCompletable()).isTrue();
+        }
+
+        @Test
         @DisplayName("상품이 예약 상태이면 isReserved 가 true 이다")
         void it_sets_isReserved_true_when_product_is_reserved() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            givenTradeState(false, true, null);
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.empty());
 
@@ -318,7 +352,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_returns_reservation_schedule_and_place_when_reserved() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            givenTradeState(false, true, null);
 
             ProductReservation reservation = mock(ProductReservation.class);
             LocalDateTime scheduledAt = LocalDateTime.of(2026, 9, 1, 14, 0);
