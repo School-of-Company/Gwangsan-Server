@@ -4,10 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.exception.InvalidChatStreamPayloadException;
+import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -15,6 +18,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChatStreamMessageProcessor {
@@ -46,6 +50,8 @@ public class ChatStreamMessageProcessor {
             LocalDateTime createdAt = parseCreatedAt(body.get(ChatStreamField.CREATED_AT));
             message = new ChatStreamMessage(messageId, roomId, content, imageIds, messageType, senderId, createdAt);
         } catch (Exception e) {
+            log.error("[ChatStream] 메시지 매핑 실패로 폐기합니다. streamKey={}, recordId={}, body={}",
+                    streamKey, record.getId(), body, e);
             redisAdapter.sendToDlq(streamKey, record, "MAPPING_ERROR: " + e.getMessage());
             redisAdapter.ack(streamKey, record.getId());
             return;
@@ -55,9 +61,13 @@ public class ChatStreamMessageProcessor {
             try {
                 handler.handle(message);
             } catch (Exception e) {
-                if (attempt >= props.getRetryMax()) {
+                if (attempt >= props.getRetryMax() || isPermanentFailure(e)) {
+                    log.error("[ChatStream] 메시지 처리 실패로 폐기합니다. streamKey={}, recordId={}, messageId={}, attempt={}",
+                            streamKey, record.getId(), message.messageId(), attempt, e);
                     redisAdapter.sendToDlq(streamKey, record, e.getMessage());
                 } else {
+                    log.warn("[ChatStream] 메시지 처리 실패, 재시도합니다. streamKey={}, messageId={}, attempt={}, cause={}",
+                            streamKey, message.messageId(), attempt, e.getMessage());
                     redisAdapter.sendToRetry(streamKey, record, attempt + 1, e.getMessage());
                 }
                 redisAdapter.ack(streamKey, record.getId());
@@ -66,6 +76,14 @@ public class ChatStreamMessageProcessor {
         }
 
         redisAdapter.ack(streamKey, record.getId());
+    }
+
+    /**
+     * 재시도해도 결과가 달라지지 않는 실패인지. 없는 방/회원은 나중에 다시 시도해도
+     * 그대로 실패하므로 retry 횟수만 소모하지 말고 바로 DLQ 로 보낸다.
+     */
+    private boolean isPermanentFailure(Exception e) {
+        return e instanceof NotFoundChatRoomException || e instanceof NotFoundMemberException;
     }
 
     private List<Long> parseImageIds(String raw) {

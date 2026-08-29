@@ -73,9 +73,31 @@ public class ChatStreamRedisAdapter {
             streamOps().createGroup(streamKey, ReadOffset.from("0"), props.getGroup());
             initializedGroups.add(streamKey);
         } catch (Exception e) {
-            log.debug("[ChatStream] Group '{}' already exists or stream missing: {}", props.getGroup(), e.getMessage());
-            initializedGroups.add(streamKey);
+            // 이미 존재하는 경우에만 완료로 표시한다. 진짜 실패까지 완료로 두면 그 방은
+            // 이후 매 사이클 NOGROUP 만 내면서 영영 저장되지 않는다.
+            if (containsError(e, "BUSYGROUP")) {
+                log.debug("[ChatStream] Group '{}' already exists for {}", props.getGroup(), streamKey);
+                initializedGroups.add(streamKey);
+                return;
+            }
+            // 아직 만들어지지 않은 스트림(예: 실패가 없어 비어 있는 retry 스트림)은 정상이다.
+            // 스트림이 생기면 다음 사이클에 그룹도 만들어진다.
+            if (containsError(e, "requires the key to exist")) {
+                log.debug("[ChatStream] Stream {} does not exist yet, group creation deferred", streamKey);
+                return;
+            }
+            log.warn("[ChatStream] Failed to create group '{}' for {}: {}", props.getGroup(), streamKey, e.getMessage());
         }
+    }
+
+    private boolean containsError(Throwable e, String token) {
+        for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+            String message = cause.getMessage();
+            if (message != null && message.contains(token)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
