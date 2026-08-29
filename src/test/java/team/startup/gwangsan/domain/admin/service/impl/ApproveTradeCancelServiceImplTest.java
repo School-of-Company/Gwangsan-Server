@@ -12,10 +12,13 @@ import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
+import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
@@ -24,6 +27,7 @@ import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelExce
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -53,6 +57,9 @@ class ApproveTradeCancelServiceImplTest {
 
     @Mock
     private ValidatePlaceUtil validatePlaceUtil;
+
+    @Mock
+    private ChatRoomRepository chatRoomRepository;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -89,6 +96,10 @@ class ApproveTradeCancelServiceImplTest {
 
                 Product product = mock(Product.class);
                 when(product.getGwangsan()).thenReturn(1000);
+                when(product.getId()).thenReturn(7L);
+
+                ChatRoom chatRoom = mock(ChatRoom.class);
+                when(chatRoom.getId()).thenReturn(77L);
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getProduct()).thenReturn(product);
@@ -107,6 +118,8 @@ class ApproveTradeCancelServiceImplTest {
                         .thenReturn(Optional.of(tradeCancel));
                 when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(buyerDetail));
                 when(memberDetailRepository.findById(3L)).thenReturn(Optional.of(sellerDetail));
+                when(chatRoomRepository.findByProductIdAndBuyerAndSeller(7L, buyer, seller))
+                        .thenReturn(Optional.of(chatRoom));
 
                 service.execute(10L);
 
@@ -114,7 +127,9 @@ class ApproveTradeCancelServiceImplTest {
                 verify(sellerDetail).minusGwangsan(1000);
                 verify(tradeCancel).updateStatus(TradeCancelStatus.APPROVED);
                 verify(tradeComplete).updateStatus(TradeStatus.ROLLED_BACK);
+                verify(product).updateStatus(ProductStatus.ONGOING);
                 verify(applicationEventPublisher).publishEvent(any(CreateAlertEvent.class));
+                verify(applicationEventPublisher).publishEvent(any(TradeStatusChangedEvent.class));
             }
         }
 

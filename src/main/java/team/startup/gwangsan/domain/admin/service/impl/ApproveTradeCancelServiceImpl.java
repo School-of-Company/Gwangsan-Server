@@ -14,7 +14,9 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
@@ -23,7 +25,10 @@ import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelExce
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +39,7 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
     private final MemberUtil memberUtil;
     private final MemberDetailRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
+    private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -75,14 +81,24 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
 
         tradeComplete.updateStatus(TradeStatus.ROLLED_BACK);
 
+        // 상품을 다시 거래 가능 상태로 되돌린다. 이걸 빠뜨리면 채팅방의 isCompleted 가
+        // Product.status 에서만 파생되므로 철회 후에도 영구히 "거래 완료"로 남는다.
+        product.updateStatus(ProductStatus.ONGOING);
+
         applicationEventPublisher.publishEvent(new CreateAlertEvent(
                 tradeCancel.getId(),
                 alert.getRequester().getId(),
                 AlertType.TRADE_CANCEL
         ));
 
-
-
-
+        chatRoomRepository.findByProductIdAndBuyerAndSeller(product.getId(), buyer, seller)
+                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                        chatRoom.getId(),
+                        null,
+                        product.getId(),
+                        false,
+                        false,
+                        LocalDateTime.now()
+                )));
     }
 }

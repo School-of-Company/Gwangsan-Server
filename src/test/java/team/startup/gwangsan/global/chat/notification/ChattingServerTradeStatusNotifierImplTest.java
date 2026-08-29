@@ -28,7 +28,7 @@ class ChattingServerTradeStatusNotifierImplTest {
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
         notifier = new ChattingServerTradeStatusNotifierImpl(
-                new ChattingServerProperties("http://chatting-server", "test-secret"),
+                new ChattingServerProperties("http://chatting-server", "test-secret", null, null),
                 builder
         );
     }
