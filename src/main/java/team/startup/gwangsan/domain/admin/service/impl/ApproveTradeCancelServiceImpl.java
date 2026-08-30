@@ -24,11 +24,12 @@ import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
     private final MemberDetailRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
     private final ChatRoomRepository chatRoomRepository;
+    private final TradeStateReader tradeStateReader;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -91,14 +93,20 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
                 AlertType.TRADE_CANCEL
         ));
 
+        // 철회가 승인되면 대기 중인 요청도 완료된 요청도 남지 않으므로
+        // requestedBySeller 와 requestedAt 이 모두 null 이 된다. 그래야 클라이언트가
+        // 거래 카드를 감추고 재요청 버튼을 다시 열어 준다.
         chatRoomRepository.findByProductIdAndBuyerAndSeller(product.getId(), buyer, seller)
-                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
-                        chatRoom.getId(),
-                        null,
-                        product.getId(),
-                        false,
-                        false,
-                        LocalDateTime.now()
-                )));
+                .ifPresent(chatRoom -> {
+                    TradeStateSnapshot tradeState = tradeStateReader.read(product, buyer, seller);
+                    applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                            chatRoom.getId(),
+                            product.getId(),
+                            tradeState.completed(),
+                            tradeState.reserved(),
+                            tradeState.requestedBySeller(),
+                            tradeState.requestedAt()
+                    ));
+                });
     }
 }

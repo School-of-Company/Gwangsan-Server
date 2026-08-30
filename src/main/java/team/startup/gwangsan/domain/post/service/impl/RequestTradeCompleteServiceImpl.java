@@ -39,7 +39,6 @@ import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -189,14 +188,15 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 product.getId()
         ));
 
-        LocalDateTime changedAt = LocalDateTime.now();
+        // 확정 후에는 대기 중인 요청이 없으므로 requestedBySeller 는 null 이고,
+        // requestedAt 은 방금 완료된 요청의 생성 시각을 유지한다. 조회 응답과 같은 값이다.
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                requester.getId(),
                 product.getId(),
                 true,
                 false,
-                changedAt
+                null,
+                pending.getCreatedAt()
         ));
     }
 
@@ -217,14 +217,14 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 AlertType.OTHER_MEMBER_TRADE_COMPLETE
         ));
 
-        LocalDateTime changedAt = LocalDateTime.now();
+        // save() 로 @CreatedDate 가 채워지므로 조회 응답이 나중에 줄 값과 동일하다.
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
-                requestTarget.getId(),
                 product.getId(),
                 false,
                 product.getStatus() == ProductStatus.RESERVATION,
-                changedAt
+                newTradeComplete.isRequestedBySeller(),
+                newTradeComplete.getCreatedAt()
         ));
     }
 }

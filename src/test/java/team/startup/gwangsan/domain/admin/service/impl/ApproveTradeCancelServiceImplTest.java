@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,12 +27,16 @@ import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -60,6 +65,9 @@ class ApproveTradeCancelServiceImplTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+    private TradeStateReader tradeStateReader;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -120,6 +128,9 @@ class ApproveTradeCancelServiceImplTest {
                 when(memberDetailRepository.findById(3L)).thenReturn(Optional.of(sellerDetail));
                 when(chatRoomRepository.findByProductIdAndBuyerAndSeller(7L, buyer, seller))
                         .thenReturn(Optional.of(chatRoom));
+                // 철회 승인 후에는 대기 중인 요청도 완료된 요청도 남지 않는다.
+                when(tradeStateReader.read(product, buyer, seller))
+                        .thenReturn(new TradeStateSnapshot(false, false, null, null));
 
                 service.execute(10L);
 
@@ -129,7 +140,15 @@ class ApproveTradeCancelServiceImplTest {
                 verify(tradeComplete).updateStatus(TradeStatus.ROLLED_BACK);
                 verify(product).updateStatus(ProductStatus.ONGOING);
                 verify(applicationEventPublisher).publishEvent(any(CreateAlertEvent.class));
-                verify(applicationEventPublisher).publishEvent(any(TradeStatusChangedEvent.class));
+                ArgumentCaptor<TradeStatusChangedEvent> tradeEventCaptor =
+                        ArgumentCaptor.forClass(TradeStatusChangedEvent.class);
+                verify(applicationEventPublisher).publishEvent(tradeEventCaptor.capture());
+                TradeStatusChangedEvent tradeEvent = tradeEventCaptor.getValue();
+                assertFalse(tradeEvent.completed());
+                assertFalse(tradeEvent.reserved());
+                // 값이 남으면 클라이언트가 아직 거래 요청이 있다고 보고 재요청 버튼을 잠근다.
+                assertNull(tradeEvent.requestedBySeller());
+                assertNull(tradeEvent.requestedAt());
             }
         }
 

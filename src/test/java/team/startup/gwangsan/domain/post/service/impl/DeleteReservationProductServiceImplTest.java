@@ -19,6 +19,8 @@ import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.exception.ReservationParticipantOnlyException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -46,6 +48,10 @@ class DeleteReservationProductServiceImplTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+
+    private TradeStateReader tradeStateReader;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -84,6 +90,8 @@ class DeleteReservationProductServiceImplTest {
                     .thenReturn(Optional.of(chatRoom));
 
             // when & then
+            when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, false, null, null));
             assertDoesNotThrow(() -> service.execute(productId));
 
             verify(memberUtil).getCurrentMember();
@@ -99,10 +107,11 @@ class DeleteReservationProductServiceImplTest {
             verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
             TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
             assertEquals(10L, event.roomId());
-            assertNull(event.targetMemberId());
             assertEquals(productId, event.productId());
             assertFalse(event.completed());
             assertFalse(event.reserved());
+            assertNull(event.requestedBySeller());
+            assertNull(event.requestedAt());
 
             verifyNoInteractions(productRepository);
         }

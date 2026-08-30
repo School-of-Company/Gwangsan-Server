@@ -22,6 +22,8 @@ import team.startup.gwangsan.domain.post.exception.ProductAlreadyReservationExce
 import team.startup.gwangsan.domain.post.exception.ProductNotOngoingException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -51,6 +53,10 @@ class ReservationProductServiceImplTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+
+    private TradeStateReader tradeStateReader;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -222,6 +228,8 @@ class ReservationProductServiceImplTest {
             when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
 
             // when
+            when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, true, null, null));
             assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             // then
@@ -232,10 +240,12 @@ class ReservationProductServiceImplTest {
             verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
             TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
             assertEquals(10L, event.roomId());
-            assertNull(event.targetMemberId());
             assertEquals(productId, event.productId());
             assertFalse(event.completed());
             assertTrue(event.reserved());
+            // 대기 중인 거래 요청이 없으므로 방 전체에 보내는 사실도 비어 있어야 한다.
+            assertNull(event.requestedBySeller());
+            assertNull(event.requestedAt());
         }
     }
 }
