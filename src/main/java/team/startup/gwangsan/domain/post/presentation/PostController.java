@@ -11,6 +11,7 @@ import team.startup.gwangsan.domain.post.presentation.dto.request.CreateProductR
 import team.startup.gwangsan.domain.post.presentation.dto.request.PatchProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.ReservationRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.request.WithdrawTradeCompleteRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductByIdResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.service.*;
@@ -31,6 +32,7 @@ public class PostController {
     private final DeleteProductByIdService deleteProductByIdService;
     private final FindProductsByMemberIdService findProductsByMemberIdService;
     private final RequestTradeCompleteService requestTradeCompleteService;
+    private final WithdrawTradeCompleteService withdrawTradeCompleteService;
     private final ReservationProductService reservationProductService;
     private final DeleteReservationProductService deleteReservationProductService;
 
@@ -108,6 +110,12 @@ public class PostController {
     @PostMapping("/trade")
     public ResponseEntity<Void> tradeRequest(@RequestBody @Valid RequestTradeCompleteRequest request) {
         requestTradeCompleteService.execute(request.productId(), request.otherMemberId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/trade")
+    public ResponseEntity<Void> tradeWithdraw(@RequestBody @Valid WithdrawTradeCompleteRequest request) {
+        withdrawTradeCompleteService.execute(request.productId(), request.otherMemberId());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
