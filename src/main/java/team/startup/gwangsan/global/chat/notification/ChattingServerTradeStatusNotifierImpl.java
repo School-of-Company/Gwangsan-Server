@@ -25,7 +25,7 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
         if (!properties.isEnabled()) {
             // 설정이 비어 있으면 거래 상태가 채팅 서버에 전혀 전달되지 않는다.
             // 조용히 넘어가면 실시간 갱신이 죽은 것을 알 수 없으므로 남겨 둔다.
-            log.warn("chatting.server.url 이 설정되지 않아 거래 상태 변경을 채팅 서버에 전달하지 않습니다.");
+            log.error("[TRADE-NOTIFY] DISABLED at startup: chatting.server.url 이 비어 있어 거래 상태 변경이 채팅 서버에 전달되지 않습니다.");
             this.restClient = null;
             return;
         }
@@ -40,15 +40,25 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
         }
 
         this.restClient = builder.build();
+        log.info("[TRADE-NOTIFY] enabled. baseUrl={}, secretConfigured={}, connectTimeout={}, readTimeout={}",
+                properties.url(),
+                properties.internalSecret() != null && !properties.internalSecret().isBlank(),
+                properties.connectTimeout(),
+                properties.readTimeout());
     }
 
     @Override
     public void notifyTradeStatusChanged(TradeStatusChangedEvent event) {
         if (restClient == null) {
+            log.error("[TRADE-NOTIFY] SKIPPED: chatting.server.url 이 비어 있음. roomId={}, productId={}",
+                    event.roomId(), event.productId());
             return;
         }
 
-        restClient.post()
+        log.info("[TRADE-NOTIFY] POST {}{} roomId={}, productId={}, completed={}, reserved={}",
+                properties.url(), TRADE_STATUS_PATH, event.roomId(), event.productId(), event.completed(), event.reserved());
+
+        var response = restClient.post()
                 .uri(TRADE_STATUS_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(INTERNAL_SECRET_HEADER, properties.internalSecret())
@@ -62,6 +72,9 @@ public class ChattingServerTradeStatusNotifierImpl implements ChattingServerTrad
                 ))
                 .retrieve()
                 .toBodilessEntity();
+
+        log.info("[TRADE-NOTIFY] chatting server responded {}. roomId={}, productId={}",
+                response.getStatusCode(), event.roomId(), event.productId());
     }
 
     /**
