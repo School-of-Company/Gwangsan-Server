@@ -9,6 +9,7 @@ import team.startup.gwangsan.domain.sms.exception.NotMatchRandomCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.VerifyCodeRequest;
 import team.startup.gwangsan.domain.sms.service.VerifyCodeService;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsDemoAccount;
 
 @Slf4j
 @Service
@@ -20,9 +21,6 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
 
     private static final long VERIFIED_TTL_MILLIS = 10 * 60 * 1000L;
 
-    private static final String DEMO_PHONE_NUMBER = "01011111111";
-    private static final String DEMO_FIXED_CODE = "000000";
-
     private final RedisUtil redisUtil;
 
     @Override
@@ -31,7 +29,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         String phoneNumber = request.phoneNumber();
         String verifiedKey = VERIFIED_KEY_PREFIX + phoneNumber;
 
-        if (DEMO_PHONE_NUMBER.equals(phoneNumber) && DEMO_FIXED_CODE.equals(request.code())) {
+        if (SmsDemoAccount.isDemo(phoneNumber) && SmsDemoAccount.FIXED_CODE.equals(request.code())) {
             redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
             log.info("[SMS] 인증 성공 (데모) - phoneNumber={}", phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
             return;

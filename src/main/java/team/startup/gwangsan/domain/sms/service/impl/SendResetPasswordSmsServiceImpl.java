@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.sms.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
@@ -10,6 +11,7 @@ import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeExceptio
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.service.SendResetPasswordSmsService;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsDemoAccount;
 import team.startup.gwangsan.global.sms.SmsSendHelper;
 import team.startup.gwangsan.global.sms.SmsProperties;
 
@@ -17,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SendResetPasswordSmsServiceImpl implements SendResetPasswordSmsService {
@@ -29,6 +32,11 @@ public class SendResetPasswordSmsServiceImpl implements SendResetPasswordSmsServ
     @Override
     @Transactional
     public void execute(SendSmsRequest request) {
+
+        if (SmsDemoAccount.isDemo(request.phoneNumber())) {
+            log.info("[SMS] 데모 번호 요청 - 발송 생략");
+            return;
+        }
 
         if (!memberRepository.existsByPhoneNumber(request.phoneNumber())) {
             throw new NotRegisteredPhoneNumberException();
