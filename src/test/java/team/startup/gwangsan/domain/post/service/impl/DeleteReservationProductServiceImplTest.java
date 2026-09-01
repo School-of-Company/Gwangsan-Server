@@ -16,6 +16,7 @@ import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ReservationParticipantOnlyException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
@@ -64,8 +65,56 @@ class DeleteReservationProductServiceImplTest {
     class Describe_execute {
 
         @Test
-        @DisplayName("예약자 또는 상품 등록자가 호출하면 예약을 취소하고 상품 상태를 ONGOING 으로 변경한다")
-        void it_cancels_reservation_and_update_product_status_when_called_by_participant() {
+        @DisplayName("예약자가 호출하면 예약을 취소하고 상품 상태를 ONGOING 으로 변경한다")
+        void it_cancels_reservation_and_update_product_status_when_called_by_reserver() {
+            // given
+            Long productId = 1L;
+
+            Member currentMember = mock(Member.class);
+            Member owner = mock(Member.class);
+            ProductReservation reservation = mock(ProductReservation.class);
+            Product product = mock(Product.class);
+
+            when(memberUtil.getCurrentMember()).thenReturn(currentMember);
+            when(currentMember.getId()).thenReturn(2L);
+            when(owner.getId()).thenReturn(1L);
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+            when(product.getMember()).thenReturn(owner);
+            when(reservation.getReserver()).thenReturn(currentMember);
+            when(product.getId()).thenReturn(productId);
+
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoomRepository.findByProductIdAndMember(productId, currentMember))
+                    .thenReturn(Optional.of(chatRoom));
+
+            // when & then
+            when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, false, null, null));
+            assertDoesNotThrow(() -> service.execute(productId));
+
+            verify(memberUtil).getCurrentMember();
+            verify(productRepository).findActiveById(productId);
+            verify(productReservationRepository).findByProductAndStatus(product, ReservationStatus.PENDING);
+            verify(reservation).cancel();
+            verify(product).updateStatus(ProductStatus.ONGOING);
+
+            ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+            verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
+            TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
+            assertEquals(10L, event.roomId());
+            assertEquals(productId, event.productId());
+            assertFalse(event.completed());
+            assertFalse(event.reserved());
+            assertNull(event.requestedBySeller());
+            assertNull(event.requestedAt());
+        }
+
+        @Test
+        @DisplayName("상품 등록자가 호출하면 예약을 취소하고 상품 상태를 ONGOING 으로 변경한다")
+        void it_cancels_reservation_and_update_product_status_when_called_by_product_owner() {
             // given
             Long productId = 1L;
 
@@ -75,12 +124,11 @@ class DeleteReservationProductServiceImplTest {
             Product product = mock(Product.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
-            when(productReservationRepository.findByProduct_MemberOrReserverAndStatus(
-                    currentMember,
-                    currentMember,
-                    ReservationStatus.PENDING
-            )).thenReturn(Optional.of(reservation));
-            when(reservation.getProduct()).thenReturn(product);
+            when(currentMember.getId()).thenReturn(1L);
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+            when(product.getMember()).thenReturn(currentMember);
             when(reservation.getReserver()).thenReturn(reserver);
             when(product.getId()).thenReturn(productId);
 
@@ -94,26 +142,51 @@ class DeleteReservationProductServiceImplTest {
                     .thenReturn(new TradeStateSnapshot(false, false, null, null));
             assertDoesNotThrow(() -> service.execute(productId));
 
-            verify(memberUtil).getCurrentMember();
-            verify(productReservationRepository).findByProduct_MemberOrReserverAndStatus(
-                    currentMember,
-                    currentMember,
-                    ReservationStatus.PENDING
-            );
             verify(reservation).cancel();
             verify(product).updateStatus(ProductStatus.ONGOING);
+        }
 
-            ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
-            verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
-            TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
-            assertEquals(10L, event.roomId());
-            assertEquals(productId, event.productId());
-            assertFalse(event.completed());
-            assertFalse(event.reserved());
-            assertNull(event.requestedBySeller());
-            assertNull(event.requestedAt());
+        @Test
+        @DisplayName("상품이 존재하지 않으면 NotFoundProductException 을 던진다")
+        void it_throws_NotFoundProductException_when_product_not_found() {
+            // given
+            Long productId = 1L;
 
-            verifyNoInteractions(productRepository);
+            Member currentMember = mock(Member.class);
+
+            when(memberUtil.getCurrentMember()).thenReturn(currentMember);
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(NotFoundProductException.class,
+                    () -> service.execute(productId));
+
+            verifyNoInteractions(productReservationRepository);
+        }
+
+        @Test
+        @DisplayName("해당 상품에 PENDING 예약이 없으면 ReservationParticipantOnlyException 을 던진다")
+        void it_throws_ReservationParticipantOnlyException_when_reservation_not_found() {
+            // given
+            Long productId = 1L;
+
+            Member currentMember = mock(Member.class);
+            Product product = mock(Product.class);
+
+            when(memberUtil.getCurrentMember()).thenReturn(currentMember);
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(ReservationParticipantOnlyException.class,
+                    () -> service.execute(productId));
+
+            verify(memberUtil).getCurrentMember();
+            verify(productRepository).findActiveById(productId);
+            verify(productReservationRepository).findByProductAndStatus(product, ReservationStatus.PENDING);
+
+            verifyNoMoreInteractions(productReservationRepository);
         }
 
         @Test
@@ -123,27 +196,27 @@ class DeleteReservationProductServiceImplTest {
             Long productId = 1L;
 
             Member currentMember = mock(Member.class);
+            Member owner = mock(Member.class);
+            Member reserver = mock(Member.class);
+            Product product = mock(Product.class);
+            ProductReservation reservation = mock(ProductReservation.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
-            when(productReservationRepository.findByProduct_MemberOrReserverAndStatus(
-                    currentMember,
-                    currentMember,
-                    ReservationStatus.PENDING
-            )).thenReturn(Optional.empty());
+            when(currentMember.getId()).thenReturn(3L);
+            when(owner.getId()).thenReturn(1L);
+            when(reserver.getId()).thenReturn(2L);
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+            when(product.getMember()).thenReturn(owner);
+            when(reservation.getReserver()).thenReturn(reserver);
 
             // when & then
             assertThrows(ReservationParticipantOnlyException.class,
                     () -> service.execute(productId));
 
-            verify(memberUtil).getCurrentMember();
-            verify(productReservationRepository).findByProduct_MemberOrReserverAndStatus(
-                    currentMember,
-                    currentMember,
-                    ReservationStatus.PENDING
-            );
-
-            verifyNoMoreInteractions(productReservationRepository);
-            verifyNoInteractions(productRepository);
+            verify(reservation, never()).cancel();
+            verifyNoInteractions(chatRoomRepository);
         }
     }
 }
