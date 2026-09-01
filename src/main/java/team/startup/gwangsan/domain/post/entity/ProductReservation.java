@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(
         name = "tbl_product_reservation",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"product_id", "status"})
+        indexes = @Index(name = "idx_product_reservation_product_status", columnList = "product_id, status")
 )
 @EntityListeners(AuditingEntityListener.class)
 public class ProductReservation {
