@@ -27,6 +27,7 @@ import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepo
 import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsDemoAccount;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,12 @@ public class SignUpServiceImpl implements SignUpService {
     @Override
     @Transactional
     public void execute(SignUpRequest request) {
+        // ponytail: 데모 번호는 App Store 심사용. 데모 회원이 이미 존재하고 phone_number가 unique라
+        // 실제 저장이 불가능하므로 검증/저장 없이 성공 처리한다. 리뷰어는 Review Notes의 데모 계정으로 로그인한다.
+        if (SmsDemoAccount.isDemo(request.phoneNumber())) {
+            return;
+        }
+
         validateBannedPhoneNumber(request.phoneNumber());
         validateDuplicatePhoneNumber(request.phoneNumber());
         validateDuplicateNickname(request.nickname());

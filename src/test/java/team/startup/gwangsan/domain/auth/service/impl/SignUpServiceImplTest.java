@@ -62,6 +62,26 @@ class SignUpServiceImplTest {
     class Describe_execute {
 
         @Nested
+        @DisplayName("데모 번호일 때")
+        class Context_with_demo_phone_number {
+
+            @Test
+            @DisplayName("검증·저장 없이 즉시 반환한다")
+            void it_returns_immediately_without_saving_member() {
+                SignUpRequest request = new SignUpRequest(
+                        "심사용", "심사용닉", "password", "01011111111",
+                        "광산동", 1, List.of("Java"), "추천인닉", "자기소개"
+                );
+
+                service.execute(request);
+
+                verifyNoInteractions(memberRepository, redisUtil, withdrawalRecordRepository,
+                        dongRepository, placeRepository, memberDetailRepository,
+                        applicationEventPublisher);
+            }
+        }
+
+        @Nested
         @DisplayName("정상적인 요청일 때")
         class Context_with_valid_request {
 

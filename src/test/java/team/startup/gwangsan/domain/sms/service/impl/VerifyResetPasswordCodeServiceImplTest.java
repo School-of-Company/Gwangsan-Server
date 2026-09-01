@@ -31,6 +31,20 @@ class VerifyResetPasswordCodeServiceImplTest {
     class Describe_execute {
 
         @Nested
+        @DisplayName("데모 번호와 데모 코드일 때")
+        class Context_with_demo_number_and_code {
+
+            @Test
+            @DisplayName("인증 완료 키만 저장하고 코드 키는 삭제하지 않는다")
+            void it_saves_verified_key_without_deleting_code_key() {
+                service.execute(new VerifyCodeRequest("01011111111", "000000"));
+
+                verify(redisUtil).set(eq("sms:verified:01011111111"), eq(Boolean.TRUE), anyLong());
+                verify(redisUtil, never()).delete(anyString());
+            }
+        }
+
+        @Nested
         @DisplayName("코드가 일치할 때")
         class Context_with_matching_code {
 
