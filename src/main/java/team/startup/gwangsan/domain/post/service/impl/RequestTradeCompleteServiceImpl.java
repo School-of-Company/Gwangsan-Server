@@ -190,6 +190,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
 
         // 확정 후에는 대기 중인 요청이 없으므로 requestedBySeller 는 null 이고,
         // requestedAt 은 방금 완료된 요청의 생성 시각을 유지한다. 조회 응답과 같은 값이다.
+        log.info("[TRADE-NOTIFY] publish(confirm) roomId={}, productId={}", chatRoom.getId(), product.getId());
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
                 product.getId(),
@@ -218,6 +219,8 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         ));
 
         // save() 로 @CreatedDate 가 채워지므로 조회 응답이 나중에 줄 값과 동일하다.
+        log.info("[TRADE-NOTIFY] publish(request) roomId={}, productId={}, requestedBySeller={}",
+                chatRoom.getId(), product.getId(), newTradeComplete.isRequestedBySeller());
         applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
                 chatRoom.getId(),
                 product.getId(),
