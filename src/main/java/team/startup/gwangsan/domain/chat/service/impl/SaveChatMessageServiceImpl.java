@@ -24,6 +24,7 @@ import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
+import team.startup.gwangsan.global.util.BlockValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +40,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final DeviceTokenRepository deviceTokenRepository;
+    private final BlockValidator blockValidator;
 
     @Override
     @Transactional
@@ -46,6 +48,9 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
         Member member = memberRepository.findById(senderId).orElseThrow(NotFoundMemberException::new);
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);
+
+        Member otherMember = chatRoom.getOtherMember(member);
+        blockValidator.validate(member, otherMember);
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .id(messageId)
@@ -70,8 +75,6 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
         // 나간 방에 새 메시지가 오면 양쪽 모두에게 다시 보여야 한다.
         chatRoom.unhideFor(chatRoom.getBuyer());
         chatRoom.unhideFor(chatRoom.getSeller());
-
-        Member otherMember = member.getId().equals(chatRoom.getBuyer().getId()) ? chatRoom.getSeller() : chatRoom.getBuyer();
 
         List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());
         if (!deviceTokens.isEmpty()) {
