@@ -15,6 +15,7 @@ import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.chat.service.FindRoomsByCurrentUserService;
 import team.startup.gwangsan.domain.chat.service.ReadChatMessageService;
 import team.startup.gwangsan.domain.chat.service.FindRoomIdByProductIdService;
+import team.startup.gwangsan.domain.chat.service.ValidateChatSendableService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class ChatController {
     private final FindRoomsByCurrentUserService findRoomsByCurrentUserService;
     private final FindRoomIdByProductIdService findRoomIdByProductIdService;
     private final DeleteChatRoomService deleteChatRoomService;
+    private final ValidateChatSendableService validateChatSendableService;
 
     @PostMapping("/room/{product_id}")
     public ResponseEntity<CreateChatRoomResponse> createChatRoom(@PathVariable("product_id") Long productId) {
@@ -64,6 +66,13 @@ public class ChatController {
     public ResponseEntity<GetRoomIdResponse> getRoom(@PathVariable("product_id") Long productId) {
         GetRoomIdResponse response = findRoomIdByProductIdService.execute(productId);
         return ResponseEntity.ok(response);
+    }
+
+    // 채팅 서버가 소켓 메시지를 브로드캐스트하기 전에 호출한다.
+    @GetMapping("/room/{room_id}/sendable")
+    public ResponseEntity<Void> validateSendable(@PathVariable("room_id") Long roomId) {
+        validateChatSendableService.execute(roomId);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/room/{room_id}")
