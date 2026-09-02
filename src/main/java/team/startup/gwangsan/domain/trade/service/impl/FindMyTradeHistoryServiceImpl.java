@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.GetTradeHistoryResponse;
+import team.startup.gwangsan.domain.trade.presentation.dto.response.GetTradeMemberResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.GetTradeProductResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.constant.TradeRole;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
@@ -58,12 +59,14 @@ public class FindMyTradeHistoryServiceImpl implements FindMyTradeHistoryService 
                     TradeRole role = trade.getBuyer().getId().equals(member.getId())
                             ? TradeRole.BUYER
                             : TradeRole.SELLER;
+                    Member otherMember = role == TradeRole.BUYER ? trade.getSeller() : trade.getBuyer();
 
                     return new GetTradeHistoryResponse(
                             trade.getId(),
                             role,
                             trade.getStatus(),
                             trade.getCompletedAt(),
+                            new GetTradeMemberResponse(otherMember.getId(), otherMember.getNickname()),
                             new GetTradeProductResponse(
                                     product.getId(),
                                     product.getTitle(),
