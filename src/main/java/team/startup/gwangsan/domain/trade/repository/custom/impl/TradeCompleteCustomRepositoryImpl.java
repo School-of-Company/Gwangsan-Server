@@ -125,6 +125,8 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
         return queryFactory
                 .selectFrom(tradeComplete)
                 .join(tradeComplete.product).fetchJoin()
+                .join(tradeComplete.buyer).fetchJoin()
+                .join(tradeComplete.seller).fetchJoin()
                 .where(
                         tradeComplete.buyer.eq(member).or(tradeComplete.seller.eq(member)),
                         tradeComplete.status.eq(status)

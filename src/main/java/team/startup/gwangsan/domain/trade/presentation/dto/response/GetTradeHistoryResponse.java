@@ -10,6 +10,7 @@ public record GetTradeHistoryResponse(
         TradeRole role,
         TradeStatus status,
         LocalDateTime completedAt,
+        GetTradeMemberResponse otherMember,
         GetTradeProductResponse product
 ) {
 }
