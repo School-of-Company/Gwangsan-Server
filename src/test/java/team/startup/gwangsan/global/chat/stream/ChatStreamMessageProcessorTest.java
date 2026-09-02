@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
+import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 
 import java.util.List;
@@ -142,6 +143,23 @@ class ChatStreamMessageProcessorTest {
             ArgumentCaptor<Integer> attemptCaptor = ArgumentCaptor.forClass(Integer.class);
             verify(redisAdapter).sendToRetry(eq(streamKey), eq(record), attemptCaptor.capture(), any());
             assertThat(attemptCaptor.getValue()).isEqualTo(1);
+            verify(redisAdapter).ack(eq(streamKey), any(RecordId.class));
+        }
+
+        @Test
+        @DisplayName("차단 관계면 재시도하지 않고 바로 DLQ로 보낸다")
+        void it_sends_to_dlq_without_retry_when_blocked() {
+            doThrow(new BlockedMemberException()).when(handler).handle(any(ChatStreamMessage.class));
+
+            MapRecord<String, String, String> record = MapRecord.create(
+                    streamKey,
+                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello", "createdAt", "1700000000000")
+            ).withId(RecordId.of("1700000000000-0"));
+
+            processor.process(streamKey, record, 0);
+
+            verify(redisAdapter).sendToDlq(eq(streamKey), eq(record), any());
+            verify(redisAdapter, never()).sendToRetry(any(), any(), anyInt(), any());
             verify(redisAdapter).ack(eq(streamKey), any(RecordId.class));
         }
 

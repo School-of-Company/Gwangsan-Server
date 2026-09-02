@@ -26,7 +26,9 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
+import team.startup.gwangsan.global.util.BlockValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,6 +50,7 @@ class SaveChatMessageServiceImplTest {
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
     @Mock private DeviceTokenRepository deviceTokenRepository;
+    @Mock private BlockValidator blockValidator;
 
     @InjectMocks
     private SaveChatMessageServiceImpl service;
@@ -73,6 +76,7 @@ class SaveChatMessageServiceImplTest {
             when(otherMember.getId()).thenReturn(2L);
             when(chatRoom.getBuyer()).thenReturn(sender);
             when(chatRoom.getSeller()).thenReturn(otherMember);
+            when(chatRoom.getOtherMember(sender)).thenReturn(otherMember);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
             when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -230,6 +234,7 @@ class SaveChatMessageServiceImplTest {
             when(sellerMember.getId()).thenReturn(3L);
             when(buyerMember.getId()).thenReturn(4L);
             when(room.getBuyer()).thenReturn(buyerMember);
+            when(room.getOtherMember(sellerMember)).thenReturn(buyerMember);
             when(memberRepository.findById(3L)).thenReturn(Optional.of(sellerMember));
             when(chatRoomRepository.findChatRoomByRoomId(20L)).thenReturn(Optional.of(room));
             when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -238,6 +243,22 @@ class SaveChatMessageServiceImplTest {
             service.execute(1L, 20L, "안녕", null, MessageType.TEXT, 3L, now);
 
             verify(deviceTokenRepository).findAllByUserId(4L);
+        }
+
+        @Test
+        @DisplayName("발신자와 상대방이 차단 관계면 BlockedMemberException 을 던지고 메시지를 저장하지 않는다")
+        void it_throws_BlockedMemberException_when_blocked() {
+            when(chatRoom.getOtherMember(sender)).thenReturn(otherMember);
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
+            when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
+            doThrow(new BlockedMemberException()).when(blockValidator).validate(sender, otherMember);
+
+            assertThatThrownBy(() -> service.execute(1L, 10L, "안녕", null, MessageType.TEXT, 1L, now))
+                    .isInstanceOf(BlockedMemberException.class);
+
+            verify(chatMessageRepository, never()).save(any());
+            verifyNoInteractions(deviceTokenRepository);
+            verifyNoInteractions(applicationEventPublisher);
         }
     }
 }
