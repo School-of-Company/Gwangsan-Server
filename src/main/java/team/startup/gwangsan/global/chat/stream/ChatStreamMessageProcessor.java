@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.exception.InvalidChatStreamPayloadException;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
@@ -79,11 +80,13 @@ public class ChatStreamMessageProcessor {
     }
 
     /**
-     * 재시도해도 결과가 달라지지 않는 실패인지. 없는 방/회원은 나중에 다시 시도해도
-     * 그대로 실패하므로 retry 횟수만 소모하지 말고 바로 DLQ 로 보낸다.
+     * 재시도해도 결과가 달라지지 않는 실패인지. 없는 방/회원, 차단 관계는 나중에 다시
+     * 시도해도 그대로 실패하므로 retry 횟수만 소모하지 말고 바로 DLQ 로 보낸다.
      */
     private boolean isPermanentFailure(Exception e) {
-        return e instanceof NotFoundChatRoomException || e instanceof NotFoundMemberException;
+        return e instanceof NotFoundChatRoomException
+                || e instanceof NotFoundMemberException
+                || e instanceof BlockedMemberException;
     }
 
     private List<Long> parseImageIds(String raw) {
