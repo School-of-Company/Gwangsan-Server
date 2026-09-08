@@ -22,8 +22,8 @@ cat .github/PULL_REQUEST_TEMPLATE.md
 
 ## Step 2 — Determine Labels
 
-Read `.agents/skills/write-pr/references/labels.md` and select 1–2 appropriate labels based on the nature of the changes.
-Read `.agents/skills/write-pr/references/commit-conventions.md` for commit type and scope naming rules.
+Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate labels based on the nature of the changes.
+Read `${CLAUDE_SKILL_DIR}/references/commit-conventions.md` for commit type and scope naming rules.
 
 ## Step 3 — Generate PR Content
 
@@ -57,14 +57,14 @@ Write the body to `PR_BODY.md`, then display:
 [body content]
 ```
 
-Ask the user which title to use (present options 1/2/3). Wait for the answer before proceeding.
+Use AskUserQuestion to ask the user which title to use (present options 1/2/3). Wait for the answer before proceeding.
 
 ## Step 5 — Create PR
 
 Run the creation script with the confirmed title and labels:
 
 ```bash
-bash .agents/skills/write-pr/scripts/create-pr.sh "<confirmed-title>" "PR_BODY.md" "<label1>,<label2>"
+bash "${CLAUDE_SKILL_DIR}/scripts/create-pr.sh" "<confirmed-title>" "PR_BODY.md" "<label1>,<label2>"
 ```
 
 After creation, display the PR URL.
