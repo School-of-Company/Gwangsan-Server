@@ -176,22 +176,20 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .collect(Collectors.joining(", "));
 
         String sql = """
-                SELECT room_id, message_id, content, message_type, created_at
-                FROM (
-                    SELECT
-                        room_id,
-                        message_id,
-                        content,
-                        message_type,
-                        created_at,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY room_id
-                            ORDER BY created_at DESC, message_id DESC
-                        ) AS row_num
-                    FROM tbl_chat_message
-                    WHERE room_id IN (%s)
-                ) ranked_message
-                WHERE row_num = 1
+                SELECT message.room_id, message.message_id, message.content,
+                       message.message_type, message.created_at
+                FROM tbl_chat_message message
+                WHERE message.message_id IN (
+                    SELECT (
+                        SELECT newest.message_id
+                        FROM tbl_chat_message newest
+                        WHERE newest.room_id = room.room_id
+                        ORDER BY newest.created_at DESC, newest.message_id DESC
+                        LIMIT 1
+                    )
+                    FROM tbl_chat_room room
+                    WHERE room.room_id IN (%s)
+                )
                 """.formatted(placeholders);
 
         Query query = entityManager.createNativeQuery(sql);

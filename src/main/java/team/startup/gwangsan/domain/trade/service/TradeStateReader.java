@@ -5,11 +5,12 @@ import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository.TradeStateProjection;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,16 +26,16 @@ public class TradeStateReader {
     private final TradeCompleteRepository tradeCompleteRepository;
 
     public TradeStateSnapshot read(Product product, Member buyer, Member seller) {
-        Optional<TradeComplete> pending = tradeCompleteRepository
-                .findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING);
+        List<TradeStateProjection> states = tradeCompleteRepository.findTradeState(product, buyer, seller);
+        Optional<TradeStateProjection> pending = find(states, TradeStatus.PENDING);
 
         return new TradeStateSnapshot(
                 product.getStatus() == ProductStatus.COMPLETED,
                 product.getStatus() == ProductStatus.RESERVATION,
                 // 대기 중인 요청이 있을 때만 값을 갖는다. 롤백된 요청의 값이 새어 나가면
                 // 클라이언트의 isCompletable 계산이 조회 응답과 어긋난다.
-                pending.map(TradeComplete::isRequestedBySeller).orElse(null),
-                resolveRequestedAt(product, buyer, seller, pending)
+                pending.map(TradeStateProjection::getRequestedBySeller).orElse(null),
+                resolveRequestedAt(states, pending)
         );
     }
 
@@ -47,14 +48,19 @@ public class TradeStateReader {
      * <p>반대로 철회가 승인된 뒤에는 null 이어야 한다. 값이 남으면 클라이언트가 아직
      * 거래 요청이 있다고 판단해 재요청 버튼을 잠근다.
      */
-    private LocalDateTime resolveRequestedAt(Product product, Member buyer, Member seller,
-                                             Optional<TradeComplete> pending) {
+    private LocalDateTime resolveRequestedAt(List<TradeStateProjection> states,
+                                             Optional<TradeStateProjection> pending) {
         if (pending.isPresent()) {
             return pending.get().getCreatedAt();
         }
-        return tradeCompleteRepository
-                .findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.COMPLETED)
-                .map(TradeComplete::getCreatedAt)
+        return find(states, TradeStatus.COMPLETED)
+                .map(TradeStateProjection::getCreatedAt)
                 .orElse(null);
+    }
+
+    private Optional<TradeStateProjection> find(List<TradeStateProjection> states, TradeStatus status) {
+        return states.stream()
+                .filter(state -> state.getStatus() == status)
+                .findFirst();
     }
 }

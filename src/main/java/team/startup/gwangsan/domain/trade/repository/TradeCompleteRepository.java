@@ -10,10 +10,29 @@ import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomRepository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Long>, TradeCompleteCustomRepository {
+    interface TradeStateProjection {
+        TradeStatus getStatus();
+        Boolean getRequestedBySeller();
+        LocalDateTime getCreatedAt();
+    }
+
     Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus tradeStatus);
+
+    @Query("""
+            SELECT t.status AS status, t.requestedBySeller AS requestedBySeller, t.createdAt AS createdAt
+            FROM TradeComplete t
+            WHERE t.product = :product AND t.buyer = :buyer AND t.seller = :seller
+              AND t.status IN (team.startup.gwangsan.domain.trade.entity.constant.TradeStatus.PENDING,
+                               team.startup.gwangsan.domain.trade.entity.constant.TradeStatus.COMPLETED)
+            """)
+    List<TradeStateProjection> findTradeState(@Param("product") Product product,
+                                               @Param("buyer") Member buyer,
+                                               @Param("seller") Member seller);
 
     Optional<TradeComplete> findByProductAndStatus(Product product, TradeStatus tradeStatus);
 

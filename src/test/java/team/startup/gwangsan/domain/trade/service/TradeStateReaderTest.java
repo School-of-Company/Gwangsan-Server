@@ -10,12 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository.TradeStateProjection;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,27 +52,22 @@ class TradeStateReaderTest {
     }
 
     private void givenNoTradeComplete() {
-        when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING))
-                .thenReturn(Optional.empty());
-        when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.COMPLETED))
-                .thenReturn(Optional.empty());
+        when(tradeCompleteRepository.findTradeState(product, buyer, seller)).thenReturn(List.of());
     }
 
     private void givenPendingRequest(boolean requestedBySeller) {
-        TradeComplete pending = mock(TradeComplete.class);
-        when(pending.isRequestedBySeller()).thenReturn(requestedBySeller);
+        TradeStateProjection pending = mock(TradeStateProjection.class);
+        when(pending.getStatus()).thenReturn(TradeStatus.PENDING);
+        when(pending.getRequestedBySeller()).thenReturn(requestedBySeller);
         when(pending.getCreatedAt()).thenReturn(REQUESTED_AT);
-        when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING))
-                .thenReturn(Optional.of(pending));
+        when(tradeCompleteRepository.findTradeState(product, buyer, seller)).thenReturn(List.of(pending));
     }
 
     private void givenCompletedRequestOnly() {
-        TradeComplete completed = mock(TradeComplete.class);
+        TradeStateProjection completed = mock(TradeStateProjection.class);
+        when(completed.getStatus()).thenReturn(TradeStatus.COMPLETED);
         when(completed.getCreatedAt()).thenReturn(REQUESTED_AT);
-        when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING))
-                .thenReturn(Optional.empty());
-        when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.COMPLETED))
-                .thenReturn(Optional.of(completed));
+        when(tradeCompleteRepository.findTradeState(product, buyer, seller)).thenReturn(List.of(completed));
     }
 
     private TradeStateSnapshot read() {
