@@ -5,11 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
+import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
+import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.global.util.MemberUtil;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
@@ -56,6 +63,83 @@ class SaveChatMessageServiceImplTest {
     private SaveChatMessageServiceImpl service;
 
     @Nested
+    @DisplayName("수신자의 나가기 및 재참여 상태에 따른 알림")
+    class RecipientVisibility {
+
+        @ParameterizedTest
+        @CsvSource({"true,true", "false,true", "true,false", "false,false"})
+        @DisplayName("양방향에서 재참여 전까지 숨김과 푸시 차단을 유지하고 재참여 후 알림을 보낸다")
+        void it_notifies_only_previously_visible_recipient(boolean senderIsBuyer, boolean recipientHidden) {
+            Member buyer = mock(Member.class);
+            Member seller = mock(Member.class);
+            when(buyer.getId()).thenReturn(1L);
+            when(seller.getId()).thenReturn(2L);
+            Member sender = senderIsBuyer ? buyer : seller;
+            Member recipient = senderIsBuyer ? seller : buyer;
+            ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
+            ReflectionTestUtils.setField(room, "id", 10L);
+            LocalDateTime now = LocalDateTime.of(2024, 1, 1, 0, 0);
+            room.hideFor(sender, now);
+            if (recipientHidden) {
+                room.hideFor(recipient, now);
+            }
+            when(memberRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
+            when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
+            Image image = mock(Image.class);
+            when(image.getId()).thenReturn(100L);
+            when(image.getImageUrl()).thenReturn("image-url");
+            when(imageRepository.findAllById(List.of(100L))).thenReturn(List.of(image));
+            DeviceToken token = mock(DeviceToken.class);
+            if (!recipientHidden) {
+                when(deviceTokenRepository.findAllByUserId(recipient.getId())).thenReturn(List.of(token));
+            }
+
+            SaveChatMessageResponse response = service.execute(
+                    1L, 10L, "이미지", List.of(100L), MessageType.IMAGE, sender.getId(), now);
+
+            verify(chatMessageRepository).save(any(ChatMessage.class));
+            verify(chatMessageImageRepository).saveAll(anyList());
+            assertThat(response.images()).hasSize(1);
+            assertThat(response.images().getFirst().imageId()).isEqualTo(100L);
+            assertThat(room.isHiddenFor(sender)).isTrue();
+            assertThat(room.isHiddenFor(recipient)).isEqualTo(recipientHidden);
+            if (recipientHidden) {
+                verifyNoInteractions(deviceTokenRepository, applicationEventPublisher);
+                service.execute(2L, 10L, "다음 메시지", null, MessageType.TEXT, sender.getId(), now);
+                verify(chatMessageRepository, times(2)).save(any(ChatMessage.class));
+                verifyNoInteractions(deviceTokenRepository, applicationEventPublisher);
+                assertThat(room.isHiddenFor(recipient)).isTrue();
+
+                MemberUtil memberUtil = mock(MemberUtil.class);
+                ProductRepository productRepository = mock(ProductRepository.class);
+                Product product = mock(Product.class);
+                when(memberUtil.getCurrentMember()).thenReturn(recipient);
+                when(productRepository.findActiveById(100L)).thenReturn(Optional.of(product));
+                when(product.getMember()).thenReturn(sender);
+                when(product.getMode()).thenReturn(senderIsBuyer ? Mode.RECEIVER : Mode.GIVER);
+                when(chatRoomRepository.findByProductIdAndBuyerAndSeller(100L, buyer, seller))
+                        .thenReturn(Optional.of(room));
+                CreateChatRoomServiceImpl createService = new CreateChatRoomServiceImpl(
+                        chatRoomRepository, memberUtil, productRepository, blockValidator);
+
+                assertThat(createService.execute(100L).roomId()).isEqualTo(10L);
+                verify(chatRoomRepository, never()).save(any());
+                assertThat(room.isHiddenFor(recipient)).isFalse();
+                assertThat(room.isHiddenFor(sender)).isTrue();
+                when(deviceTokenRepository.findAllByUserId(recipient.getId())).thenReturn(List.of(token));
+                service.execute(3L, 10L, "재참여 후 메시지", null, MessageType.TEXT, sender.getId(), now);
+                verify(deviceTokenRepository).findAllByUserId(recipient.getId());
+                verify(applicationEventPublisher).publishEvent(
+                        new SendNotificationEvent(List.of(token), NotificationType.CHATTING, 10L));
+            } else {
+                verify(deviceTokenRepository).findAllByUserId(recipient.getId());
+                verify(applicationEventPublisher).publishEvent(
+                        new SendNotificationEvent(List.of(token), NotificationType.CHATTING, 10L));
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
@@ -74,8 +158,6 @@ class SaveChatMessageServiceImplTest {
         private void arrangeDefaultScenario() {
             when(sender.getId()).thenReturn(1L);
             when(otherMember.getId()).thenReturn(2L);
-            when(chatRoom.getBuyer()).thenReturn(sender);
-            when(chatRoom.getSeller()).thenReturn(otherMember);
             when(chatRoom.getOtherMember(sender)).thenReturn(otherMember);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
@@ -120,14 +202,13 @@ class SaveChatMessageServiceImplTest {
         }
 
         @Test
-        @DisplayName("새 메시지가 오면 양쪽 모두에게 숨긴 방을 다시 노출한다")
-        void it_unhides_room_for_both_participants() {
+        @DisplayName("새 메시지가 와도 참여자의 숨김을 해제하지 않는다")
+        void it_does_not_unhide_room_when_message_arrives() {
             arrangeDefaultScenario();
 
             service.execute(1L, 10L, "안녕하세요", null, MessageType.TEXT, 1L, now);
 
-            verify(chatRoom).unhideFor(sender);
-            verify(chatRoom).unhideFor(otherMember);
+            verify(chatRoom, never()).unhideFor(any());
         }
 
         @Test
@@ -233,7 +314,6 @@ class SaveChatMessageServiceImplTest {
 
             when(sellerMember.getId()).thenReturn(3L);
             when(buyerMember.getId()).thenReturn(4L);
-            when(room.getBuyer()).thenReturn(buyerMember);
             when(room.getOtherMember(sellerMember)).thenReturn(buyerMember);
             when(memberRepository.findById(3L)).thenReturn(Optional.of(sellerMember));
             when(chatRoomRepository.findChatRoomByRoomId(20L)).thenReturn(Optional.of(room));

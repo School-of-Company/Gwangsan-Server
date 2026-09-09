@@ -65,6 +65,16 @@ public class ChatRoom {
         return buyer.getId().equals(member.getId()) ? seller : buyer;
     }
 
+    public boolean isHiddenFor(Member member) {
+        if (buyer.getId().equals(member.getId())) {
+            return hiddenByBuyerAt != null;
+        }
+        if (seller.getId().equals(member.getId())) {
+            return hiddenBySellerAt != null;
+        }
+        return false;
+    }
+
     public void hideFor(Member member, LocalDateTime hiddenAt) {
         if (buyer.getId().equals(member.getId())) {
             this.hiddenByBuyerAt = hiddenAt;

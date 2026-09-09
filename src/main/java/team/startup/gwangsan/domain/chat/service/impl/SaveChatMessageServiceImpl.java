@@ -51,6 +51,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
 
         Member otherMember = chatRoom.getOtherMember(member);
         blockValidator.validate(member, otherMember);
+        boolean recipientHidden = chatRoom.isHiddenFor(otherMember);
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .id(messageId)
@@ -72,15 +73,13 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
 
-        // 나간 방에 새 메시지가 오면 양쪽 모두에게 다시 보여야 한다.
-        chatRoom.unhideFor(chatRoom.getBuyer());
-        chatRoom.unhideFor(chatRoom.getSeller());
-
-        List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());
-        if (!deviceTokens.isEmpty()) {
-            applicationEventPublisher.publishEvent(
-                    new SendNotificationEvent(deviceTokens, NotificationType.CHATTING, roomId)
-            );
+        if (!recipientHidden) {
+            List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());
+            if (!deviceTokens.isEmpty()) {
+                applicationEventPublisher.publishEvent(
+                        new SendNotificationEvent(deviceTokens, NotificationType.CHATTING, roomId)
+                );
+            }
         }
 
         return new SaveChatMessageResponse(
