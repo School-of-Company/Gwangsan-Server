@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.TradeCancelRequest;
+import team.startup.gwangsan.domain.trade.presentation.dto.response.TradeCancelResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.request.constant.Period;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.GetTradeHistoryResponse;
 import team.startup.gwangsan.domain.trade.presentation.dto.response.HeadTradeHistoryResponse;
@@ -78,12 +79,11 @@ public class TradeController {
     }
 
     @PostMapping("/cancel/{product_id}")
-    public ResponseEntity<Void> cancel(
+    public ResponseEntity<TradeCancelResponse> cancel(
             @PathVariable("product_id") Long productId,
             @RequestBody TradeCancelRequest request
     ) {
-        tradeCancelService.execute(productId, request.reason(), request.imageIds());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tradeCancelService.execute(productId, request.reason(), request.imageIds()));
     }
 
     @DeleteMapping("/cancel/{product_id}")

@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
@@ -32,6 +34,7 @@ class TradeCancelWithdrawServiceImplTest {
     @InjectMocks private TradeCancelWithdrawServiceImpl service;
 
     @Mock private MemberUtil memberUtil;
+    @Mock private ProductRepository productRepository;
     @Mock private TradeCompleteRepository tradeCompleteRepository;
     @Mock private TradeCancelRepository tradeCancelRepository;
     @Mock private TradeCancelImageRepository tradeCancelImageRepository;
@@ -53,6 +56,7 @@ class TradeCancelWithdrawServiceImplTest {
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getId()).thenReturn(10L);
+                when(productRepository.findByIdForUpdate(100L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
 
@@ -81,6 +85,7 @@ class TradeCancelWithdrawServiceImplTest {
             void it_throws_not_found_trade_complete_exception() {
                 Member member = mock(Member.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(99L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.empty());
 
@@ -101,6 +106,7 @@ class TradeCancelWithdrawServiceImplTest {
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getId()).thenReturn(10L);
+                when(productRepository.findByIdForUpdate(100L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
                 when(tradeCancelRepository.findByTradeCompleteIdAndStatus(10L, TradeCancelStatus.PENDING))
@@ -124,6 +130,7 @@ class TradeCancelWithdrawServiceImplTest {
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
                 when(tradeComplete.getId()).thenReturn(10L);
+                when(productRepository.findByIdForUpdate(100L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
 
