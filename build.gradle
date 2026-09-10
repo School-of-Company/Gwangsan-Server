@@ -24,6 +24,8 @@ repositories {
 	mavenCentral()
 }
 
+ext['testcontainers.version'] = '1.21.3'
+
 dependencies {
 	// spring-boot-starter
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -68,6 +70,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:mariadb'
 	testRuntimeOnly 'com.h2database:h2'
 
 	// cloud
@@ -134,5 +137,10 @@ jacocoTestCoverageVerification {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// Docker Engine 29 는 API 1.40 미만을 거부한다. docker-java 가 기본으로 고르는 버전이
+	// 그보다 낮아 Testcontainers 가 /info 에서 400 을 받으므로 명시한다.
+	environment 'DOCKER_API_VERSION', '1.41'
+	environment 'TESTCONTAINERS_API_VERSION', '1.41'
+	systemProperty 'api.version', '1.41'
 	finalizedBy jacocoTestReport
 }

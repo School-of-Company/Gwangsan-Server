@@ -16,6 +16,8 @@ public interface AdminAlertRepository extends JpaRepository<AdminAlert, Long>, A
 
     Optional<AdminAlert> findByIdAndType(Long alertId, AlertType type);
 
+    Optional<AdminAlert> findByTypeAndSourceId(AlertType type, Long sourceId);
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE AdminAlert a SET a.otherMember = :dummy WHERE a.otherMember = :target")
     void reassignOtherMember(@Param("target") Member target, @Param("dummy") Member dummy);
