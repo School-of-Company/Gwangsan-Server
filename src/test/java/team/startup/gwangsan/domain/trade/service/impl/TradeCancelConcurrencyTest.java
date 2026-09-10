@@ -178,20 +178,16 @@ class TradeCancelConcurrencyTest {
             entityManager.persist(head);
             Place place = Place.builder().name("지점").head(head).build();
             entityManager.persist(place);
-            // MemberDetail.dong 이 @OneToOne 이라 dong_id 에 유니크 제약이 걸린다.
-            // 두 회원이 같은 동을 공유할 수 없어 따로 만든다.
-            Dong buyerDong = Dong.builder().name("구매자동").build();
-            Dong sellerDong = Dong.builder().name("판매자동").build();
-            entityManager.persist(buyerDong);
-            entityManager.persist(sellerDong);
+            Dong dong = Dong.builder().name("공유동").build();
+            entityManager.persist(dong);
 
             Member buyer = member("구매자", "010-0000-0001");
             Member seller = member("판매자", "010-0000-0002");
             entityManager.persist(buyer);
             entityManager.persist(seller);
 
-            entityManager.persist(memberDetail(buyer, buyerDong, place));
-            entityManager.persist(memberDetail(seller, sellerDong, place));
+            entityManager.persist(memberDetail(buyer, dong, place));
+            entityManager.persist(memberDetail(seller, dong, place));
 
             Product product = Product.builder()
                     .title("상품").description("설명").gwangsan(GWANGSAN)
