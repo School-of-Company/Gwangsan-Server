@@ -48,6 +48,7 @@ public enum ErrorCode {
     INAPPROPRIATE_CONTENT(400, "부적절한 내용이 포함되어 있습니다."),
 
     // image
+    INVALID_IMAGE_IDS(400, "이미지 ID는 양의 안전 정수여야 합니다."),
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
     OBJECT_REQUIRED_IMAGE(400, "해당 게시글은 이미지가 필수입니다."),
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
