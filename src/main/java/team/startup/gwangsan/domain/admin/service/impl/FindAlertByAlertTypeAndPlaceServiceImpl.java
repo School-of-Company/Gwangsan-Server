@@ -28,6 +28,7 @@ import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductRes
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
+import team.startup.gwangsan.domain.report.entity.constant.ReportTargetType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
@@ -178,12 +179,16 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
                     Member reported = report.getReported();
+                    Product reportedProduct = report.getProduct();
 
                     return new GetReportAlertResponse(
                             alert.getId(),
                             alert.getRequester().getNickname(),
                             reported != null ? reported.getId() : null,
                             reported != null ? reported.getNickname() : "알 수 없음",
+                            reportedProduct != null ? ReportTargetType.PRODUCT : ReportTargetType.MEMBER,
+                            reportedProduct != null ? reportedProduct.getId() : null,
+                            reportedProduct != null ? reportedProduct.getTitle() : null,
                             alert.getTitle(),
                             placeName,
                             alert.getCreatedAt(),

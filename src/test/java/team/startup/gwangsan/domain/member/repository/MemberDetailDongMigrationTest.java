@@ -227,6 +227,9 @@ class MemberDetailDongMigrationTest {
                 .dataSource(schema.url(), mariadb.getUsername(), mariadb.getPassword())
                 .locations("classpath:db/migration")
                 .baselineVersion("7")
+                // 이 테스트는 V8 의 동작만 검증한다. target 을 고정하지 않으면 이후에 추가되는
+                // 마이그레이션까지 함께 실행돼 실행 건수 단정이 깨진다.
+                .target("8")
                 .load();
         flyway.baseline();
         return flyway;
