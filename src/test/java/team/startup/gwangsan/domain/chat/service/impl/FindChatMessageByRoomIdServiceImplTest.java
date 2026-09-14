@@ -5,6 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.util.ReflectionTestUtils;
+import team.startup.gwangsan.domain.chat.presentation.ChatController;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FindChatMessageByRoomIdServiceImpl 단위 테스트")
@@ -69,6 +77,7 @@ class FindChatMessageByRoomIdServiceImplTest {
             otherMember = mock(Member.class);
             chatRoom = mock(ChatRoom.class);
             product = mock(Product.class);
+            lenient().when(product.getMember()).thenReturn(currentMember);
 
             when(currentMember.getId()).thenReturn(1L);
             lenient().when(otherMember.getId()).thenReturn(2L);
@@ -411,6 +420,41 @@ class FindChatMessageByRoomIdServiceImplTest {
             service.execute(5L, null, null, 20);
 
             verify(chatMessageRepository, never()).readMessage(anyLong(), anyLong(), anyLong());
+        }
+
+        @ParameterizedTest
+        @CsvSource({"GIVER, true, true", "GIVER, false, false",
+                "RECEIVER, true, false", "RECEIVER, false, true"})
+        @DisplayName("Mode와 작성자 여부에 따른 isAuthor/isSeller를 HTTP boolean 키로 반환한다")
+        void it_returns_author_and_seller_independently(Mode mode, boolean author, boolean seller) throws Exception {
+            Member owner = author ? currentMember : otherMember;
+            Member partner = author ? otherMember : currentMember;
+            Product actualProduct = Product.builder().title("상품명").member(owner).mode(mode).build();
+            ReflectionTestUtils.setField(actualProduct, "id", 10L);
+            ChatRoom actualRoom = ChatRoom.builder().product(actualProduct)
+                    .seller(mode == Mode.GIVER ? owner : partner)
+                    .buyer(mode == Mode.GIVER ? partner : owner).build();
+            when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(actualRoom));
+            when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
+            givenTradeState(false, false, true);
+            arrangeEmptyMessages();
+
+            var mvc = MockMvcBuilders.standaloneSetup(
+                    new ChatController(null, service, null, null, null, null, null)).build();
+            mvc.perform(get("/api/chat/5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.product.isAuthor").isBoolean())
+                    .andExpect(jsonPath("$.product.isAuthor").value(author))
+                    .andExpect(jsonPath("$.product.author").doesNotExist())
+                    .andExpect(jsonPath("$.product.isSeller").isBoolean())
+                    .andExpect(jsonPath("$.product.isSeller").value(seller))
+                    .andExpect(jsonPath("$.product.isCompletable").value(!seller))
+                    .andExpect(jsonPath("$.product.isCompleted").value(false))
+                    .andExpect(jsonPath("$.product.isReserved").value(false));
+            verify(chatRoomRepository).findByRoomIdWithSellerAndProduct(5L);
+            verify(productImageRepository).findAllByProductId(10L);
+            verifyNoMoreInteractions(chatRoomRepository, productImageRepository);
+            verifyNoInteractions(productReservationRepository, chatMessageImageRepository);
         }
 
         private ChatMessage buildTextMessage(Long id, String content) {

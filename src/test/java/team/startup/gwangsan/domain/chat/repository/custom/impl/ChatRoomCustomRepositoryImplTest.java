@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
@@ -41,6 +44,38 @@ class ChatRoomCustomRepositoryImplTest {
     @BeforeEach
     void setUp() {
         repository = new ChatRoomCustomRepositoryImpl(new JPAQueryFactory(em.getEntityManager()), em.getEntityManager());
+    }
+
+    @Nested
+    @DisplayName("채팅방 상세 작성자 ID 조회는")
+    class Describe_findByRoomIdWithSellerAndProduct {
+        @ParameterizedTest
+        @EnumSource(Mode.class)
+        @DisplayName("두 Mode에서 작성자 ID 접근으로 추가 SQL을 실행하지 않는다")
+        void it_reads_author_id_without_an_extra_query(Mode mode) {
+            Member owner = createMember("owner", "01011111111");
+            Member partner = createMember("partner", "01022222222");
+            Product product = createProduct(owner);
+            product.update(Type.SERVICE, mode, "상품", "설명", 5000);
+            ChatRoom room = createRoom(mode == Mode.GIVER ? partner : owner,
+                    mode == Mode.GIVER ? owner : partner, product);
+            Long roomId = room.getId();
+            Long ownerId = owner.getId();
+            em.flush();
+            em.clear();
+            var statistics = em.getEntityManager().getEntityManagerFactory()
+                    .unwrap(SessionFactory.class).getStatistics();
+            boolean wasEnabled = statistics.isStatisticsEnabled();
+            statistics.setStatisticsEnabled(true);
+            try {
+                ChatRoom loaded = repository.findByRoomIdWithSellerAndProduct(roomId).orElseThrow();
+                long statements = statistics.getPrepareStatementCount();
+                assertThat(loaded.getProduct().getMember().getId()).isEqualTo(ownerId);
+                assertThat(statistics.getPrepareStatementCount()).isEqualTo(statements);
+            } finally {
+                statistics.setStatisticsEnabled(wasEnabled);
+            }
+        }
     }
 
     private Member createMember(String nickname, String phone) {

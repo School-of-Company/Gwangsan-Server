@@ -66,6 +66,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .toList();
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
+        boolean isAuthor = product.getMember().getId().equals(memberId);
 
         // 거래 상태 변경 이벤트와 같은 값을 쓰기 위해 조회도 이 스냅샷을 거친다.
         TradeStateSnapshot tradeState = tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
@@ -81,6 +82,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 imageResponses,
                 tradeState.requestedAt(),
                 isSeller,
+                isAuthor,
                 tradeState.isCompletableFor(isSeller),
                 tradeState.completed(),
                 isReserved,

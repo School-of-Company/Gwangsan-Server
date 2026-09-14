@@ -18,6 +18,7 @@ public record GetChatProductDto(
          */
         LocalDateTime createdAt,
         boolean isSeller,
+        boolean isAuthor,
         boolean isCompletable,
         boolean isCompleted,
         boolean isReserved,
