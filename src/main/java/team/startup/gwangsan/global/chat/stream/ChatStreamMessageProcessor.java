@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.domain.chat.exception.ChatMessageIdConflictException;
 import team.startup.gwangsan.domain.chat.exception.InvalidChatStreamPayloadException;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -85,6 +86,7 @@ public class ChatStreamMessageProcessor {
      */
     private boolean isPermanentFailure(Exception e) {
         return e instanceof NotFoundChatRoomException
+                || e instanceof ChatMessageIdConflictException
                 || e instanceof NotFoundMemberException
                 || e instanceof BlockedMemberException;
     }

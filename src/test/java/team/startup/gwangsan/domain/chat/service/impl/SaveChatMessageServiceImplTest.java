@@ -85,6 +85,8 @@ class SaveChatMessageServiceImplTest {
             }
             when(memberRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
+            when(chatMessageRepository.insertIfAbsent(any())).thenReturn(true);
+            when(chatMessageRepository.getReferenceById(1L)).thenReturn(mock(ChatMessage.class));
             Image image = mock(Image.class);
             when(image.getId()).thenReturn(100L);
             when(image.getImageUrl()).thenReturn("image-url");
@@ -97,7 +99,7 @@ class SaveChatMessageServiceImplTest {
             SaveChatMessageResponse response = service.execute(
                     1L, 10L, "이미지", List.of(100L), MessageType.IMAGE, sender.getId(), now);
 
-            verify(chatMessageRepository).save(any(ChatMessage.class));
+            verify(chatMessageRepository).insertIfAbsent(any(ChatMessage.class));
             verify(chatMessageImageRepository).saveAll(anyList());
             assertThat(response.images()).hasSize(1);
             assertThat(response.images().getFirst().imageId()).isEqualTo(100L);
@@ -106,7 +108,7 @@ class SaveChatMessageServiceImplTest {
             if (recipientHidden) {
                 verifyNoInteractions(deviceTokenRepository, applicationEventPublisher);
                 service.execute(2L, 10L, "다음 메시지", null, MessageType.TEXT, sender.getId(), now);
-                verify(chatMessageRepository, times(2)).save(any(ChatMessage.class));
+                verify(chatMessageRepository, times(2)).insertIfAbsent(any(ChatMessage.class));
                 verifyNoInteractions(deviceTokenRepository, applicationEventPublisher);
                 assertThat(room.isHiddenFor(recipient)).isTrue();
 
@@ -161,7 +163,7 @@ class SaveChatMessageServiceImplTest {
             when(chatRoom.getOtherMember(sender)).thenReturn(otherMember);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
-            when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(chatMessageRepository.insertIfAbsent(any())).thenReturn(true);
             when(deviceTokenRepository.findAllByUserId(any())).thenReturn(List.of());
         }
 
@@ -192,7 +194,7 @@ class SaveChatMessageServiceImplTest {
             SaveChatMessageResponse response = service.execute(1L, 10L, "안녕하세요", null, MessageType.TEXT, 1L, now);
 
             ArgumentCaptor<ChatMessage> captor = ArgumentCaptor.forClass(ChatMessage.class);
-            verify(chatMessageRepository).save(captor.capture());
+            verify(chatMessageRepository).insertIfAbsent(captor.capture());
             assertThat(captor.getValue().getContent()).isEqualTo("안녕하세요");
             assertThat(captor.getValue().getMessageType()).isEqualTo(MessageType.TEXT);
             assertThat(captor.getValue().getChecked()).isFalse();
@@ -222,6 +224,7 @@ class SaveChatMessageServiceImplTest {
             when(image2.getId()).thenReturn(200L);
             when(image2.getImageUrl()).thenReturn("url2");
             when(imageRepository.findAllById(List.of(100L, 200L))).thenReturn(List.of(image1, image2));
+            when(chatMessageRepository.getReferenceById(1L)).thenReturn(mock(ChatMessage.class));
             when(chatMessageImageRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
             SaveChatMessageResponse response = service.execute(1L, 10L, "이미지", List.of(100L, 200L), MessageType.IMAGE, 1L, now);
@@ -239,6 +242,7 @@ class SaveChatMessageServiceImplTest {
             when(image.getId()).thenReturn(100L);
             when(image.getImageUrl()).thenReturn("url");
             when(imageRepository.findAllById(List.of(100L, 999L))).thenReturn(List.of(image));
+            when(chatMessageRepository.getReferenceById(1L)).thenReturn(mock(ChatMessage.class));
             when(chatMessageImageRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
             SaveChatMessageResponse response = service.execute(1L, 10L, "이미지", List.of(100L, 999L), MessageType.IMAGE, 1L, now);
@@ -317,7 +321,7 @@ class SaveChatMessageServiceImplTest {
             when(room.getOtherMember(sellerMember)).thenReturn(buyerMember);
             when(memberRepository.findById(3L)).thenReturn(Optional.of(sellerMember));
             when(chatRoomRepository.findChatRoomByRoomId(20L)).thenReturn(Optional.of(room));
-            when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(chatMessageRepository.insertIfAbsent(any())).thenReturn(true);
             when(deviceTokenRepository.findAllByUserId(any())).thenReturn(List.of());
 
             service.execute(1L, 20L, "안녕", null, MessageType.TEXT, 3L, now);
@@ -326,17 +330,19 @@ class SaveChatMessageServiceImplTest {
         }
 
         @Test
-        @DisplayName("발신자와 상대방이 차단 관계면 BlockedMemberException 을 던지고 메시지를 저장하지 않는다")
+        @DisplayName("차단 관계면 예외를 던지고 이미지와 알림을 처리하지 않는다")
         void it_throws_BlockedMemberException_when_blocked() {
             when(chatRoom.getOtherMember(sender)).thenReturn(otherMember);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
+            when(chatMessageRepository.insertIfAbsent(any())).thenReturn(true);
             doThrow(new BlockedMemberException()).when(blockValidator).validate(sender, otherMember);
 
             assertThatThrownBy(() -> service.execute(1L, 10L, "안녕", null, MessageType.TEXT, 1L, now))
                     .isInstanceOf(BlockedMemberException.class);
 
             verify(chatMessageRepository, never()).save(any());
+            verifyNoInteractions(chatMessageImageRepository);
             verifyNoInteractions(deviceTokenRepository);
             verifyNoInteractions(applicationEventPublisher);
         }

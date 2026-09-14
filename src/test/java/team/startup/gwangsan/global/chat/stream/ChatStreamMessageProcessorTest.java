@@ -15,11 +15,13 @@ import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.domain.chat.exception.ChatMessageIdConflictException;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -111,6 +113,34 @@ class ChatStreamMessageProcessorTest {
     @Nested
     @DisplayName("핸들러 실패 처리는")
     class Describe_handler_failure {
+
+        @Test
+        void it_quarantines_conflicting_message_ids_before_acknowledging() {
+            doThrow(new ChatMessageIdConflictException(999L)).when(handler).handle(any());
+            MapRecord<String, String, String> record = MapRecord.create(streamKey, Map.of(
+                    "messageId", "999", "roomId", "42", "senderId", "7", "content", "hello",
+                    "createdAt", "1700000000000")).withId(RecordId.of("1700000000000-0"));
+
+            processor.process(streamKey, record, 0);
+
+            var order = inOrder(redisAdapter);
+            order.verify(redisAdapter).sendToDlq(eq(streamKey), eq(record), any());
+            order.verify(redisAdapter).ack(streamKey, record.getId());
+            verify(redisAdapter, never()).sendToRetry(any(), any(), anyInt(), any());
+        }
+
+        @Test
+        void it_does_not_acknowledge_when_conflict_quarantine_fails() {
+            doThrow(new ChatMessageIdConflictException(999L)).when(handler).handle(any());
+            doThrow(new RuntimeException("Redis unavailable")).when(redisAdapter).sendToDlq(any(), any(), any());
+            MapRecord<String, String, String> record = MapRecord.create(streamKey, Map.of(
+                    "messageId", "999", "roomId", "42", "senderId", "7", "content", "hello",
+                    "createdAt", "1700000000000")).withId(RecordId.of("1700000000000-0"));
+
+            assertThatThrownBy(() -> processor.process(streamKey, record, 0)).hasMessage("Redis unavailable");
+
+            verify(redisAdapter, never()).ack(any(), any());
+        }
 
         @Test
         @DisplayName("attempt >= retryMax이면 DLQ로 보내고 ACK한다")
