@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductCustomRepository {
+    List<Product> findAdminProducts(Type type, Mode mode, Long lastId, int size);
+
     List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status);
 
     List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses);

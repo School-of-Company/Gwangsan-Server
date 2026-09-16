@@ -64,6 +64,54 @@ class ProductRepositoryTest {
     }
 
     @Nested
+    @DisplayName("관리자 목록은")
+    class Describe_findAdminProducts {
+        @ParameterizedTest
+        @CsvSource(value = {"NULL,NULL,4", "OBJECT,NULL,2", "SERVICE,NULL,2", "NULL,GIVER,2", "NULL,RECEIVER,2", "OBJECT,GIVER,1", "OBJECT,RECEIVER,1", "SERVICE,GIVER,1", "SERVICE,RECEIVER,1"}, nullValues = "NULL")
+        @DisplayName("선택 필터를 각각 및 조합 적용하고 삭제 상태를 제외한다")
+        void it_applies_optional_filters(Type type, Mode mode, int count) {
+            for (Type productType : Type.values()) {
+                for (Mode productMode : Mode.values()) {
+                    em.persist(Product.builder().title("게시글").description("설명").gwangsan(5000)
+                            .member(member).status(ProductStatus.ONGOING).type(productType).mode(productMode).build());
+                }
+            }
+            persistProduct(ProductStatus.DELETED);
+            em.flush();
+            em.clear();
+
+            var result = productRepository.findAdminProducts(type, mode, null, 20);
+
+            assertThat(result).hasSize(count);
+            assertThat(result).allSatisfy(product -> {
+                if (type != null) assertThat(product.getType()).isEqualTo(type);
+                if (mode != null) assertThat(product.getMode()).isEqualTo(mode);
+                assertThat(product.getStatus()).isNotEqualTo(ProductStatus.DELETED);
+            });
+        }
+
+        @Test
+        @DisplayName("진행중·예약·완료 게시글을 ID 역순으로 중복 없이 페이지 조회한다")
+        void it_pages_all_active_statuses_with_exclusive_cursor() {
+            Product first = persistProduct(ProductStatus.ONGOING);
+            Product second = persistProduct(ProductStatus.RESERVATION);
+            Product third = persistProduct(ProductStatus.COMPLETED);
+            Product deleted = persistProduct(ProductStatus.DELETED);
+            em.flush();
+            em.clear();
+
+            assertThat(productRepository.findAdminProducts(null, null, null, 2))
+                    .extracting(Product::getId).containsExactly(third.getId(), second.getId());
+            assertThat(productRepository.findAdminProducts(null, null, second.getId(), 2))
+                    .extracting(Product::getId).containsExactly(first.getId());
+            assertThat(productRepository.findAdminProducts(null, null, first.getId(), 2)).isEmpty();
+            assertThat(productRepository.findAdminProducts(null, null, deleted.getId(), 1))
+                    .extracting(Product::getId).containsExactly(third.getId());
+            assertThat(productRepository.findAdminProducts(Type.OBJECT, null, null, 2)).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("findRoomProductsWithImagesByIds 메서드는")
     class Describe_findRoomProductsWithImagesByIds {
 
