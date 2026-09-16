@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.member.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public interface MemberDetailRepository extends JpaRepository<MemberDetail, Long>, MemberDetailCustomRepository {
     Optional<MemberDetail> findByMember(Member member);
 
+    @EntityGraph(attributePaths = "place")
     List<MemberDetail> findAllByMemberIdIn(List<Long> memberIds);
 
     List<MemberDetail> findAllByPlace(Place place);
