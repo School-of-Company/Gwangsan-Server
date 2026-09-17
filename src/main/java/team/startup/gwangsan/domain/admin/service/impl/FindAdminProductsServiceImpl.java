@@ -68,13 +68,15 @@ public class FindAdminProductsServiceImpl implements FindAdminProductsService {
                     Member member = product.getMember();
                     MemberDetail memberDetail = memberDetailMap.get(member.getId());
 
-                    int rawLight = memberDetail.getLight();
-                    int light = Math.max(1, rawLight / 10);
+                    int light = memberDetail == null ? 1 : Math.max(1, memberDetail.getLight() / 10);
+                    String placeName = (memberDetail == null || memberDetail.getPlace() == null)
+                            ? null
+                            : memberDetail.getPlace().getName();
 
                     GetProductMemberResponse memberResponse = new GetProductMemberResponse(
                             member.getId(),
                             member.getNickname(),
-                            memberDetail.getPlace().getName(),
+                            placeName,
                             light
                     );
 

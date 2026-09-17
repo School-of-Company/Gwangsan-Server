@@ -147,6 +147,39 @@ class FindAdminProductsServiceImplTest {
         }
 
         @Test
+        @DisplayName("작성자의 MemberDetail이 없으면 기본값(light=1, placeName=null)으로 채워 반환한다")
+        void it_fills_default_when_member_detail_is_missing() {
+            // given
+            Product product = mock(Product.class);
+            Member member = mock(Member.class);
+
+            when(member.getId()).thenReturn(1L);
+
+            when(product.getId()).thenReturn(100L);
+            when(product.getTitle()).thenReturn("상품1");
+            when(product.getDescription()).thenReturn("설명1");
+            when(product.getGwangsan()).thenReturn(10);
+            when(product.getType()).thenReturn(TYPE);
+            when(product.getMode()).thenReturn(MODE);
+            when(product.getMember()).thenReturn(member);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+
+            when(productRepository.findAdminProducts(TYPE, MODE, 102L, 20)).thenReturn(List.of(product));
+
+            when(memberDetailRepository.findAllByMemberIdIn(anyList())).thenReturn(List.of());
+            when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
+
+            // when
+            List<GetProductResponse> result = service.execute(TYPE, MODE, 102L, 20);
+
+            // then
+            assertThat(result).hasSize(1);
+            GetProductResponse r = result.get(0);
+            assertThat(r.member().light()).isEqualTo(1);
+            assertThat(r.member().placeName()).isNull();
+        }
+
+        @Test
         @DisplayName("조회된 상품이 0개이면 빈 리스트를 반환한다")
         void it_returns_empty_without_secondary_queries() {
             // given
