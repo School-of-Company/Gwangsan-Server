@@ -2,6 +2,8 @@ package team.startup.gwangsan.domain.review.presentation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,16 +38,37 @@ public class ReviewController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity<List<ReviewResponse>> getMyReceivedReviews() {
-        List<ReviewResponse> response = getReceivedReviewListService.execute();
+    public ResponseEntity<List<ReviewResponse>> getMyReceivedReviews(
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false) Integer size) {
+        if (!validPage(cursor, size)) return ResponseEntity.badRequest().build();
+        List<ReviewResponse> response = size == null
+                ? getReceivedReviewListService.execute()
+                : getReceivedReviewListService.execute(cursor, size);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{memberId}")
     public ResponseEntity<List<ReviewResponse>> getReviewByMember(
-            @PathVariable Long memberId) {
-        List<ReviewResponse> response = getReviewByMemberService.execute(memberId);
+            @PathVariable Long memberId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false) Integer size) {
+        if (!validPage(cursor, size)) return ResponseEntity.badRequest().build();
+        List<ReviewResponse> response = size == null
+                ? getReviewByMemberService.execute(memberId)
+                : getReviewByMemberService.execute(memberId, cursor, size);
         return ResponseEntity.ok(response);
+    }
+
+    @InitBinder
+    public void bindNumbers(WebDataBinder binder) {
+        binder.registerCustomEditor(Long.class, new CustomNumberEditor(Long.class, false));
+        binder.registerCustomEditor(Integer.class, new CustomNumberEditor(Integer.class, false));
+    }
+
+    private boolean validPage(Long cursor, Integer size) {
+        return (size == null ? cursor == null : size >= 1 && size <= 100)
+                && (cursor == null || cursor > 0);
     }
 
     @GetMapping("/detail/{reviewId}")

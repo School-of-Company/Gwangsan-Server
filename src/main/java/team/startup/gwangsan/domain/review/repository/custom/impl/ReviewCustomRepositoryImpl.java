@@ -37,7 +37,12 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
 
     @Override
     public List<ReceivedReviewDto> findReceivedReviews(Long reviewedId) {
-        return queryFactory
+        return findReceivedReviews(reviewedId, null, null);
+    }
+
+    @Override
+    public List<ReceivedReviewDto> findReceivedReviews(Long reviewedId, Long cursor, Integer size) {
+        var query = queryFactory
                 .select(Projections.constructor(
                         ReceivedReviewDto.class,
                         review.id,
@@ -47,8 +52,9 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                         review.reviewer.nickname
                 ))
                 .from(review)
-                .where(review.reviewed.id.eq(reviewedId))
-                .orderBy(review.id.desc())
-                .fetch();
+                .where(review.reviewed.id.eq(reviewedId), cursor == null ? null : review.id.lt(cursor))
+                .orderBy(review.id.desc());
+        if (size != null) query.limit(size);
+        return query.fetch();
     }
 }
