@@ -9,6 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RequestLogFilterTest {
 
     private static final String FICTIONAL_SECRET_MARKER = "fictional-secret-marker";
+    private Level previousLogLevel;
+
+    @BeforeEach
+    void enableInfoLogging() {
+        previousLogLevel = logger().getLevel();
+        logger().setLevel(Level.INFO);
+    }
+
+    @AfterEach
+    void restoreLogLevel() {
+        logger().setLevel(previousLogLevel);
+    }
 
     @Nested
     @DisplayName("doFilterInternal()은")
