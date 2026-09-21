@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.auth.entity.RefreshToken;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
@@ -37,12 +38,16 @@ public class SignInServiceImpl implements SignInService {
         Member member = memberRepository.findByNickname(request.nickname())
                 .orElseThrow(NotFoundUserException::new);
 
-        if (member.getStatus() != MemberStatus.ACTIVE) {
-            throw new ForbiddenException();
-        }
-
         if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new UnauthorizedException();
+        }
+
+        if (member.getStatus() == MemberStatus.PENDING) {
+            throw new PendingApprovalException();
+        }
+
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new ForbiddenException();
         }
 
         String accessToken = jwtProvider.generateAccessToken(member.getPhoneNumber(), member.getRole());
