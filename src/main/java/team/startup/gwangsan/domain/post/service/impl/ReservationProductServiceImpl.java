@@ -42,7 +42,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
     public void execute(Long productId, Long roomId, LocalDateTime scheduledAt, String placeName, String address, Double latitude, Double longitude) {
         Member member = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findActiveById(productId)
+        Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(NotFoundProductException::new);
 
         if (!product.getMember().getId().equals(member.getId())) {

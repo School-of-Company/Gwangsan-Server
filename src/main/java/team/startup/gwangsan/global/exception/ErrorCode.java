@@ -43,6 +43,7 @@ public enum ErrorCode {
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
     PRODUCT_NOT_ONGOING(400, "진행 중인 상품만 예약할 수 있습니다."),
     PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
+    RESERVED_PRODUCT_DELETION(409, "예약 중인 게시글은 삭제할 수 없습니다. 예약을 취소한 후 다시 시도해 주세요."),
     PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
     RESERVATION_PARTICIPANT_ONLY(403, "예약자 또는 상품 등록자만 예약을 취소할 수 있습니다."),
     INAPPROPRIATE_CONTENT(400, "부적절한 내용이 포함되어 있습니다."),

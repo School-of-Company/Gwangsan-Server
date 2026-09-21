@@ -83,13 +83,13 @@ class ReservationProductServiceImplTest {
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
             // given
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class,
                     () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
-            verify(productRepository).findActiveById(productId);
+            verify(productRepository).findByIdWithLock(productId);
         }
 
         @Test
@@ -106,7 +106,7 @@ class ReservationProductServiceImplTest {
             Product product = mock(Product.class);
             when(product.getMember()).thenReturn(author);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             assertThrows(ForbiddenProductException.class,
                     () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
@@ -128,7 +128,7 @@ class ReservationProductServiceImplTest {
             when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductAlreadyReservationException.class,
@@ -149,7 +149,7 @@ class ReservationProductServiceImplTest {
             when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductNotOngoingException.class,
@@ -169,7 +169,7 @@ class ReservationProductServiceImplTest {
             when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.empty());
 
             assertThrows(NotFoundChatRoomException.class,
@@ -189,7 +189,7 @@ class ReservationProductServiceImplTest {
             when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             ChatRoom chatRoom = mock(ChatRoom.class);
             Product otherProduct = mock(Product.class);
@@ -216,7 +216,7 @@ class ReservationProductServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getId()).thenReturn(productId);
 
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             Member buyer = mock(Member.class);
             when(buyer.getId()).thenReturn(2L);
