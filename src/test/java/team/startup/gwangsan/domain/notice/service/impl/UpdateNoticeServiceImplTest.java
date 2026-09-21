@@ -65,6 +65,24 @@ class UpdateNoticeServiceImplTest {
                 verify(noticeImageRepository).deleteAllByNotice(notice);
                 verify(noticeImageRepository).saveAll(any());
             }
+
+            @Test
+            @DisplayName("빈 이미지 ID 목록이면 기존 이미지를 모두 제거하고 빈 목록으로 저장한다")
+            void it_clears_all_images_when_image_ids_are_empty() {
+                Member member = mock(Member.class);
+                Notice notice = mock(Notice.class);
+
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
+                when(notice.getMember()).thenReturn(member);
+                when(member.getId()).thenReturn(1L);
+
+                service.execute(1L, new UpdateNoticeRequest("새 제목", "새 내용", List.of()));
+
+                verify(noticeImageRepository).deleteAllByNotice(notice);
+                verify(imageRepository).findAllById(List.of());
+                verify(noticeImageRepository).saveAll(List.of());
+            }
         }
 
         @Nested

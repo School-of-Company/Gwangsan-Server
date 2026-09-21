@@ -25,7 +25,11 @@ import team.startup.gwangsan.domain.chat.presentation.dto.response.SaveChatMessa
 import team.startup.gwangsan.domain.chat.repository.ChatMessageImageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
+import team.startup.gwangsan.domain.chat.repository.custom.ChatMessageCustomRepository.StoredMessage;
+import team.startup.gwangsan.domain.chat.exception.ChatMessageIdConflictException;
+import team.startup.gwangsan.domain.chat.exception.NotFoundChatMessageException;
 import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -40,6 +44,7 @@ import team.startup.gwangsan.global.util.BlockValidator;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -345,6 +350,190 @@ class SaveChatMessageServiceImplTest {
             verifyNoInteractions(chatMessageImageRepository);
             verifyNoInteractions(deviceTokenRepository);
             verifyNoInteractions(applicationEventPublisher);
+        }
+    }
+
+    @Nested
+    @DisplayName("재전송 메시지는")
+    class Describe_replay {
+
+        private static final Long MESSAGE_ID = 1L;
+        private static final Long ROOM_ID = 10L;
+        private static final Long SENDER_ID = 20L;
+        private static final LocalDateTime CREATED_AT = LocalDateTime.of(2024, 1, 1, 12, 0, 0, 123_456_000);
+
+        private Member sender;
+        private Member recipient;
+        private ChatRoom room;
+
+        @BeforeEach
+        void setUp() {
+            sender = member(SENDER_ID, "발신자");
+            recipient = member(30L, "수신자");
+            room = room(ROOM_ID, sender, recipient);
+        }
+
+        @Test
+        @DisplayName("이미 존재하는 메시지는 같은 저장 응답을 반환하고 저장·차단·알림을 다시 실행하지 않는다")
+        void it_replays_existing_message_without_repeating_side_effects() {
+            StoredMessage stored = storedMessage(MessageType.TEXT, CREATED_AT, List.of());
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", null, MessageType.TEXT, SENDER_ID, CREATED_AT);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+            verify(chatMessageRepository, never()).insertIfAbsent(any());
+            verify(chatMessageRepository, never()).save(any());
+            verifyNoInteractions(memberRepository, chatRoomRepository, imageRepository, chatMessageImageRepository,
+                    blockValidator, deviceTokenRepository, applicationEventPublisher);
+        }
+
+        @Test
+        @DisplayName("삽입 경쟁에서 저장소가 false를 반환하면 같은 저장 응답을 반환하고 후속 부작용을 실행하지 않는다")
+        void it_replays_message_after_insert_race_without_repeating_side_effects() {
+            StoredMessage stored = storedMessage(MessageType.TEXT, CREATED_AT, List.of());
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(false);
+            when(memberRepository.findById(SENDER_ID)).thenReturn(Optional.of(sender));
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(room));
+            when(chatMessageRepository.insertIfAbsent(any(ChatMessage.class))).thenReturn(false);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", null, MessageType.TEXT, SENDER_ID, CREATED_AT);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+            verify(chatMessageRepository).insertIfAbsent(any(ChatMessage.class));
+            verify(chatMessageRepository, never()).save(any());
+            verifyNoInteractions(imageRepository, chatMessageImageRepository, blockValidator,
+                    deviceTokenRepository, applicationEventPublisher);
+        }
+
+        @Test
+        @DisplayName("존재한다고 판단한 메시지의 저장 정보가 없으면 NotFoundChatMessageException 을 던진다")
+        void it_throws_NotFoundChatMessageException_when_replayed_message_is_not_found() {
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", null, MessageType.TEXT, SENDER_ID, CREATED_AT))
+                    .isInstanceOf(NotFoundChatMessageException.class);
+
+            verifyNoInteractions(memberRepository, chatRoomRepository, imageRepository, chatMessageImageRepository,
+                    blockValidator, deviceTokenRepository, applicationEventPublisher);
+        }
+
+        @DisplayName("방·발신자·내용·유형·밀리초 timestamp 중 하나가 다르면 ChatMessageIdConflictException 을 던진다")
+        @Test
+        void it_throws_ChatMessageIdConflictException_when_replay_payload_differs() {
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID))
+                    .thenReturn(Optional.of(storedMessage(MessageType.TEXT, CREATED_AT, List.of())));
+
+            assertConflict(ROOM_ID + 1, "내용", MessageType.TEXT, SENDER_ID, CREATED_AT);
+            assertConflict(ROOM_ID, "내용", MessageType.TEXT, SENDER_ID + 1, CREATED_AT);
+            assertConflict(ROOM_ID, "다른 내용", MessageType.TEXT, SENDER_ID, CREATED_AT);
+            assertConflict(ROOM_ID, "내용", MessageType.IMAGE, SENDER_ID, CREATED_AT);
+            assertConflict(ROOM_ID, "내용", MessageType.TEXT, SENDER_ID, CREATED_AT.plusNanos(1_000_000));
+        }
+
+        @Test
+        @DisplayName("같은 밀리초 안의 timestamp 차이는 같은 메시지로 재전송한다")
+        void it_replays_when_timestamp_differs_only_below_millisecond() {
+            StoredMessage stored = storedMessage(MessageType.TEXT, CREATED_AT, List.of());
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+            LocalDateTime withinSameMillisecond = LocalDateTime.of(2024, 1, 1, 12, 0, 0, 123_999_999);
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", null, MessageType.TEXT, SENDER_ID, withinSameMillisecond);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+        }
+
+        @Test
+        @DisplayName("IMAGE 재전송에서 null imageIds 와 빈 저장 이미지 목록은 같다")
+        void it_replays_image_message_when_image_ids_are_null_and_stored_images_are_empty() {
+            StoredMessage stored = storedMessage(MessageType.IMAGE, CREATED_AT, List.of());
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", null, MessageType.IMAGE, SENDER_ID, CREATED_AT);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+            verify(chatMessageRepository, never()).findExistingImageIds(any());
+        }
+
+        @Test
+        @DisplayName("IMAGE 재전송에서 빈 imageIds 와 빈 저장 이미지 목록은 같다")
+        void it_replays_image_message_when_image_ids_are_empty_and_stored_images_are_empty() {
+            StoredMessage stored = storedMessage(MessageType.IMAGE, CREATED_AT, List.of());
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+            when(chatMessageRepository.findExistingImageIds(List.of())).thenReturn(Set.of());
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", List.of(), MessageType.IMAGE, SENDER_ID, CREATED_AT);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+        }
+
+        @Test
+        @DisplayName("IMAGE 재전송은 존재하는 이미지 ID 집합이 순서와 중복에 관계없이 같으면 저장 응답을 반환한다")
+        void it_replays_image_message_when_existing_image_id_sets_are_equal() {
+            List<GetImageResponse> images = List.of(new GetImageResponse(100L, "first"), new GetImageResponse(200L, "second"));
+            StoredMessage stored = storedMessage(MessageType.IMAGE, CREATED_AT, images);
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+            when(chatMessageRepository.findExistingImageIds(List.of(200L, 100L, 100L))).thenReturn(Set.of(100L, 200L));
+
+            SaveChatMessageResponse response = service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", List.of(200L, 100L, 100L), MessageType.IMAGE, SENDER_ID, CREATED_AT);
+
+            assertThat(response).isEqualTo(responseOf(stored));
+        }
+
+        @Test
+        @DisplayName("IMAGE 재전송의 존재하는 이미지 ID 집합이 다르면 ChatMessageIdConflictException 을 던진다")
+        void it_throws_ChatMessageIdConflictException_when_existing_image_id_sets_differ() {
+            StoredMessage stored = storedMessage(MessageType.IMAGE, CREATED_AT, List.of(new GetImageResponse(100L, "first")));
+            when(chatMessageRepository.existsById(MESSAGE_ID)).thenReturn(true);
+            when(chatMessageRepository.findStoredMessage(MESSAGE_ID)).thenReturn(Optional.of(stored));
+            when(chatMessageRepository.findExistingImageIds(List.of(100L, 200L))).thenReturn(Set.of(100L, 200L));
+
+            assertThatThrownBy(() -> service.execute(
+                    MESSAGE_ID, ROOM_ID, "내용", List.of(100L, 200L), MessageType.IMAGE, SENDER_ID, CREATED_AT))
+                    .isInstanceOf(ChatMessageIdConflictException.class);
+        }
+
+        private void assertConflict(Long roomId, String content, MessageType messageType, Long senderId, LocalDateTime createdAt) {
+            assertThatThrownBy(() -> service.execute(
+                    MESSAGE_ID, roomId, content, null, messageType, senderId, createdAt))
+                    .isInstanceOf(ChatMessageIdConflictException.class);
+        }
+
+        private static Member member(Long id, String nickname) {
+            Member member = Member.builder()
+                    .name(nickname).nickname(nickname).phoneNumber(id + "0000000000").password("password").build();
+            ReflectionTestUtils.setField(member, "id", id);
+            return member;
+        }
+
+        private static ChatRoom room(Long id, Member buyer, Member seller) {
+            ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
+            ReflectionTestUtils.setField(room, "id", id);
+            return room;
+        }
+
+        private static StoredMessage storedMessage(MessageType messageType, LocalDateTime createdAt, List<GetImageResponse> images) {
+            return new StoredMessage(MESSAGE_ID, ROOM_ID, SENDER_ID, "내용", messageType, createdAt, false, images);
+        }
+
+        private static SaveChatMessageResponse responseOf(StoredMessage stored) {
+            return new SaveChatMessageResponse(
+                    stored.messageId(), stored.images(), stored.createdAt(), stored.senderId(), stored.checked());
         }
     }
 }

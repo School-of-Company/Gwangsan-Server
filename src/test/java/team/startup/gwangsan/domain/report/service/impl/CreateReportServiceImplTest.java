@@ -155,6 +155,24 @@ class CreateReportServiceImplTest {
         }
 
         @Test
+        @DisplayName("이미지 ID가 빈 목록이면 신고와 관리자 알림은 저장하고 이미지 저장은 생략한다")
+        void it_persists_report_and_event_without_image_calls_when_image_ids_are_empty() {
+            Member reporter = mockMember(1L);
+            Member reported = mockMember(2L);
+            when(memberUtil.getCurrentMember()).thenReturn(reporter);
+            when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
+            when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.ETC))
+                    .thenReturn(Optional.empty());
+
+            service.execute(new CreateReportRequest(
+                    ReportTargetType.MEMBER, 2L, ReportType.ETC, "신고", List.of()));
+
+            verify(reportRepository).save(any(Report.class));
+            verify(eventPublisher).publishEvent(any(CreateAdminAlertEvent.class));
+            verifyNoInteractions(imageRepository, reportImageRepository);
+        }
+
+        @Test
         @DisplayName("본인 신고 시 SelfReportNotAllowedException 을 던진다")
         void it_throws_when_self_report() {
             // given

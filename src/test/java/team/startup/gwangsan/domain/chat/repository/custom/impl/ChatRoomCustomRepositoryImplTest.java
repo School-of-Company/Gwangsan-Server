@@ -102,8 +102,12 @@ class ChatRoomCustomRepositoryImplTest {
     }
 
     private ChatRoom createRoom(Member buyer, Member seller, Product product) {
+        return createRoom(true, buyer, seller, product);
+    }
+
+    private ChatRoom createRoom(boolean active, Member buyer, Member seller, Product product) {
         return em.persist(ChatRoom.builder()
-                .isActive(true)
+                .isActive(active)
                 .buyer(buyer)
                 .seller(seller)
                 .product(product)
@@ -111,11 +115,16 @@ class ChatRoomCustomRepositoryImplTest {
     }
 
     private void createMessage(Long id, ChatRoom room, Member sender, String content, LocalDateTime createdAt) {
+        createMessage(id, room, sender, content, createdAt, false);
+    }
+
+    private void createMessage(Long id, ChatRoom room, Member sender, String content, LocalDateTime createdAt,
+                               boolean checked) {
         em.persist(ChatMessage.builder()
                 .id(id)
                 .content(content)
                 .messageType(MessageType.TEXT)
-                .checked(false)
+                .checked(checked)
                 .room(room)
                 .sender(sender)
                 .createdAt(createdAt)
@@ -199,6 +208,52 @@ class ChatRoomCustomRepositoryImplTest {
             em.getEntityManager().clear();
 
             assertThat(repository.findRoomsByMemberId(seller.getId())).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("활성 채팅방만 최신 메시지와 상대방의 미확인 메시지 수를 함께 반환한다")
+        void it_returns_active_rooms_with_latest_message_and_unread_count() {
+            Member buyer = createMember("buyer5", "010-0005-0001");
+            Member seller = createMember("seller5", "010-0005-0002");
+            ChatRoom messageRoom = createRoom(buyer, seller, createProduct(seller));
+            ChatRoom noMessageRoom = createRoom(buyer, seller, createProduct(seller));
+            createRoom(false, buyer, seller, createProduct(seller));
+
+            LocalDateTime sentAt = LocalDateTime.of(2024, 1, 1, 10, 0);
+            createMessage(30L, messageRoom, seller, "읽지 않은 메시지", sentAt, false);
+            createMessage(31L, messageRoom, seller, "읽은 메시지", sentAt.plusMinutes(1), true);
+            createMessage(32L, messageRoom, buyer, "내 메시지", sentAt.plusMinutes(2), false);
+
+            em.flush();
+            em.clear();
+
+            List<GetRoomsDto> result = repository.findRoomsByMemberId(buyer.getId());
+
+            assertThat(result).extracting(GetRoomsDto::roomId)
+                    .containsExactly(messageRoom.getId(), noMessageRoom.getId());
+            assertThat(result.getFirst().member().memberId()).isEqualTo(seller.getId());
+            assertThat(result.getFirst())
+                    .extracting(GetRoomsDto::messageId, GetRoomsDto::lastMessage, GetRoomsDto::lastMessageTime,
+                            GetRoomsDto::unreadMessageCount)
+                    .containsExactly(32L, "내 메시지", sentAt.plusMinutes(2), 1L);
+            assertThat(result.get(1))
+                    .extracting(GetRoomsDto::messageId, GetRoomsDto::lastMessage, GetRoomsDto::lastMessageType,
+                            GetRoomsDto::lastMessageTime, GetRoomsDto::unreadMessageCount)
+                    .containsExactly(null, null, null, null, 0L);
+        }
+
+        @Test
+        @DisplayName("참여하는 공개 활성 채팅방이 없으면 빈 목록을 반환한다")
+        void it_returns_empty_when_member_has_no_visible_active_rooms() {
+            Member buyer = createMember("buyer6", "010-0006-0001");
+            Member seller = createMember("seller6", "010-0006-0002");
+            Member outsider = createMember("outsider6", "010-0006-0003");
+            createRoom(buyer, seller, createProduct(seller));
+
+            em.flush();
+            em.clear();
+
+            assertThat(repository.findRoomsByMemberId(outsider.getId())).isEmpty();
         }
 
     }

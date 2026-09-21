@@ -623,6 +623,85 @@ class RequestTradeCompleteServiceImplTest {
             verifyNoInteractions(productReservationRepository);
             verifyTradeStatusChangedEvent(roomId, null, productId, true, false);
         }
+
+        @Test
+        @DisplayName("RECEIVER 게시물 작성자는 구매자로 거래 완료 요청을 만든다")
+        void execute_as_receiver_author_creates_buyer_request() {
+            Long buyerId = 1L;
+            Long sellerId = 2L;
+            Long productId = 100L;
+            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            Member buyer = buyerDetail.getMember();
+            Member seller = sellerDetail.getMember();
+            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(buyerDetail);
+            when(memberDetailRepository.findByMemberIdWithMember(sellerId)).thenReturn(sellerDetail);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(product.getMode()).thenReturn(Mode.RECEIVER);
+            when(product.getMember()).thenReturn(buyer);
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(20L);
+            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller))
+                    .thenReturn(Optional.of(chatRoom));
+            when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, buyerId)).thenReturn(true);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                    product, buyer, seller, TradeStatus.PENDING)).thenReturn(Optional.empty());
+            when(tradeCompleteRepository.save(any(TradeComplete.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            service.execute(productId, sellerId);
+
+            ArgumentCaptor<TradeComplete> tradeCaptor = ArgumentCaptor.forClass(TradeComplete.class);
+            verify(tradeCompleteRepository).save(tradeCaptor.capture());
+            assertEquals(buyer, tradeCaptor.getValue().getBuyer());
+            assertEquals(seller, tradeCaptor.getValue().getSeller());
+            assertEquals(false, tradeCaptor.getValue().isRequestedBySeller());
+        }
+
+        @Test
+        @DisplayName("예약자가 판매자여도 판매자는 예약 거래 완료를 요청할 수 있고 예약 사실을 이벤트에 담는다")
+        void execute_as_reserved_seller_creates_request_with_reserved_event() {
+            Long sellerId = 1L;
+            Long buyerId = 2L;
+            Long productId = 100L;
+            Long roomId = 30L;
+            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            Member seller = sellerDetail.getMember();
+            Member buyer = buyerDetail.getMember();
+            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(sellerDetail);
+            when(memberDetailRepository.findByMemberIdWithMember(buyerId)).thenReturn(buyerDetail);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            when(product.getMode()).thenReturn(Mode.GIVER);
+            when(product.getMember()).thenReturn(seller);
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+            ProductReservation reservation = mock(ProductReservation.class);
+            when(reservation.getReserver()).thenReturn(seller);
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(roomId);
+            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller))
+                    .thenReturn(Optional.of(chatRoom));
+            when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, sellerId)).thenReturn(true);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                    product, buyer, seller, TradeStatus.PENDING)).thenReturn(Optional.empty());
+            TradeComplete saved = mock(TradeComplete.class);
+            when(saved.getId()).thenReturn(55L);
+            when(saved.isRequestedBySeller()).thenReturn(true);
+            when(saved.getCreatedAt()).thenReturn(TRADE_REQUESTED_AT);
+            when(tradeCompleteRepository.save(any(TradeComplete.class))).thenReturn(saved);
+
+            service.execute(productId, buyerId);
+
+            verifyTradeStatusChangedEvent(roomId, true, productId, false, true);
+        }
     }
 
     /**

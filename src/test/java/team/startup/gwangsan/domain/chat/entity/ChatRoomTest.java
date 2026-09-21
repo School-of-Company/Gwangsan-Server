@@ -15,6 +15,26 @@ import static org.mockito.Mockito.when;
 class ChatRoomTest {
 
     @Nested
+    @DisplayName("참여자 메서드는")
+    class Describe_participants {
+
+        @Test
+        @DisplayName("실제 buyer·seller ID를 참여자로 판단하고 각 참여자의 상대를 반환한다")
+        void it_identifies_actual_participants_and_returns_the_other_participant() {
+            Member buyer = member(1L, "구매자");
+            Member seller = member(2L, "판매자");
+            Member outsider = member(3L, "외부인");
+            ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
+
+            assertThat(room.isParticipant(buyer)).isTrue();
+            assertThat(room.isParticipant(seller)).isTrue();
+            assertThat(room.isParticipant(outsider)).isFalse();
+            assertThat(room.getOtherMember(buyer)).isSameAs(seller);
+            assertThat(room.getOtherMember(seller)).isSameAs(buyer);
+        }
+    }
+
+    @Nested
     @DisplayName("isHiddenFor() 메서드는")
     class Describe_isHiddenFor {
 
@@ -44,5 +64,12 @@ class ChatRoomTest {
             room.unhideFor(seller);
             assertThat(room.isHiddenFor(seller)).isFalse();
         }
+    }
+
+    private static Member member(Long id, String nickname) {
+        Member member = Member.builder()
+                .name(nickname).nickname(nickname).phoneNumber(id + "0000000000").password("password").build();
+        org.springframework.test.util.ReflectionTestUtils.setField(member, "id", id);
+        return member;
     }
 }

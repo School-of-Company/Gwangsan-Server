@@ -180,6 +180,36 @@ class FindAdminProductsServiceImplTest {
         }
 
         @Test
+        @DisplayName("지점 없는 회원의 예약 상품을 기본 지점명과 예약 상태로 반환한다")
+        void it_maps_reservation_when_member_detail_has_no_place() {
+            Product product = mock(Product.class);
+            Member member = mock(Member.class);
+            MemberDetail detail = mock(MemberDetail.class);
+            when(member.getId()).thenReturn(1L);
+            when(product.getId()).thenReturn(100L);
+            when(product.getTitle()).thenReturn("예약 상품");
+            when(product.getDescription()).thenReturn("설명");
+            when(product.getGwangsan()).thenReturn(10);
+            when(product.getType()).thenReturn(TYPE);
+            when(product.getMode()).thenReturn(MODE);
+            when(product.getMember()).thenReturn(member);
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            when(detail.getMember()).thenReturn(member);
+            when(detail.getLight()).thenReturn(20);
+            when(detail.getPlace()).thenReturn(null);
+            when(productRepository.findAdminProducts(TYPE, MODE, 102L, 20)).thenReturn(List.of(product));
+            when(memberDetailRepository.findAllByMemberIdIn(anyList())).thenReturn(List.of(detail));
+            when(productImageRepository.findAllByProductIdIn(anyList())).thenReturn(List.of());
+
+            GetProductResponse response = service.execute(TYPE, MODE, 102L, 20).getFirst();
+
+            assertThat(response.member().placeName()).isNull();
+            assertThat(response.member().light()).isEqualTo(2);
+            assertThat(response.isReserved()).isTrue();
+            assertThat(response.isCompleted()).isFalse();
+        }
+
+        @Test
         @DisplayName("조회된 상품이 0개이면 빈 리스트를 반환한다")
         void it_returns_empty_without_secondary_queries() {
             // given

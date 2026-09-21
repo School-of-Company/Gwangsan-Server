@@ -247,5 +247,36 @@ class ReservationProductServiceImplTest {
             assertNull(event.requestedBySeller());
             assertNull(event.requestedAt());
         }
+
+        @Test
+        @DisplayName("작성자가 채팅방 구매자이면 판매자를 예약자로 저장한다")
+        void saves_seller_as_reserver_when_author_is_room_buyer() {
+            Long productId = 1L;
+            Member authorBuyer = mock(Member.class);
+            Member seller = mock(Member.class);
+            when(authorBuyer.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(authorBuyer);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getMember()).thenReturn(authorBuyer);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoom.getProduct()).thenReturn(product);
+            when(chatRoom.getBuyer()).thenReturn(authorBuyer);
+            when(chatRoom.getSeller()).thenReturn(seller);
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
+            when(tradeStateReader.read(product, authorBuyer, seller))
+                    .thenReturn(new TradeStateSnapshot(false, true, null, null));
+
+            service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE);
+
+            ArgumentCaptor<ProductReservation> reservationCaptor = ArgumentCaptor.forClass(ProductReservation.class);
+            verify(productReservationRepository).save(reservationCaptor.capture());
+            assertEquals(seller, reservationCaptor.getValue().getReserver());
+        }
     }
 }
