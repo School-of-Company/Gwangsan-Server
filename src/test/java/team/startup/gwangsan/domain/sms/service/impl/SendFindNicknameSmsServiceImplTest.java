@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.sms.exception.NotRegisteredPhoneNumberException;
+import team.startup.gwangsan.domain.sms.exception.SmsSendFailedException;
 import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.global.redis.RedisUtil;
@@ -73,6 +74,26 @@ class SendFindNicknameSmsServiceImplTest {
                 verify(messageService).sendOne(any());
                 verify(redisUtil).set(eq("sms:code:01012345678"), anyString(), anyLong());
                 verify(redisUtil).set(eq("sms:attempt:01012345678"), eq(1), anyLong());
+            }
+        }
+
+        @Nested
+        @DisplayName("SMS 제공자가 발송에 실패할 때")
+        class Context_with_sms_provider_failure {
+
+            @Test
+            @DisplayName("SmsSendFailedException으로 변환하고 인증 코드를 저장하지 않는다")
+            void it_throws_sms_send_failed_exception_without_saving_auth_code() {
+                SendSmsRequest request = new SendSmsRequest("01012345678");
+                when(memberRepository.existsByPhoneNumber(request.phoneNumber())).thenReturn(true);
+                when(redisUtil.get("sms:attempt:" + request.phoneNumber(), Integer.class)).thenReturn(0);
+                when(smsProperties.getFromNumber()).thenReturn("01000000000");
+                doThrow(new RuntimeException("provider failed")).when(messageService).sendOne(any());
+
+                assertThrows(SmsSendFailedException.class, () -> service.execute(request));
+
+                verify(redisUtil).set(eq("sms:attempt:" + request.phoneNumber()), eq(1), anyLong());
+                verify(redisUtil, never()).set(eq("sms:code:" + request.phoneNumber()), anyString(), anyLong());
             }
         }
 

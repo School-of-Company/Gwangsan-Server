@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
@@ -91,6 +92,24 @@ class TradeCancelWithdrawServiceImplTest {
 
                 assertThatThrownBy(() -> service.execute(99L))
                         .isInstanceOf(NotFoundTradeCompleteException.class);
+            }
+        }
+
+        @Nested
+        @DisplayName("상품이 없을 때")
+        class Context_with_product_not_found {
+
+            @Test
+            @DisplayName("NotFoundProductException을 던지고 철회 후속 작업을 하지 않는다")
+            void it_throws_not_found_product_exception_without_withdrawal_side_effects() {
+                Member member = mock(Member.class);
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> service.execute(99L))
+                        .isInstanceOf(NotFoundProductException.class);
+
+                verifyNoInteractions(tradeCompleteRepository, tradeCancelRepository, tradeCancelImageRepository);
             }
         }
 

@@ -26,6 +26,7 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -167,6 +168,22 @@ class FindChatMessageByRoomIdServiceImplTest {
 
             assertThat(response.messages()).hasSize(1);
             assertThat(response.messages().get(0).content()).isEqualTo("안녕");
+        }
+
+        @Test
+        @DisplayName("실제 상품 이미지 엔티티를 상품 이미지 응답으로 매핑한다")
+        void it_maps_actual_product_images_to_product_response() {
+            arrangeRoomAsSellerView();
+            Image image = Image.builder().imageUrl("product-image-url").build();
+            ReflectionTestUtils.setField(image, "id", 100L);
+            ProductImage productImage = ProductImage.builder().product(product).image(image).build();
+            when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of(productImage));
+            arrangeEmptyMessages();
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().images())
+                    .containsExactly(new team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse(100L, "product-image-url"));
         }
 
         @Test

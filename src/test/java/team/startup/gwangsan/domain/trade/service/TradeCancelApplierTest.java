@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
@@ -16,6 +17,8 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -119,30 +122,19 @@ class TradeCancelApplierTest {
         class Context_with_pending_trade_cancel {
 
             @Test
-            @DisplayName("구매자에게 환불하고 판매자에게서 차감한다")
-            void it_moves_gwangsan_back() {
-                TradeCancel tradeCancel = givenPendingTradeCancel();
+            @DisplayName("실제 구매자·판매자 잔액과 거래 상태를 되돌린다")
+            void it_moves_gwangsan_and_rolls_back_actual_entities() {
+                TradeCancel tradeCancel = givenActualPendingTradeCancel();
                 givenNoAdminAlert();
                 givenNoChatRoom();
 
                 applier.apply(tradeCancel);
 
-                verify(buyerDetail).plusGwangsan(GWANGSAN);
-                verify(sellerDetail).minusGwangsan(GWANGSAN);
-            }
-
-            @Test
-            @DisplayName("철회·거래·상품 상태를 모두 되돌린다")
-            void it_rolls_back_every_status() {
-                TradeCancel tradeCancel = givenPendingTradeCancel();
-                givenNoAdminAlert();
-                givenNoChatRoom();
-
-                applier.apply(tradeCancel);
-
-                verify(tradeCancel).updateStatus(TradeCancelStatus.APPROVED);
-                verify(tradeComplete).updateStatus(TradeStatus.ROLLED_BACK);
-                verify(product).updateStatus(ProductStatus.ONGOING);
+                assertThat(buyerDetail.getGwangsan()).isEqualTo(6_000);
+                assertThat(sellerDetail.getGwangsan()).isEqualTo(3_000);
+                assertThat(tradeCancel.getStatus()).isEqualTo(TradeCancelStatus.APPROVED);
+                assertThat(tradeComplete.getStatus()).isEqualTo(TradeStatus.ROLLED_BACK);
+                assertThat(product.getStatus()).isEqualTo(ProductStatus.ONGOING);
             }
 
             @Test
@@ -284,5 +276,45 @@ class TradeCancelApplierTest {
                 verify(applicationEventPublisher, never()).publishEvent(any());
             }
         }
+    }
+
+    private TradeCancel givenActualPendingTradeCancel() {
+        buyer = actualMember(BUYER_ID, "구매자");
+        seller = actualMember(SELLER_ID, "판매자");
+
+        product = Product.builder()
+                .title("상품").description("설명").gwangsan(GWANGSAN).member(seller)
+                .type(team.startup.gwangsan.domain.post.entity.constant.Type.SERVICE)
+                .mode(team.startup.gwangsan.domain.post.entity.constant.Mode.GIVER)
+                .status(ProductStatus.COMPLETED)
+                .build();
+        ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
+
+        tradeComplete = TradeComplete.builder()
+                .product(product).buyer(buyer).seller(seller)
+                .status(TradeStatus.COMPLETED).requestedBySeller(false)
+                .build();
+
+        TradeCancel tradeCancel = TradeCancel.builder()
+                .tradeComplete(tradeComplete).member(buyer).reason("사유")
+                .status(TradeCancelStatus.PENDING)
+                .build();
+        ReflectionTestUtils.setField(tradeCancel, "id", TRADE_CANCEL_ID);
+
+        buyerDetail = MemberDetail.builder().gwangsan(5_000).light(0).build();
+        sellerDetail = MemberDetail.builder().gwangsan(4_000).light(0).build();
+        when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(buyerDetail));
+        when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(sellerDetail));
+
+        return tradeCancel;
+    }
+
+    private Member actualMember(Long id, String name) {
+        Member member = Member.builder()
+                .name(name).nickname(name).phoneNumber("010-0000-000" + id).password("pw")
+                .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE)
+                .build();
+        ReflectionTestUtils.setField(member, "id", id);
+        return member;
     }
 }

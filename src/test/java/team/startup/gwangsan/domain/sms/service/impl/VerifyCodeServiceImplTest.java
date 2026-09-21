@@ -65,6 +65,23 @@ class VerifyCodeServiceImplTest {
         }
 
         @Nested
+        @DisplayName("데모 번호에 잘못된 코드를 입력할 때")
+        class Context_with_demo_number_and_wrong_code {
+
+            @Test
+            @DisplayName("저장된 코드를 검증하고 인증 완료로 처리하지 않는다")
+            void it_validates_saved_code_instead_of_auto_approving() {
+                VerifyCodeRequest request = new VerifyCodeRequest("01011111111", "999999");
+                when(redisUtil.get("sms:code:01011111111", String.class)).thenReturn("123456");
+
+                assertThrows(NotMatchRandomCodeException.class, () -> service.execute(request));
+
+                verify(redisUtil, never()).set(eq("sms:verified:01011111111"), eq(Boolean.TRUE), anyLong());
+                verify(redisUtil, never()).delete(anyString());
+            }
+        }
+
+        @Nested
         @DisplayName("코드가 만료되었을 때")
         class Context_with_expired_code {
 

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -58,12 +60,20 @@ class CreateAdminAlertServiceImplTest {
         @DisplayName("REPORT 타입 알림 생성 시")
         class Context_with_report_type {
 
-            @Test
+            @ParameterizedTest
+            @CsvSource({
+                    "SEXUAL, 음란/성적 콘텐츠 신고",
+                    "ABUSE_HATE_HARASSMENT, 욕설/혐오/괴롭힘 신고",
+                    "SPAM_AD, 스팸/광고 신고",
+                    "IMPERSONATION, 사칭 신고",
+                    "SELF_HARM_DANGER, 자해/위험 신고",
+                    "ETC, 기타 신고"
+            })
             @DisplayName("신고 타입에 맞는 제목으로 AdminAlert를 저장한다")
-            void it_saves_report_alert() {
+            void it_saves_report_alert(ReportType reportType, String expectedTitle) {
                 Report report = mock(Report.class);
                 Member member = mock(Member.class);
-                when(report.getReportType()).thenReturn(ReportType.SEXUAL);
+                when(report.getReportType()).thenReturn(reportType);
                 when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
 
@@ -71,7 +81,7 @@ class CreateAdminAlertServiceImplTest {
 
                 ArgumentCaptor<AdminAlert> captor = ArgumentCaptor.forClass(AdminAlert.class);
                 verify(adminAlertRepository).save(captor.capture());
-                assertThat(captor.getValue().getTitle()).isEqualTo("음란/성적 콘텐츠 신고");
+                assertThat(captor.getValue().getTitle()).isEqualTo(expectedTitle);
                 assertThat(captor.getValue().getType()).isEqualTo(AlertType.REPORT);
                 assertThat(captor.getValue().getSourceId()).isEqualTo(1L);
                 assertThat(captor.getValue().getRequester()).isEqualTo(member);

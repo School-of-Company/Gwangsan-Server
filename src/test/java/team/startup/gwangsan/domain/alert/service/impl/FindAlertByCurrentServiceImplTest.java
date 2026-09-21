@@ -239,6 +239,25 @@ class FindAlertByCurrentServiceImplTest {
         }
 
         @Test
+        @DisplayName("조회 대상 거래 취소가 없으면 이미지는 비어 있고 상품 이미지 조회를 하지 않는다")
+        void it_returns_empty_images_without_product_lookup_when_trade_cancel_reference_is_missing() {
+            Alert alert = Alert.builder()
+                    .sourceId(400L)
+                    .alertType(AlertType.TRADE_CANCEL)
+                    .title("거래 철회")
+                    .content("거래 철회 요청이 접수되었습니다.")
+                    .build();
+
+            when(alertReceiptRepository.findByMemberId(1L)).thenReturn(List.of(alert));
+            when(tradeCancelRepository.findAllById(List.of(400L))).thenReturn(List.of());
+
+            List<GetAlertResponse> result = service.execute();
+
+            assertThat(result).singleElement().satisfies(response -> assertThat(response.images()).isEmpty());
+            verify(productImageRepository, never()).findAllByProductIdIn(anyList());
+        }
+
+        @Test
         @DisplayName("sendMember 가 있는 알림이면 sendMemberId 를 포함해 반환한다")
         void it_includes_send_member_id_when_present() {
             Member sendMember = mock(Member.class);

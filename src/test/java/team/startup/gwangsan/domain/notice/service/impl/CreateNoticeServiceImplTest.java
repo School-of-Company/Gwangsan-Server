@@ -106,6 +106,26 @@ class CreateNoticeServiceImplTest {
 
                 verify(noticeImageRepository, never()).saveAll(any());
             }
+
+            @Test
+            @DisplayName("이미지 ID가 null이면 이미지 조회와 저장을 생략한다")
+            void it_skips_image_lookup_and_save_when_image_ids_are_null() {
+                Member admin = mock(Member.class);
+                Place place = mock(Place.class);
+                MemberDetail memberDetail = mock(MemberDetail.class);
+
+                when(memberUtil.getCurrentMember()).thenReturn(admin);
+                when(placeRepository.findById(1)).thenReturn(Optional.of(place));
+                when(memberDetailRepository.findAllByPlace(place)).thenReturn(List.of(memberDetail));
+                when(memberDetail.getId()).thenReturn(1L);
+                when(deviceTokenRepository.findAllByUserId(1L)).thenReturn(List.of());
+
+                service.execute(new CreateNoticeRequest("제목", "내용", 1, null));
+
+                verify(noticeRepository).save(any(Notice.class));
+                verify(imageRepository, never()).findAllById(any());
+                verify(noticeImageRepository, never()).saveAll(any());
+            }
         }
 
         @Nested

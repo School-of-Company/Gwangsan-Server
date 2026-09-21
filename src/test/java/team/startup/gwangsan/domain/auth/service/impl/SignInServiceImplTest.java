@@ -106,6 +106,32 @@ class SignInServiceImplTest {
         }
 
         @Nested
+        @DisplayName("deviceId만 있는 정상 로그인 시")
+        class Context_with_device_id_without_device_token {
+
+            @Test
+            @DisplayName("DeviceToken을 저장하지 않는다")
+            void it_does_not_save_device_token() {
+                Member member = activeMember();
+                when(member.getPhoneNumber()).thenReturn("01012345678");
+                when(member.getRole()).thenReturn(MemberRole.ROLE_USER);
+                SignInRequest request = new SignInRequest("테스터일", "pw", null, "device-001", null);
+
+                when(memberRepository.findByNickname("테스터일")).thenReturn(Optional.of(member));
+                when(passwordEncoder.matches("pw", "encodedPw")).thenReturn(true);
+                when(jwtProvider.generateAccessToken(any(), any())).thenReturn("accessToken");
+                when(jwtProvider.generateRefreshToken(any())).thenReturn("refreshToken");
+                when(jwtProvider.getAccessTokenTime()).thenReturn(3600L);
+                when(jwtProvider.getRefreshTokenTime()).thenReturn(86400L);
+
+                TokenResponse response = service.execute(request);
+
+                assertThat(response.accessToken()).isEqualTo("accessToken");
+                verify(deviceTokenRepository, never()).save(any());
+            }
+        }
+
+        @Nested
         @DisplayName("닉네임에 해당하는 회원이 없을 때")
         class Context_with_user_not_found {
 

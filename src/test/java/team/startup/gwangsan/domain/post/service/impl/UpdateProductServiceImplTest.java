@@ -283,4 +283,36 @@ class UpdateProductServiceImplTest {
 
         verify(productImageRepository, never()).deleteAllInBatch(any());
     }
+
+    @Test
+    @DisplayName("SERVICE 게시물은 null 이미지 요청을 빈 목록으로 처리하고 기존 이미지 삭제 없이 갱신한다")
+    void givenServiceWithNullImages_whenUpdateProduct_thenKeepsExistingImages() {
+        Long productId = 1L;
+        when(memberUtil.getCurrentMember()).thenReturn(author);
+        when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+        when(productImageRepository.findAllByProductId(productId)).thenReturn(List.of());
+        when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
+
+        updateProductService.execute(productId, Type.SERVICE, Mode.GIVER, "새 제목", "새 설명", 100, null);
+
+        verify(product).update(Type.SERVICE, Mode.GIVER, "새 제목", "새 설명", 100);
+        verify(productImageRepository, never()).deleteAllInBatch(any());
+        verify(productImageRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("OBJECT 수령 게시물은 이미지 없이도 기존 이미지 삭제 없이 갱신한다")
+    void givenObjectReceiverWithoutImages_whenUpdateProduct_thenKeepsExistingImages() {
+        Long productId = 1L;
+        when(memberUtil.getCurrentMember()).thenReturn(author);
+        when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+        when(productImageRepository.findAllByProductId(productId)).thenReturn(List.of());
+        when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
+
+        updateProductService.execute(productId, Type.OBJECT, Mode.RECEIVER, "새 제목", "새 설명", 100, List.of());
+
+        verify(product).update(Type.OBJECT, Mode.RECEIVER, "새 제목", "새 설명", 100);
+        verify(productImageRepository, never()).deleteAllInBatch(any());
+        verify(productImageRepository, never()).saveAll(any());
+    }
 }

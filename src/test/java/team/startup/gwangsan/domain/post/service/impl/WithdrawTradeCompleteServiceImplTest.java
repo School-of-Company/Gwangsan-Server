@@ -323,5 +323,42 @@ class WithdrawTradeCompleteServiceImplTest {
             assertEquals(null, event.requestedBySeller());
             assertEquals(null, event.requestedAt());
         }
+
+        @Test
+        @DisplayName("RECEIVER 게시물 작성자인 구매자가 자신의 요청을 철회한다")
+        void execute_as_receiver_author_buyer_withdraws_own_request() {
+            Long buyerId = 1L;
+            Long sellerId = 2L;
+            Long productId = 100L;
+            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            Member buyer = buyerDetail.getMember();
+            Member seller = sellerDetail.getMember();
+            when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(buyerDetail);
+            when(memberDetailRepository.findByMemberIdWithMember(sellerId)).thenReturn(sellerDetail);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(product.getMode()).thenReturn(Mode.RECEIVER);
+            when(product.getMember()).thenReturn(buyer);
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            TradeComplete pending = mock(TradeComplete.class);
+            when(pending.isRequestedBySeller()).thenReturn(false);
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                    product, buyer, seller, TradeStatus.PENDING)).thenReturn(Optional.of(pending));
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(50L);
+            when(chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller))
+                    .thenReturn(Optional.of(chatRoom));
+            when(tradeStateReader.read(product, buyer, seller))
+                    .thenReturn(new TradeStateSnapshot(false, false, null, null));
+
+            service.execute(productId, sellerId);
+
+            verify(tradeCompleteRepository).delete(pending);
+            verify(tradeStateReader).read(product, buyer, seller);
+        }
     }
 }

@@ -4,10 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
+import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageUploadFailedException;
 import team.startup.gwangsan.domain.image.exception.InappropriateImageException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.UploadImageResponse;
@@ -51,12 +54,19 @@ class UploadImageServiceImplTest {
                 when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
                 when(s3UploadService.execute(eq("test.png"), any()))
                         .thenReturn(CompletableFuture.completedFuture("https://s3.example.com/test.png"));
+                when(imageRepository.save(any(Image.class))).thenAnswer(invocation -> {
+                    Image image = invocation.getArgument(0);
+                    ReflectionTestUtils.setField(image, "id", 42L);
+                    return image;
+                });
 
                 UploadImageResponse response = service.execute(file);
 
-                assertThat(response).isNotNull();
-                assertThat(response.imageUrl()).isEqualTo("https://s3.example.com/test.png");
-                verify(imageRepository).save(any());
+                ArgumentCaptor<Image> imageCaptor = ArgumentCaptor.forClass(Image.class);
+                verify(imageRepository).save(imageCaptor.capture());
+                assertThat(imageCaptor.getValue().getImageUrl()).isEqualTo("https://s3.example.com/test.png");
+                assertThat(response.imageId()).isEqualTo(42L);
+                assertThat(response.imageUrl()).isEqualTo(imageCaptor.getValue().getImageUrl());
             }
         }
 
@@ -90,6 +100,26 @@ class UploadImageServiceImplTest {
 
                 assertThatThrownBy(() -> service.execute(file))
                         .isInstanceOf(ImageUploadFailedException.class);
+            }
+        }
+
+        @Nested
+        @DisplayName("S3 업로드 비동기 작업이 실패할 때")
+        class Context_with_failed_upload_future {
+
+            @Test
+            @DisplayName("ImageUploadFailedException을 던지고 이미지를 저장하지 않는다")
+            void it_throws_image_upload_failed_exception_without_saving_image() throws IOException {
+                MultipartFile file = mock(MultipartFile.class);
+                when(file.getOriginalFilename()).thenReturn("test.png");
+                when(file.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
+                when(s3UploadService.execute(eq("test.png"), any()))
+                        .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("S3 failure")));
+
+                assertThatThrownBy(() -> service.execute(file))
+                        .isInstanceOf(ImageUploadFailedException.class);
+
+                verifyNoInteractions(imageRepository);
             }
         }
     }
