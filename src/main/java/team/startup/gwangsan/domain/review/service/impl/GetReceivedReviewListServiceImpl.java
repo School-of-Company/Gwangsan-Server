@@ -28,11 +28,22 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
     @Override
     @Transactional(readOnly = true)
     public List<ReviewResponse> execute() {
+        return findReviews(null, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> execute(Long cursor, int size) {
+        return findReviews(cursor, size);
+    }
+
+    private List<ReviewResponse> findReviews(Long cursor, Integer size) {
 
         Member reviewed = memberUtil.getCurrentMember();
 
-        List<ReceivedReviewDto> rows =
-                reviewRepository.findReceivedReviews(reviewed.getId());
+        List<ReceivedReviewDto> rows = size == null
+                ? reviewRepository.findReceivedReviews(reviewed.getId())
+                : reviewRepository.findReceivedReviews(reviewed.getId(), cursor, size);
 
         if (rows.isEmpty()) return List.of();
 

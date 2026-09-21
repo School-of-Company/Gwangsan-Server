@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface GetReceivedReviewListService {
     List<ReviewResponse> execute();
+    List<ReviewResponse> execute(Long cursor, int size);
 }
