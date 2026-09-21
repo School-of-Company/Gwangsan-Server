@@ -33,12 +33,20 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
     @Override
     @Transactional(readOnly = true)
     public List<GetProductResponse> execute(Long memberId, Type type, Mode mode) {
+        return execute(memberId, type, mode, null, null, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GetProductResponse> execute(Long memberId, Type type, Mode mode, Long lastId, Integer size, Boolean completed) {
         MemberDetail memberDetail = memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
         Member member = memberDetail.getMember();
 
-        List<Product> products = productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
-                member, type, mode, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION));
+        List<Product> products = size == null
+                ? productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
+                        member, type, mode, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION))
+                : productRepository.findMemberProducts(member.getId(), type, mode, lastId, size, completed);
 
         if (products.isEmpty()) {
             return List.of();

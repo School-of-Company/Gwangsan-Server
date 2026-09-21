@@ -34,6 +34,25 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public List<Product> findMemberProducts(Long memberId, Type type, Mode mode, Long lastId, int size, Boolean completed) {
+        List<ProductStatus> statuses = completed == null
+                ? List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION, ProductStatus.COMPLETED)
+                : completed ? List.of(ProductStatus.COMPLETED)
+                : List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION);
+        return queryFactory.selectFrom(product)
+                .where(
+                        product.member.id.eq(memberId),
+                        typeEq(type),
+                        modeEq(mode),
+                        product.status.in(statuses),
+                        lastId != null ? product.id.lt(lastId) : null
+                )
+                .orderBy(product.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
     public List<Product> findAdminProducts(Type type, Mode mode, Long lastId, int size) {
         return queryFactory.selectFrom(product)
                 .join(product.member, member).fetchJoin()

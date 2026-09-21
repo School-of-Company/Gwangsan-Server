@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface FindProductByCurrentUserAndTypeAndModeService {
     List<GetProductResponse> execute(Type type, Mode mode);
+
+    List<GetProductResponse> execute(Type type, Mode mode, Long lastId, Integer size, Boolean completed);
 }
