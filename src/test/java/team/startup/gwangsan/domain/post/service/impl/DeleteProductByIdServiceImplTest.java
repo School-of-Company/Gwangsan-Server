@@ -14,11 +14,14 @@ import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.domain.post.exception.ReservedProductDeletionException;
+import team.startup.gwangsan.global.exception.ErrorCode;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +56,22 @@ class DeleteProductByIdServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
+        @Test
+        @DisplayName("작성자도 예약 중인 게시글은 삭제할 수 없으며 상태를 변경하지 않는다")
+        void it_rejects_reserved_product_without_mutation() {
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+            when(productRepository.findByIdWithLock(1L)).thenReturn(Optional.of(product));
+            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
+            ReservedProductDeletionException exception = assertThrows(ReservedProductDeletionException.class,
+                    () -> deleteProductByIdService.execute(1L));
+            assertEquals(ErrorCode.RESERVED_PRODUCT_DELETION, exception.getErrorCode());
+            assertEquals(409, exception.getErrorCode().getStatus());
+
+            verify(product, never()).updateStatus(any());
+            verify(productRepository, never()).delete(any());
+        }
+
         @Nested
         @DisplayName("상품 작성자가 삭제를 요청하면")
         class Context_with_author {
@@ -63,7 +82,9 @@ class DeleteProductByIdServiceImplTest {
                 // given
                 Long productId = 1L;
                 when(memberUtil.getCurrentMember()).thenReturn(author);
-                when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+                when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+                when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
 
                 // when
                 deleteProductByIdService.execute(productId);
@@ -84,7 +105,7 @@ class DeleteProductByIdServiceImplTest {
                 // given
                 Long productId = 1L;
                 when(memberUtil.getCurrentMember()).thenReturn(otherUser);
-                when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+                when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
                 // when & then
                 assertThrows(ForbiddenProductException.class,
@@ -104,7 +125,7 @@ class DeleteProductByIdServiceImplTest {
                 // given
                 Long productId = 99L;
                 when(memberUtil.getCurrentMember()).thenReturn(author);
-                when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
+                when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
 
                 // when & then
                 assertThrows(NotFoundProductException.class,
