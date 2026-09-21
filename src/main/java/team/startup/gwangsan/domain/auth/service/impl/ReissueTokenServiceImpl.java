@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.auth.entity.RefreshToken;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
 import team.startup.gwangsan.domain.auth.exception.NotFoundUserException;
+import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 import team.startup.gwangsan.domain.auth.repository.RefreshTokenRepository;
@@ -37,6 +38,10 @@ public class ReissueTokenServiceImpl implements ReissueTokenService {
 
         Member member = memberRepository.findByPhoneNumber(savedToken.getPhoneNumber())
                 .orElseThrow(NotFoundUserException::new);
+
+        if (member.getStatus() == MemberStatus.PENDING) {
+            throw new PendingApprovalException();
+        }
 
         if (member.getStatus() != MemberStatus.ACTIVE) {
             throw new ForbiddenException();

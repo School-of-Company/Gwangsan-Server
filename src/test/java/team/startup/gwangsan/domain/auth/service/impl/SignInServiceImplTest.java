@@ -3,6 +3,8 @@ package team.startup.gwangsan.domain.auth.service.impl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -10,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
 import team.startup.gwangsan.domain.auth.exception.NotFoundUserException;
+import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
 import team.startup.gwangsan.domain.auth.presentation.dto.request.SignInRequest;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
@@ -19,6 +22,7 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.global.exception.GlobalException;
 import team.startup.gwangsan.global.security.jwt.JwtProvider;
 
 import java.util.Optional;
@@ -150,17 +154,32 @@ class SignInServiceImplTest {
         @DisplayName("비활성 상태의 회원이 로그인 시도할 때")
         class Context_with_inactive_member {
 
-            @Test
-            @DisplayName("ForbiddenException을 던진다")
-            void it_throws_forbidden_exception() {
+            @ParameterizedTest
+            @EnumSource(value = MemberStatus.class, names = {"PENDING", "SUSPENDED", "WITHDRAWN"})
+            @DisplayName("승인 대기와 제한 상태를 구분하고 토큰을 발급하지 않는다")
+            void it_rejects_inactive_status(MemberStatus status) {
                 Member member = mock(Member.class);
-                when(member.getStatus()).thenReturn(MemberStatus.PENDING);
+                when(member.getStatus()).thenReturn(status);
+                when(member.getPassword()).thenReturn("encodedPw");
+                when(passwordEncoder.matches("pw", "encodedPw")).thenReturn(true);
                 SignInRequest request = new SignInRequest("테스터일", "pw", null, null, null);
 
                 when(memberRepository.findByNickname("테스터일")).thenReturn(Optional.of(member));
 
                 assertThatThrownBy(() -> service.execute(request))
-                        .isInstanceOf(ForbiddenException.class);
+                        .isExactlyInstanceOf(status == MemberStatus.PENDING
+                                ? PendingApprovalException.class : ForbiddenException.class)
+                        .isInstanceOfSatisfying(GlobalException.class, exception -> {
+                            assertThat(exception.getErrorCode().getStatus()).isEqualTo(403);
+                            assertThat(exception.getErrorCode().getMessage()).isEqualTo(
+                                    status == MemberStatus.PENDING
+                                            ? "승인 대기 중인 계정입니다. 관리자 승인 후 이용 가능합니다."
+                                            : "탈퇴한 회원이거나 접근이 제한된 계정입니다.");
+                        });
+                verify(jwtProvider, never()).generateAccessToken(any(), any());
+                verify(jwtProvider, never()).generateRefreshToken(any());
+                verify(refreshTokenRepository, never()).save(any());
+                verifyNoInteractions(deviceTokenRepository);
             }
         }
 
@@ -168,17 +187,22 @@ class SignInServiceImplTest {
         @DisplayName("비밀번호가 일치하지 않을 때")
         class Context_with_wrong_password {
 
-            @Test
+            @ParameterizedTest
+            @EnumSource(MemberStatus.class)
             @DisplayName("UnauthorizedException을 던진다")
-            void it_throws_unauthorized_exception() {
-                Member member = activeMember();
+            void it_throws_unauthorized_exception(MemberStatus status) {
+                Member member = mock(Member.class);
+                when(member.getPassword()).thenReturn("encodedPw");
                 SignInRequest request = new SignInRequest("테스터일", "wrong", null, null, null);
 
+                lenient().when(member.getStatus()).thenReturn(status);
                 when(memberRepository.findByNickname("테스터일")).thenReturn(Optional.of(member));
                 when(passwordEncoder.matches("wrong", "encodedPw")).thenReturn(false);
 
                 assertThatThrownBy(() -> service.execute(request))
                         .isInstanceOf(UnauthorizedException.class);
+                verify(member, never()).getStatus();
+                verifyNoInteractions(jwtProvider, refreshTokenRepository);
             }
         }
     }
