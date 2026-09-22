@@ -9,6 +9,7 @@ public record GetRoomProductDto(
         String title,
         boolean isCompleted,
         boolean isReserved,
+        boolean isDeleted,
         List<GetImageResponse> images
 ) {
 }

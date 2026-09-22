@@ -116,10 +116,15 @@ class ProductRepositoryTest {
     class Describe_findRoomProductsWithImagesByIds {
 
         @ParameterizedTest
-        @CsvSource({"COMPLETED, true, false", "RESERVATION, false, true", "ONGOING, false, false"})
-        @DisplayName("상품 상태를 isCompleted/isReserved로 매핑한다")
+        @CsvSource({
+                "COMPLETED, true, false, false",
+                "RESERVATION, false, true, false",
+                "ONGOING, false, false, false",
+                "DELETED, false, false, true"
+        })
+        @DisplayName("상품 상태를 isCompleted/isReserved/isDeleted로 매핑한다")
         void it_maps_status_to_completed_and_reserved(
-                ProductStatus status, boolean completed, boolean reserved) {
+                ProductStatus status, boolean completed, boolean reserved, boolean deleted) {
             Product product = persistProduct(status);
             em.flush();
             em.clear();
@@ -131,6 +136,7 @@ class ProductRepositoryTest {
             assertThat(dto.productId()).isEqualTo(product.getId());
             assertThat(dto.isCompleted()).isEqualTo(completed);
             assertThat(dto.isReserved()).isEqualTo(reserved);
+            assertThat(dto.isDeleted()).isEqualTo(deleted);
         }
 
         @Test
