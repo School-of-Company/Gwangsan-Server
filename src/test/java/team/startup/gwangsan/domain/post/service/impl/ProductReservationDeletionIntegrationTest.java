@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -235,9 +236,22 @@ class ProductReservationDeletionIntegrationTest {
                 await(release);
                 winner.run();
             }));
-            assertThat(locked.await(10, TimeUnit.SECONDS)).isTrue();
+            if (!locked.await(10, TimeUnit.SECONDS)) {
+                if (first.isDone()) {
+                    first.get();
+                }
+                throw new AssertionError("첫 번째 작업이 상품 행 잠금을 획득하지 못했습니다");
+            }
+            // 이전 조회 후 100ms 넘게 쉬고 빈 캐시를 먼저 읽어, 대기 감지 회귀를 검증한다.
+            TimeUnit.MILLISECONDS.sleep(200);
+            try (var connection = DriverManager.getConnection(mariadb.getJdbcUrl(), "root", mariadb.getPassword());
+                 var statement = connection.createStatement();
+                 var rows = statement.executeQuery("SELECT COUNT(*) FROM information_schema.INNODB_LOCK_WAITS")) {
+                rows.next();
+                assertThat(rows.getLong(1)).as("두 번째 작업 시작 전 빈 잠금 대기 캐시").isZero();
+            }
             var second = pool.submit(() -> assertThatThrownBy(loser::run).isInstanceOf(expected));
-            awaitDatabaseLockWait();
+            awaitDatabaseLockWait(first, second);
             assertThat(second.isDone()).isFalse();
             release.countDown();
             first.get(15, TimeUnit.SECONDS);
@@ -249,18 +263,28 @@ class ProductReservationDeletionIntegrationTest {
         }
     }
 
-    private void awaitDatabaseLockWait() throws Exception {
+    private void awaitDatabaseLockWait(Future<?> first, Future<?> second) throws Exception {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         try (var connection = DriverManager.getConnection(mariadb.getJdbcUrl(), "root", mariadb.getPassword());
              var statement = connection.createStatement()) {
             do {
+                if (first.isDone()) {
+                    first.get();
+                    throw new AssertionError("잠금 해제 전에 첫 번째 작업이 종료되었습니다");
+                }
+                if (second.isDone()) {
+                    second.get();
+                    throw new AssertionError("DB 잠금 대기 확인 전에 두 번째 작업이 종료되었습니다");
+                }
                 try (var rows = statement.executeQuery("SELECT COUNT(*) FROM information_schema.INNODB_LOCK_WAITS")) {
                     rows.next();
                     if (rows.getLong(1) > 0) {
                         return;
                     }
                 }
-                TimeUnit.MILLISECONDS.sleep(25);
+                // MariaDB의 InnoDB 정보 캐시는 마지막 조회 후 100ms 넘게 쉬어야 갱신된다.
+                // 25ms 폴링은 빈 스냅샷을 계속 유지하므로 실제 행 잠금 대기를 놓친다.
+                TimeUnit.MILLISECONDS.sleep(200);
             } while (System.nanoTime() < deadline);
         }
         throw new AssertionError("두 번째 서비스가 MariaDB 행 잠금을 기다리지 않았습니다");
