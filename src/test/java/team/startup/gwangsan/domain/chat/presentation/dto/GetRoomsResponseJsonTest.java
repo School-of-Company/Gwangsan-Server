@@ -34,7 +34,7 @@ class GetRoomsResponseJsonTest {
         @ParameterizedTest
         @CsvSource({"true, false", "false, true", "false, false"})
         void it_includes_boolean_status_fields_even_when_false(boolean completed, boolean reserved) throws Exception {
-            var product = new GetRoomProductDto(1L, "상품", completed, reserved, List.of());
+            var product = new GetRoomProductDto(1L, "상품", completed, reserved, false, List.of());
             var response = new GetRoomsResponse(1L, null, null, null, null, null, 0L, product);
 
             var json = objectMapper.readTree(objectMapper.writeValueAsString(List.of(response))).get(0).get("product");
@@ -44,6 +44,8 @@ class GetRoomsResponseJsonTest {
             assertThat(json.get("isReserved").booleanValue()).isEqualTo(reserved);
             assertThat(json.get("isCompleted").isBoolean()).isTrue();
             assertThat(json.get("isCompleted").booleanValue()).isEqualTo(completed);
+            assertThat(json.get("isDeleted").isBoolean()).isTrue();
+            assertThat(json.get("isDeleted").booleanValue()).isFalse();
             assertThat(json.get("images").isArray()).isTrue();
             assertThat(json.get("images").isEmpty()).isTrue();
         }

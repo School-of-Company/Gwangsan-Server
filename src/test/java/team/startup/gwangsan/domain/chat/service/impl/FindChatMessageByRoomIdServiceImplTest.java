@@ -28,6 +28,7 @@ import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
@@ -357,6 +358,30 @@ class FindChatMessageByRoomIdServiceImplTest {
 
             assertThat(response.product().createdAt()).isNull();
             assertThat(response.product().isCompletable()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 DELETED 상태이면 isDeleted 가 true 이다")
+        void it_sets_isDeleted_true_when_product_is_deleted() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.DELETED);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isDeleted()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 DELETED 상태가 아니면 isDeleted 가 false 이다")
+        void it_sets_isDeleted_false_when_product_is_not_deleted() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isDeleted()).isFalse();
         }
 
         @Test

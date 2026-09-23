@@ -18,6 +18,7 @@ import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResp
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
+import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
@@ -67,6 +68,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
         boolean isAuthor = product.getMember().getId().equals(memberId);
+        boolean isDeleted = product.getStatus() == ProductStatus.DELETED;
 
         // 거래 상태 변경 이벤트와 같은 값을 쓰기 위해 조회도 이 스냅샷을 거친다.
         TradeStateSnapshot tradeState = tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
@@ -86,6 +88,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 tradeState.isCompletableFor(isSeller),
                 tradeState.completed(),
                 isReserved,
+                isDeleted,
                 reservation.map(ProductReservation::getScheduledAt).orElse(null),
                 reservation.map(ProductReservation::getPlaceName).orElse(null),
                 reservation.map(ProductReservation::getAddress).orElse(null),

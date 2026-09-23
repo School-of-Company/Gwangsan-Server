@@ -132,7 +132,14 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
             // 일괄 조회를 유지하기 위해 엔티티 기반 TradeStateReader 대신 조회한 상태로 계산한다.
             GetRoomProductDto dto = resultMap.computeIfAbsent(
                     productId,
-                    id -> new GetRoomProductDto(id, title, status == ProductStatus.COMPLETED, status == ProductStatus.RESERVATION, new ArrayList<>())
+                    id -> new GetRoomProductDto(
+                            id,
+                            title,
+                            status == ProductStatus.COMPLETED,
+                            status == ProductStatus.RESERVATION,
+                            status == ProductStatus.DELETED,
+                            new ArrayList<>()
+                    )
             );
 
             if (imageId != null) {

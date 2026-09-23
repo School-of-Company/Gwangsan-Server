@@ -22,6 +22,7 @@ public record GetChatProductDto(
         boolean isCompletable,
         boolean isCompleted,
         boolean isReserved,
+        boolean isDeleted,
         LocalDateTime reservationScheduledAt,
         String reservationPlaceName,
         String reservationAddress,
