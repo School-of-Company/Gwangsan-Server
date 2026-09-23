@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.RelatedKeywordResponse;
 import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
@@ -38,19 +39,19 @@ class FindRelatedKeywordServiceImplTest {
             @Test
             @DisplayName("키워드 목록을 반환한다")
             void it_returns_related_keyword_list() {
-                RelatedKeyword rk1 = mock(RelatedKeyword.class);
-                when(rk1.getId()).thenReturn(1L);
-                when(rk1.getName()).thenReturn("keyword1");
-
-                RelatedKeyword rk2 = mock(RelatedKeyword.class);
-                when(rk2.getId()).thenReturn(2L);
-                when(rk2.getName()).thenReturn("keyword2");
+                RelatedKeyword rk1 = RelatedKeyword.builder().name("keyword1").build();
+                ReflectionTestUtils.setField(rk1, "id", 1L);
+                RelatedKeyword rk2 = RelatedKeyword.builder().name("keyword2").build();
+                ReflectionTestUtils.setField(rk2, "id", 2L);
 
                 when(relatedKeywordRepository.findAll()).thenReturn(List.of(rk1, rk2));
 
                 List<RelatedKeywordResponse> result = service.execute();
 
-                assertEquals(2, result.size());
+                assertEquals(List.of(
+                        new RelatedKeywordResponse(1L, "keyword1"),
+                        new RelatedKeywordResponse(2L, "keyword2")
+                ), result);
             }
         }
 

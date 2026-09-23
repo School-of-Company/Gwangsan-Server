@@ -34,6 +34,40 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
+    public List<Product> findMemberProducts(Long memberId, Type type, Mode mode, Long lastId, int size, Boolean completed) {
+        List<ProductStatus> statuses = completed == null
+                ? List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION, ProductStatus.COMPLETED)
+                : completed ? List.of(ProductStatus.COMPLETED)
+                : List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION);
+        return queryFactory.selectFrom(product)
+                .where(
+                        product.member.id.eq(memberId),
+                        typeEq(type),
+                        modeEq(mode),
+                        product.status.in(statuses),
+                        lastId != null ? product.id.lt(lastId) : null
+                )
+                .orderBy(product.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public List<Product> findAdminProducts(Type type, Mode mode, Long lastId, int size) {
+        return queryFactory.selectFrom(product)
+                .join(product.member, member).fetchJoin()
+                .where(
+                        typeEq(type),
+                        modeEq(mode),
+                        product.status.ne(ProductStatus.DELETED),
+                        lastId != null ? product.id.lt(lastId) : null
+                )
+                .orderBy(product.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
     public List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status) {
         return queryFactory
                 .selectFrom(product).distinct()
@@ -94,9 +128,18 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
             Long imageId = row.get(image.id);
             String imageUrl = row.get(image.imageUrl);
 
+            // 상태 값은 TradeStateReader.read()가 반환하는 completed()/reserved()와 같아야 한다.
+            // 일괄 조회를 유지하기 위해 엔티티 기반 TradeStateReader 대신 조회한 상태로 계산한다.
             GetRoomProductDto dto = resultMap.computeIfAbsent(
                     productId,
-                    id -> new GetRoomProductDto(id, title, status == ProductStatus.COMPLETED, new ArrayList<>())
+                    id -> new GetRoomProductDto(
+                            id,
+                            title,
+                            status == ProductStatus.COMPLETED,
+                            status == ProductStatus.RESERVATION,
+                            status == ProductStatus.DELETED,
+                            new ArrayList<>()
+                    )
             );
 
             if (imageId != null) {

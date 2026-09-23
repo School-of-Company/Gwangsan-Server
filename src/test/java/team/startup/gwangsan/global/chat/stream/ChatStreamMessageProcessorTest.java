@@ -13,12 +13,15 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
+import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.domain.chat.exception.ChatMessageIdConflictException;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -112,6 +115,34 @@ class ChatStreamMessageProcessorTest {
     class Describe_handler_failure {
 
         @Test
+        void it_quarantines_conflicting_message_ids_before_acknowledging() {
+            doThrow(new ChatMessageIdConflictException(999L)).when(handler).handle(any());
+            MapRecord<String, String, String> record = MapRecord.create(streamKey, Map.of(
+                    "messageId", "999", "roomId", "42", "senderId", "7", "content", "hello",
+                    "createdAt", "1700000000000")).withId(RecordId.of("1700000000000-0"));
+
+            processor.process(streamKey, record, 0);
+
+            var order = inOrder(redisAdapter);
+            order.verify(redisAdapter).sendToDlq(eq(streamKey), eq(record), any());
+            order.verify(redisAdapter).ack(streamKey, record.getId());
+            verify(redisAdapter, never()).sendToRetry(any(), any(), anyInt(), any());
+        }
+
+        @Test
+        void it_does_not_acknowledge_when_conflict_quarantine_fails() {
+            doThrow(new ChatMessageIdConflictException(999L)).when(handler).handle(any());
+            doThrow(new RuntimeException("Redis unavailable")).when(redisAdapter).sendToDlq(any(), any(), any());
+            MapRecord<String, String, String> record = MapRecord.create(streamKey, Map.of(
+                    "messageId", "999", "roomId", "42", "senderId", "7", "content", "hello",
+                    "createdAt", "1700000000000")).withId(RecordId.of("1700000000000-0"));
+
+            assertThatThrownBy(() -> processor.process(streamKey, record, 0)).hasMessage("Redis unavailable");
+
+            verify(redisAdapter, never()).ack(any(), any());
+        }
+
+        @Test
         @DisplayName("attempt >= retryMax이면 DLQ로 보내고 ACK한다")
         void it_sends_to_dlq_when_max_retry_exceeded() {
             doThrow(new RuntimeException("DB 연결 실패")).when(handler).handle(any(ChatStreamMessage.class));
@@ -142,6 +173,23 @@ class ChatStreamMessageProcessorTest {
             ArgumentCaptor<Integer> attemptCaptor = ArgumentCaptor.forClass(Integer.class);
             verify(redisAdapter).sendToRetry(eq(streamKey), eq(record), attemptCaptor.capture(), any());
             assertThat(attemptCaptor.getValue()).isEqualTo(1);
+            verify(redisAdapter).ack(eq(streamKey), any(RecordId.class));
+        }
+
+        @Test
+        @DisplayName("차단 관계면 재시도하지 않고 바로 DLQ로 보낸다")
+        void it_sends_to_dlq_without_retry_when_blocked() {
+            doThrow(new BlockedMemberException()).when(handler).handle(any(ChatStreamMessage.class));
+
+            MapRecord<String, String, String> record = MapRecord.create(
+                    streamKey,
+                    Map.of("messageId", "999", "roomId", "42", "senderId", "7", "content", "hello", "createdAt", "1700000000000")
+            ).withId(RecordId.of("1700000000000-0"));
+
+            processor.process(streamKey, record, 0);
+
+            verify(redisAdapter).sendToDlq(eq(streamKey), eq(record), any());
+            verify(redisAdapter, never()).sendToRetry(any(), any(), anyInt(), any());
             verify(redisAdapter).ack(eq(streamKey), any(RecordId.class));
         }
 

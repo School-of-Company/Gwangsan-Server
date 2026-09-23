@@ -10,6 +10,7 @@ import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeExceptio
 import team.startup.gwangsan.domain.sms.presentation.dto.SendSmsRequest;
 import team.startup.gwangsan.domain.sms.service.SendSmsService;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsDemoAccount;
 import team.startup.gwangsan.global.sms.SmsSendHelper;
 import team.startup.gwangsan.global.sms.SmsProperties;
 
@@ -29,6 +30,11 @@ public class SendSmsServiceImpl implements SendSmsService {
 
     @Override
     public void execute(SendSmsRequest request) {
+
+        if (SmsDemoAccount.isDemo(request.phoneNumber())) {
+            log.info("[SMS] 데모 번호 요청 - 발송 생략");
+            return;
+        }
 
         if (memberRepository.existsByPhoneNumber(request.phoneNumber())) {
             throw new AlreadyRegisteredPhoneNumberException();

@@ -14,11 +14,33 @@ import team.startup.gwangsan.domain.post.repository.custom.ProductCustomReposito
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, ProductCustomRepository {
-    Optional<Product> findByIdAndStatus(Long id, ProductStatus status);
+    Optional<Product> findByIdAndStatusNot(Long id, ProductStatus status);
 
+    /**
+     * 삭제되지 않은 게시글만 조회한다. 단건 조회는 이 메서드를 사용한다.
+     */
+    default Optional<Product> findActiveById(Long id) {
+        return findByIdAndStatusNot(id, ProductStatus.DELETED);
+    }
+
+    /**
+     * 거래·예약·작성자 삭제의 상태 검사와 변경을 직렬화하는 잠금. 삭제된 게시글은 제외한다.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Product p where p.id = :id and p.status <> team.startup.gwangsan.domain.post.entity.constant.ProductStatus.DELETED")
+    Optional<Product> findByIdWithLock(Long id);
+
+    /**
+     * 이미 성립한 거래를 되돌리기 위한 잠금. 삭제된 게시글도 포함한다.
+     *
+     * <p>작성자 삭제는 예약 중에만 거절하고 완료된 게시글은 허용하므로, 철회 대기 중에
+     * 판매자가 글을 지울 수 있다. 여기서 DELETED 를 걸러내면 광산 환불이 영구히 막히고 관리자
+     * 알림도 처리 불가 상태로 남는다. 잠그는 행은 {@link #findByIdWithLock} 과 같으므로
+     * 거래 완료 요청 경로와의 직렬화는 그대로 유지된다.
+     */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
-    Optional<Product> findByIdWithLock(Long id);
+    Optional<Product> findByIdForUpdate(Long id);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Product p SET p.member = :dummy WHERE p.member = :target")

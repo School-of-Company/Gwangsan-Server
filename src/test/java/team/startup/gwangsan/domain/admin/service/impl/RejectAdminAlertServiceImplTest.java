@@ -16,10 +16,13 @@ import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
+import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -54,6 +57,9 @@ class RejectAdminAlertServiceImplTest {
 
     @Mock
     private TradeCancelRepository tradeCancelRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -161,15 +167,50 @@ class RejectAdminAlertServiceImplTest {
                 TradeCancel tradeCancel = mock(TradeCancel.class);
                 when(tradeCancel.getId()).thenReturn(7L);
                 when(tradeCancel.getMember()).thenReturn(cancelMember);
+                when(tradeCancel.getStatus()).thenReturn(TradeCancelStatus.PENDING);
 
                 when(adminAlertRepository.findById(10L)).thenReturn(Optional.of(alert));
                 when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(requesterDetail));
+                when(tradeCancelRepository.findProductIdById(7L)).thenReturn(Optional.of(70L));
+                when(productRepository.findByIdForUpdate(70L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCancelRepository.findById(7L)).thenReturn(Optional.of(tradeCancel));
 
                 service.execute(10L);
 
+                verify(productRepository).findByIdForUpdate(70L);
                 verify(tradeCancel).updateStatus(TradeCancelStatus.REJECTED);
                 verify(applicationEventPublisher).publishEvent(any(CreateAlertEvent.class));
+            }
+
+            @Test
+            @DisplayName("이미 처리된 철회는 CannotPendingTradeCancelException을 던진다")
+            void it_throws_when_trade_cancel_already_handled() {
+                Member admin = mock(Member.class);
+                when(admin.getId()).thenReturn(1L);
+                MemberDetail adminDetail = mock(MemberDetail.class);
+                givenAdmin(admin, adminDetail);
+
+                Member requester = mock(Member.class);
+                when(requester.getId()).thenReturn(2L);
+                AdminAlert alert = mock(AdminAlert.class);
+                when(alert.getType()).thenReturn(AlertType.TRADE_CANCEL);
+                when(alert.getRequester()).thenReturn(requester);
+                when(alert.getSourceId()).thenReturn(7L);
+
+                // 양측 동의로 이미 철회가 반영된 뒤 관리자가 기각을 누른 상황.
+                TradeCancel tradeCancel = mock(TradeCancel.class);
+                when(tradeCancel.getStatus()).thenReturn(TradeCancelStatus.APPROVED);
+
+                when(adminAlertRepository.findById(10L)).thenReturn(Optional.of(alert));
+                when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(mock(MemberDetail.class)));
+                when(tradeCancelRepository.findProductIdById(7L)).thenReturn(Optional.of(70L));
+                when(productRepository.findByIdForUpdate(70L)).thenReturn(Optional.of(mock(Product.class)));
+                when(tradeCancelRepository.findById(7L)).thenReturn(Optional.of(tradeCancel));
+
+                assertThatThrownBy(() -> service.execute(10L))
+                        .isInstanceOf(CannotPendingTradeCancelException.class);
+
+                verify(tradeCancel, never()).updateStatus(TradeCancelStatus.REJECTED);
             }
         }
 

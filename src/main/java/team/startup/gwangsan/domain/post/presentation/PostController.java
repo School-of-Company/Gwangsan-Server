@@ -10,6 +10,8 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.presentation.dto.request.CreateProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.PatchProductRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.request.ReservationRequest;
+import team.startup.gwangsan.domain.post.presentation.dto.request.WithdrawTradeCompleteRequest;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductByIdResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
 import team.startup.gwangsan.domain.post.service.*;
@@ -30,6 +32,7 @@ public class PostController {
     private final DeleteProductByIdService deleteProductByIdService;
     private final FindProductsByMemberIdService findProductsByMemberIdService;
     private final RequestTradeCompleteService requestTradeCompleteService;
+    private final WithdrawTradeCompleteService withdrawTradeCompleteService;
     private final ReservationProductService reservationProductService;
     private final DeleteReservationProductService deleteReservationProductService;
 
@@ -64,9 +67,19 @@ public class PostController {
     @GetMapping("/current")
     public ResponseEntity<List<GetProductResponse>> findCurrentProduct(
             @RequestParam(name = "type", required = false) Type type,
-            @RequestParam(name = "mode", required = false) Mode mode
+            @RequestParam(name = "mode", required = false) Mode mode,
+            @RequestParam(name = "last_id", required = false) Long lastId,
+            @RequestParam(name = "size", required = false) Integer size,
+            @RequestParam(name = "completed", required = false) Boolean completed
     ) {
-        List<GetProductResponse> responses = findProductByCurrentUserAndTypeAndModeService.execute(type, mode);
+        if ((size == null && (lastId != null || completed != null))
+                || (size != null && (size < 1 || size > 100))
+                || (lastId != null && lastId < 1)) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<GetProductResponse> responses = size == null
+                ? findProductByCurrentUserAndTypeAndModeService.execute(type, mode)
+                : findProductByCurrentUserAndTypeAndModeService.execute(type, mode, lastId, size, completed);
         return ResponseEntity.ok(responses);
     }
 
@@ -98,9 +111,19 @@ public class PostController {
     public ResponseEntity<List<GetProductResponse>> findByMemberID(
             @PathVariable("member_id") Long memberId,
             @RequestParam(name = "type", required = false) Type type,
-            @RequestParam(name = "mode", required = false) Mode mode
+            @RequestParam(name = "mode", required = false) Mode mode,
+            @RequestParam(name = "last_id", required = false) Long lastId,
+            @RequestParam(name = "size", required = false) Integer size,
+            @RequestParam(name = "completed", required = false) Boolean completed
     ) {
-        List<GetProductResponse> responses = findProductsByMemberIdService.execute(memberId, type, mode);
+        if ((size == null && (lastId != null || completed != null))
+                || (size != null && (size < 1 || size > 100))
+                || (lastId != null && lastId < 1)) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<GetProductResponse> responses = size == null
+                ? findProductsByMemberIdService.execute(memberId, type, mode)
+                : findProductsByMemberIdService.execute(memberId, type, mode, lastId, size, completed);
         return ResponseEntity.ok(responses);
     }
 
@@ -110,9 +133,26 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @DeleteMapping("/trade")
+    public ResponseEntity<Void> tradeWithdraw(@RequestBody @Valid WithdrawTradeCompleteRequest request) {
+        withdrawTradeCompleteService.execute(request.productId(), request.otherMemberId());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @PatchMapping("/reservation/{product_id}")
-    public ResponseEntity<Void> reservation(@PathVariable("product_id") Long productId) {
-        reservationProductService.execute(productId);
+    public ResponseEntity<Void> reservation(
+            @PathVariable("product_id") Long productId,
+            @RequestBody @Valid ReservationRequest request
+    ) {
+        reservationProductService.execute(
+                productId,
+                request.roomId(),
+                request.scheduledAt(),
+                request.placeName(),
+                request.address(),
+                request.latitude(),
+                request.longitude()
+        );
         return ResponseEntity.ok().build();
     }
 

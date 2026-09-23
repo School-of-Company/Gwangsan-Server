@@ -52,7 +52,7 @@ public class CreateReviewServiceImpl implements CreateReviewService {
             throw new CannotReviewSelfException();
         }
 
-        Product product = productRepository.findById(request.productId())
+        Product product = productRepository.findActiveById(request.productId())
                 .orElseThrow(NotFoundProductException::new);
 
         if (product.getStatus() != ProductStatus.COMPLETED) {

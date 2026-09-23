@@ -13,6 +13,7 @@ import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.SelfBlockNotAllowedException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -94,6 +95,20 @@ class BlockMemberServiceImplTest {
             // when & then
             assertThrows(AlreadyBlockedException.class,
                     () -> service.execute(2L));
+
+            verify(memberBlockRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("차단 대상 회원이 없으면 NotFoundMemberException 을 던지고 저장하지 않는다")
+        void it_throws_NotFoundMemberException_when_target_member_not_found() {
+            Member currentMember = mock(Member.class);
+            when(currentMember.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(currentMember);
+            when(memberBlockRepository.existsByBlockerIdAndBlockedId(1L, 2L)).thenReturn(false);
+            when(memberRepository.findById(2L)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundMemberException.class, () -> service.execute(2L));
 
             verify(memberBlockRepository, never()).save(any());
         }

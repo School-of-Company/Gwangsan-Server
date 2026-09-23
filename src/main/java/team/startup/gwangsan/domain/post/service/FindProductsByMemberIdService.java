@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface FindProductsByMemberIdService {
     List<GetProductResponse> execute(Long memberId, Type type, Mode mode);
+
+    List<GetProductResponse> execute(Long memberId, Type type, Mode mode, Long lastId, Integer size, Boolean completed);
 }

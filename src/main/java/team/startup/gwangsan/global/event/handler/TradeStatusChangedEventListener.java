@@ -19,11 +19,14 @@ public class TradeStatusChangedEventListener {
     @Async("asyncExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleTradeStatusChangedEvent(TradeStatusChangedEvent event) {
+        log.info("[TRADE-NOTIFY] listener entered. roomId={}, productId={}, completed={}, reserved={}",
+                event.roomId(), event.productId(), event.completed(), event.reserved());
         try {
             notifier.notifyTradeStatusChanged(event);
+            log.info("[TRADE-NOTIFY] listener done. roomId={}, productId={}", event.roomId(), event.productId());
         } catch (Exception e) {
-            log.warn(
-                    "Failed to notify chatting server of trade status change. roomId={}, productId={}, completed={}, reserved={}",
+            log.error(
+                    "[TRADE-NOTIFY] FAILED. roomId={}, productId={}, completed={}, reserved={}",
                     event.roomId(),
                     event.productId(),
                     event.completed(),

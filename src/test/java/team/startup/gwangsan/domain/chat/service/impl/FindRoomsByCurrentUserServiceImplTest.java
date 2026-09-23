@@ -66,7 +66,7 @@ class FindRoomsByCurrentUserServiceImplTest {
                     10L, null, 1L, "마지막 메시지", MessageType.TEXT,
                     LocalDateTime.now(), 0L, 100L
             );
-            GetRoomProductDto productDto = new GetRoomProductDto(100L, "상품명", false, List.of());
+            GetRoomProductDto productDto = new GetRoomProductDto(100L, "상품명", false, true, false, List.of());
 
             when(chatRoomRepository.findRoomsByMemberId(1L)).thenReturn(List.of(roomDto));
             when(productRepository.findRoomProductsWithImagesByIds(Set.of(100L))).thenReturn(List.of(productDto));
@@ -77,6 +77,7 @@ class FindRoomsByCurrentUserServiceImplTest {
             assertThat(result.get(0).roomId()).isEqualTo(10L);
             assertThat(result.get(0).lastMessage()).isEqualTo("마지막 메시지");
             assertThat(result.get(0).product()).isSameAs(productDto);
+            assertThat(result.get(0).product().isReserved()).isTrue();
         }
 
         @Test
@@ -84,8 +85,8 @@ class FindRoomsByCurrentUserServiceImplTest {
         void it_maps_each_room_to_correct_product() {
             GetRoomsDto room1 = new GetRoomsDto(1L, null, 1L, "msg1", MessageType.TEXT, LocalDateTime.now(), 0L, 100L);
             GetRoomsDto room2 = new GetRoomsDto(2L, null, 2L, "msg2", MessageType.TEXT, LocalDateTime.now(), 1L, 200L);
-            GetRoomProductDto product1 = new GetRoomProductDto(100L, "상품1", false, List.of());
-            GetRoomProductDto product2 = new GetRoomProductDto(200L, "상품2", true, List.of());
+            GetRoomProductDto product1 = new GetRoomProductDto(100L, "상품1", false, false, false, List.of());
+            GetRoomProductDto product2 = new GetRoomProductDto(200L, "상품2", true, false, false, List.of());
 
             when(chatRoomRepository.findRoomsByMemberId(1L)).thenReturn(List.of(room1, room2));
             when(productRepository.findRoomProductsWithImagesByIds(Set.of(100L, 200L)))
@@ -101,8 +102,8 @@ class FindRoomsByCurrentUserServiceImplTest {
         }
 
         @Test
-        @DisplayName("상품이 삭제되어 productDtoMap 에 없으면 product 가 null 인 응답이 반환된다")
-        void it_returns_null_product_when_product_deleted() {
+        @DisplayName("상품이 productDtoMap 에 없으면 isDeleted 플레이스홀더 상품 정보를 반환한다")
+        void it_returns_deleted_placeholder_when_product_missing_from_map() {
             GetRoomsDto roomDto = new GetRoomsDto(
                     10L, null, 1L, "메시지", MessageType.TEXT,
                     LocalDateTime.now(), 0L, 999L
@@ -114,7 +115,9 @@ class FindRoomsByCurrentUserServiceImplTest {
             List<GetRoomsResponse> result = service.execute();
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).product()).isNull();
+            assertThat(result.get(0).product()).isNotNull();
+            assertThat(result.get(0).product().productId()).isEqualTo(999L);
+            assertThat(result.get(0).product().isDeleted()).isTrue();
         }
     }
 }

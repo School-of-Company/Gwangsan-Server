@@ -10,14 +10,16 @@ import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ReservationParticipantOnlyException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.post.service.DeleteReservationProductService;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     private final MemberUtil memberUtil;
     private final ProductReservationRepository productReservationRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final TradeStateReader tradeStateReader;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -34,24 +37,34 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     public void execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
 
+        Product product = productRepository.findActiveById(productId)
+                .orElseThrow(NotFoundProductException::new);
+
         ProductReservation productReservation = productReservationRepository
-                .findByProduct_MemberOrReserverAndStatus(member, member, ReservationStatus.PENDING)
+                .findByProductAndStatus(product, ReservationStatus.PENDING)
                 .orElseThrow(ReservationParticipantOnlyException::new);
 
-        Product product = productReservation.getProduct();
+        if (!product.getMember().getId().equals(member.getId())
+                && !productReservation.getReserver().getId().equals(member.getId())) {
+            throw new ReservationParticipantOnlyException();
+        }
 
         productReservation.cancel();
 
         product.updateStatus(ProductStatus.ONGOING);
 
         chatRoomRepository.findByProductIdAndMember(product.getId(), productReservation.getReserver())
-                .ifPresent(chatRoom -> applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
-                        chatRoom.getId(),
-                        null,
-                        product.getId(),
-                        false,
-                        false,
-                        LocalDateTime.now()
-                )));
+                .ifPresent(chatRoom -> {
+                    TradeStateSnapshot tradeState =
+                            tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
+                    applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(
+                            chatRoom.getId(),
+                            product.getId(),
+                            tradeState.completed(),
+                            tradeState.reserved(),
+                            tradeState.requestedBySeller(),
+                            tradeState.requestedAt()
+                    ));
+                });
     }
 }

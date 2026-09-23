@@ -41,7 +41,7 @@ public class UpdateProductServiceImpl implements UpdateProductService {
     public void execute(Long productId, Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
         Member member = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
 
         validateProductMember(member, product);

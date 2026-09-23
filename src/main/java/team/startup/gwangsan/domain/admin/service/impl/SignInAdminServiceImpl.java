@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminR
 import team.startup.gwangsan.domain.admin.service.SignInAdminService;
 import team.startup.gwangsan.domain.auth.entity.RefreshToken;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
+import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
 import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
 import team.startup.gwangsan.domain.auth.repository.RefreshTokenRepository;
@@ -37,8 +38,8 @@ public class SignInAdminServiceImpl implements SignInAdminService {
 
         validateMemberRole(member);
 
-        validateMemberStatus(member);
         validateMemberPassword(password, member);
+        validateMemberStatus(member);
 
         String accessToken = jwtProvider.generateAccessToken(member.getPhoneNumber(), member.getRole());
         String refreshToken = jwtProvider.generateRefreshToken(member.getPhoneNumber());
@@ -68,6 +69,10 @@ public class SignInAdminServiceImpl implements SignInAdminService {
     }
 
     private void validateMemberStatus(Member member) {
+        if (member.getStatus() == MemberStatus.PENDING) {
+            throw new PendingApprovalException();
+        }
+
         if (member.getStatus() != MemberStatus.ACTIVE) {
             throw new ForbiddenException();
         }

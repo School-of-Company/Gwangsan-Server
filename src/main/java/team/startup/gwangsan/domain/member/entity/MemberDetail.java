@@ -22,7 +22,7 @@ public class MemberDetail {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dong_id", nullable = false)
     private Dong dong;
 

@@ -50,6 +50,8 @@ chatting:
     # Keep empty in tests to disable external chatting server calls by default.
     url: ""
     internal-secret: ""
+    connect-timeout: 100ms
+    read-timeout: 100ms
 
 ai:
   server:

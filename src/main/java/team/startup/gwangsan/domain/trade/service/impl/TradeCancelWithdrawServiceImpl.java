@@ -2,8 +2,11 @@ package team.startup.gwangsan.domain.trade.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
+import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
@@ -24,14 +27,19 @@ import java.util.Objects;
 public class TradeCancelWithdrawServiceImpl implements TradeCancelWithdrawService {
 
     private final MemberUtil memberUtil;
+    private final ProductRepository productRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
     private final TradeCancelRepository tradeCancelRepository;
     private final TradeCancelImageRepository tradeCancelImageRepository;
 
+    /** 잠금과 격리 수준의 이유는 {@code TradeCancelServiceImpl} 주석 참고. */
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
+
+        productRepository.findByIdForUpdate(productId)
+                .orElseThrow(NotFoundProductException::new);
 
         TradeComplete tradeComplete = tradeCompleteRepository.findByProductIdAndStatus(
                 productId, TradeStatus.COMPLETED)

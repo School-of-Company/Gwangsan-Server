@@ -5,6 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.util.ReflectionTestUtils;
+import team.startup.gwangsan.domain.chat.presentation.ChatController;
+import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,11 +26,14 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.domain.post.entity.ProductImage;
+import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -35,17 +44,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FindChatMessageByRoomIdServiceImpl 단위 테스트")
 class FindChatMessageByRoomIdServiceImplTest {
+
+    private static final LocalDateTime TRADE_REQUESTED_AT = LocalDateTime.of(2026, 8, 30, 11, 20);
 
     @Mock private ChatRoomRepository chatRoomRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private ChatMessageRepository chatMessageRepository;
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ProductImageRepository productImageRepository;
-    @Mock private TradeCompleteRepository tradeCompleteRepository;
+    @Mock private TradeStateReader tradeStateReader;
+    @Mock private ProductReservationRepository productReservationRepository;
 
     @InjectMocks
     private FindChatMessageByRoomIdServiceImpl service;
@@ -65,6 +79,7 @@ class FindChatMessageByRoomIdServiceImplTest {
             otherMember = mock(Member.class);
             chatRoom = mock(ChatRoom.class);
             product = mock(Product.class);
+            lenient().when(product.getMember()).thenReturn(currentMember);
 
             when(currentMember.getId()).thenReturn(1L);
             lenient().when(otherMember.getId()).thenReturn(2L);
@@ -78,11 +93,9 @@ class FindChatMessageByRoomIdServiceImplTest {
             when(chatRoom.getProduct()).thenReturn(product);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.empty());
+            givenTradeState(false, false, null);
         }
 
         // buyer == currentMember 인 happy path 공통 설정
@@ -92,11 +105,15 @@ class FindChatMessageByRoomIdServiceImplTest {
             when(chatRoom.getProduct()).thenReturn(product);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
-            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(chatRoom));
             when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
-            lenient().when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.empty());
+            givenTradeState(false, false, null);
+        }
+
+        /** 거래 상태 스냅샷을 지정한다. isCompletable 은 실제 record 로직으로 계산된다. */
+        private void givenTradeState(boolean completed, boolean reserved, Boolean requestedBySeller) {
+            lenient().when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(completed, reserved, requestedBySeller, TRADE_REQUESTED_AT));
         }
 
         private void arrangeEmptyMessages() {
@@ -152,6 +169,22 @@ class FindChatMessageByRoomIdServiceImplTest {
 
             assertThat(response.messages()).hasSize(1);
             assertThat(response.messages().get(0).content()).isEqualTo("안녕");
+        }
+
+        @Test
+        @DisplayName("실제 상품 이미지 엔티티를 상품 이미지 응답으로 매핑한다")
+        void it_maps_actual_product_images_to_product_response() {
+            arrangeRoomAsSellerView();
+            Image image = Image.builder().imageUrl("product-image-url").build();
+            ReflectionTestUtils.setField(image, "id", 100L);
+            ProductImage productImage = ProductImage.builder().product(product).image(image).build();
+            when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of(productImage));
+            arrangeEmptyMessages();
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().images())
+                    .containsExactly(new team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse(100L, "product-image-url"));
         }
 
         @Test
@@ -231,10 +264,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_seller_already_requested() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, true);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -257,10 +287,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_true_when_buyer_and_seller_requested() {
             arrangeRoomAsBuyerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(true);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, true);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -272,10 +299,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_buyer_already_requested() {
             arrangeRoomAsBuyerView();
             arrangeEmptyMessages();
-            TradeComplete tradeComplete = mock(TradeComplete.class);
-            when(tradeComplete.isRequestedBySeller()).thenReturn(false);
-            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(any(), any(), any(), eq(TradeStatus.PENDING)))
-                    .thenReturn(Optional.of(tradeComplete));
+            givenTradeState(false, false, false);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -287,7 +311,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_sets_isCompletable_false_when_product_already_completed() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
+            givenTradeState(true, false, null);
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -296,15 +320,124 @@ class FindChatMessageByRoomIdServiceImplTest {
         }
 
         @Test
+        @DisplayName("거래 요청 시각을 그대로 응답의 createdAt 으로 내려준다")
+        void it_returns_trade_requested_at_as_created_at() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            givenTradeState(false, false, true);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            // 상품 생성 시각이 아니라 거래 요청 시각이며, 거래 상태 변경 이벤트와 같은 값이다.
+            assertThat(response.product().createdAt()).isEqualTo(TRADE_REQUESTED_AT);
+        }
+
+        @Test
+        @DisplayName("거래가 완료된 뒤에도 createdAt 이 남아 거래 카드가 유지된다")
+        void it_keeps_created_at_after_trade_completion() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            givenTradeState(true, false, null);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            // null 이 되면 클라이언트가 거래 카드를 숨겨 완료 표시와 리뷰 작성 진입점이 사라진다.
+            assertThat(response.product().createdAt()).isEqualTo(TRADE_REQUESTED_AT);
+            assertThat(response.product().isCompleted()).isTrue();
+        }
+
+        @Test
+        @DisplayName("철회가 승인되면 createdAt 이 null 이 되어 다시 거래를 요청할 수 있다")
+        void it_clears_created_at_after_rollback() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            lenient().when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, false, null, null));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().createdAt()).isNull();
+            assertThat(response.product().isCompletable()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 DELETED 상태이면 isDeleted 가 true 이다")
+        void it_sets_isDeleted_true_when_product_is_deleted() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.DELETED);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isDeleted()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 DELETED 상태가 아니면 isDeleted 가 false 이다")
+        void it_sets_isDeleted_false_when_product_is_not_deleted() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().isDeleted()).isFalse();
+        }
+
+        @Test
         @DisplayName("상품이 예약 상태이면 isReserved 가 true 이다")
         void it_sets_isReserved_true_when_product_is_reserved() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
+            givenTradeState(false, true, null);
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.empty());
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().isReserved()).isTrue();
+        }
+
+        @Test
+        @DisplayName("상품이 예약 상태이면 예약 일시와 장소 정보를 함께 반환한다")
+        void it_returns_reservation_schedule_and_place_when_reserved() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+            givenTradeState(false, true, null);
+
+            ProductReservation reservation = mock(ProductReservation.class);
+            LocalDateTime scheduledAt = LocalDateTime.of(2026, 9, 1, 14, 0);
+            when(reservation.getScheduledAt()).thenReturn(scheduledAt);
+            when(reservation.getPlaceName()).thenReturn("광산구청");
+            when(reservation.getAddress()).thenReturn("광주광역시 광산구 광산로29번길 15");
+            when(reservation.getLatitude()).thenReturn(35.1397);
+            when(reservation.getLongitude()).thenReturn(126.7935);
+            when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
+                    .thenReturn(Optional.of(reservation));
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().reservationScheduledAt()).isEqualTo(scheduledAt);
+            assertThat(response.product().reservationPlaceName()).isEqualTo("광산구청");
+            assertThat(response.product().reservationAddress()).isEqualTo("광주광역시 광산구 광산로29번길 15");
+            assertThat(response.product().reservationLatitude()).isEqualTo(35.1397);
+            assertThat(response.product().reservationLongitude()).isEqualTo(126.7935);
+        }
+
+        @Test
+        @DisplayName("상품이 예약 상태가 아니면 예약 조회 없이 예약 정보는 null 이다")
+        void it_does_not_query_reservation_when_not_reserved() {
+            arrangeRoomAsSellerView();
+            arrangeEmptyMessages();
+
+            GetChatMessagesResponse response = service.execute(5L, null, null, 20);
+
+            assertThat(response.product().reservationScheduledAt()).isNull();
+            assertThat(response.product().reservationPlaceName()).isNull();
+            assertThat(response.product().reservationAddress()).isNull();
+            assertThat(response.product().reservationLatitude()).isNull();
+            assertThat(response.product().reservationLongitude()).isNull();
+            verifyNoInteractions(productReservationRepository);
         }
 
         @Test
@@ -329,6 +462,41 @@ class FindChatMessageByRoomIdServiceImplTest {
             service.execute(5L, null, null, 20);
 
             verify(chatMessageRepository, never()).readMessage(anyLong(), anyLong(), anyLong());
+        }
+
+        @ParameterizedTest
+        @CsvSource({"GIVER, true, true", "GIVER, false, false",
+                "RECEIVER, true, false", "RECEIVER, false, true"})
+        @DisplayName("Mode와 작성자 여부에 따른 isAuthor/isSeller를 HTTP boolean 키로 반환한다")
+        void it_returns_author_and_seller_independently(Mode mode, boolean author, boolean seller) throws Exception {
+            Member owner = author ? currentMember : otherMember;
+            Member partner = author ? otherMember : currentMember;
+            Product actualProduct = Product.builder().title("상품명").member(owner).mode(mode).build();
+            ReflectionTestUtils.setField(actualProduct, "id", 10L);
+            ChatRoom actualRoom = ChatRoom.builder().product(actualProduct)
+                    .seller(mode == Mode.GIVER ? owner : partner)
+                    .buyer(mode == Mode.GIVER ? partner : owner).build();
+            when(chatRoomRepository.findByRoomIdWithSellerAndProduct(5L)).thenReturn(Optional.of(actualRoom));
+            when(productImageRepository.findAllByProductId(10L)).thenReturn(List.of());
+            givenTradeState(false, false, true);
+            arrangeEmptyMessages();
+
+            var mvc = MockMvcBuilders.standaloneSetup(
+                    new ChatController(null, service, null, null, null, null, null)).build();
+            mvc.perform(get("/api/chat/5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.product.isAuthor").isBoolean())
+                    .andExpect(jsonPath("$.product.isAuthor").value(author))
+                    .andExpect(jsonPath("$.product.author").doesNotExist())
+                    .andExpect(jsonPath("$.product.isSeller").isBoolean())
+                    .andExpect(jsonPath("$.product.isSeller").value(seller))
+                    .andExpect(jsonPath("$.product.isCompletable").value(!seller))
+                    .andExpect(jsonPath("$.product.isCompleted").value(false))
+                    .andExpect(jsonPath("$.product.isReserved").value(false));
+            verify(chatRoomRepository).findByRoomIdWithSellerAndProduct(5L);
+            verify(productImageRepository).findAllByProductId(10L);
+            verifyNoMoreInteractions(chatRoomRepository, productImageRepository);
+            verifyNoInteractions(productReservationRepository, chatMessageImageRepository);
         }
 
         private ChatMessage buildTextMessage(Long id, String content) {

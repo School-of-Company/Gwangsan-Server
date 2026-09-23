@@ -43,6 +43,19 @@ class SendResetPasswordSmsServiceImplTest {
     class Describe_execute {
 
         @Nested
+        @DisplayName("데모 번호일 때")
+        class Context_with_demo_phone_number {
+
+            @Test
+            @DisplayName("회원 조회·인증 정보 저장·SMS 발송 없이 즉시 반환한다")
+            void it_returns_immediately_without_sending_sms() {
+                service.execute(new SendSmsRequest("01011111111"));
+
+                verifyNoInteractions(memberRepository, redisUtil, smsSendHelper);
+            }
+        }
+
+        @Nested
         @DisplayName("정상적인 요청일 때")
         class Context_with_valid_request {
 

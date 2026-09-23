@@ -3,17 +3,21 @@ package team.startup.gwangsan.domain.chat.presentation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.chat.presentation.dto.request.UpdateMessageCheckedRequest;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.CreateChatRoomResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetChatMessagesResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.ValidateChatSendableResponse;
 import team.startup.gwangsan.domain.chat.service.CreateChatRoomService;
+import team.startup.gwangsan.domain.chat.service.DeleteChatRoomService;
 import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.chat.service.FindRoomsByCurrentUserService;
 import team.startup.gwangsan.domain.chat.service.ReadChatMessageService;
 import team.startup.gwangsan.domain.chat.service.FindRoomIdByProductIdService;
+import team.startup.gwangsan.domain.chat.service.ValidateChatSendableService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +32,8 @@ public class ChatController {
     private final ReadChatMessageService readChatMessageService;
     private final FindRoomsByCurrentUserService findRoomsByCurrentUserService;
     private final FindRoomIdByProductIdService findRoomIdByProductIdService;
+    private final DeleteChatRoomService deleteChatRoomService;
+    private final ValidateChatSendableService validateChatSendableService;
 
     @PostMapping("/room/{product_id}")
     public ResponseEntity<CreateChatRoomResponse> createChatRoom(@PathVariable("product_id") Long productId) {
@@ -62,5 +68,20 @@ public class ChatController {
     public ResponseEntity<GetRoomIdResponse> getRoom(@PathVariable("product_id") Long productId) {
         GetRoomIdResponse response = findRoomIdByProductIdService.execute(productId);
         return ResponseEntity.ok(response);
+    }
+
+    // 채팅 서버가 소켓 메시지를 브로드캐스트하기 전에 호출한다.
+    @GetMapping("/room/{room_id}/sendable")
+    public ResponseEntity<ValidateChatSendableResponse> validateSendable(
+            @PathVariable("room_id") Long roomId,
+            @RequestParam MultiValueMap<String, String> queryParameters
+    ) {
+        return ResponseEntity.ok(validateChatSendableService.execute(roomId, queryParameters.get("imageIds")));
+    }
+
+    @DeleteMapping("/room/{room_id}")
+    public ResponseEntity<Void> deleteChatRoom(@PathVariable("room_id") Long roomId) {
+        deleteChatRoomService.execute(roomId);
+        return ResponseEntity.noContent().build();
     }
 }

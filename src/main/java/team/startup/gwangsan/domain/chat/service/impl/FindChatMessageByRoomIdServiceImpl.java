@@ -17,11 +17,13 @@ import team.startup.gwangsan.domain.chat.service.FindChatMessageByRoomIdService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -39,7 +41,8 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final ProductImageRepository productImageRepository;
-    private final TradeCompleteRepository tradeCompleteRepository;
+    private final TradeStateReader tradeStateReader;
+    private final ProductReservationRepository productReservationRepository;
 
     @Override
     @Transactional
@@ -64,23 +67,33 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 .toList();
 
         boolean isSeller = memberId.equals(chatRoom.getSeller().getId());
-        Optional<TradeComplete> pendingTradeComplete = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
-                product, chatRoom.getBuyer(), chatRoom.getSeller(), TradeStatus.PENDING);
-        boolean isCompleted = product.getStatus() == ProductStatus.COMPLETED;
-        boolean isReserved = product.getStatus() == ProductStatus.RESERVATION;
-        boolean isCompletable = !isCompleted && pendingTradeComplete
-                .map(tc -> tc.isRequestedBySeller() != isSeller)
-                .orElse(true);
+        boolean isAuthor = product.getMember().getId().equals(memberId);
+        boolean isDeleted = product.getStatus() == ProductStatus.DELETED;
+
+        // 거래 상태 변경 이벤트와 같은 값을 쓰기 위해 조회도 이 스냅샷을 거친다.
+        TradeStateSnapshot tradeState = tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
+        boolean isReserved = tradeState.reserved();
+
+        Optional<ProductReservation> reservation = isReserved
+                ? productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING)
+                : Optional.empty();
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
                 product.getTitle(),
                 imageResponses,
-                pendingTradeComplete.map(TradeComplete::getCreatedAt).orElse(null),
+                tradeState.requestedAt(),
                 isSeller,
-                isCompletable,
-                isCompleted,
-                isReserved
+                isAuthor,
+                tradeState.isCompletableFor(isSeller),
+                tradeState.completed(),
+                isReserved,
+                isDeleted,
+                reservation.map(ProductReservation::getScheduledAt).orElse(null),
+                reservation.map(ProductReservation::getPlaceName).orElse(null),
+                reservation.map(ProductReservation::getAddress).orElse(null),
+                reservation.map(ProductReservation::getLatitude).orElse(null),
+                reservation.map(ProductReservation::getLongitude).orElse(null)
         );
 
         List<ChatMessage> messages = chatMessageRepository.findChatMessageByRoomIdWithCursorPaging(roomId, lastCreatedAt, lastMessageId, limit);

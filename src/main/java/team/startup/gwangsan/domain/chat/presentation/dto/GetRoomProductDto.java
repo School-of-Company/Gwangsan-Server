@@ -8,6 +8,8 @@ public record GetRoomProductDto(
         Long productId,
         String title,
         boolean isCompleted,
+        boolean isReserved,
+        boolean isDeleted,
         List<GetImageResponse> images
 ) {
 }

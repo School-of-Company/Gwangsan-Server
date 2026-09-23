@@ -43,11 +43,13 @@ public enum ErrorCode {
     FORBIDDEN_PRODUCT(403, "해당 게시글에 접근할 권한이 없습니다."),
     PRODUCT_NOT_ONGOING(400, "진행 중인 상품만 예약할 수 있습니다."),
     PRODUCT_ALREADY_RESERVATION(400, "이미 예약된 상품입니다."),
+    RESERVED_PRODUCT_DELETION(409, "예약 중인 게시글은 삭제할 수 없습니다. 예약을 취소한 후 다시 시도해 주세요."),
     PRODUCT_NOT_RESERVATION(400, "예약되지 않은 상품입니다."),
     RESERVATION_PARTICIPANT_ONLY(403, "예약자 또는 상품 등록자만 예약을 취소할 수 있습니다."),
     INAPPROPRIATE_CONTENT(400, "부적절한 내용이 포함되어 있습니다."),
 
     // image
+    INVALID_IMAGE_IDS(400, "이미지 ID는 양의 안전 정수여야 합니다."),
     IMAGE_NOT_FOUND(404, "해당 이미지를 찾을 수 없습니다."),
     OBJECT_REQUIRED_IMAGE(400, "해당 게시글은 이미지가 필수입니다."),
     NOT_FOUND_IMAGE_IDS(404, "존재하지 않는 이미지 ID가 포함되어 있습니다."),
@@ -71,6 +73,7 @@ public enum ErrorCode {
     // auth
     UNAUTHORIZED(401, "닉네임 또는 비밀번호가 잘못되었습니다."),
     BANNED_PHONE_NUMBER(403, "강제 탈퇴 처리된 회원입니다."),
+    PENDING_APPROVAL(403, "승인 대기 중인 계정입니다. 관리자 승인 후 이용 가능합니다."),
     FORBIDDEN(403, "탈퇴한 회원이거나 접근이 제한된 계정입니다."),
     NOT_FOUND_USER(401, "존재하지 않는 사용자입니다."),
 
@@ -98,6 +101,7 @@ public enum ErrorCode {
     // trade
     CANNOT_SELECT_SELF(400, "본인을 거래 대상으로 선택할 수 없습니다."),
     NOT_FOUND_TRADE_COMPLETE(404, "거래 완료 요청을 찾을 수 없습니다."),
+    NOT_TRADE_COMPLETE_REQUESTER(403, "거래 완료 요청자가 아닙니다."),
     TRADE_ALREADY_COMPLETE(409, "이미 거래 완료된 상품입니다."),
     TRADE_ALREADY_COMPLETE_REQUEST(409, "이미 거래 완료 요청한 상품입니다."),
     TRADE_COMPLETE_WITHOUT_CHATTING(400, "채팅을 하지 않은 상품은 거래 완료할 수 없습니다."),

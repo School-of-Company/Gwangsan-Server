@@ -49,9 +49,13 @@ public class FindRoomsByCurrentUserServiceImpl implements FindRoomsByCurrentUser
                             room.lastMessageType(),
                             room.lastMessageTime(),
                             room.unreadMessageCount(),
-                            productDtoMap.get(room.productId())
+                            productDtoMap.getOrDefault(room.productId(), deletedProductPlaceholder(room.productId()))
                     )
                 )
                 .toList();
+    }
+
+    private GetRoomProductDto deletedProductPlaceholder(Long productId) {
+        return new GetRoomProductDto(productId, null, false, false, true, List.of());
     }
 }

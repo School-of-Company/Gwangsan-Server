@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface GetReviewByMemberService {
     List<ReviewResponse> execute(Long memberId);
+    List<ReviewResponse> execute(Long memberId, Long cursor, int size);
 }

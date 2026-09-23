@@ -105,7 +105,7 @@ class FindProductByIdServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
             when(product.getMember()).thenReturn(owner);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             Place productPlace = mock(Place.class);
             when(productPlace.getName()).thenReturn("광산구");
@@ -165,7 +165,7 @@ class FindProductByIdServiceImplTest {
             assertThat(result.isCompleted()).isFalse();
             assertThat(result.isReserved()).isTrue();
 
-            verify(productRepository).findById(productId);
+            verify(productRepository).findActiveById(productId);
             verify(productImageRepository).findAllByProductId(productId);
             verify(chatRoomRepository).findByProductIdAndMember(productId, currentMember);
             verify(chatMessageRepository).existsByRoomAndSenderId(chatRoom, currentMember.getId());
@@ -185,13 +185,13 @@ class FindProductByIdServiceImplTest {
             when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
                     .thenReturn(myPlace);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class,
                     () -> service.execute(productId));
 
-            verify(productRepository).findById(productId);
+            verify(productRepository).findActiveById(productId);
             verifyNoMoreInteractions(productImageRepository, chatRoomRepository, chatMessageRepository);
         }
 
@@ -215,7 +215,7 @@ class FindProductByIdServiceImplTest {
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(productId);
             when(product.getMember()).thenReturn(owner);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             Place productPlace = mock(Place.class);
             when(memberDetailRepository.findPlaceByMemberId(owner.getId()))
@@ -233,7 +233,7 @@ class FindProductByIdServiceImplTest {
             assertThrows(PlaceMismatchException.class,
                     () -> service.execute(productId));
 
-            verify(productRepository).findById(productId);
+            verify(productRepository).findActiveById(productId);
         }
 
         @Test
@@ -264,7 +264,7 @@ class FindProductByIdServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
             when(product.getMember()).thenReturn(owner);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             MemberDetail ownerDetail = mock(MemberDetail.class);
             when(ownerDetail.getId()).thenReturn(10L);
@@ -313,7 +313,7 @@ class FindProductByIdServiceImplTest {
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(productId);
             when(product.getMember()).thenReturn(owner);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             doThrow(new BlockedMemberException())
                     .when(blockValidator).validate(currentMember, owner);
@@ -346,7 +346,7 @@ class FindProductByIdServiceImplTest {
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(productId);
             when(product.getMember()).thenReturn(owner);
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
             Place productPlace = mock(Place.class);
             when(memberDetailRepository.findPlaceByMemberId(owner.getId()))

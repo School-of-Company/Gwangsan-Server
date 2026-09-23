@@ -15,6 +15,7 @@ public record GetProductResponse(
         Mode mode,
         GetProductMemberResponse member,
         List<GetImageResponse> images,
-        boolean isCompleted
+        boolean isCompleted,
+        boolean isReserved
 ) {
 }

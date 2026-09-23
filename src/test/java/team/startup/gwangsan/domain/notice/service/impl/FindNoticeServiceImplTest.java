@@ -7,12 +7,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.member.entity.MemberDetail;
 import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
+import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.presentation.dto.response.FindNoticeResponse;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
@@ -22,6 +26,8 @@ import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +79,38 @@ class FindNoticeServiceImplTest {
 
                 assertThat(response).isNotNull();
                 assertThat(response.title()).isEqualTo("제목");
+            }
+
+            @Test
+            @DisplayName("공지 이미지의 실제 ID와 URL을 응답에 매핑한다")
+            void it_maps_real_notice_image_to_response() {
+                Member member = mock(Member.class);
+                MemberDetail memberDetail = mock(MemberDetail.class);
+                Place place = mock(Place.class);
+                Notice notice = Notice.builder()
+                        .title("제목")
+                        .content("내용")
+                        .place(place)
+                        .member(member)
+                        .build();
+                Image image = Image.builder().imageUrl("https://image.example/notice.jpg").build();
+                NoticeImage noticeImage = NoticeImage.builder().notice(notice).image(image).build();
+                ReflectionTestUtils.setField(notice, "id", 1L);
+                ReflectionTestUtils.setField(notice, "createdAt", LocalDateTime.of(2026, 1, 1, 0, 0));
+                ReflectionTestUtils.setField(image, "id", 10L);
+
+                when(memberUtil.getCurrentMember()).thenReturn(member);
+                when(noticeRepository.findById(1L)).thenReturn(Optional.of(notice));
+                when(memberDetailRepository.findByMember(member)).thenReturn(Optional.of(memberDetail));
+                when(member.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
+                when(memberDetail.getPlace()).thenReturn(place);
+                when(place.getName()).thenReturn("광산지부");
+                when(member.getId()).thenReturn(1L);
+                when(noticeImageRepository.findAllByNotice(notice)).thenReturn(List.of(noticeImage));
+
+                FindNoticeResponse response = service.execute(1L);
+
+                assertThat(response.images()).containsExactly(new GetImageResponse(10L, "https://image.example/notice.jpg"));
             }
         }
 

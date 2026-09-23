@@ -8,6 +8,7 @@ import team.startup.gwangsan.domain.sms.exception.NotMatchRandomCodeException;
 import team.startup.gwangsan.domain.sms.presentation.dto.VerifyCodeRequest;
 import team.startup.gwangsan.domain.sms.service.VerifyFindNicknameCodeService;
 import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.global.sms.SmsDemoAccount;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,11 @@ public class VerifyFindNicknameCodeServiceImpl implements VerifyFindNicknameCode
         String phoneNumber = request.phoneNumber();
         String codeKey = CODE_KEY_PREFIX + phoneNumber;
         String verifiedKey = VERIFIED_KEY_PREFIX + phoneNumber;
+
+        if (SmsDemoAccount.isDemo(phoneNumber) && SmsDemoAccount.FIXED_CODE.equals(request.code())) {
+            redisUtil.set(verifiedKey, Boolean.TRUE, VERIFIED_TTL_MILLIS);
+            return;
+        }
 
         String savedCode = redisUtil.get(codeKey, String.class);
         if (savedCode == null) {

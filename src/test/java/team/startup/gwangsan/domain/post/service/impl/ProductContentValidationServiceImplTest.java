@@ -11,6 +11,7 @@ import team.startup.gwangsan.domain.post.exception.InappropriateContentException
 import team.startup.gwangsan.global.thirdparty.ai.AiModerationClient;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,14 @@ class ProductContentValidationServiceImplTest {
 
             assertThatThrownBy(() -> service.validate("제목", "설명"))
                     .isInstanceOf(InappropriateContentException.class);
+        }
+
+        @Test
+        @DisplayName("부적절한 내용이 없으면 정상 처리한다")
+        void it_returns_normally_for_appropriate_content() {
+            when(aiModerationClient.containsProfanity("제목\n설명")).thenReturn(false);
+
+            assertThatCode(() -> service.validate("제목", "설명")).doesNotThrowAnyException();
         }
     }
 }

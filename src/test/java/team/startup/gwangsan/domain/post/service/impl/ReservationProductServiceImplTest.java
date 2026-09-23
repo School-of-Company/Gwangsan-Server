@@ -10,19 +10,24 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ProductAlreadyReservationException;
 import team.startup.gwangsan.domain.post.exception.ProductNotOngoingException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
+import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -50,10 +55,21 @@ class ReservationProductServiceImplTest {
     private ChatRoomRepository chatRoomRepository;
 
     @Mock
+
+    private TradeStateReader tradeStateReader;
+
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private ReservationProductServiceImpl service;
+
+    private static final Long ROOM_ID = 5L;
+    private static final LocalDateTime SCHEDULED_AT = LocalDateTime.of(2026, 9, 1, 14, 0);
+    private static final String PLACE_NAME = "광산구청";
+    private static final String ADDRESS = "광주광역시 광산구 광산로29번길 15";
+    private static final Double LATITUDE = 35.1397;
+    private static final Double LONGITUDE = 126.7935;
 
     @Nested
     @DisplayName("execute()는")
@@ -63,15 +79,39 @@ class ReservationProductServiceImplTest {
         @DisplayName("상품이 존재하지 않으면 NotFoundProductException을 던진다")
         void throw_exception_when_product_not_found() {
             Long productId = 1L;
+            Member author = mock(Member.class);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
 
             // given
-            when(productRepository.findById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class,
-                    () -> service.execute(productId));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
-            verify(productRepository).findById(productId);
+            verify(productRepository).findByIdWithLock(productId);
+        }
+
+        @Test
+        @DisplayName("호출자가 게시물 작성자가 아니면 ForbiddenProductException을 던진다")
+        void throw_exception_when_not_author() {
+            Long productId = 1L;
+
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            Member other = mock(Member.class);
+            when(other.getId()).thenReturn(2L);
+            when(memberUtil.getCurrentMember()).thenReturn(other);
+
+            Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
+
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            assertThrows(ForbiddenProductException.class,
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
+
+            verifyNoInteractions(chatRoomRepository, productReservationRepository, applicationEventPublisher);
         }
 
         @Test
@@ -79,15 +119,20 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_already_reserved() {
             Long productId = 1L;
 
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+
             // given
             Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductAlreadyReservationException.class,
-                    () -> service.execute(productId));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -95,15 +140,65 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_status_is_not_ongoing() {
             Long productId = 1L;
 
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+
             // given
             Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
             // when & then
             assertThrows(ProductNotOngoingException.class,
-                    () -> service.execute(productId));
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
+        }
+
+        @Test
+        @DisplayName("채팅방을 찾을 수 없으면 NotFoundChatRoomException을 던진다")
+        void throw_exception_when_chat_room_not_found() {
+            Long productId = 1L;
+
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+
+            Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundChatRoomException.class,
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
+        }
+
+        @Test
+        @DisplayName("채팅방의 상품이 요청한 상품과 다르면 NotFoundChatRoomException을 던진다")
+        void throw_exception_when_chat_room_product_mismatch() {
+            Long productId = 1L;
+
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
+
+            Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            Product otherProduct = mock(Product.class);
+            when(otherProduct.getId()).thenReturn(999L);
+            when(chatRoom.getProduct()).thenReturn(otherProduct);
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
+
+            assertThrows(NotFoundChatRoomException.class,
+                    () -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
         }
 
         @Test
@@ -112,21 +207,30 @@ class ReservationProductServiceImplTest {
             Long productId = 1L;
 
             // given
-            Member reserver = mock(Member.class);
-            when(memberUtil.getCurrentMember()).thenReturn(reserver);
+            Member author = mock(Member.class);
+            when(author.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(author);
 
             Product product = mock(Product.class);
+            when(product.getMember()).thenReturn(author);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(product.getId()).thenReturn(productId);
 
-            when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            Member buyer = mock(Member.class);
+            when(buyer.getId()).thenReturn(2L);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.getId()).thenReturn(10L);
-            when(chatRoomRepository.findByProductIdAndMember(productId, reserver))
-                    .thenReturn(Optional.of(chatRoom));
+            when(chatRoom.getProduct()).thenReturn(product);
+            when(chatRoom.getBuyer()).thenReturn(buyer);
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
 
             // when
-            assertDoesNotThrow(() -> service.execute(productId));
+            when(tradeStateReader.read(any(), any(), any()))
+                    .thenReturn(new TradeStateSnapshot(false, true, null, null));
+            assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             // then
             verify(productReservationRepository).save(any(ProductReservation.class));
@@ -136,10 +240,43 @@ class ReservationProductServiceImplTest {
             verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
             TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
             assertEquals(10L, event.roomId());
-            assertNull(event.targetMemberId());
             assertEquals(productId, event.productId());
             assertFalse(event.completed());
             assertTrue(event.reserved());
+            // 대기 중인 거래 요청이 없으므로 방 전체에 보내는 사실도 비어 있어야 한다.
+            assertNull(event.requestedBySeller());
+            assertNull(event.requestedAt());
+        }
+
+        @Test
+        @DisplayName("작성자가 채팅방 구매자이면 판매자를 예약자로 저장한다")
+        void saves_seller_as_reserver_when_author_is_room_buyer() {
+            Long productId = 1L;
+            Member authorBuyer = mock(Member.class);
+            Member seller = mock(Member.class);
+            when(authorBuyer.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(authorBuyer);
+
+            Product product = mock(Product.class);
+            when(product.getId()).thenReturn(productId);
+            when(product.getMember()).thenReturn(authorBuyer);
+            when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
+
+            ChatRoom chatRoom = mock(ChatRoom.class);
+            when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoom.getProduct()).thenReturn(product);
+            when(chatRoom.getBuyer()).thenReturn(authorBuyer);
+            when(chatRoom.getSeller()).thenReturn(seller);
+            when(chatRoomRepository.findChatRoomByRoomId(ROOM_ID)).thenReturn(Optional.of(chatRoom));
+            when(tradeStateReader.read(product, authorBuyer, seller))
+                    .thenReturn(new TradeStateSnapshot(false, true, null, null));
+
+            service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE);
+
+            ArgumentCaptor<ProductReservation> reservationCaptor = ArgumentCaptor.forClass(ProductReservation.class);
+            verify(productReservationRepository).save(reservationCaptor.capture());
+            assertEquals(seller, reservationCaptor.getValue().getReserver());
         }
     }
 }

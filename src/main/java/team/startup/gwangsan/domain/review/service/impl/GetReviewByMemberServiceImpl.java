@@ -28,11 +28,23 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
     @Override
     @Transactional(readOnly = true)
     public List<ReviewResponse> execute(Long memberId) {
+        return findReviews(memberId, null, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> execute(Long memberId, Long cursor, int size) {
+        return findReviews(memberId, cursor, size);
+    }
+
+    private List<ReviewResponse> findReviews(Long memberId, Long cursor, Integer size) {
 
         Member target = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
-        List<ReceivedReviewDto> rows = reviewRepository.findReceivedReviews(memberId);
+        List<ReceivedReviewDto> rows = size == null
+                ? reviewRepository.findReceivedReviews(memberId)
+                : reviewRepository.findReceivedReviews(memberId, cursor, size);
         if (rows.isEmpty()) return List.of();
 
         List<Long> productIds = rows.stream()

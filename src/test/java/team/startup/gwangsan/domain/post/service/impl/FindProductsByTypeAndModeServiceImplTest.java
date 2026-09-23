@@ -67,12 +67,15 @@ class FindProductsByTypeAndModeServiceImplTest {
 
             Product product1 = mock(Product.class);
             Product product2 = mock(Product.class);
+            Product product3 = mock(Product.class);
 
             Member member1 = mock(Member.class);
             Member member2 = mock(Member.class);
+            Member member3 = mock(Member.class);
 
             when(member1.getId()).thenReturn(1L);
             when(member2.getId()).thenReturn(2L);
+            when(member3.getId()).thenReturn(3L);
 
             when(product1.getId()).thenReturn(100L);
             when(product1.getTitle()).thenReturn("상품1");
@@ -92,26 +95,41 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(product2.getMember()).thenReturn(member2);
             when(product2.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
+            when(product3.getId()).thenReturn(102L);
+            when(product3.getTitle()).thenReturn("상품3");
+            when(product3.getDescription()).thenReturn("설명3");
+            when(product3.getGwangsan()).thenReturn(30);
+            when(product3.getType()).thenReturn(TYPE);
+            when(product3.getMode()).thenReturn(MODE);
+            when(product3.getMember()).thenReturn(member3);
+            when(product3.getStatus()).thenReturn(ProductStatus.RESERVATION);
+
             when(productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
                     TYPE, MODE, myPlace, ProductStatus.ONGOING
-            )).thenReturn(List.of(product1, product2));
+            )).thenReturn(List.of(product1, product2, product3));
 
             MemberDetail detail1 = mock(MemberDetail.class);
             MemberDetail detail2 = mock(MemberDetail.class);
+            MemberDetail detail3 = mock(MemberDetail.class);
             Place place1 = mock(Place.class);
             Place place2 = mock(Place.class);
+            Place place3 = mock(Place.class);
 
             when(detail1.getMember()).thenReturn(member1);
             when(detail2.getMember()).thenReturn(member2);
+            when(detail3.getMember()).thenReturn(member3);
             when(detail1.getLight()).thenReturn(35);
             when(detail2.getLight()).thenReturn(0);
+            when(detail3.getLight()).thenReturn(1);
             when(detail1.getPlace()).thenReturn(place1);
             when(detail2.getPlace()).thenReturn(place2);
+            when(detail3.getPlace()).thenReturn(place3);
             when(place1.getName()).thenReturn("광산구");
             when(place2.getName()).thenReturn("광산구");
+            when(place3.getName()).thenReturn("광산구");
 
             when(memberDetailRepository.findAllByMemberIdIn(anyList()))
-                    .thenReturn(List.of(detail1, detail2));
+                    .thenReturn(List.of(detail1, detail2, detail3));
 
             Image img1 = mock(Image.class);
             when(img1.getId()).thenReturn(1000L);
@@ -121,6 +139,10 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(img2.getId()).thenReturn(1001L);
             when(img2.getImageUrl()).thenReturn("url2");
 
+            Image img3 = mock(Image.class);
+            when(img3.getId()).thenReturn(1002L);
+            when(img3.getImageUrl()).thenReturn("url3");
+
             ProductImage pi1 = mock(ProductImage.class);
             when(pi1.getProduct()).thenReturn(product1);
             when(pi1.getImage()).thenReturn(img1);
@@ -129,26 +151,38 @@ class FindProductsByTypeAndModeServiceImplTest {
             when(pi2.getProduct()).thenReturn(product2);
             when(pi2.getImage()).thenReturn(img2);
 
+            ProductImage pi3 = mock(ProductImage.class);
+            when(pi3.getProduct()).thenReturn(product3);
+            when(pi3.getImage()).thenReturn(img3);
+
             when(productImageRepository.findAllByProductIdIn(anyList()))
-                    .thenReturn(List.of(pi1, pi2));
+                    .thenReturn(List.of(pi1, pi2, pi3));
 
             // when
             List<GetProductResponse> result = service.execute(TYPE, MODE);
 
             // then
-            assertThat(result).hasSize(2);
+            assertThat(result).hasSize(3);
 
             GetProductResponse r1 = result.get(0);
             assertThat(r1.id()).isEqualTo(100L);
             assertThat(r1.member().light()).isEqualTo(3);
             assertThat(r1.images().get(0).imageId()).isEqualTo(1000L);
             assertThat(r1.isCompleted()).isFalse();
+            assertThat(r1.isReserved()).isFalse();
 
             GetProductResponse r2 = result.get(1);
             assertThat(r2.id()).isEqualTo(101L);
             assertThat(r2.member().light()).isEqualTo(1);
             assertThat(r2.images().get(0).imageId()).isEqualTo(1001L);
             assertThat(r2.isCompleted()).isTrue();
+            assertThat(r2.isReserved()).isFalse();
+
+            GetProductResponse r3 = result.get(2);
+            assertThat(r3.id()).isEqualTo(102L);
+            assertThat(r3.images().get(0).imageId()).isEqualTo(1002L);
+            assertThat(r3.isCompleted()).isFalse();
+            assertThat(r3.isReserved()).isTrue();
 
             verify(productRepository).findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
                     TYPE, MODE, myPlace, ProductStatus.ONGOING

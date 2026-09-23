@@ -33,6 +33,30 @@ class GetReceivedReviewListServiceImplTest {
     @Mock private MemberUtil memberUtil;
 
     @Nested
+    @DisplayName("페이지 이미지 조회")
+    class Pagination {
+        @Test
+        void it_batches_only_distinct_product_ids_from_the_page() {
+            Member member = mock(Member.class);
+            when(member.getId()).thenReturn(1L);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+            when(reviewRepository.findReceivedReviews(1L, 30L, 3)).thenReturn(List.of(
+                    new ReceivedReviewDto(29L, 100L, "a", 7, "writer"),
+                    new ReceivedReviewDto(25L, 100L, "b", 8, "writer"),
+                    new ReceivedReviewDto(21L, 200L, "c", 9, "writer")));
+            when(productImageRepository.findAllByProductIdIn(List.of(100L, 200L))).thenReturn(List.of());
+
+            List<ReviewResponse> result = service.execute(30L, 3);
+
+            assertThat(result).extracting(ReviewResponse::reviewId).containsExactly(29L, 25L, 21L);
+            assertThat(result).extracting(ReviewResponse::productId).containsExactly(100L, 100L, 200L);
+            assertThat(result).allSatisfy(row -> assertThat(row.imageUrls()).isEmpty());
+            verify(reviewRepository, never()).findReceivedReviews(anyLong());
+            verify(productImageRepository).findAllByProductIdIn(List.of(100L, 200L));
+        }
+    }
+
+    @Nested
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 

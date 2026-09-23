@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.QChatMessage;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static team.startup.gwangsan.domain.chat.entity.QChatRoom.chatRoom;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
@@ -82,7 +84,10 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .join(chatRoom.buyer, buyer)
                 .join(chatRoom.seller, seller)
                 .where(chatRoom.isActive.isTrue()
-                        .and(chatRoom.buyer.id.eq(memberId).or(chatRoom.seller.id.eq(memberId))))
+                        .and(
+                                chatRoom.buyer.id.eq(memberId).and(chatRoom.hiddenByBuyerAt.isNull())
+                                        .or(chatRoom.seller.id.eq(memberId).and(chatRoom.hiddenBySellerAt.isNull()))
+                        ))
                 .fetch();
 
         if (rooms.isEmpty()) {
@@ -171,22 +176,20 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .collect(Collectors.joining(", "));
 
         String sql = """
-                SELECT room_id, message_id, content, message_type, created_at
-                FROM (
-                    SELECT
-                        room_id,
-                        message_id,
-                        content,
-                        message_type,
-                        created_at,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY room_id
-                            ORDER BY created_at DESC, message_id DESC
-                        ) AS row_num
-                    FROM tbl_chat_message
-                    WHERE room_id IN (%s)
-                ) ranked_message
-                WHERE row_num = 1
+                SELECT message.room_id, message.message_id, message.content,
+                       message.message_type, message.created_at
+                FROM tbl_chat_message message
+                WHERE message.message_id IN (
+                    SELECT (
+                        SELECT newest.message_id
+                        FROM tbl_chat_message newest
+                        WHERE newest.room_id = room.room_id
+                        ORDER BY newest.created_at DESC, newest.message_id DESC
+                        LIMIT 1
+                    )
+                    FROM tbl_chat_room room
+                    WHERE room.room_id IN (%s)
+                )
                 """.formatted(placeholders);
 
         Query query = entityManager.createNativeQuery(sql);
@@ -198,14 +201,37 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         List<Object[]> rows = query.getResultList();
 
         return rows.stream()
-                .map(row -> new LatestMessageDto(
-                        ((Number) row[0]).longValue(),
-                        ((Number) row[1]).longValue(),
-                        (String) row[2],
-                        MessageType.valueOf(String.valueOf(row[3])),
-                        toLocalDateTime(row[4])
-                ))
+                .map(this::toLatestMessageDto)
+                .filter(Objects::nonNull)
                 .toList();
+    }
+
+    LatestMessageDto toLatestMessageDto(Object[] row) {
+        Long roomId = ((Number) row[0]).longValue();
+        MessageType messageType = toMessageType(row[3]);
+        LocalDateTime createdAt = toLocalDateTime(row[4]);
+
+        if (messageType == null || createdAt == null) {
+            log.warn("Skipping malformed chat message row for room {} (message_type={}, created_at={})",
+                    roomId, row[3], row[4]);
+            return null;
+        }
+
+        return new LatestMessageDto(
+                roomId,
+                ((Number) row[1]).longValue(),
+                (String) row[2],
+                messageType,
+                createdAt
+        );
+    }
+
+    private MessageType toMessageType(Object value) {
+        try {
+            return MessageType.valueOf(String.valueOf(value));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private LocalDateTime toLocalDateTime(Object value) {
@@ -215,6 +241,6 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
         if (value instanceof Timestamp timestamp) {
             return timestamp.toLocalDateTime();
         }
-        throw new IllegalArgumentException("Unsupported created_at type: " + value.getClass());
+        return null;
     }
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +20,7 @@ import team.startup.gwangsan.domain.member.repository.MemberRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
+import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
@@ -27,9 +29,9 @@ import team.startup.gwangsan.global.redis.RedisUtil;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,26 @@ class SignUpServiceImplTest {
     class Describe_execute {
 
         @Nested
+        @DisplayName("데모 번호일 때")
+        class Context_with_demo_phone_number {
+
+            @Test
+            @DisplayName("검증·저장 없이 즉시 반환한다")
+            void it_returns_immediately_without_saving_member() {
+                SignUpRequest request = new SignUpRequest(
+                        "심사용", "심사용닉", "password", "01011111111",
+                        "광산동", 1, List.of("Java"), "추천인닉", "자기소개"
+                );
+
+                service.execute(request);
+
+                verifyNoInteractions(memberRepository, redisUtil, withdrawalRecordRepository,
+                        dongRepository, placeRepository, memberDetailRepository,
+                        applicationEventPublisher);
+            }
+        }
+
+        @Nested
         @DisplayName("정상적인 요청일 때")
         class Context_with_valid_request {
 
@@ -77,16 +99,48 @@ class SignUpServiceImplTest {
                 when(placeRepository.findById(request.placeId())).thenReturn(Optional.of(mock(Place.class)));
                 when(memberRepository.findByNickname(request.recommender())).thenReturn(Optional.of(mock(Member.class)));
                 when(passwordEncoder.encode(any())).thenReturn("encoded");
-                when(relatedKeywordRepository.findByName(any())).thenReturn(Optional.empty());
-                when(relatedKeywordRepository.save(any())).thenReturn(mock(RelatedKeyword.class));
+                RelatedKeyword existingKeyword = RelatedKeyword.builder().name("Java").build();
+                RelatedKeyword newKeyword = RelatedKeyword.builder().name("Spring").build();
+                when(relatedKeywordRepository.findByName("Java")).thenReturn(Optional.of(existingKeyword));
+                when(relatedKeywordRepository.findByName("Spring")).thenReturn(Optional.empty());
+                when(relatedKeywordRepository.save(any())).thenReturn(newKeyword);
                 when(memberRepository.save(any())).thenReturn(mock(Member.class));
 
                 service.execute(request);
 
                 verify(memberRepository).save(any(Member.class));
                 verify(memberDetailRepository).save(any());
+                ArgumentCaptor<RelatedKeyword> createdKeyword = ArgumentCaptor.forClass(RelatedKeyword.class);
+                verify(relatedKeywordRepository).save(createdKeyword.capture());
+                assertThat(createdKeyword.getValue().getName()).isEqualTo("Spring");
+                ArgumentCaptor<MemberRelatedKeyword> mappings = ArgumentCaptor.forClass(MemberRelatedKeyword.class);
+                verify(memberRelatedKeywordRepository, times(2)).save(mappings.capture());
+                assertThat(mappings.getAllValues())
+                        .extracting(MemberRelatedKeyword::getRelatedKeyword)
+                        .containsExactly(existingKeyword, newKeyword);
                 verify(applicationEventPublisher, times(2)).publishEvent(any(Object.class));
                 verify(redisUtil).delete("sms:verified:" + request.phoneNumber());
+            }
+        }
+
+        @Nested
+        @DisplayName("차단된 탈퇴 번호일 때")
+        class Context_with_banned_phone_number {
+
+            @Test
+            @DisplayName("BannedPhoneNumberException을 던지고 이후 가입 처리를 시작하지 않는다")
+            void it_throws_banned_phone_number_exception_before_downstream_actions() {
+                SignUpRequest request = validRequest();
+                when(withdrawalRecordRepository.existsByPhoneNumberAndBannedIsTrue(request.phoneNumber()))
+                        .thenReturn(true);
+
+                assertThatThrownBy(() -> service.execute(request))
+                        .isInstanceOf(BannedPhoneNumberException.class);
+
+                verify(withdrawalRecordRepository).existsByPhoneNumberAndBannedIsTrue(request.phoneNumber());
+                verifyNoInteractions(memberRepository, redisUtil, dongRepository, placeRepository,
+                        memberDetailRepository, passwordEncoder, relatedKeywordRepository,
+                        memberRelatedKeywordRepository, applicationEventPublisher);
             }
         }
 

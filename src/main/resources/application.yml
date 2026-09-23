@@ -73,6 +73,8 @@ chatting:
     # Internal API settings for propagating trade status changes to the chatting server.
     url: ${CHATTING_SERVER_URL:}
     internal-secret: ${CHATTING_SERVER_INTERNAL_SECRET:}
+    connect-timeout: ${CHATTING_CONNECT_TIMEOUT:2s}
+    read-timeout: ${CHATTING_READ_TIMEOUT:5s}
 
 ai:
   server:

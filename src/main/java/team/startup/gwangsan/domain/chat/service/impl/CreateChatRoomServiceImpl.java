@@ -31,7 +31,7 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
     public CreateChatRoomResponse execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
         Member productMember = product.getMember();
 
@@ -51,7 +51,9 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
         Optional<ChatRoom> existsChatRoom = chatRoomRepository.findByProductIdAndBuyerAndSeller(productId, buyer, seller);
 
         if (existsChatRoom.isPresent()) {
-            return new CreateChatRoomResponse(existsChatRoom.get().getId());
+            ChatRoom room = existsChatRoom.get();
+            room.unhideFor(member);
+            return new CreateChatRoomResponse(room.getId());
         }
 
         ChatRoom chatRoom = ChatRoom.builder()

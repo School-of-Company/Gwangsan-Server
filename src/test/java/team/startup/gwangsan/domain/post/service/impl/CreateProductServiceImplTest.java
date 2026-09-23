@@ -115,5 +115,36 @@ class CreateProductServiceImplTest {
                 assertThat(savedImages.get(1).getProduct()).isEqualTo(saved);
             }
         }
+
+        @Test
+        @DisplayName("SERVICE 게시물은 이미지 목록이 비어 있어도 생성한다")
+        void it_creates_service_product_without_images() {
+            Member member = mock(Member.class);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+            when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
+
+            service.execute(Type.SERVICE, Mode.GIVER, "제목", "설명", 100, null);
+
+            ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+            verify(productRepository).save(productCaptor.capture());
+            assertThat(productCaptor.getValue().getType()).isEqualTo(Type.SERVICE);
+            assertThat(productCaptor.getValue().getMode()).isEqualTo(Mode.GIVER);
+            verify(productImageRepository).saveAll(List.of());
+        }
+
+        @Test
+        @DisplayName("OBJECT 수령 게시물은 이미지가 없어도 생성한다")
+        void it_creates_object_receiver_product_without_images() {
+            Member member = mock(Member.class);
+            when(memberUtil.getCurrentMember()).thenReturn(member);
+            when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
+
+            service.execute(Type.OBJECT, Mode.RECEIVER, "제목", "설명", 100, List.of());
+
+            ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+            verify(productRepository).save(productCaptor.capture());
+            assertThat(productCaptor.getValue().getMode()).isEqualTo(Mode.RECEIVER);
+            verify(productImageRepository).saveAll(List.of());
+        }
     }
 }
