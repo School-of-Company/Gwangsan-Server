@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
@@ -57,8 +58,14 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProductReservationRepository productReservationRepository;
 
+    /**
+     * READ_COMMITTED 를 쓰는 이유: 기본값인 REPEATABLE READ 에서는 상품 잠금 전의 첫 SELECT 시점에
+     * read view 가 고정된다. 잠금을 기다리는 동안 앞선 요청이 PENDING 을 커밋해도 이 트랜잭션의
+     * PENDING 조회는 옛 스냅샷을 보고 다시 INSERT 해 유니크 제약 위반(500)이 난다.
+     * 잠금을 잡은 뒤의 조회가 최신 커밋본을 보게 해야 한다.
+     */
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CheckBlocked(param = "otherMemberId")
     public void execute(Long productId, Long otherMemberId) {
         String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
