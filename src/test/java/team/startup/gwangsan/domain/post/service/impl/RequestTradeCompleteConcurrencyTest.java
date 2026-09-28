@@ -194,7 +194,8 @@ class RequestTradeCompleteConcurrencyTest {
         try (var connection = DriverManager.getConnection(mariadb.getJdbcUrl(), "root", mariadb.getPassword());
              var statement = connection.createStatement()) {
             do {
-                try (var rows = statement.executeQuery("SELECT COUNT(*) FROM information_schema.INNODB_LOCK_WAITS")) {
+                try (var rows = statement.executeQuery(
+                        "SELECT COUNT(DISTINCT REQUESTING_TRX_ID) FROM information_schema.INNODB_LOCK_WAITS")) {
                     rows.next();
                     if (rows.getLong(1) >= expected) {
                         return;
