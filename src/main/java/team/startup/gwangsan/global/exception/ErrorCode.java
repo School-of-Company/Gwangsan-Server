@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
 
+    APP_VERSION_UNAVAILABLE(503, "앱 버전 정보가 아직 준비되지 않았습니다."),
+
     // token
     EXPIRED_TOKEN(401, "토큰이 만료되었습니다."),
     INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
