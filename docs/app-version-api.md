@@ -19,10 +19,12 @@
 별도 Redis/인메모리 캐시 없이 매 요청 조회하고 `Cache-Control: no-store`를 사용한다.
 운영 수정/롤백을 즉시 반영하며, 캐시가 필요해질 만큼 부하가 관측되면 TTL·무효화 정책을 별도로 정한다.
 
-기존 설정은 Flyway가 비활성화되어 있으므로 자동 마이그레이션을 가정하지 않는다.
-DB 관리자가 대상 DB를 확인하고 `src/main/resources/db/migration/V10__create_app_version.sql`을 적용한다.
-이미 Hibernate ddl-auto=update로 동일 테이블이 생성되었다면 CREATE IF NOT EXISTS는 이를 유지한다.
-기존 테이블의 세 컬럼/PK 정의가 일치하는지도 확인한다. 이 작업에서 전체 Flyway를 활성화하지 않는다.
+배포 환경의 활성 프로필과 설정 override를 먼저 확인한다.
+- `prod` 프로필은 Flyway 활성화, Hibernate validate이므로 기동 시 V10을 자동 적용한다. 마이그레이션 성공을 확인한다.
+- 기본 프로필은 Flyway 비활성화, Hibernate update이다. Flyway가 꺼진 환경에서는 DB 관리자가 대상 DB를 확인하고
+  `src/main/resources/db/migration/V10__create_app_version.sql`을 직접 적용할 수 있다.
+- 이미 동일 테이블이 생성되었다면 CREATE IF NOT EXISTS는 이를 유지한다. 기존 테이블의 세 컬럼/PK 정의도 확인한다.
+이 작업에서는 프로필별 Flyway 설정을 변경하지 않는다.
 
 초기 데이터는 임의로 넣지 않는다. 앱 전환 전에 **각 스토어에서 실제 배포가 확인된 최신 버전**과
 운영자가 승인한 최소 지원 버전을 각각 입력하고 두 플랫폼 API의 200을 확인한다. 설정 전에는 503이다.
