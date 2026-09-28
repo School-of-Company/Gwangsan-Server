@@ -129,6 +129,7 @@ public class SecurityConfig {
 
                                 // health
                                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/app/version").permitAll()
 
                                 // suspend
                                 .requestMatchers(HttpMethod.PATCH, "/api/suspend")
