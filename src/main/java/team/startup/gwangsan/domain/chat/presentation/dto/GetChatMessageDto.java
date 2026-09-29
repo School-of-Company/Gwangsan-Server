@@ -12,6 +12,7 @@ public record GetChatMessageDto(
         String content,
         MessageType messageType,
         LocalDateTime createdAt,
+        LocalDateTime editedAt,
         List<GetImageResponse> images,
         String senderNickname,
         Long senderId,

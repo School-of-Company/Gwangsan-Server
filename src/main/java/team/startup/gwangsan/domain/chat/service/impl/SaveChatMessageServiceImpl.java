@@ -120,7 +120,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
                 || !stored.createdAt().truncatedTo(ChronoUnit.MILLIS).equals(createdAt.truncatedTo(ChronoUnit.MILLIS))) {
             throw new ChatMessageIdConflictException(messageId);
         }
-        if (messageType == MessageType.IMAGE) {
+        if (messageType == MessageType.IMAGE && !stored.deleted()) {
             Set<Long> requestedImages = imageIds == null ? Set.of() : chatMessageRepository.findExistingImageIds(imageIds);
             Set<Long> storedImages = stored.images().stream().map(GetImageResponse::imageId).collect(Collectors.toSet());
             if (!storedImages.equals(requestedImages)) {

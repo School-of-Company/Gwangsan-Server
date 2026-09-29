@@ -20,6 +20,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,6 +33,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.domain.chat.entity.ChatMessage;
+import team.startup.gwangsan.domain.chat.service.impl.ChatMessageMutationService;
+import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.service.impl.SaveChatMessageServiceImpl;
 import team.startup.gwangsan.domain.image.entity.Image;
@@ -42,8 +47,11 @@ import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.OsType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
+import team.startup.gwangsan.global.event.ChatMessageMutationEvent;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.global.util.MemberUtil;
+import team.startup.gwangsan.global.exception.GlobalException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -61,12 +69,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest(properties = {"spring.flyway.enabled=false", "spring.jpa.show-sql=false"})
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ImportAutoConfiguration(RedisAutoConfiguration.class)
-@Import({QueryDslConfig.class, SaveChatMessageServiceImpl.class, BlockValidator.class,
+@Import({QueryDslConfig.class, SaveChatMessageServiceImpl.class, ChatMessageMutationService.class, BlockValidator.class,
         ChatMessageIdempotencyIntegrationTest.EventConfiguration.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class ChatMessageIdempotencyIntegrationTest {
@@ -95,13 +104,21 @@ class ChatMessageIdempotencyIntegrationTest {
 
     static class CommittedEvents {
         final AtomicInteger count = new AtomicInteger();
+        final AtomicInteger mutations = new AtomicInteger();
         @TransactionalEventListener
         public void receive(SendNotificationEvent event) { count.incrementAndGet(); }
+
+        @TransactionalEventListener
+        public void receive(ChatMessageMutationEvent event) { mutations.incrementAndGet(); }
     }
 
     @Autowired EntityManager entityManager;
     @Autowired PlatformTransactionManager transactionManager;
     @Autowired SaveChatMessageServiceImpl service;
+    @Autowired ChatMessageMutationService mutations;
+    @Autowired ChatMessageRepository messages;
+    @Autowired ChatRoomRepository rooms;
+    @MockitoBean MemberUtil memberUtil;
     @Autowired DeviceTokenRepository deviceTokens;
     @Autowired StringRedisTemplate redisTemplate;
     @Autowired JdbcTemplate jdbc;
@@ -131,9 +148,11 @@ class ChatMessageIdempotencyIntegrationTest {
             entityManager.persist(image);
             return new Fixture(buyer.getId(), seller.getId(), room.getId(), image.getId());
         });
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.buyerId()));
         deviceTokens.save(DeviceToken.builder().deviceId("test-device").userId(fixture.sellerId())
                 .deviceToken("test-token").osType(OsType.ANDROID).build());
         events.count.set(0);
+        events.mutations.set(0);
         stream = "chat:room:" + fixture.roomId() + ":messages";
         props = new ChatStreamProperties();
         props.setGroup("idempotency-test");
@@ -157,6 +176,166 @@ class ChatMessageIdempotencyIntegrationTest {
         publish(1001L, "TEXT");
         worker.consumeMessages();
         assertThat(jdbc.queryForObject("SELECT checked FROM tbl_chat_message WHERE message_id=?", Boolean.class, 1001L)).isTrue();
+    }
+
+    @Test
+    void edited_text_replay_preserves_new_content() {
+        publish(1011L, "TEXT");
+        worker.consumeMessages();
+        jdbc.update("UPDATE tbl_chat_message SET original_content=content, content='edited', edited_at=NOW() WHERE message_id=?", 1011L);
+
+        publish(1011L, "TEXT");
+        worker.consumeMessages();
+
+        assertThat(jdbc.queryForObject("SELECT content FROM tbl_chat_message WHERE message_id=?", String.class, 1011L))
+                .isEqualTo("edited");
+        assertThat(messageCount(1011L)).isEqualTo(1);
+        assertThat(events.count.get()).isEqualTo(1);
+    }
+
+    @Test
+    void deleted_message_replay_does_not_restore_message_or_image_links() {
+        publish(1012L, "IMAGE");
+        worker.consumeMessages();
+        jdbc.update("DELETE FROM tbl_chat_message_image WHERE message_id=?", 1012L);
+        jdbc.update("UPDATE tbl_chat_message SET deleted_at=NOW() WHERE message_id=?", 1012L);
+
+        publish(1012L, "IMAGE");
+        worker.consumeMessages();
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM tbl_chat_message WHERE message_id=? AND deleted_at IS NULL", Long.class, 1012L)).isZero();
+        assertThat(linkCount(1012L)).isZero();
+        assertThat(events.count.get()).isEqualTo(1);
+        assertThat(redisTemplate.opsForStream().size(props.getDlqKey())).isZero();
+    }
+
+    @Test
+    void mutation_service_updates_text_and_replay_keeps_edit() {
+        Map<String, String> body = recentPayload(1013L, "TEXT");
+        publish(body);
+        worker.consumeMessages();
+
+        var response = mutations.update(1013L, "새 내용");
+        publish(body);
+        worker.consumeMessages();
+
+        assertThat(response.content()).isEqualTo("새 내용");
+        assertThat(jdbc.queryForObject("SELECT content FROM tbl_chat_message WHERE message_id=?", String.class, 1013L))
+                .isEqualTo("새 내용");
+        assertThat(jdbc.queryForObject("SELECT edited_at FROM tbl_chat_message WHERE message_id=?", java.sql.Timestamp.class, 1013L))
+                .isNotNull();
+        assertThat(events.mutations.get()).isEqualTo(1);
+    }
+
+    @Test
+    void mutation_service_deletes_image_and_replay_keeps_it_hidden() {
+        Map<String, String> body = recentPayload(1014L, "IMAGE");
+        publish(body);
+        worker.consumeMessages();
+
+        mutations.delete(1014L);
+        publish(body);
+        worker.consumeMessages();
+
+        assertThat(messages.findChatMessageByRoomIdWithCursorPaging(fixture.roomId(), null, null, 20))
+                .extracting(message -> message.getId()).doesNotContain(1014L);
+        assertThat(linkCount(1014L)).isZero();
+        assertThat(redisTemplate.opsForStream().size(props.getDlqKey())).isZero();
+        assertThatThrownBy(() -> mutations.delete(1014L))
+                .isInstanceOf(team.startup.gwangsan.domain.chat.exception.NotFoundChatMessageException.class);
+        assertThat(events.mutations.get()).isEqualTo(1);
+    }
+
+    @Test
+    void mutation_service_rejects_wrong_author_expired_and_image_edit() {
+        Map<String, String> text = recentPayload(1015L, "TEXT");
+        publish(text);
+        worker.consumeMessages();
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.sellerId()));
+        assertThatThrownBy(() -> mutations.update(1015L, "수정"))
+                .isInstanceOf(GlobalException.class)
+                .extracting("errorCode.status").isEqualTo(403);
+
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.buyerId()));
+        jdbc.update("UPDATE tbl_chat_message SET created_at=? WHERE message_id=?",
+                java.sql.Timestamp.valueOf(LocalDateTime.now().minusHours(24).minusSeconds(1)), 1015L);
+        assertThatThrownBy(() -> mutations.delete(1015L))
+                .isInstanceOf(GlobalException.class)
+                .extracting("errorCode.status").isEqualTo(409);
+
+        publish(recentPayload(1016L, "IMAGE"));
+        worker.consumeMessages();
+        assertThatThrownBy(() -> mutations.update(1016L, "수정"))
+                .isInstanceOf(GlobalException.class)
+                .extracting("errorCode.status").isEqualTo(400);
+    }
+
+    @Test
+    void deleting_latest_message_restores_previous_head_and_unread_count() {
+        publish(recentPayload(1017L, "TEXT"));
+        worker.consumeMessages();
+        publish(recentPayload(1018L, "TEXT"));
+        worker.consumeMessages();
+        assertThat(rooms.findRoomsByMemberId(fixture.sellerId()).getFirst().unreadMessageCount()).isEqualTo(2);
+
+        mutations.delete(1018L);
+
+        var room = rooms.findRoomsByMemberId(fixture.sellerId()).getFirst();
+        assertThat(room.messageId()).isEqualTo(1017L);
+        assertThat(room.unreadMessageCount()).isEqualTo(1);
+    }
+
+    @Test
+    void deleting_only_message_clears_head_and_unread_count() {
+        publish(recentPayload(1019L, "TEXT"));
+        worker.consumeMessages();
+
+        mutations.delete(1019L);
+
+        var room = rooms.findRoomsByMemberId(fixture.sellerId()).getFirst();
+        assertThat(room.messageId()).isNull();
+        assertThat(room.unreadMessageCount()).isZero();
+    }
+
+    @Test
+    void deleting_middle_message_keeps_head_and_decrements_unread_count() {
+        for (long id : List.of(1020L, 1021L, 1022L)) {
+            publish(recentPayload(id, "TEXT"));
+            worker.consumeMessages();
+        }
+
+        mutations.delete(1021L);
+
+        var room = rooms.findRoomsByMemberId(fixture.sellerId()).getFirst();
+        assertThat(room.messageId()).isEqualTo(1022L);
+        assertThat(room.unreadMessageCount()).isEqualTo(2);
+    }
+
+    @Test
+    void concurrent_update_and_delete_leave_message_deleted() throws Exception {
+        publish(recentPayload(1023L, "TEXT"));
+        worker.consumeMessages();
+        CountDownLatch start = new CountDownLatch(1);
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            Future<?> update = executor.submit(() -> {
+                await(start);
+                try {
+                    mutations.update(1023L, "동시 수정");
+                } catch (team.startup.gwangsan.domain.chat.exception.NotFoundChatMessageException ignored) {
+                }
+            });
+            Future<?> delete = executor.submit(() -> {
+                await(start);
+                mutations.delete(1023L);
+            });
+            start.countDown();
+            update.get(20, TimeUnit.SECONDS);
+            delete.get(20, TimeUnit.SECONDS);
+        }
+        assertThat(jdbc.queryForObject("SELECT deleted_at FROM tbl_chat_message WHERE message_id=?", java.sql.Timestamp.class, 1023L))
+                .isNotNull();
+        assertThat(messages.findChatMessageByRoomIdWithCursorPaging(fixture.roomId(), null, null, 20))
+                .extracting(ChatMessage::getId).doesNotContain(1023L);
     }
 
     @Test
@@ -569,6 +748,12 @@ class ChatMessageIdempotencyIntegrationTest {
                 "messageId", Long.toString(id), "roomId", fixture.roomId().toString(),
                 "senderId", fixture.buyerId().toString(), "content", "message", "messageType", type,
                 "createdAt", "1700000000123", "imageIds", "[" + fixture.imageId() + "]"));
+    }
+
+    private Map<String, String> recentPayload(long id, String type) {
+        Map<String, String> body = payload(id, type);
+        body.put("createdAt", Long.toString(System.currentTimeMillis()));
+        return body;
     }
 
     private void publish(Map<String, String> body) {

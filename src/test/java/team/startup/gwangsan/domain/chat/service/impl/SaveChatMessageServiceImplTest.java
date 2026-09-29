@@ -528,7 +528,7 @@ class SaveChatMessageServiceImplTest {
         }
 
         private static StoredMessage storedMessage(MessageType messageType, LocalDateTime createdAt, List<GetImageResponse> images) {
-            return new StoredMessage(MESSAGE_ID, ROOM_ID, SENDER_ID, "내용", messageType, createdAt, false, images);
+            return new StoredMessage(MESSAGE_ID, ROOM_ID, SENDER_ID, "내용", messageType, createdAt, false, false, images);
         }
 
         private static SaveChatMessageResponse responseOf(StoredMessage stored) {

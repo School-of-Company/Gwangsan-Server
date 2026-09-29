@@ -21,6 +21,6 @@ public interface ChatMessageCustomRepository {
     Set<Long> findExistingImageIds(List<Long> imageIds);
 
     record StoredMessage(Long messageId, Long roomId, Long senderId, String content,
-                         MessageType messageType, LocalDateTime createdAt, boolean checked,
+                         MessageType messageType, LocalDateTime createdAt, boolean checked, boolean deleted,
                          List<GetImageResponse> images) { }
 }
