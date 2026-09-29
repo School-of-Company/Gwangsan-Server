@@ -97,7 +97,11 @@ public enum ErrorCode {
 
     // chat
     NOT_FOUND_CHAT_ROOM(404, "해당하는 채팅방을 찾을 수 없습니다."),
-    NOT_FOUND_CHAT_MESSAGE(404, "해당하는 채팅 메세지를 찾을 수 없습니다."),
+    NOT_FOUND_CHAT_MESSAGE(404, "채팅 메시지를 찾을 수 없습니다. 전송 직후라면 잠시 후 다시 시도해 주세요."),
+    CHAT_MESSAGE_FORBIDDEN(403, "본인이 보낸 채팅 메시지만 변경할 수 있습니다."),
+    CHAT_MESSAGE_EXPIRED(409, "전송 후 24시간이 지난 채팅 메시지는 변경할 수 없습니다."),
+    CHAT_MESSAGE_NOT_TEXT(400, "텍스트 메시지만 수정할 수 있습니다."),
+    CHAT_MESSAGE_INVALID_CONTENT(400, "메시지 내용을 입력해 주세요."),
     INVALID_CHAT_STREAM_PAYLOAD(400, "잘못된 채팅 스트림 페이로드입니다."),
 
     // trade

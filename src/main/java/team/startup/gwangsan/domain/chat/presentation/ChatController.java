@@ -1,11 +1,15 @@
 package team.startup.gwangsan.domain.chat.presentation;
 
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.domain.chat.presentation.dto.request.UpdateMessageCheckedRequest;
+import team.startup.gwangsan.domain.chat.presentation.dto.request.UpdateChatMessageRequest;
+import team.startup.gwangsan.domain.chat.presentation.dto.response.UpdateChatMessageResponse;
+import team.startup.gwangsan.domain.chat.service.impl.ChatMessageMutationService;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.CreateChatRoomResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetChatMessagesResponse;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
@@ -34,6 +38,19 @@ public class ChatController {
     private final FindRoomIdByProductIdService findRoomIdByProductIdService;
     private final DeleteChatRoomService deleteChatRoomService;
     private final ValidateChatSendableService validateChatSendableService;
+    private final ChatMessageMutationService chatMessageMutationService;
+
+    @PatchMapping("/message/{message_id}")
+    public ResponseEntity<UpdateChatMessageResponse> updateMessage(@PathVariable("message_id") Long messageId,
+                                                                     @Valid @RequestBody UpdateChatMessageRequest request) {
+        return ResponseEntity.ok(chatMessageMutationService.update(messageId, request.content()));
+    }
+
+    @DeleteMapping("/message/{message_id}")
+    public ResponseEntity<Void> deleteMessage(@PathVariable("message_id") Long messageId) {
+        chatMessageMutationService.delete(messageId);
+        return ResponseEntity.noContent().build();
+    }
 
     @PostMapping("/room/{product_id}")
     public ResponseEntity<CreateChatRoomResponse> createChatRoom(@PathVariable("product_id") Long productId) {

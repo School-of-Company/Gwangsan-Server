@@ -42,7 +42,7 @@ class ChatSendableControllerTest {
         when(rooms.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
         when(room.isParticipant(member)).thenReturn(true);
         ValidateChatSendableServiceImpl service = new ValidateChatSendableServiceImpl(rooms, members, blocks, imageRepository);
-        ChatController controller = new ChatController(null, null, null, null, null, null, service);
+        ChatController controller = new ChatController(null, null, null, null, null, null, service, null);
         mvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
     }

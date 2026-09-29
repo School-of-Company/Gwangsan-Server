@@ -3,6 +3,7 @@ package team.startup.gwangsan.domain.chat.repository.custom.impl;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -10,13 +11,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
-import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.domain.chat.entity.ChatMessageImage;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatMessageCustomRepository;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,33 +62,22 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
     @Override
     public Optional<StoredMessage> findStoredMessage(Long messageId) {
         // A locking read sees the winner's commit even after an earlier REPEATABLE READ snapshot.
-        return jdbcTemplate.query("""
-                SELECT m.message_id, m.room_id, m.sender_id, m.content, m.message_type,
-                       m.created_at, m.checked, i.image_id, i.image_url
-                FROM tbl_chat_message m
-                LEFT JOIN tbl_chat_message_image mi ON mi.message_id = m.message_id
-                LEFT JOIN tbl_image i ON i.image_id = mi.image_id
-                WHERE m.message_id = :messageId
-                ORDER BY mi.id
-                LOCK IN SHARE MODE
-                """, Map.of("messageId", messageId), rs -> {
-            if (!rs.next()) return Optional.empty();
-            Long roomId = rs.getLong("room_id");
-            Long senderId = rs.getObject("sender_id", Long.class);
-            String content = rs.getString("content");
-            MessageType messageType = MessageType.valueOf(rs.getString("message_type"));
-            LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
-            boolean checked = rs.getBoolean("checked");
-            List<GetImageResponse> images = new ArrayList<>();
-            do {
-                Long imageId = rs.getObject("image_id", Long.class);
-                if (imageId != null) {
-                    images.add(new GetImageResponse(imageId, rs.getString("image_url")));
-                }
-            } while (rs.next());
-            return Optional.of(new StoredMessage(messageId, roomId, senderId, content,
-                    messageType, createdAt, checked, List.copyOf(images)));
-        });
+        ChatMessage message = em.find(ChatMessage.class, messageId, LockModeType.PESSIMISTIC_READ);
+        if (message == null) return Optional.empty();
+        List<GetImageResponse> images = em.createQuery("""
+                        SELECT link FROM ChatMessageImage link JOIN FETCH link.image
+                        WHERE link.chatMessage.id = :messageId ORDER BY link.id
+                        """, ChatMessageImage.class)
+                .setParameter("messageId", messageId)
+                .setLockMode(LockModeType.PESSIMISTIC_READ)
+                .getResultList().stream()
+                .map(link -> new GetImageResponse(link.getImage().getId(), link.getImage().getImageUrl()))
+                .toList();
+        return Optional.of(new StoredMessage(messageId, message.getRoom().getId(),
+                message.getSender() == null ? null : message.getSender().getId(),
+                message.getOriginalContent() == null ? message.getContent() : message.getOriginalContent(),
+                message.getMessageType(), message.getCreatedAt(), message.getChecked(),
+                message.getDeletedAt() != null, images));
     }
 
     @Override
@@ -115,6 +104,7 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
                 .join(chatMessage.sender, member).fetchJoin()
                 .where(
                         chatMessage.room.id.eq(roomId),
+                        chatMessage.deletedAt.isNull(),
                         buildCursorCondition(lastCreatedAt, lastMessageId)
                 )
                 .orderBy(chatMessage.createdAt.desc(), chatMessage.id.desc())
@@ -129,6 +119,7 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
                 .set(chatMessage.checked, true)
                 .where(
                         chatMessage.room.id.eq(roomId),
+                        chatMessage.deletedAt.isNull(),
                         chatMessage.checked.isFalse(),
                         chatMessage.id.loe(lastMessageId),
                         chatMessage.sender.id.ne(readerId)

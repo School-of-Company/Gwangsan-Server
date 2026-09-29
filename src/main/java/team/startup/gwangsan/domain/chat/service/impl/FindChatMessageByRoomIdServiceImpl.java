@@ -121,6 +121,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                         message.getContent(),
                         message.getMessageType(),
                         message.getCreatedAt(),
+                        message.getEditedAt(),
                         imageMap.getOrDefault(message.getId(), List.of()),
                         message.getSender().getNickname(),
                         message.getSender().getId(),

@@ -22,6 +22,15 @@ public class ChatMessage {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "original_content", columnDefinition = "TEXT")
+    private String originalContent;
+
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(name = "message_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
@@ -53,5 +62,15 @@ public class ChatMessage {
 
     public void updateChecked(Boolean checked) {
         this.checked = checked;
+    }
+
+    public void edit(String content, LocalDateTime editedAt) {
+        if (this.originalContent == null) this.originalContent = this.content;
+        this.content = content;
+        this.editedAt = editedAt;
+    }
+
+    public void delete(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

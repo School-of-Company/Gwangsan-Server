@@ -58,7 +58,8 @@ class ChatControllerStandaloneTest {
                 findRoomsByCurrentUserService,
                 findRoomIdByProductIdService,
                 deleteChatRoomService,
-                mock(ValidateChatSendableService.class)
+                mock(ValidateChatSendableService.class),
+                mock(team.startup.gwangsan.domain.chat.service.impl.ChatMessageMutationService.class)
         );
         mvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())

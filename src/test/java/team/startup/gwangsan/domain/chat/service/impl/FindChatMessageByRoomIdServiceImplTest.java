@@ -482,7 +482,7 @@ class FindChatMessageByRoomIdServiceImplTest {
             arrangeEmptyMessages();
 
             var mvc = MockMvcBuilders.standaloneSetup(
-                    new ChatController(null, service, null, null, null, null, null)).build();
+                    new ChatController(null, service, null, null, null, null, null, null)).build();
             mvc.perform(get("/api/chat/5"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.product.isAuthor").isBoolean())
