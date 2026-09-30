@@ -114,6 +114,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                 .from(unreadMessage)
                 .where(unreadMessage.room.id.in(roomIds)
                         .and(unreadMessage.deletedAt.isNull())
+                        .and(unreadMessage.messageType.ne(MessageType.SYSTEM))
                         .and(unreadMessage.sender.id.ne(memberId))
                         .and(unreadMessage.checked.isFalse()))
                 .groupBy(unreadMessage.room.id)
@@ -185,6 +186,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
                         SELECT newest.message_id
                         FROM tbl_chat_message newest
                         WHERE newest.room_id = room.room_id AND newest.deleted_at IS NULL
+                          AND newest.message_type <> 'SYSTEM'
                         ORDER BY newest.created_at DESC, newest.message_id DESC
                         LIMIT 1
                     )

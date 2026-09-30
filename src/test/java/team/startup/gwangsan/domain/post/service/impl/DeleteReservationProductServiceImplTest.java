@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
+import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -23,6 +25,7 @@ import team.startup.gwangsan.domain.post.repository.ProductReservationRepository
 import team.startup.gwangsan.domain.trade.service.TradeStateReader;
 import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
+import team.startup.gwangsan.global.event.ReservationCancelledEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -49,6 +52,9 @@ class DeleteReservationProductServiceImplTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+    private ChatMessageRepository chatMessageRepository;
 
     @Mock
 
@@ -78,15 +84,19 @@ class DeleteReservationProductServiceImplTest {
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
             when(currentMember.getId()).thenReturn(2L);
             when(owner.getId()).thenReturn(1L);
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.of(reservation));
+            when(reservation.getId()).thenReturn(5L);
+            when(productReservationRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(reservation));
             when(product.getMember()).thenReturn(owner);
             when(reservation.getReserver()).thenReturn(currentMember);
             when(product.getId()).thenReturn(productId);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoom.getOtherMember(currentMember)).thenReturn(owner);
+            when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(chatRoomRepository.findByProductIdAndMember(productId, currentMember))
                     .thenReturn(Optional.of(chatRoom));
 
@@ -96,14 +106,21 @@ class DeleteReservationProductServiceImplTest {
             assertDoesNotThrow(() -> service.execute(productId));
 
             verify(memberUtil).getCurrentMember();
-            verify(productRepository).findActiveById(productId);
+            verify(productRepository).findByIdWithLock(productId);
             verify(productReservationRepository).findByProductAndStatus(product, ReservationStatus.PENDING);
             verify(reservation).cancel();
             verify(product).updateStatus(ProductStatus.ONGOING);
 
             ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
-            verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
-            TradeStatusChangedEvent event = (TradeStatusChangedEvent) eventCaptor.getValue();
+            verify(applicationEventPublisher, times(2)).publishEvent(eventCaptor.capture());
+            TradeStatusChangedEvent event = eventCaptor.getAllValues().stream()
+                    .filter(TradeStatusChangedEvent.class::isInstance)
+                    .map(TradeStatusChangedEvent.class::cast).findFirst().orElseThrow();
+            ReservationCancelledEvent cancellation = eventCaptor.getAllValues().stream()
+                    .filter(ReservationCancelledEvent.class::isInstance)
+                    .map(ReservationCancelledEvent.class::cast).findFirst().orElseThrow();
+            assertEquals(-5L, cancellation.messageId());
+            assertEquals(10L, cancellation.roomId());
             assertEquals(10L, event.roomId());
             assertEquals(productId, event.productId());
             assertFalse(event.completed());
@@ -125,15 +142,19 @@ class DeleteReservationProductServiceImplTest {
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
             when(currentMember.getId()).thenReturn(1L);
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.of(reservation));
+            when(reservation.getId()).thenReturn(5L);
+            when(productReservationRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(reservation));
             when(product.getMember()).thenReturn(currentMember);
             when(reservation.getReserver()).thenReturn(reserver);
             when(product.getId()).thenReturn(productId);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.getId()).thenReturn(10L);
+            when(chatRoom.getOtherMember(currentMember)).thenReturn(reserver);
+            when(chatMessageRepository.save(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
             when(chatRoomRepository.findByProductIdAndMember(productId, reserver))
                     .thenReturn(Optional.of(chatRoom));
 
@@ -155,7 +176,7 @@ class DeleteReservationProductServiceImplTest {
             Member currentMember = mock(Member.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.empty());
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
 
             // when & then
             assertThrows(NotFoundProductException.class,
@@ -174,7 +195,7 @@ class DeleteReservationProductServiceImplTest {
             Product product = mock(Product.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.empty());
 
@@ -183,7 +204,7 @@ class DeleteReservationProductServiceImplTest {
                     () -> service.execute(productId));
 
             verify(memberUtil).getCurrentMember();
-            verify(productRepository).findActiveById(productId);
+            verify(productRepository).findByIdWithLock(productId);
             verify(productReservationRepository).findByProductAndStatus(product, ReservationStatus.PENDING);
 
             verifyNoMoreInteractions(productReservationRepository);
@@ -205,9 +226,11 @@ class DeleteReservationProductServiceImplTest {
             when(currentMember.getId()).thenReturn(3L);
             when(owner.getId()).thenReturn(1L);
             when(reserver.getId()).thenReturn(2L);
-            when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
+            when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.of(reservation));
+            when(reservation.getId()).thenReturn(5L);
+            when(productReservationRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(reservation));
             when(product.getMember()).thenReturn(owner);
             when(reservation.getReserver()).thenReturn(reserver);
 

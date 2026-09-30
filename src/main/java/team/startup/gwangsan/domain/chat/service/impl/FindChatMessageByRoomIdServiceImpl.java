@@ -23,6 +23,9 @@ import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -43,6 +46,7 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
     private final ProductImageRepository productImageRepository;
     private final TradeStateReader tradeStateReader;
     private final ProductReservationRepository productReservationRepository;
+    private final TradeCompleteRepository tradeCompleteRepository;
 
     @Override
     @Transactional
@@ -77,6 +81,10 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         Optional<ProductReservation> reservation = isReserved
                 ? productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING)
                 : Optional.empty();
+        LocalDateTime completedAt = tradeState.completed()
+                ? tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED)
+                    .map(TradeComplete::getCompletedAt).orElse(null)
+                : null;
 
         GetChatProductDto productDto = new GetChatProductDto(
                 product.getId(),
@@ -90,6 +98,8 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
                 isReserved,
                 isDeleted,
                 reservation.map(ProductReservation::getScheduledAt).orElse(null),
+                reservation.map(ProductReservation::getCreatedAt).orElse(null),
+                completedAt,
                 reservation.map(ProductReservation::getPlaceName).orElse(null),
                 reservation.map(ProductReservation::getAddress).orElse(null),
                 reservation.map(ProductReservation::getLatitude).orElse(null),

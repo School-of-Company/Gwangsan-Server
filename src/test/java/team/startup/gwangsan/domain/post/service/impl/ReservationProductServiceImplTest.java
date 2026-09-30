@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -230,10 +231,13 @@ class ReservationProductServiceImplTest {
             // when
             when(tradeStateReader.read(any(), any(), any()))
                     .thenReturn(new TradeStateSnapshot(false, true, null, null));
-            assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
+            LocalDateTime soon = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul")).plusMinutes(10);
+            assertDoesNotThrow(() -> service.execute(productId, ROOM_ID, soon, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE));
 
             // then
-            verify(productReservationRepository).save(any(ProductReservation.class));
+            ArgumentCaptor<ProductReservation> savedReservation = ArgumentCaptor.forClass(ProductReservation.class);
+            verify(productReservationRepository).save(savedReservation.capture());
+            assertNotNull(savedReservation.getValue().getReminder30SentAt());
             verify(product).updateStatus(ProductStatus.RESERVATION);
 
             ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
@@ -272,11 +276,14 @@ class ReservationProductServiceImplTest {
             when(tradeStateReader.read(product, authorBuyer, seller))
                     .thenReturn(new TradeStateSnapshot(false, true, null, null));
 
-            service.execute(productId, ROOM_ID, SCHEDULED_AT, PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE);
+            service.execute(productId, ROOM_ID,
+                    LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul")).plusHours(1),
+                    PLACE_NAME, ADDRESS, LATITUDE, LONGITUDE);
 
             ArgumentCaptor<ProductReservation> reservationCaptor = ArgumentCaptor.forClass(ProductReservation.class);
             verify(productReservationRepository).save(reservationCaptor.capture());
             assertEquals(seller, reservationCaptor.getValue().getReserver());
+            assertNull(reservationCaptor.getValue().getReminder30SentAt());
         }
     }
 }

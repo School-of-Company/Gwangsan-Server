@@ -136,6 +136,25 @@ class ChatRoomCustomRepositoryImplTest {
     class Describe_findRoomsByMemberId {
 
         @Test
+        void systemMessageDoesNotChangePreviewOrUnreadCount() {
+            Member buyer = createMember("system-buyer", "010-3001-0001");
+            Member seller = createMember("system-seller", "010-3001-0002");
+            ChatRoom room = createRoom(buyer, seller, createProduct(seller));
+            LocalDateTime older = LocalDateTime.of(2026, 9, 30, 10, 0);
+            createMessage(100L, room, seller, "일반 메시지", older);
+            em.persist(ChatMessage.builder().id(-1L).room(room).sender(seller)
+                    .content("예약 취소").messageType(MessageType.SYSTEM).checked(false)
+                    .createdAt(older.plusMinutes(1)).build());
+            em.flush();
+            em.clear();
+
+            GetRoomsDto result = repository.findRoomsByMemberId(buyer.getId()).getFirst();
+
+            assertThat(result.lastMessage()).isEqualTo("일반 메시지");
+            assertThat(result.unreadMessageCount()).isEqualTo(1L);
+        }
+
+        @Test
         @DisplayName("createdAt이 최신인데 id가 더 작은 메시지를 최신 메시지로 반환한다")
         void it_selects_message_with_latest_createdAt_even_if_id_is_smaller() {
             Member buyer = createMember("buyer1", "010-0001-0001");

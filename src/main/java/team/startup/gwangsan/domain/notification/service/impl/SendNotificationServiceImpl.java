@@ -43,6 +43,7 @@ public class SendNotificationServiceImpl implements SendNotificationService {
             case CHATTING -> CHAT_BODY;
             case RECOMMENDATION -> RECOMMENDATION_BODY;
             case TRADE_COMPLETE -> TRADE_COMPLETE_BODY;
+            case RESERVATION_REMINDER, RESERVATION_CANCEL -> throw new IllegalArgumentException("예약 알림은 상대방 이름이 필요합니다.");
         };
     }
 }

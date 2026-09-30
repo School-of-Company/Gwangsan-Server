@@ -67,6 +67,22 @@ class SaveChatMessageServiceImplTest {
     @InjectMocks
     private SaveChatMessageServiceImpl service;
 
+    @Test
+    void systemMessageDoesNotCreateChatPush() {
+        Member sender = mock(Member.class);
+        Member recipient = mock(Member.class);
+        ChatRoom room = mock(ChatRoom.class);
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
+        when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
+        when(chatMessageRepository.insertIfAbsent(any())).thenReturn(true);
+        when(room.getOtherMember(sender)).thenReturn(recipient);
+        LocalDateTime createdAt = LocalDateTime.of(2026, 9, 30, 10, 0);
+
+        service.execute(-1L, 10L, "예약 취소", List.of(), MessageType.SYSTEM, 1L, createdAt);
+
+        verifyNoInteractions(deviceTokenRepository, applicationEventPublisher);
+    }
+
     @Nested
     @DisplayName("수신자의 나가기 및 재참여 상태에 따른 알림")
     class RecipientVisibility {

@@ -60,6 +60,12 @@ public class ProductReservation {
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
+    @Column(name = "reminder_30_sent_at")
+    private LocalDateTime reminder30SentAt;
+
+    @Column(name = "reminder_at_sent_at")
+    private LocalDateTime reminderAtSentAt;
+
     @Builder
     public ProductReservation(Product product, Member reserver, ReservationStatus status, LocalDateTime scheduledAt,
                                String placeName, String address, Double latitude, Double longitude) {
@@ -80,5 +86,13 @@ public class ProductReservation {
 
     public void complete() {
         this.status = ReservationStatus.COMPLETED;
+    }
+
+    public void markReminder30Sent(LocalDateTime sentAt) {
+        this.reminder30SentAt = sentAt;
+    }
+
+    public void markReminderAtSent(LocalDateTime sentAt) {
+        this.reminderAtSentAt = sentAt;
     }
 }

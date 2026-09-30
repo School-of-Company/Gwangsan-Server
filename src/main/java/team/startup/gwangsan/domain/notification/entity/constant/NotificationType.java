@@ -5,4 +5,6 @@ public enum NotificationType {
     CHATTING,
     RECOMMENDATION,
     TRADE_COMPLETE,
+    RESERVATION_REMINDER,
+    RESERVATION_CANCEL,
 }
