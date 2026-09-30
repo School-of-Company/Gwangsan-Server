@@ -142,6 +142,23 @@ class SignUpServiceImplTest {
                         memberDetailRepository, passwordEncoder, relatedKeywordRepository,
                         memberRelatedKeywordRepository, applicationEventPublisher);
             }
+
+            @Test
+            @DisplayName("추천인 닉네임이 실제 존재해도, 가입 신청자 본인 번호가 차단되어 있으면 추천인 조회 없이 실패한다")
+            void it_fails_regardless_of_recommender_validity_when_own_phone_is_banned() {
+                // recommender(추천인) 값이 유효한지 여부와 무관하게, 가입 신청자 본인 phoneNumber만으로
+                // 판단한다. 응답 메시지만 보고 추천인 조회 실패로 오인하는 것을 막기 위한 회귀 테스트.
+                SignUpRequest request = validRequest();
+                when(withdrawalRecordRepository.existsByPhoneNumberAndBannedIsTrue(request.phoneNumber()))
+                        .thenReturn(true);
+
+                assertThatThrownBy(() -> service.execute(request))
+                        .isInstanceOf(BannedPhoneNumberException.class)
+                        .extracting(ex -> ((BannedPhoneNumberException) ex).getErrorCode().getMessage())
+                        .isEqualTo("강제 탈퇴 처리된 휴대폰 번호로는 재가입할 수 없습니다.");
+
+                verify(memberRepository, never()).findByNickname(request.recommender());
+            }
         }
 
         @Nested

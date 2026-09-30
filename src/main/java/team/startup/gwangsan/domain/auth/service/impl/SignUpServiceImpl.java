@@ -1,6 +1,7 @@
 package team.startup.gwangsan.domain.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.redis.RedisUtil;
 import team.startup.gwangsan.global.sms.SmsDemoAccount;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SignUpServiceImpl implements SignUpService {
@@ -148,7 +150,11 @@ public class SignUpServiceImpl implements SignUpService {
 
     private void validateBannedPhoneNumber(String phoneNumber) {
         if (withdrawalRecordRepository.existsByPhoneNumberAndBannedIsTrue(phoneNumber)) {
-            throw new  BannedPhoneNumberException();
+            // 이 검증은 recommender(추천인) 필드와 무관하게 가입 신청자 본인의 phoneNumber만 본다.
+            // 응답 메시지만 보면 추천인 조회 실패로 오인하기 쉬워 운영 확인용으로 남긴다.
+            log.warn("회원가입 차단: 강제 탈퇴 이력이 있는 휴대폰 번호로 가입 시도 - phoneNumber={}",
+                    phoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
+            throw new BannedPhoneNumberException();
         }
     }
 }
