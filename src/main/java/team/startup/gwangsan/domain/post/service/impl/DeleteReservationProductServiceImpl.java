@@ -5,6 +5,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
+import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
+import team.startup.gwangsan.domain.chat.entity.ChatMessage;
+import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.global.event.ReservationCancelledEvent;
+import java.time.LocalDateTime;
 import team.startup.gwangsan.domain.member.entity.Member;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -31,17 +36,19 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     private final ChatRoomRepository chatRoomRepository;
     private final TradeStateReader tradeStateReader;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Override
     @Transactional
     public void execute(Long productId) {
         Member member = memberUtil.getCurrentMember();
 
-        Product product = productRepository.findActiveById(productId)
+        Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(NotFoundProductException::new);
 
         ProductReservation productReservation = productReservationRepository
                 .findByProductAndStatus(product, ReservationStatus.PENDING)
+                .flatMap(r -> productReservationRepository.findByIdForUpdate(r.getId()))
                 .orElseThrow(ReservationParticipantOnlyException::new);
 
         if (!product.getMember().getId().equals(member.getId())
@@ -55,6 +62,20 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
 
         chatRoomRepository.findByProductIdAndMember(product.getId(), productReservation.getReserver())
                 .ifPresent(chatRoom -> {
+                    String content = member.getNickname() + "님이 예약을 취소했어요";
+                    LocalDateTime createdAt = LocalDateTime.now();
+                    ChatMessage message = chatMessageRepository.save(ChatMessage.builder()
+                            .id(-productReservation.getId())
+                            .room(chatRoom)
+                            .sender(member)
+                            .content(content)
+                            .messageType(MessageType.SYSTEM)
+                            .checked(true)
+                            .createdAt(createdAt)
+                            .build());
+                    applicationEventPublisher.publishEvent(new ReservationCancelledEvent(
+                            chatRoom.getId(), message.getId(), member.getId(),
+                            chatRoom.getOtherMember(member).getId(), content, createdAt));
                     TradeStateSnapshot tradeState =
                             tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
                     applicationEventPublisher.publishEvent(new TradeStatusChangedEvent(

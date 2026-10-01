@@ -19,6 +19,8 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -66,6 +68,34 @@ class ProductReservationRepositoryTest {
         reservation.cancel();
         em.flush();
         return reservation;
+    }
+
+    @Test
+    void dueReminderStateSurvivesReloadAndCancelledReservationsAreExcluded() {
+        Member seller = createMember("reminder-seller", "010-2001-0001");
+        Member buyer = createMember("reminder-buyer", "010-2001-0002");
+        Product product = createProduct(seller);
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        ProductReservation reservation = productReservationRepository.save(ProductReservation.builder()
+                .product(product).reserver(buyer).status(ReservationStatus.PENDING)
+                .scheduledAt(now.plusMinutes(15)).build());
+        em.flush();
+        em.clear();
+
+        assertThat(productReservationRepository.findDueReminderIds(now, now.plusMinutes(30)))
+                .contains(reservation.getId());
+        ProductReservation reloaded = productReservationRepository.findByIdForUpdate(reservation.getId()).orElseThrow();
+        reloaded.markReminder30Sent(now);
+        em.flush();
+        em.clear();
+        assertThat(productReservationRepository.findDueReminderIds(now, now.plusMinutes(30)))
+                .doesNotContain(reservation.getId());
+
+        productReservationRepository.findByIdForUpdate(reservation.getId()).orElseThrow().cancel();
+        em.flush();
+        em.clear();
+        assertThat(productReservationRepository.findDueReminderIds(now.plusMinutes(16), now.plusMinutes(46)))
+                .doesNotContain(reservation.getId());
     }
 
     @Nested

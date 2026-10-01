@@ -34,6 +34,9 @@ import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductReservationRepository;
 import team.startup.gwangsan.domain.trade.service.TradeStateReader;
 import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
+import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -60,6 +63,7 @@ class FindChatMessageByRoomIdServiceImplTest {
     @Mock private ProductImageRepository productImageRepository;
     @Mock private TradeStateReader tradeStateReader;
     @Mock private ProductReservationRepository productReservationRepository;
+    @Mock private TradeCompleteRepository tradeCompleteRepository;
 
     @InjectMocks
     private FindChatMessageByRoomIdServiceImpl service;
@@ -338,12 +342,18 @@ class FindChatMessageByRoomIdServiceImplTest {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
             givenTradeState(true, false, null);
+            TradeComplete completion = mock(TradeComplete.class);
+            LocalDateTime completedAt = LocalDateTime.of(2026, 9, 1, 15, 0);
+            when(completion.getCompletedAt()).thenReturn(completedAt);
+            when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
+                    .thenReturn(Optional.of(completion));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             // null 이 되면 클라이언트가 거래 카드를 숨겨 완료 표시와 리뷰 작성 진입점이 사라진다.
             assertThat(response.product().createdAt()).isEqualTo(TRADE_REQUESTED_AT);
             assertThat(response.product().isCompleted()).isTrue();
+            assertThat(response.product().completedAt()).isEqualTo(completedAt);
         }
 
         @Test
@@ -408,6 +418,8 @@ class FindChatMessageByRoomIdServiceImplTest {
             ProductReservation reservation = mock(ProductReservation.class);
             LocalDateTime scheduledAt = LocalDateTime.of(2026, 9, 1, 14, 0);
             when(reservation.getScheduledAt()).thenReturn(scheduledAt);
+            LocalDateTime reservedAt = LocalDateTime.of(2026, 8, 31, 11, 0);
+            when(reservation.getCreatedAt()).thenReturn(reservedAt);
             when(reservation.getPlaceName()).thenReturn("광산구청");
             when(reservation.getAddress()).thenReturn("광주광역시 광산구 광산로29번길 15");
             when(reservation.getLatitude()).thenReturn(35.1397);
@@ -418,6 +430,7 @@ class FindChatMessageByRoomIdServiceImplTest {
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
             assertThat(response.product().reservationScheduledAt()).isEqualTo(scheduledAt);
+            assertThat(response.product().reservedAt()).isEqualTo(reservedAt);
             assertThat(response.product().reservationPlaceName()).isEqualTo("광산구청");
             assertThat(response.product().reservationAddress()).isEqualTo("광주광역시 광산구 광산로29번길 15");
             assertThat(response.product().reservationLatitude()).isEqualTo(35.1397);

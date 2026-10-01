@@ -25,6 +25,7 @@ import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
@@ -68,8 +69,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
                 ? chatRoom.getSeller()
                 : chatRoom.getBuyer();
 
-        productReservationRepository.save(
-                ProductReservation.builder()
+        ProductReservation reservation = ProductReservation.builder()
                         .product(product)
                         .reserver(reserver)
                         .status(ReservationStatus.PENDING)
@@ -78,8 +78,11 @@ public class ReservationProductServiceImpl implements ReservationProductService 
                         .address(address)
                         .latitude(latitude)
                         .longitude(longitude)
-                        .build()
-        );
+                        .build();
+        if (!scheduledAt.isAfter(LocalDateTime.now(ZoneId.of("Asia/Seoul")).plusMinutes(30))) {
+            reservation.markReminder30Sent(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+        }
+        productReservationRepository.save(reservation);
 
         product.updateStatus(ProductStatus.RESERVATION);
 

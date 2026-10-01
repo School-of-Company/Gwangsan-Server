@@ -101,6 +101,16 @@ class ExpoPushAdapterTest {
         }
 
         @Test
+        void reservationPushesIncludeRoomIdAndAlertType() {
+            assertThat(adapter.buildData(NotificationType.RESERVATION_REMINDER, 42L))
+                    .containsEntry("roomId", "42")
+                    .containsEntry("alertType", "RESERVATION_REMINDER");
+            assertThat(adapter.buildData(NotificationType.RESERVATION_CANCEL, 42L))
+                    .containsEntry("roomId", "42")
+                    .containsEntry("alertType", "RESERVATION_CANCEL");
+        }
+
+        @Test
         @DisplayName("TRADE_COMPLETE 타입일 때 alertType, sourceId만 포함하고 roomId는 없다")
         void it_excludes_room_id_for_trade_complete() {
             Map<String, String> data = adapter.buildData(NotificationType.TRADE_COMPLETE, 7L);

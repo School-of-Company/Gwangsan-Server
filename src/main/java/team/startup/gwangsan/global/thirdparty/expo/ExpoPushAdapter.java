@@ -64,7 +64,8 @@ public class ExpoPushAdapter implements NotificationPort {
         data.put("alertType", type.name());
         if (sourceId != null) {
             data.put("sourceId", String.valueOf(sourceId));
-            if (type == NotificationType.CHATTING) {
+            if (type == NotificationType.CHATTING || type == NotificationType.RESERVATION_REMINDER
+                    || type == NotificationType.RESERVATION_CANCEL) {
                 data.put("roomId", String.valueOf(sourceId));
             }
         }
@@ -105,11 +106,16 @@ public class ExpoPushAdapter implements NotificationPort {
                             .block(Duration.ofSeconds(5));
 
                     log.info("[Expo] 응답: {}", resp);
-                    logExpoErrors(resp);
+                    int errors = logExpoErrors(resp);
+                    if (errors > 0 && (type == NotificationType.RESERVATION_REMINDER
+                            || type == NotificationType.RESERVATION_CANCEL)) {
+                        throw new IllegalStateException("Expo rejected " + errors + " reservation push tickets");
+                    }
                     return null;
                 });
             } catch (Exception e) {
                 log.error("[Expo] 전송 실패: {}", e.getMessage(), e);
+                if (type == NotificationType.RESERVATION_REMINDER) throw e;
             }
         }
     }

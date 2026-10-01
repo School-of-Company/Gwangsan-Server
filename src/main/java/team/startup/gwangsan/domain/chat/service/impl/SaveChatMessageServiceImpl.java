@@ -86,7 +86,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             chatMessageImageRepository.saveAll(chatMessageImages);
         }
 
-        if (!recipientHidden) {
+        if (!recipientHidden && messageType != MessageType.SYSTEM) {
             List<DeviceToken> deviceTokens = deviceTokenRepository.findAllByUserId(otherMember.getId());
             if (!deviceTokens.isEmpty()) {
                 applicationEventPublisher.publishEvent(
