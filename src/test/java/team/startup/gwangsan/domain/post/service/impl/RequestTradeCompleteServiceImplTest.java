@@ -2,6 +2,8 @@ package team.startup.gwangsan.domain.post.service.impl;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +37,8 @@ import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.trade.exception.*;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
+import team.startup.gwangsan.global.event.SendNotificationEvent;
+import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -362,8 +366,8 @@ class RequestTradeCompleteServiceImplTest {
         }
 
         @Test
-        @DisplayName("판매자가 최초로 거래 완료를 요청하면 PENDING 거래 완료 엔티티를 생성한다")
-        void execute_asSeller_shouldCreatePendingTrade_whenNoExistingPending() {
+        @DisplayName("작성자인 판매자가 최초 호출하면 즉시 완료한다")
+        void execute_asSeller_shouldCompleteTrade_whenNoExistingPending() {
             // given
             Long sellerId = 1L;
             Long buyerId = 2L;
@@ -424,7 +428,10 @@ class RequestTradeCompleteServiceImplTest {
             ArgumentCaptor<TradeComplete> savedCaptor = ArgumentCaptor.forClass(TradeComplete.class);
             verify(tradeCompleteRepository).save(savedCaptor.capture());
             assertTrue(savedCaptor.getValue().isRequestedBySeller());
-            verifyTradeStatusChangedEvent(roomId, true, productId, false, false);
+            assertEquals(TradeStatus.COMPLETED, savedCaptor.getValue().getStatus());
+            verify(product).updateStatus(ProductStatus.COMPLETED);
+            verify(newTradeComplete).updateCompletedAt();
+            verifyTradeStatusChangedEvent(roomId, null, productId, true, false);
         }
 
         @Test
@@ -492,11 +499,20 @@ class RequestTradeCompleteServiceImplTest {
             verify(tradeCompleteRepository).save(savedCaptor.capture());
             assertTrue(!savedCaptor.getValue().isRequestedBySeller());
             verifyTradeStatusChangedEvent(roomId, false, productId, false, false);
+
+            when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                    product, buyerMember, sellerMember, TradeStatus.PENDING))
+                    .thenReturn(Optional.of(newTradeComplete));
+            assertThrows(TradeAlreadyCompleteRequestException.class,
+                    () -> service.execute(productId, sellerId));
+            verify(product, never()).updateStatus(any());
+            verify(tradeCompleteRepository, times(1)).save(any());
         }
 
-        @Test
-        @DisplayName("자신이 이미 보낸 PENDING 요청을 스스로 다시 확정하려 하면 TradeAlreadyCompleteRequestException 을 던진다")
-        void execute_shouldThrowTradeAlreadyCompleteRequestException_whenCallerIsTheRequester() {
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        @DisplayName("작성자인 판매자는 요청자가 누구든 PENDING을 완료한다")
+        void execute_asAuthor_shouldCompletePending(boolean requestedBySeller) {
             // given
             Long sellerId = 1L;
             Long buyerId = 2L;
@@ -533,9 +549,8 @@ class RequestTradeCompleteServiceImplTest {
             when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, sellerId))
                     .thenReturn(true);
 
-            // 판매자 본인이 이미 요청을 보낸 상태(requestedBySeller = true)에서 판매자가 다시 호출
             TradeComplete pending = mock(TradeComplete.class);
-            when(pending.isRequestedBySeller()).thenReturn(true);
+            when(pending.isRequestedBySeller()).thenReturn(requestedBySeller);
             when(pending.getCreatedAt()).thenReturn(TRADE_REQUESTED_AT);
             when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product,
@@ -545,11 +560,13 @@ class RequestTradeCompleteServiceImplTest {
             )).thenReturn(Optional.of(pending));
 
             // when & then
-            assertThrows(TradeAlreadyCompleteRequestException.class,
-                    () -> service.execute(productId, buyerId));
+            assertDoesNotThrow(() -> service.execute(productId, buyerId));
 
             verify(tradeCompleteRepository, never()).save(any());
-            verify(product, never()).updateStatus(any());
+            verify(product).updateStatus(ProductStatus.COMPLETED);
+            verify(pending).updateStatus(TradeStatus.COMPLETED);
+            verify(pending).updateCompletedAt();
+            verifyTradeStatusChangedEvent(300L, null, productId, true, false);
         }
 
         @Test
@@ -624,9 +641,10 @@ class RequestTradeCompleteServiceImplTest {
             verifyTradeStatusChangedEvent(roomId, null, productId, true, false);
         }
 
-        @Test
-        @DisplayName("RECEIVER 게시물 작성자는 구매자로 거래 완료 요청을 만든다")
-        void execute_as_receiver_author_creates_buyer_request() {
+        @ParameterizedTest
+        @ValueSource(booleans = {false, true})
+        @DisplayName("RECEIVER 작성자는 구매자로 즉시 완료하고 광산을 판매자에게 이동한다")
+        void execute_as_receiver_author_completes_trade(boolean withOwnPending) {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
@@ -642,6 +660,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.RECEIVER);
             when(product.getMember()).thenReturn(buyer);
+            when(product.getGwangsan()).thenReturn(10);
             when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.getId()).thenReturn(20L);
@@ -650,20 +669,37 @@ class RequestTradeCompleteServiceImplTest {
             when(chatMessageRepository.existsByRoomAndSenderId(chatRoom, buyerId)).thenReturn(true);
             when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                     product, buyer, seller, TradeStatus.PENDING)).thenReturn(Optional.empty());
-            when(tradeCompleteRepository.save(any(TradeComplete.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            TradeComplete saved = mock(TradeComplete.class);
+            when(saved.getCreatedAt()).thenReturn(TRADE_REQUESTED_AT);
+            when(tradeCompleteRepository.save(any(TradeComplete.class))).thenReturn(saved);
+            if (withOwnPending) {
+                when(tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
+                        product, buyer, seller, TradeStatus.PENDING)).thenReturn(Optional.of(saved));
+            }
 
             service.execute(productId, sellerId);
 
-            ArgumentCaptor<TradeComplete> tradeCaptor = ArgumentCaptor.forClass(TradeComplete.class);
-            verify(tradeCompleteRepository).save(tradeCaptor.capture());
-            assertEquals(buyer, tradeCaptor.getValue().getBuyer());
-            assertEquals(seller, tradeCaptor.getValue().getSeller());
-            assertEquals(false, tradeCaptor.getValue().isRequestedBySeller());
+            if (withOwnPending) {
+                verify(tradeCompleteRepository, never()).save(any());
+            } else {
+                ArgumentCaptor<TradeComplete> tradeCaptor = ArgumentCaptor.forClass(TradeComplete.class);
+                verify(tradeCompleteRepository).save(tradeCaptor.capture());
+                assertEquals(buyer, tradeCaptor.getValue().getBuyer());
+                assertEquals(seller, tradeCaptor.getValue().getSeller());
+                assertEquals(false, tradeCaptor.getValue().isRequestedBySeller());
+                assertEquals(TradeStatus.COMPLETED, tradeCaptor.getValue().getStatus());
+            }
+            verify(product).updateStatus(ProductStatus.COMPLETED);
+            verify(saved).updateStatus(TradeStatus.COMPLETED);
+            verify(buyerDetail).minusGwangsan(10);
+            verify(sellerDetail).plusGwangsan(10);
+            verify(saved).updateCompletedAt();
+            verifyTradeStatusChangedEvent(20L, null, productId, true, false);
         }
 
         @Test
-        @DisplayName("예약자가 판매자여도 판매자는 예약 거래 완료를 요청할 수 있고 예약 사실을 이벤트에 담는다")
-        void execute_as_reserved_seller_creates_request_with_reserved_event() {
+        @DisplayName("예약자가 판매자인 작성자도 즉시 완료하고 예약을 완료한다")
+        void execute_as_reserved_seller_completes_trade() {
             Long sellerId = 1L;
             Long buyerId = 2L;
             Long productId = 100L;
@@ -700,7 +736,11 @@ class RequestTradeCompleteServiceImplTest {
 
             service.execute(productId, buyerId);
 
-            verifyTradeStatusChangedEvent(roomId, true, productId, false, true);
+            verify(reservation).complete();
+            verify(product).updateStatus(ProductStatus.COMPLETED);
+            verify(saved).updateStatus(TradeStatus.COMPLETED);
+            verify(saved).updateCompletedAt();
+            verifyTradeStatusChangedEvent(roomId, null, productId, true, false);
         }
     }
 
@@ -731,5 +771,14 @@ class RequestTradeCompleteServiceImplTest {
         assertEquals(reserved, event.reserved());
         // 조회 응답과 같은 값이어야 하므로 거래 요청 시각이 실려 있어야 한다.
         assertNotNull(event.requestedAt());
+        if (completed) {
+            SendNotificationEvent notification = eventCaptor.getAllValues().stream()
+                    .filter(SendNotificationEvent.class::isInstance)
+                    .map(SendNotificationEvent.class::cast)
+                    .findFirst().orElseThrow();
+            assertEquals(NotificationType.TRADE_COMPLETE, notification.type());
+            assertEquals(productId, notification.sourceId());
+            verify(tradeCompleteRepository).deleteByProductAndStatus(any(Product.class), eq(TradeStatus.PENDING));
+        }
     }
 }

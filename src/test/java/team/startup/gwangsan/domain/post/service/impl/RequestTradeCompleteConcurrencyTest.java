@@ -103,21 +103,43 @@ class RequestTradeCompleteConcurrencyTest {
     @Autowired private PlatformTransactionManager transactionManager;
 
     @Test
-    @DisplayName("판매자의 동시 완료 요청은 PENDING 한 건만 만들고 나머지는 이미 요청됨으로 거절된다")
-    void seller_concurrent_requests_create_single_pending() throws Exception {
+    @DisplayName("작성자인 판매자의 동시 요청은 한 번만 완료하고 광산도 한 번만 이동한다")
+    void seller_concurrent_requests_complete_once() throws Exception {
         Fixture fixture = fixture(false);
 
         Map<String, Long> results = raceWhileProductLocked(fixture.productId(),
                 () -> requestTradeCompleteService.execute(fixture.productId(), fixture.buyerId()),
                 fixture.sellerPhone());
 
+        assertThat(results).containsOnlyKeys("OK", TradeAlreadyCompleteException.class.getSimpleName());
+        assertThat(results.get("OK")).isEqualTo(1L);
+        assertCompletedOnce(fixture);
+    }
+
+    @Test
+    @DisplayName("작성자의 기존 PENDING 동시 확정도 광산을 한 번만 이동한다")
+    void seller_concurrent_confirms_own_pending_once() throws Exception {
+        Fixture fixture = fixture(true);
+        Map<String, Long> results = raceWhileProductLocked(fixture.productId(),
+                () -> requestTradeCompleteService.execute(fixture.productId(), fixture.buyerId()),
+                fixture.sellerPhone());
+        assertThat(results).containsOnlyKeys("OK", TradeAlreadyCompleteException.class.getSimpleName());
+        assertThat(results.get("OK")).isEqualTo(1L);
+        assertCompletedOnce(fixture);
+    }
+
+    @Test
+    @DisplayName("비작성자인 구매자의 동시 요청은 PENDING 하나만 만들고 재요청을 거절한다")
+    void buyer_concurrent_requests_create_single_pending() throws Exception {
+        Fixture fixture = fixture(false);
+        Map<String, Long> results = raceWhileProductLocked(fixture.productId(),
+                () -> requestTradeCompleteService.execute(fixture.productId(), fixture.sellerId()),
+                fixture.buyerPhone());
         assertThat(results).containsOnlyKeys("OK", TradeAlreadyCompleteRequestException.class.getSimpleName());
         assertThat(results.get("OK")).isEqualTo(1L);
         assertThat(countTrades(fixture.productId(), TradeStatus.PENDING)).isEqualTo(1);
-
-        runAs(fixture.buyerPhone(),
-                () -> requestTradeCompleteService.execute(fixture.productId(), fixture.sellerId()));
-
+        runAs(fixture.sellerPhone(),
+                () -> requestTradeCompleteService.execute(fixture.productId(), fixture.buyerId()));
         assertCompletedOnce(fixture);
     }
 
