@@ -93,8 +93,20 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         Optional<TradeComplete> pending = tradeCompleteRepository.findByProductAndBuyerAndSellerAndStatus(
                 product, buyerDetail.getMember(), sellerDetail.getMember(), TradeStatus.PENDING);
 
-        if (pending.isPresent()) {
-            confirmTradeCompletion(pending.get(), isBuyer, chatRoom, product, buyerDetail, sellerDetail, otherMemberDetail.getMember(), reservation);
+        if (product.getMember().equals(member)) {
+            TradeComplete trade = pending.orElseGet(() -> tradeCompleteRepository.save(TradeComplete.builder()
+                    .product(product)
+                    .buyer(buyerDetail.getMember())
+                    .seller(sellerDetail.getMember())
+                    .status(TradeStatus.COMPLETED)
+                    .requestedBySeller(!isBuyer)
+                    .build()));
+            confirmTradeCompletion(trade, chatRoom, product, buyerDetail, sellerDetail, reservation);
+        } else if (pending.isPresent()) {
+            if (isCallerTheRequester(isBuyer, pending.get())) {
+                throw new TradeAlreadyCompleteRequestException();
+            }
+            confirmTradeCompletion(pending.get(), chatRoom, product, buyerDetail, sellerDetail, reservation);
         } else {
             requestTradeCompletion(chatRoom, product, isBuyer, buyerDetail.getMember(), sellerDetail.getMember(), otherMemberDetail.getMember());
         }
@@ -158,13 +170,9 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         return isBuyer != pending.isRequestedBySeller();
     }
 
-    private void confirmTradeCompletion(TradeComplete pending, boolean isBuyer, ChatRoom chatRoom, Product product,
-                                         MemberDetail buyerDetail, MemberDetail sellerDetail, Member requester,
+    private void confirmTradeCompletion(TradeComplete pending, ChatRoom chatRoom, Product product,
+                                         MemberDetail buyerDetail, MemberDetail sellerDetail,
                                          ProductReservation reservation) {
-        if (isCallerTheRequester(isBuyer, pending)) {
-            throw new TradeAlreadyCompleteRequestException();
-        }
-
         product.updateStatus(ProductStatus.COMPLETED);
         pending.updateStatus(TradeStatus.COMPLETED);
         pending.updateCompletedAt();
