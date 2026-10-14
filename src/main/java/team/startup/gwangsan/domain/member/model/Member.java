@@ -15,8 +15,8 @@ public class Member {
     private String passwordHash;
     private final String phoneNumber;
     private final Long recommenderId;
-    private final MemberRole role;
-    private final MemberStatus status;
+    private MemberRole role;
+    private MemberStatus status;
     private final LocalDateTime joinedAt;
 
     /** 가입 신청 회원. 관리자 승인 전까지 PENDING 이다. */
@@ -31,5 +31,13 @@ public class Member {
 
     public void changePassword(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public void changeRole(MemberRole role) {
+        this.role = role;
+    }
+
+    public void changeStatus(MemberStatus status) {
+        this.status = status;
     }
 }

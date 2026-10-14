@@ -18,6 +18,9 @@ public interface MemberDetailJpaRepository extends JpaRepository<MemberDetailJpa
 
     List<MemberDetailJpaEntity> findAllByPlace(PlaceJpaEntity place);
 
+    @Query("SELECT d.id FROM MemberDetail d WHERE d.place.id = :placeId")
+    List<Long> findIdsByPlaceId(@Param("placeId") Integer placeId);
+
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM MemberDetail d WHERE d.member = :member")
     void deleteByMember(@Param("member") MemberJpaEntity member);

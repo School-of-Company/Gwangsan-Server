@@ -13,7 +13,7 @@ public class MemberDetail {
 
     private final Long memberId;
     private final Integer dongId;
-    private final Integer placeId;
+    private Integer placeId;
     private Integer gwangsan;
     private Integer light;
     private String description;
@@ -24,6 +24,10 @@ public class MemberDetail {
 
     public void updateDescription(String description) {
         this.description = description;
+    }
+
+    public void changePlace(Integer placeId) {
+        this.placeId = placeId;
     }
 
     // 음수 잔액 허용은 기존 정책이다. 거래 경로에서 바꾸지 않는다.

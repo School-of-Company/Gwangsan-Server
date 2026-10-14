@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.member.data.AdminScope;
 import team.startup.gwangsan.application.member.data.MemberProfile;
+import team.startup.gwangsan.application.member.data.MemberSummary;
 import team.startup.gwangsan.application.member.port.out.LoadMemberPort;
 import team.startup.gwangsan.application.member.port.out.MemberProfileQueryPort;
 import team.startup.gwangsan.application.member.port.out.SaveMemberPort;
@@ -15,7 +16,9 @@ import team.startup.gwangsan.domain.member.model.Member;
 import team.startup.gwangsan.domain.member.model.MemberDetail;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -95,13 +98,45 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
         MemberJpaEntity entity = memberJpaRepository.findById(member.getId()).orElseThrow(NotFoundMemberException::new);
         entity.updateNickname(member.getNickname());
         entity.changePassword(member.getPasswordHash());
+        entity.updateMemberRole(member.getRole());
+        entity.updateMemberStatus(member.getStatus());
     }
 
     @Override
     public void saveDetail(MemberDetail detail) {
-        memberDetailJpaRepository.findById(detail.getMemberId())
-                .orElseThrow(NotFoundMemberDetailException::new)
-                .apply(detail);
+        MemberDetailJpaEntity entity = memberDetailJpaRepository.findById(detail.getMemberId())
+                .orElseThrow(NotFoundMemberDetailException::new);
+        entity.apply(detail);
+        if (!Objects.equals(entity.getPlace().getId(), detail.getPlaceId())) {
+            entity.updatePlace(entityManager.getReference(Place.class, detail.getPlaceId()));
+        }
+    }
+
+    @Override
+    public void deleteDetail(Long memberId) {
+        memberDetailJpaRepository.findById(memberId).ifPresent(memberDetailJpaRepository::delete);
+    }
+
+    @Override
+    public Optional<Integer> removeWithdrawalRecord(String phoneNumber) {
+        Optional<WithdrawalRecordJpaEntity> record = withdrawalRecordJpaRepository.findByPhoneNumber(phoneNumber);
+        record.ifPresent(withdrawalRecordJpaRepository::delete);
+        return record.map(WithdrawalRecordJpaEntity::getGwangsan);
+    }
+
+    @Override
+    public List<Long> findExistingIds(Collection<Long> memberIds) {
+        return memberJpaRepository.findExistingIds(memberIds);
+    }
+
+    @Override
+    public List<MemberSummary> findSummaries(Collection<Long> memberIds) {
+        return memberJpaRepository.findSummaries(memberIds);
+    }
+
+    @Override
+    public List<Long> findMemberIdsInPlace(Integer placeId) {
+        return memberDetailJpaRepository.findIdsByPlaceId(placeId);
     }
 
     @Override
