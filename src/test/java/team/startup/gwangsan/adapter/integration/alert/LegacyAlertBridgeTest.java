@@ -10,7 +10,6 @@ import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.Trad
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.ReportSource;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
@@ -42,6 +41,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @DisplayName("알림 legacy bridge")
@@ -52,16 +52,16 @@ class LegacyAlertBridgeTest {
     class Describe_source {
 
         private final MemberAccountQuery members = mock(MemberAccountQuery.class);
-        private final MemberJpaRepository memberJpaRepository = mock(MemberJpaRepository.class);
         private final TradeCompleteJpaRepository trades = mock(TradeCompleteJpaRepository.class);
         private final ProductSnapshotQuery products = mock(ProductSnapshotQuery.class);
         private final ReviewJpaRepository reviews = mock(ReviewJpaRepository.class);
         private final ReportQuery reports = mock(ReportQuery.class);
         private final SuspensionQuery suspends = mock(SuspensionQuery.class);
         private final TradeCancelJpaRepository cancels = mock(TradeCancelJpaRepository.class);
+        private final TradeCancelQuery cancelQuery = mock(TradeCancelQuery.class);
         private final NoticeQuery notices = mock(NoticeQuery.class);
         private final LegacyAlertSourceAdapter adapter = new LegacyAlertSourceAdapter(
-                members, memberJpaRepository, trades, products, reviews, reports, suspends, cancels, notices);
+                members, trades, products, reviews, reports, suspends, cancels, cancelQuery, notices);
 
         @Test
         @DisplayName("원천이 없으면 기존 업무별 NotFound 예외를 그대로 던진다")
@@ -72,7 +72,7 @@ class LegacyAlertBridgeTest {
             when(reviews.findById(any())).thenReturn(Optional.empty());
             when(reports.getAlertSource(any())).thenThrow(new NotFoundReportException());
             when(suspends.getSuspendedDays(any())).thenThrow(new NotFoundSuspendException());
-            when(cancels.findById(any())).thenReturn(Optional.empty());
+            when(cancelQuery.findRequesterId(anyLong())).thenReturn(Optional.empty());
             when(cancels.findByIdWithTradeCompleteAndMember(any())).thenReturn(Optional.empty());
             when(notices.getTitle(any())).thenThrow(new NoticeNotFoundException());
 
@@ -112,6 +112,16 @@ class LegacyAlertBridgeTest {
         }
 
         @Test
+        @DisplayName("공지 수신자 존재 확인과 철회 요청자는 member·trade 공개 query 값을 그대로 쓴다")
+        void it_delegates_member_and_requester_to_public_queries() {
+            when(members.findExistingIds(List.of(1L, 2L, 3L))).thenReturn(List.of(1L, 3L));
+            when(cancelQuery.findRequesterId(9L)).thenReturn(Optional.of(2L));
+
+            assertThat(adapter.existingMemberIds(List.of(1L, 2L, 3L))).containsExactly(1L, 3L);
+            assertThat(adapter.tradeCancelRequester(9L)).isEqualTo(2L);
+        }
+
+        @Test
         @DisplayName("신고·정지 원천은 report/suspend 공개 query 값을 그대로 옮긴다")
         void it_maps_report_and_suspend_sources() {
             when(reports.getAlertSource(4L)).thenReturn(new ReportAlertSource(2L, "피신고자"));
@@ -123,14 +133,14 @@ class LegacyAlertBridgeTest {
     }
 
     @Nested
-    @DisplayName("LegacyAlertImageAdapter 는")
+    @DisplayName("AlertImageAdapter 는")
     class Describe_images {
 
         private final NoticeQuery noticeImages = mock(NoticeQuery.class);
         private final TradeCancelQuery tradeCancelQuery = mock(TradeCancelQuery.class);
         private final ProductImageQuery productImages = mock(ProductImageQuery.class);
         private final ReportQuery reportQuery = mock(ReportQuery.class);
-        private final LegacyAlertImageAdapter adapter = new LegacyAlertImageAdapter(
+        private final AlertImageAdapter adapter = new AlertImageAdapter(
                 noticeImages, productImages, reportQuery, tradeCancelQuery);
 
         @Test

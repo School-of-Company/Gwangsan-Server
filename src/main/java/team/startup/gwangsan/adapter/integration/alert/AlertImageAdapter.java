@@ -14,12 +14,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 임시 bridge: 알림 이미지 조회를 기존 Repository 쿼리 그대로 수행한다.
- * 상품 이미지는 post 공개 ProductImageQuery 로 교체됨(PR06). 거래 철회는 trade 공개 TradeCancelQuery 로 교체됨(PR07). 신고는 report 공개 ReportQuery 로 교체됨(PR09). 공지는 notice 공개 NoticeQuery 로 교체됨(PR10). PR12 에서 최종 확인한다.
+ * 알림 이미지·거래 철회 상품을 각 업무 공개 조회(NoticeQuery·ProductImageQuery·ReportQuery·TradeCancelQuery)로 읽는다.
  */
 @Component
 @RequiredArgsConstructor
-public class LegacyAlertImageAdapter implements LoadAlertImagesPort {
+public class AlertImageAdapter implements LoadAlertImagesPort {
 
     private final NoticeQuery noticeQuery;
     private final ProductImageQuery productImageQuery;
