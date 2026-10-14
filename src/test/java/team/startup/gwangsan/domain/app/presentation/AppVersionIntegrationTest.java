@@ -26,13 +26,13 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.app.service.impl.FindAppVersionServiceImpl;
-import team.startup.gwangsan.global.auth.MemberDetailsService;
+import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
-import team.startup.gwangsan.global.security.config.SecurityConfig;
-import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
-import team.startup.gwangsan.global.security.handler.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.infrastructure.security.SecurityConfig;
+import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
+import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
 import team.startup.gwangsan.global.security.jwt.JwtProvider;
-import team.startup.gwangsan.global.security.jwt.TokenParser;
+import team.startup.gwangsan.adapter.security.auth.TokenParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=validate", "spring.jpa.open-in-view=false",
         "spring.sql.init.mode=always",
         "spring.sql.init.schema-locations=classpath:db/migration/V10__create_app_version.sql",
-        "logging.level.team.startup.gwangsan.global.filter.RequestLogFilter=OFF"})
+        "logging.level.team.startup.gwangsan.infrastructure.web.RequestLogFilter=OFF"})
 @Testcontainers
 @DisplayName("앱 버전 실제 HTTP/MariaDB 계약")
 class AppVersionIntegrationTest {

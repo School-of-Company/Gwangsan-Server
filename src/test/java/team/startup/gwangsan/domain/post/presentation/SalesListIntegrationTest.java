@@ -41,13 +41,14 @@ import team.startup.gwangsan.domain.post.entity.constant.*;
 import team.startup.gwangsan.domain.post.service.*;
 import team.startup.gwangsan.domain.post.service.impl.FindProductByCurrentUserAndTypeAndModeServiceImpl;
 import team.startup.gwangsan.domain.post.service.impl.FindProductsByMemberIdServiceImpl;
-import team.startup.gwangsan.global.auth.MemberDetailsService;
+import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.global.redis.RedisUtil;
-import team.startup.gwangsan.global.security.config.SecurityConfig;
-import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
-import team.startup.gwangsan.global.security.handler.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.infrastructure.security.SecurityConfig;
+import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
+import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.adapter.security.auth.TokenParser;
 import team.startup.gwangsan.global.security.jwt.*;
 import team.startup.gwangsan.global.util.MemberUtil;
 

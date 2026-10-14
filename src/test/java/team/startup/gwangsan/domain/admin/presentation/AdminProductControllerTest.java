@@ -21,13 +21,13 @@ import team.startup.gwangsan.domain.post.entity.constant.Type;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
 import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
-import team.startup.gwangsan.global.auth.MemberDetailsService;
+import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
-import team.startup.gwangsan.global.security.config.SecurityConfig;
-import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
-import team.startup.gwangsan.global.security.handler.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.infrastructure.security.SecurityConfig;
+import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
+import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
 import team.startup.gwangsan.global.security.jwt.JwtProvider;
-import team.startup.gwangsan.global.security.jwt.TokenParser;
+import team.startup.gwangsan.adapter.security.auth.TokenParser;
 
 import java.util.List;
 import java.util.Optional;

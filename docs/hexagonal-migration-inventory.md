@@ -1,0 +1,1064 @@
+# 헥사고날 전환 inventory
+
+기준 commit `474a2cde24025e828e6c96fd5f29865bfa2a3fd0` (develop). 생성: PR01 inventory 생성기(명령은 `.omo/evidence/hex-pr01.md`). 이 문서는 PR별 전환의 소유·bridge 제거 책임 기준이다.
+
+## 사용 규칙
+
+- 각 PR은 자기 행의 `현재 경로`·`상태`를 갱신하고, 옮긴/삭제한 클래스를 `src/test/resources/architecture/legacy-classes.txt`에서 지운다. `HexagonalArchitectureTest`가 남은 항목(stale)과 새 클래스의 경계 위반을 실패로 보고한다.
+- `목표 배치`는 기본 제안이다. 실제 위치는 담당 PR이 계획 v1 컨벤션에 맞춰 확정하고 이 표를 고친다. 빈 model/policy를 억지로 만들지 않는다.
+- 담당 PR이 아닌 파일은 import 갱신 외에 수정하지 않는다. 선행 업무가 미전환이면 output Adapter 안 bridge로 연결하고 아래 bridge 표에 제거 PR을 적는다.
+- 표의 API status/트랜잭션/락은 정규식 추출 결과다. `?`는 코드에서 직접 확인해야 하는 항목이다.
+
+## 1. 요약
+
+- 기준 main Java 파일: **539** (inventory 행 수 539, 중복 0 — 생성기가 기준 목록과 1:1 생성)
+- PR01에서 이동 15 · 삭제 1 · legacy 유지 522 (+ GwangsanApplication)
+- 담당 PR별 파일 수: PR01 17, PR02 102, PR03 29, PR04 34, PR05 29, PR06 54, PR07 84, PR08 68, PR09 44, PR10 24, PR11 46, PR12 8
+- 업무별 파일 수: - 1, admin 46, alert 24, app 7, auth 49, block 19, chat 68, common 5, dong 2, health 1, image 29, infrastructure 13, member 34, notice 24, notification 10, place 5, post 60, relatedkeyword 14, report 19, review 25, sms 25, suspend 8, trade 51
+
+## 2. 파일 inventory (기준 commit의 모든 main Java 파일, 경로는 `team/startup/gwangsan/` 기준)
+
+| # | 기준 경로 | 현재 경로 | 업무 | 역할 | 목표 배치 | 담당 PR | 상태 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `GwangsanApplication.java` | = | - | bootstrap | 유지 (team.startup.gwangsan) | PR01 | 유지 |
+| 2 | `domain/admin/entity/AdminAlert.java` | = | admin | jpa entity | adapter/persistence/admin (JpaEntity) + domain/admin/model (순수 모델, 규칙 있을 때) | PR11 | legacy |
+| 3 | `domain/admin/entity/constant/AlertType.java` | = | admin | enum | domain/admin/model | PR11 | legacy |
+| 4 | `domain/admin/exception/NotFoundAdminAlertException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
+| 5 | `domain/admin/exception/NotFoundAlertTypeException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
+| 6 | `domain/admin/exception/NotFoundPendingMemberException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
+| 7 | `domain/admin/presentation/AdminController.java` | = | admin | controller | adapter/web/admin/controller | PR11 | legacy |
+| 8 | `domain/admin/presentation/AdminProductController.java` | = | admin | controller | adapter/web/admin/controller | PR11 | legacy |
+| 9 | `domain/admin/presentation/dto/request/AdjustGwangsanRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 10 | `domain/admin/presentation/dto/request/AdminSignInRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 11 | `domain/admin/presentation/dto/request/UpdateMemberRoleRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 12 | `domain/admin/presentation/dto/request/UpdateMemberStatusRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 13 | `domain/admin/presentation/dto/response/GetAdminAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 14 | `domain/admin/presentation/dto/response/GetReportAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 15 | `domain/admin/presentation/dto/response/GetSignUpAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 16 | `domain/admin/presentation/dto/response/GetTradeCancelAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 17 | `domain/admin/presentation/dto/response/SignInAdminResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
+| 18 | `domain/admin/repository/AdminAlertRepository.java` | = | admin | repository | adapter/persistence/admin (JpaRepository) + application/admin/port/out | PR11 | legacy |
+| 19 | `domain/admin/repository/custom/AdminAlertCustomRepository.java` | = | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | legacy |
+| 20 | `domain/admin/repository/custom/impl/AdminAlertCustomRepositoryImpl.java` | = | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | legacy |
+| 21 | `domain/admin/service/AdjustGwangsanService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 22 | `domain/admin/service/ApproveTradeCancelService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 23 | `domain/admin/service/CreateAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 24 | `domain/admin/service/DeleteAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 25 | `domain/admin/service/DeleteAdminProductService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 26 | `domain/admin/service/FindAdminProductsService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 27 | `domain/admin/service/FindAlertByAlertTypeAndPlaceService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 28 | `domain/admin/service/RejectAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 29 | `domain/admin/service/SignInAdminService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 30 | `domain/admin/service/UpdateMemberRoleService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 31 | `domain/admin/service/UpdateMemberStatusService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 32 | `domain/admin/service/VerificationSignUpService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
+| 33 | `domain/admin/service/impl/AdjustGwangsanServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 34 | `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 35 | `domain/admin/service/impl/CreateAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 36 | `domain/admin/service/impl/DeleteAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 37 | `domain/admin/service/impl/DeleteAdminProductServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 38 | `domain/admin/service/impl/FindAdminProductsServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 39 | `domain/admin/service/impl/FindAlertByAlertTypeAndPlaceServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 40 | `domain/admin/service/impl/RejectAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 41 | `domain/admin/service/impl/SignInAdminServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 42 | `domain/admin/service/impl/UpdateMemberRoleServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 43 | `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 44 | `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
+| 45 | `domain/admin/util/ValidatePlaceUtil.java` | = | admin | util | domain/admin/policy (순수 인가 정책) | PR11 | legacy |
+| 46 | `domain/alert/entity/Alert.java` | = | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
+| 47 | `domain/alert/entity/AlertReceipt.java` | = | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
+| 48 | `domain/alert/entity/constant/AlertType.java` | = | alert | enum | domain/alert/model | PR04 | legacy |
+| 49 | `domain/alert/presentation/AlertController.java` | = | alert | controller | adapter/web/alert/controller | PR04 | legacy |
+| 50 | `domain/alert/presentation/dto/response/ExistsAlertResponse.java` | = | alert | web dto | adapter/web/alert/dto | PR04 | legacy |
+| 51 | `domain/alert/presentation/dto/response/GetAlertResponse.java` | = | alert | web dto | adapter/web/alert/dto | PR04 | legacy |
+| 52 | `domain/alert/repository/AlertReceiptRepository.java` | = | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | legacy |
+| 53 | `domain/alert/repository/AlertRepository.java` | = | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | legacy |
+| 54 | `domain/alert/repository/custom/AlertReceiptCustomRepository.java` | = | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | legacy |
+| 55 | `domain/alert/repository/custom/impl/AlertReceiptCustomRepositoryImpl.java` | = | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | legacy |
+| 56 | `domain/alert/service/CreateAlertMembersService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
+| 57 | `domain/alert/service/CreateAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
+| 58 | `domain/alert/service/ExistsUnreadAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
+| 59 | `domain/alert/service/FindAlertByCurrentService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
+| 60 | `domain/alert/service/ReadAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
+| 61 | `domain/alert/service/impl/CreateAlertMembersServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 62 | `domain/alert/service/impl/CreateAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 63 | `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 64 | `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 65 | `domain/alert/service/impl/ReadAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 66 | `domain/app/entity/AppVersion.java` | = | app | jpa entity | adapter/persistence/app (JpaEntity) + domain/app/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 67 | `domain/app/exception/AppVersionUnavailableException.java` | = | app | exception | domain/app/exception | PR03 | legacy |
+| 68 | `domain/app/presentation/AppVersionController.java` | = | app | controller | adapter/web/app/controller | PR03 | legacy |
+| 69 | `domain/app/presentation/dto/response/AppVersionResponse.java` | = | app | web dto | adapter/web/app/dto | PR03 | legacy |
+| 70 | `domain/app/repository/AppVersionRepository.java` | = | app | repository | adapter/persistence/app (JpaRepository) + application/app/port/out | PR03 | legacy |
+| 71 | `domain/app/service/FindAppVersionService.java` | = | app | service interface | application/app/port/in (UseCase/Query) | PR03 | legacy |
+| 72 | `domain/app/service/impl/FindAppVersionServiceImpl.java` | = | app | service impl | application/app/service (+ 필요한 output Port) | PR03 | legacy |
+| 73 | `domain/auth/entity/RefreshToken.java` | = | auth | jpa entity | adapter/persistence/auth (JpaEntity) + domain/auth/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
+| 74 | `domain/auth/entity/constant/OsType.java` | = | auth | enum | domain/auth/model | PR02 | legacy |
+| 75 | `domain/auth/exception/BannedPhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 76 | `domain/auth/exception/DongNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 77 | `domain/auth/exception/DuplicateNicknameException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 78 | `domain/auth/exception/DuplicatePhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 79 | `domain/auth/exception/ForbiddenException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 80 | `domain/auth/exception/InvalidVerificationCodeException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 81 | `domain/auth/exception/NotFoundUserException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 82 | `domain/auth/exception/PendingApprovalException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 83 | `domain/auth/exception/PlaceNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 84 | `domain/auth/exception/RecommenderNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 85 | `domain/auth/exception/SmsAuthNotCompletedException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 86 | `domain/auth/exception/SmsAuthNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 87 | `domain/auth/exception/UnauthorizedException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
+| 88 | `domain/auth/presentation/AuthController.java` | = | auth | controller | adapter/web/auth/controller | PR02 | legacy |
+| 89 | `domain/auth/presentation/dto/request/FindNicknameRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 90 | `domain/auth/presentation/dto/request/ResetPasswordRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 91 | `domain/auth/presentation/dto/request/SignInRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 92 | `domain/auth/presentation/dto/request/SignUpRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 93 | `domain/auth/presentation/dto/response/FindNicknameResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 94 | `domain/auth/presentation/dto/response/MemberInfoResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 95 | `domain/auth/presentation/dto/response/TokenResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
+| 96 | `domain/auth/repository/RefreshTokenRepository.java` | = | auth | repository | adapter/persistence/auth (JpaRepository) + application/auth/port/out | PR02 | legacy |
+| 97 | `domain/auth/service/FindNicknameService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 98 | `domain/auth/service/ReissueTokenService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 99 | `domain/auth/service/ResetPasswordService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 100 | `domain/auth/service/SignInService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 101 | `domain/auth/service/SignOutService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 102 | `domain/auth/service/SignUpService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 103 | `domain/auth/service/TokenAuthenticationService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
+| 104 | `domain/auth/service/impl/FindNicknameServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 105 | `domain/auth/service/impl/ReissueTokenServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 106 | `domain/auth/service/impl/ResetPasswordServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 107 | `domain/auth/service/impl/SignInServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 108 | `domain/auth/service/impl/SignOutServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 109 | `domain/auth/service/impl/SignUpServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 110 | `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 111 | `domain/block/entity/MemberBlock.java` | = | block | jpa entity | adapter/persistence/block (JpaEntity) + domain/block/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
+| 112 | `domain/block/exception/AlreadyBlockedException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
+| 113 | `domain/block/exception/BlockedMemberException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
+| 114 | `domain/block/exception/NotFoundBlockException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
+| 115 | `domain/block/exception/SelfBlockNotAllowedException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
+| 116 | `domain/block/presentation/BlockController.java` | = | block | controller | adapter/web/block/controller | PR09 | legacy |
+| 117 | `domain/block/presentation/dto/response/GetBlockedMemberResponse.java` | = | block | web dto | adapter/web/block/dto | PR09 | legacy |
+| 118 | `domain/block/repository/MemberBlockRepository.java` | = | block | repository | adapter/persistence/block (JpaRepository) + application/block/port/out | PR09 | legacy |
+| 119 | `domain/block/repository/custom/MemberBlockCustomRepository.java` | = | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | legacy |
+| 120 | `domain/block/repository/custom/impl/MemberBlockCustomRepositoryImpl.java` | = | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | legacy |
+| 121 | `domain/block/service/BlockMemberService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
+| 122 | `domain/block/service/GetBlockListService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
+| 123 | `domain/block/service/UnblockMemberService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
+| 124 | `domain/block/service/impl/BlockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
+| 125 | `domain/block/service/impl/GetBlockListServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
+| 126 | `domain/block/service/impl/UnblockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
+| 127 | `domain/chat/entity/ChatMessage.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
+| 128 | `domain/chat/entity/ChatMessageImage.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
+| 129 | `domain/chat/entity/ChatRoom.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
+| 130 | `domain/chat/entity/constant/MessageType.java` | = | chat | enum | domain/chat/model | PR08 | legacy |
+| 131 | `domain/chat/exception/ChatMessageIdConflictException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
+| 132 | `domain/chat/exception/InvalidChatStreamPayloadException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
+| 133 | `domain/chat/exception/NotFoundChatMessageException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
+| 134 | `domain/chat/exception/NotFoundChatRoomException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
+| 135 | `domain/chat/presentation/ChatController.java` | = | chat | controller | adapter/web/chat/controller | PR08 | legacy |
+| 136 | `domain/chat/presentation/dto/GetChatMessageDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 137 | `domain/chat/presentation/dto/GetChatProductDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 138 | `domain/chat/presentation/dto/GetRoomProductDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 139 | `domain/chat/presentation/dto/GetRoomsDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 140 | `domain/chat/presentation/dto/request/UpdateChatMessageRequest.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 141 | `domain/chat/presentation/dto/request/UpdateMessageCheckedRequest.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 142 | `domain/chat/presentation/dto/response/CreateChatRoomResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 143 | `domain/chat/presentation/dto/response/GetChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 144 | `domain/chat/presentation/dto/response/GetChatMessagesResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 145 | `domain/chat/presentation/dto/response/GetRoomIdResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 146 | `domain/chat/presentation/dto/response/GetRoomMemberResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 147 | `domain/chat/presentation/dto/response/GetRoomsResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 148 | `domain/chat/presentation/dto/response/SaveChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 149 | `domain/chat/presentation/dto/response/UpdateChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 150 | `domain/chat/presentation/dto/response/ValidateChatSendableResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
+| 151 | `domain/chat/repository/ChatMessageImageRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 152 | `domain/chat/repository/ChatMessageRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 153 | `domain/chat/repository/ChatRoomRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 154 | `domain/chat/repository/custom/ChatMessageCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 155 | `domain/chat/repository/custom/ChatMessageImageCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 156 | `domain/chat/repository/custom/ChatRoomCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 157 | `domain/chat/repository/custom/impl/ChatMessageCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 158 | `domain/chat/repository/custom/impl/ChatMessageImageCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 159 | `domain/chat/repository/custom/impl/ChatRoomCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
+| 160 | `domain/chat/repository/projection/ChatRoomDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 161 | `domain/chat/repository/projection/LatestMessageDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 162 | `domain/chat/repository/projection/UnreadCountDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
+| 163 | `domain/chat/service/CreateChatRoomService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 164 | `domain/chat/service/DeleteChatRoomService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 165 | `domain/chat/service/FindChatMessageByRoomIdService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 166 | `domain/chat/service/FindRoomIdByProductIdService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 167 | `domain/chat/service/FindRoomsByCurrentUserService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 168 | `domain/chat/service/ReadChatMessageService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 169 | `domain/chat/service/SaveChatMessageService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 170 | `domain/chat/service/ValidateChatSendableService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
+| 171 | `domain/chat/service/impl/ChatMessageMutationService.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 172 | `domain/chat/service/impl/CreateChatRoomServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 173 | `domain/chat/service/impl/DeleteChatRoomServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 174 | `domain/chat/service/impl/FindChatMessageByRoomIdServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 175 | `domain/chat/service/impl/FindRoomIdByProductIdServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 176 | `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 177 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 178 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 179 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 180 | `domain/dong/entity/Dong.java` | = | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 181 | `domain/dong/repository/DongRepository.java` | = | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | legacy |
+| 182 | `domain/health/presentation/HealthController.java` | = | health | controller | adapter/web/health/controller | PR03 | legacy |
+| 183 | `domain/image/entity/Image.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
+| 184 | `domain/image/entity/dto/DeleteResult.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
+| 185 | `domain/image/exception/ImageDeleteFailedException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 186 | `domain/image/exception/ImageNotFoundException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 187 | `domain/image/exception/ImageUploadFailedException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 188 | `domain/image/exception/InappropriateImageException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 189 | `domain/image/exception/InvalidImageIdsException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 190 | `domain/image/exception/NotFoundImageIdsException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
+| 191 | `domain/image/presentation/ImageController.java` | = | image | controller | adapter/web/image/controller | PR05 | legacy |
+| 192 | `domain/image/presentation/dto/request/UploadImageRequest.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
+| 193 | `domain/image/presentation/dto/response/GetImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
+| 194 | `domain/image/presentation/dto/response/UploadImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
+| 195 | `domain/image/repository/ImageRepository.java` | = | image | repository | adapter/persistence/image (JpaRepository) + application/image/port/out | PR05 | legacy |
+| 196 | `domain/image/repository/custom/ImageCustomRepository.java` | = | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | legacy |
+| 197 | `domain/image/repository/custom/impl/ImageCustomRepositoryImpl.java` | = | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | legacy |
+| 198 | `domain/image/service/DeleteImageService.java` | = | image | service interface | application/image/port/in (UseCase/Query) | PR05 | legacy |
+| 199 | `domain/image/service/UploadImageService.java` | = | image | service interface | application/image/port/in (UseCase/Query) | PR05 | legacy |
+| 200 | `domain/image/service/impl/DeleteImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
+| 201 | `domain/image/service/impl/UploadImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
+| 202 | `domain/member/entity/Member.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
+| 203 | `domain/member/entity/MemberDetail.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
+| 204 | `domain/member/entity/WithdrawalRecord.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
+| 205 | `domain/member/entity/constant/MemberRole.java` | = | member | enum | domain/member/model | PR02 | legacy |
+| 206 | `domain/member/entity/constant/MemberStatus.java` | = | member | enum | domain/member/model | PR02 | legacy |
+| 207 | `domain/member/exception/DummyMemberDeletionNotAllowedException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
+| 208 | `domain/member/exception/NotAllowedUserAccessException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
+| 209 | `domain/member/exception/NotFoundDummyMemberException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
+| 210 | `domain/member/exception/NotFoundMemberDetailException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
+| 211 | `domain/member/exception/NotFoundMemberException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
+| 212 | `domain/member/peresentation/MemberController.java` | = | member | controller | adapter/web/member/controller | PR02 | legacy |
+| 213 | `domain/member/peresentation/dto/request/UpdateMyInfoRequest.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
+| 214 | `domain/member/peresentation/dto/response/FindAllUserInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
+| 215 | `domain/member/peresentation/dto/response/FindMyInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
+| 216 | `domain/member/peresentation/dto/response/FindUserInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
+| 217 | `domain/member/repository/MemberDetailRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
+| 218 | `domain/member/repository/MemberRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
+| 219 | `domain/member/repository/WithdrawalRecordRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
+| 220 | `domain/member/repository/custom/MemberCustomRepository.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
+| 221 | `domain/member/repository/custom/MemberDetailCustomRepository.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
+| 222 | `domain/member/repository/custom/impl/MemberCustomRepositoryImpl.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
+| 223 | `domain/member/repository/custom/impl/MemberDetailCustomRepositoryImpl.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
+| 224 | `domain/member/service/FindAllUserInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 225 | `domain/member/service/FindMyInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 226 | `domain/member/service/FindUserInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 227 | `domain/member/service/MemberDeletionService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 228 | `domain/member/service/MemberWithdrawalService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 229 | `domain/member/service/UpdateMyInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
+| 230 | `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 231 | `domain/member/service/impl/FindMyInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 232 | `domain/member/service/impl/FindUserInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 235 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 236 | `domain/notice/entity/Notice.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
+| 237 | `domain/notice/entity/NoticeImage.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
+| 238 | `domain/notice/exception/NoticeForbiddenException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
+| 239 | `domain/notice/exception/NoticeNotFoundException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
+| 240 | `domain/notice/exception/UnauthorizedNoticeAccessException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
+| 241 | `domain/notice/presentation/NoticeController.java` | = | notice | controller | adapter/web/notice/controller | PR10 | legacy |
+| 242 | `domain/notice/presentation/dto/request/CreateNoticeRequest.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
+| 243 | `domain/notice/presentation/dto/request/UpdateNoticeRequest.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
+| 244 | `domain/notice/presentation/dto/response/FindAllNoticeResponse.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
+| 245 | `domain/notice/presentation/dto/response/FindNoticeResponse.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
+| 246 | `domain/notice/repository/NoticeImageRepository.java` | = | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | legacy |
+| 247 | `domain/notice/repository/NoticeRepository.java` | = | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | legacy |
+| 248 | `domain/notice/repository/custom/NoticeImageCustomRepository.java` | = | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | legacy |
+| 249 | `domain/notice/repository/custom/impl/NoticeImageCustomRepositoryImpl.java` | = | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | legacy |
+| 250 | `domain/notice/service/CreateNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
+| 251 | `domain/notice/service/DeleteNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
+| 252 | `domain/notice/service/FindAllNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
+| 253 | `domain/notice/service/FindNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
+| 254 | `domain/notice/service/UpdateNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
+| 255 | `domain/notice/service/impl/CreateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 256 | `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 257 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 258 | `domain/notice/service/impl/FindNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 259 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 260 | `domain/notification/NotificationPort.java` | = | notification | port | application/notification/port/out | PR04 | legacy |
+| 261 | `domain/notification/entity/DeviceToken.java` | = | notification | jpa entity | adapter/persistence/notification (JpaEntity) + domain/notification/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
+| 262 | `domain/notification/entity/constant/NotificationType.java` | = | notification | enum | domain/notification/model | PR04 | legacy |
+| 263 | `domain/notification/entity/constant/OsType.java` | = | notification | enum | domain/notification/model | PR04 | legacy |
+| 264 | `domain/notification/repository/DeviceTokenRepository.java` | = | notification | repository | adapter/persistence/notification (JpaRepository) + application/notification/port/out | PR04 | legacy |
+| 265 | `domain/notification/service/SendNotificationService.java` | = | notification | service interface | application/notification/port/in (UseCase/Query) | PR04 | legacy |
+| 266 | `domain/notification/service/impl/SendNotificationServiceImpl.java` | = | notification | service impl | application/notification/service (+ 필요한 output Port) | PR04 | legacy |
+| 267 | `domain/place/entity/Head.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 268 | `domain/place/entity/Place.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 269 | `domain/place/exception/PlaceMismatchException.java` | = | place | exception | domain/place/exception | PR03 | legacy |
+| 270 | `domain/place/presentation/dto/PlaceDto.java` | = | place | web dto | adapter/web/place/dto | PR03 | legacy |
+| 271 | `domain/place/repository/PlaceRepository.java` | = | place | repository | adapter/persistence/place (JpaRepository) + application/place/port/out | PR03 | legacy |
+| 272 | `domain/post/entity/Product.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
+| 273 | `domain/post/entity/ProductImage.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
+| 274 | `domain/post/entity/ProductReservation.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
+| 275 | `domain/post/entity/constant/Mode.java` | = | post | enum | domain/post/model | PR06 | legacy |
+| 276 | `domain/post/entity/constant/ProductStatus.java` | = | post | enum | domain/post/model | PR06 | legacy |
+| 277 | `domain/post/entity/constant/ReservationStatus.java` | = | post | enum | domain/post/model | PR06 | legacy |
+| 278 | `domain/post/entity/constant/Type.java` | = | post | enum | domain/post/model | PR06 | legacy |
+| 279 | `domain/post/exception/ForbiddenProductException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 280 | `domain/post/exception/InappropriateContentException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 281 | `domain/post/exception/NotFoundProductException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 282 | `domain/post/exception/ObjectRequiredImageException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 283 | `domain/post/exception/ProductAlreadyReservationException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 284 | `domain/post/exception/ProductNotOngoingException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 285 | `domain/post/exception/ProductNotReservationException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 286 | `domain/post/exception/ReservationParticipantOnlyException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 287 | `domain/post/exception/ReservedProductDeletionException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
+| 288 | `domain/post/presentation/PostController.java` | = | post | controller | adapter/web/post/controller | PR06 | legacy |
+| 289 | `domain/post/presentation/dto/request/CreateProductRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 290 | `domain/post/presentation/dto/request/PatchProductRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 291 | `domain/post/presentation/dto/request/RequestTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
+| 292 | `domain/post/presentation/dto/request/ReservationRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 293 | `domain/post/presentation/dto/request/WithdrawTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
+| 294 | `domain/post/presentation/dto/response/GetProductByIdResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 295 | `domain/post/presentation/dto/response/GetProductMemberResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 296 | `domain/post/presentation/dto/response/GetProductResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 297 | `domain/post/repository/ProductImageRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
+| 298 | `domain/post/repository/ProductRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
+| 299 | `domain/post/repository/ProductReservationRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
+| 300 | `domain/post/repository/custom/ProductCustomRepository.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
+| 301 | `domain/post/repository/custom/ProductImageCustomRepository.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
+| 302 | `domain/post/repository/custom/impl/ProductCustomRepositoryImpl.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
+| 303 | `domain/post/repository/custom/impl/ProductImageCustomRepositoryImpl.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
+| 304 | `domain/post/service/CreateProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 305 | `domain/post/service/DeleteProductByIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 306 | `domain/post/service/DeleteReservationProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 307 | `domain/post/service/FindProductByCurrentUserAndTypeAndModeService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 308 | `domain/post/service/FindProductByIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 309 | `domain/post/service/FindProductsByMemberIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 310 | `domain/post/service/FindProductsByTypeAndModeService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 311 | `domain/post/service/ProductContentValidationService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 312 | `domain/post/service/RequestTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
+| 313 | `domain/post/service/ReservationProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 314 | `domain/post/service/UpdateProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 315 | `domain/post/service/WithdrawTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
+| 316 | `domain/post/service/impl/CreateProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 317 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 318 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 319 | `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 320 | `domain/post/service/impl/FindProductByIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 321 | `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 322 | `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 323 | `domain/post/service/impl/ProductContentValidationServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 324 | `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
+| 325 | `domain/post/service/impl/ReservationProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 326 | `domain/post/service/impl/ReservationReminderSender.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 327 | `domain/post/service/impl/UpdateProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 328 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
+| 329 | `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | = | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 330 | `domain/relatedkeyword/entity/RelatedKeyword.java` | = | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | legacy |
+| 331 | `domain/relatedkeyword/exception/MemberRelatedKeywordForbiddenException.java` | = | relatedkeyword | exception | domain/relatedkeyword/exception | PR03 | legacy |
+| 332 | `domain/relatedkeyword/exception/MemberRelatedKeywordNotFoundException.java` | = | relatedkeyword | exception | domain/relatedkeyword/exception | PR03 | legacy |
+| 333 | `domain/relatedkeyword/presentation/RelatedKeywordController.java` | = | relatedkeyword | controller | adapter/web/relatedkeyword/controller | PR03 | legacy |
+| 334 | `domain/relatedkeyword/presentation/dto/response/RelatedKeywordResponse.java` | = | relatedkeyword | web dto | adapter/web/relatedkeyword/dto | PR03 | legacy |
+| 335 | `domain/relatedkeyword/repository/MemberRelatedKeywordRepository.java` | = | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | legacy |
+| 336 | `domain/relatedkeyword/repository/RelatedKeywordRepository.java` | = | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | legacy |
+| 337 | `domain/relatedkeyword/service/DeleteMemberRelatedKeywordService.java` | = | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | legacy |
+| 338 | `domain/relatedkeyword/service/FindMyRelatedKeywordService.java` | = | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | legacy |
+| 339 | `domain/relatedkeyword/service/FindRelatedKeywordService.java` | = | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | legacy |
+| 340 | `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java` | = | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | legacy |
+| 341 | `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java` | = | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | legacy |
+| 342 | `domain/relatedkeyword/service/impl/FindRelatedKeywordServiceImpl.java` | = | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | legacy |
+| 343 | `domain/report/entity/Report.java` | = | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
+| 344 | `domain/report/entity/ReportImage.java` | = | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
+| 345 | `domain/report/entity/constant/ReportTargetType.java` | = | report | enum | domain/report/model | PR09 | legacy |
+| 346 | `domain/report/entity/constant/ReportType.java` | = | report | enum | domain/report/model | PR09 | legacy |
+| 347 | `domain/report/exception/AlreadyReportedException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
+| 348 | `domain/report/exception/InvalidReportTypeException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
+| 349 | `domain/report/exception/NotFoundReportException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
+| 350 | `domain/report/exception/SelfReportNotAllowedException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
+| 351 | `domain/report/presentation/ReportController.java` | = | report | controller | adapter/web/report/controller | PR09 | legacy |
+| 352 | `domain/report/presentation/dto/request/CreateReportRequest.java` | = | report | web dto | adapter/web/report/dto | PR09 | legacy |
+| 353 | `domain/report/presentation/dto/response/GetReportResponse.java` | = | report | web dto | adapter/web/report/dto | PR09 | legacy |
+| 354 | `domain/report/repository/ReportImageRepository.java` | = | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | legacy |
+| 355 | `domain/report/repository/ReportRepository.java` | = | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | legacy |
+| 356 | `domain/report/repository/custom/ReportCustomRepository.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
+| 357 | `domain/report/repository/custom/ReportImageCustomRepository.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
+| 358 | `domain/report/repository/custom/impl/ReportCustomRepositoryImpl.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
+| 359 | `domain/report/repository/custom/impl/ReportImageCustomRepositoryImpl.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
+| 360 | `domain/report/service/CreateReportService.java` | = | report | service interface | application/report/port/in (UseCase/Query) | PR09 | legacy |
+| 361 | `domain/report/service/impl/CreateReportServiceImpl.java` | = | report | service impl | application/report/service (+ 필요한 output Port) | PR09 | legacy |
+| 362 | `domain/review/entity/Review.java` | = | review | jpa entity | adapter/persistence/review (JpaEntity) + domain/review/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
+| 363 | `domain/review/exception/AlreadyReviewedException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
+| 364 | `domain/review/exception/CannotReviewBeforeTradeException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
+| 365 | `domain/review/exception/CannotReviewSelfException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
+| 366 | `domain/review/exception/NotFoundReviewException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
+| 367 | `domain/review/exception/NotTradeParticipantException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
+| 368 | `domain/review/presentation/ReviewController.java` | = | review | controller | adapter/web/review/controller | PR07 | legacy |
+| 369 | `domain/review/presentation/dto/request/CreateReviewRequest.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
+| 370 | `domain/review/presentation/dto/response/ReviewDetailResponse.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
+| 371 | `domain/review/presentation/dto/response/ReviewResponse.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
+| 372 | `domain/review/repository/ReviewRepository.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
+| 373 | `domain/review/repository/custom/ReviewCustomRepository.java` | = | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | legacy |
+| 374 | `domain/review/repository/custom/impl/ReviewCustomRepositoryImpl.java` | = | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | legacy |
+| 375 | `domain/review/repository/projection/MyReviewDto.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
+| 376 | `domain/review/repository/projection/ReceivedReviewDto.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
+| 377 | `domain/review/service/CreateReviewService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
+| 378 | `domain/review/service/GetMyReviewListService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
+| 379 | `domain/review/service/GetReceivedReviewListService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
+| 380 | `domain/review/service/GetReviewByMemberService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
+| 381 | `domain/review/service/GetReviewDetailService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
+| 382 | `domain/review/service/impl/CreateReviewServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 383 | `domain/review/service/impl/GetMyReviewListServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 384 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 385 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 386 | `domain/review/service/impl/GetReviewDetailServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 387 | `domain/sms/exception/AlreadyRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 388 | `domain/sms/exception/AuthCodeGenerationException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 389 | `domain/sms/exception/NotMatchRandomCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 390 | `domain/sms/exception/NotRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 391 | `domain/sms/exception/SmsSendFailedException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 392 | `domain/sms/exception/TooManyRequestAuthCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
+| 393 | `domain/sms/presentation/SmsController.java` | = | sms | controller | adapter/web/sms/controller | PR02 | legacy |
+| 394 | `domain/sms/presentation/dto/SendSmsRequest.java` | = | sms | web dto | adapter/web/sms/dto | PR02 | legacy |
+| 395 | `domain/sms/presentation/dto/VerifyCodeRequest.java` | = | sms | web dto | adapter/web/sms/dto | PR02 | legacy |
+| 396 | `domain/sms/service/SendFindNicknameSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 397 | `domain/sms/service/SendResetPasswordSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 398 | `domain/sms/service/SendSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 399 | `domain/sms/service/VerifyCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 400 | `domain/sms/service/VerifyFindNicknameCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 401 | `domain/sms/service/VerifyResetPasswordCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
+| 402 | `domain/sms/service/impl/SendFindNicknameSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 403 | `domain/sms/service/impl/SendResetPasswordSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 404 | `domain/sms/service/impl/SendSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 405 | `domain/sms/service/impl/VerifyCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 406 | `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 407 | `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 408 | `domain/suspend/entity/Suspend.java` | = | suspend | jpa entity | adapter/persistence/suspend (JpaEntity) + domain/suspend/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
+| 409 | `domain/suspend/exception/NotFoundSuspendException.java` | = | suspend | exception | domain/suspend/exception | PR09 | legacy |
+| 410 | `domain/suspend/presentation/SuspendController.java` | = | suspend | controller | adapter/web/suspend/controller | PR09 | legacy |
+| 411 | `domain/suspend/presentation/dto/request/SuspendMemberRequest.java` | = | suspend | web dto | adapter/web/suspend/dto | PR09 | legacy |
+| 412 | `domain/suspend/repository/SuspendRepository.java` | = | suspend | repository | adapter/persistence/suspend (JpaRepository) + application/suspend/port/out | PR09 | legacy |
+| 413 | `domain/suspend/service/SuspendMemberService.java` | = | suspend | service interface | application/suspend/port/in (UseCase/Query) | PR09 | legacy |
+| 414 | `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | = | suspend | service impl | application/suspend/service (+ 필요한 output Port) | PR09 | legacy |
+| 415 | `domain/trade/entity/TradeCancel.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
+| 416 | `domain/trade/entity/TradeCancelImage.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
+| 417 | `domain/trade/entity/TradeComplete.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
+| 418 | `domain/trade/entity/constant/TradeCancelStatus.java` | = | trade | enum | domain/trade/model | PR07 | legacy |
+| 419 | `domain/trade/entity/constant/TradeStatus.java` | = | trade | enum | domain/trade/model | PR07 | legacy |
+| 420 | `domain/trade/exception/AlreadyTradeCancelRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 421 | `domain/trade/exception/CannotPendingTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 422 | `domain/trade/exception/CannotSelectSelfException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 423 | `domain/trade/exception/InvalidTradeStatisticsPeriodException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 424 | `domain/trade/exception/NotFoundTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 425 | `domain/trade/exception/NotFoundTradeCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 426 | `domain/trade/exception/NotTradeCancelRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 427 | `domain/trade/exception/NotTradeCompleteRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 428 | `domain/trade/exception/TradeAlreadyCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 429 | `domain/trade/exception/TradeAlreadyCompleteRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 430 | `domain/trade/exception/TradeCompleteWithoutChattingException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 431 | `domain/trade/exception/TradeParticipantOnlyException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
+| 432 | `domain/trade/presentation/TradeController.java` | = | trade | controller | adapter/web/trade/controller | PR07 | legacy |
+| 433 | `domain/trade/presentation/dto/request/TradeCancelRequest.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 434 | `domain/trade/presentation/dto/request/constant/Period.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 435 | `domain/trade/presentation/dto/response/GetTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 436 | `domain/trade/presentation/dto/response/GetTradeMemberResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 437 | `domain/trade/presentation/dto/response/GetTradeProductResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 438 | `domain/trade/presentation/dto/response/HeadTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 439 | `domain/trade/presentation/dto/response/PlaceTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 440 | `domain/trade/presentation/dto/response/TradeCancelResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 441 | `domain/trade/presentation/dto/response/constant/TradeRole.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
+| 442 | `domain/trade/repository/TradeCancelImageRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
+| 443 | `domain/trade/repository/TradeCancelRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
+| 444 | `domain/trade/repository/TradeCompleteRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
+| 445 | `domain/trade/repository/custom/TradeCancelCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 446 | `domain/trade/repository/custom/TradeCancelImageCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 447 | `domain/trade/repository/custom/TradeCompleteCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 448 | `domain/trade/repository/custom/impl/TradeCancelCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 449 | `domain/trade/repository/custom/impl/TradeCancelImageCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 450 | `domain/trade/repository/custom/impl/TradeCompleteCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
+| 451 | `domain/trade/service/FindMyTradeHistoryService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 452 | `domain/trade/service/TradeCancelApplier.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 453 | `domain/trade/service/TradeCancelService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 454 | `domain/trade/service/TradeCancelWithdrawService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 455 | `domain/trade/service/TradeHistoryByHeadService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 456 | `domain/trade/service/TradeHistoryByPlaceService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 457 | `domain/trade/service/TradeStateReader.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 458 | `domain/trade/service/TradeStateSnapshot.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
+| 459 | `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
+| 460 | `domain/trade/service/impl/TradeCancelServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
+| 461 | `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
+| 462 | `domain/trade/service/impl/TradeHistoryByHeadServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
+| 463 | `domain/trade/service/impl/TradeHistoryByPlaceServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
+| 464 | `global/aop/BlockAspect.java` | = | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | legacy |
+| 465 | `global/aop/CheckBlocked.java` | = | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | legacy |
+| 466 | `global/auth/MemberDetails.java` | `adapter/security/auth/MemberDetails.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
+| 467 | `global/auth/MemberDetailsService.java` | `adapter/security/auth/MemberDetailsService.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
+| 468 | `global/chat/notification/ChattingServerMessageMutationNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
+| 469 | `global/chat/notification/ChattingServerProperties.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
+| 470 | `global/chat/notification/ChattingServerSystemMessageNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
+| 471 | `global/chat/notification/ChattingServerTradeStatusNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
+| 472 | `global/chat/notification/ChattingServerTradeStatusNotifierImpl.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
+| 473 | `global/chat/stream/ChatStreamConsumerWorker.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 474 | `global/chat/stream/ChatStreamField.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 475 | `global/chat/stream/ChatStreamHandler.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 476 | `global/chat/stream/ChatStreamMessage.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 477 | `global/chat/stream/ChatStreamMessageProcessor.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 478 | `global/chat/stream/ChatStreamProperties.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 479 | `global/chat/stream/ChatStreamRedisAdapter.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 480 | `global/chat/stream/SaveChatMessageHandler.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 481 | `global/config/AsyncConfig.java` | `infrastructure/config/AsyncConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
+| 482 | `global/config/GsonConfig.java` | `infrastructure/config/GsonConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
+| 483 | `global/config/RetryConfig.java` | `infrastructure/config/RetryConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
+| 484 | `global/config/SchedulerConfig.java` | `infrastructure/config/SchedulerConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
+| 485 | `global/event/ChatMessageMutationEvent.java` | = | chat | global/event | application/chat (기존 이벤트 경계 정리) | PR08 | legacy |
+| 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
+| 487 | `global/event/CreateAlertEvent.java` | = | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | legacy |
+| 488 | `global/event/CreateAlertMembersEvent.java` | = | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | legacy |
+| 489 | `global/event/DeleteNotUsedImageEvent.java` | = | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | legacy |
+| 490 | `global/event/ReservationCancelledEvent.java` | = | post | global/event | application/post (기존 이벤트 경계 정리) | PR06 | legacy |
+| 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | legacy |
+| 492 | `global/event/TradeStatusChangedEvent.java` | = | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | legacy |
+| 493 | `global/event/constant/ImageType.java` | = | image | global/event | domain/image/model | PR05 | legacy |
+| 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
+| 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
+| 496 | `global/event/handler/CreateAlertEventListener.java` | = | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | legacy |
+| 497 | `global/event/handler/CreateAlertMembersEventListener.java` | = | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | legacy |
+| 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | = | image | global/event | adapter/event/image | PR05 | legacy |
+| 499 | `global/event/handler/ReservationCancelledEventListener.java` | = | post | global/event | adapter/event/post | PR06 | legacy |
+| 500 | `global/event/handler/SendNotificationEventListener.java` | = | notification | global/event | adapter/event/notification | PR04 | legacy |
+| 501 | `global/event/handler/TradeStatusChangedEventListener.java` | = | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | legacy |
+| 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
+| 503 | `global/exception/ErrorResponse.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
+| 504 | `global/exception/GlobalException.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
+| 505 | `global/exception/GlobalExceptionHandler.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
+| 506 | `global/filter/ExceptionFilter.java` | `infrastructure/web/ExceptionFilter.java` | infrastructure | global/filter | infrastructure/web | PR01 | PR01 완료 |
+| 507 | `global/filter/JwtAuthenticationFilter.java` | `adapter/security/auth/JwtAuthenticationFilter.java` | auth | global/filter | adapter/security/auth | PR01 | PR01 완료 |
+| 508 | `global/filter/JwtFilter.java` | `adapter/security/auth/JwtFilter.java` | auth | global/filter | adapter/security/auth | PR01 | PR01 완료 |
+| 509 | `global/filter/RequestLogFilter.java` | `infrastructure/web/RequestLogFilter.java` | infrastructure | global/filter | infrastructure/web | PR01 | PR01 완료 |
+| 510 | `global/querydsl/QueryDslConfig.java` | = | infrastructure | global/querydsl | infrastructure/config | PR12 | legacy |
+| 511 | `global/redis/RedisConfig.java` | = | infrastructure | global/redis | infrastructure/config | PR12 | legacy |
+| 512 | `global/redis/RedisUtil.java` | = | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | legacy |
+| 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | = | image | global/scheduler | adapter/scheduler/image | PR05 | legacy |
+| 514 | `global/scheduler/ReservationReminderScheduler.java` | = | post | global/scheduler | adapter/scheduler/post | PR06 | legacy |
+| 515 | `global/scheduler/SuspendReleaseScheduler.java` | = | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | legacy |
+| 516 | `global/security/config/JwtSecurityConfig.java` | `(삭제)` | infrastructure | global/security | 삭제 (어디서도 적용되지 않는 dead code) | PR01 | PR01 완료 |
+| 517 | `global/security/config/SecurityConfig.java` | `infrastructure/security/SecurityConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
+| 518 | `global/security/config/WebMvcConfig.java` | `infrastructure/config/WebMvcConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
+| 519 | `global/security/exception/ExpiredTokenException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
+| 520 | `global/security/exception/InvalidMemberPrincipalException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
+| 521 | `global/security/exception/InvalidTokenException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
+| 522 | `global/security/handler/JwtAccessDeniedHandler.java` | `infrastructure/security/JwtAccessDeniedHandler.java` | infrastructure | global/security | infrastructure/security | PR01 | PR01 완료 |
+| 523 | `global/security/handler/JwtAuthenticationEntryPoint.java` | `infrastructure/security/JwtAuthenticationEntryPoint.java` | infrastructure | global/security | infrastructure/security | PR01 | PR01 완료 |
+| 524 | `global/security/jwt/JwtProperties.java` | = | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | legacy |
+| 525 | `global/security/jwt/JwtProvider.java` | = | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | legacy |
+| 526 | `global/security/jwt/TokenParser.java` | `adapter/security/auth/TokenParser.java` | auth | global/security | adapter/security/auth | PR01 | PR01 완료 |
+| 527 | `global/sms/SmsConfig.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
+| 528 | `global/sms/SmsDemoAccount.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
+| 529 | `global/sms/SmsProperties.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
+| 530 | `global/sms/SmsSendHelper.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
+| 531 | `global/thirdparty/ai/AiModerationClient.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
+| 532 | `global/thirdparty/ai/AiModerationProperties.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
+| 533 | `global/thirdparty/aws/s3/config/S3Config.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
+| 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
+| 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
+| 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | = | notification | global/thirdparty | adapter/push/notification | PR04 | legacy |
+| 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
+| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy |
+| 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
+
+## 3. HTTP API (Controller 매핑)
+
+URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이름 변경을 URL에 반영하지 않는다.
+
+| method | URL | controller | handler | 성공 status |
+| --- | --- | --- | --- | --- |
+| GET | `/api/admin/alert` | `domain/admin/presentation/AdminController.java` | getAdminAlert | 200 |
+| DELETE | `/api/admin/alert/{alert_id}` | `domain/admin/presentation/AdminController.java` | rejectAlert | 204 |
+| PATCH | `/api/admin/gwangsan/{member_id}` | `domain/admin/presentation/AdminController.java` | adjustGwangsan | 200 |
+| GET | `/api/admin/product` | `domain/admin/presentation/AdminProductController.java` | findProducts | 200 / 400(분기) |
+| DELETE | `/api/admin/product/{product_id}` | `domain/admin/presentation/AdminProductController.java` | deleteProduct | 204 / 400(분기) |
+| PATCH | `/api/admin/role/{member_id}` | `domain/admin/presentation/AdminController.java` | updateMemberRole | 204 |
+| POST | `/api/admin/signin` | `domain/admin/presentation/AdminController.java` | signIn | 200 |
+| PATCH | `/api/admin/status/{member_id}` | `domain/admin/presentation/AdminController.java` | updateMemberStatus | 204 |
+| PATCH | `/api/admin/trade/{alert_id}` | `domain/admin/presentation/AdminController.java` | approveTradeCancel | 200 |
+| PATCH | `/api/admin/verify/signup/{alert_id}` | `domain/admin/presentation/AdminController.java` | verifySignUp | 204 |
+| DELETE | `/api/admin/{alert_id}` | `domain/admin/presentation/AdminController.java` | deleteAlert | 204 |
+| GET | `/api/alert` | `domain/alert/presentation/AlertController.java` | getAlerts | 200 |
+| PATCH | `/api/alert/read/{alert_id}` | `domain/alert/presentation/AlertController.java` | readAlerts | 204 |
+| GET | `/api/alert/unread` | `domain/alert/presentation/AlertController.java` | getUnreadAlerts | 200 |
+| GET | `/api/app/version` | `domain/app/presentation/AppVersionController.java` | findVersion | 200 / 400(분기) |
+| GET | `/api/auth` | `domain/auth/presentation/AuthController.java` | getMemberInfo | 200 |
+| POST | `/api/auth/nickname` | `domain/auth/presentation/AuthController.java` | findNickname | 200 |
+| PATCH | `/api/auth/password` | `domain/auth/presentation/AuthController.java` | resetPassword | 200 |
+| PATCH | `/api/auth/reissue` | `domain/auth/presentation/AuthController.java` | reissueToken | 200 |
+| POST | `/api/auth/signin` | `domain/auth/presentation/AuthController.java` | signIn | 200 |
+| DELETE | `/api/auth/signout` | `domain/auth/presentation/AuthController.java` | signout | 204 |
+| POST | `/api/auth/signup` | `domain/auth/presentation/AuthController.java` | signUp | 201 |
+| GET | `/api/block` | `domain/block/presentation/BlockController.java` | getBlockList | 200 |
+| DELETE | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | unblock | 204 |
+| POST | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | block | 201 |
+| DELETE | `/api/chat/message/{message_id}` | `domain/chat/presentation/ChatController.java` | deleteMessage | 204 |
+| PATCH | `/api/chat/message/{message_id}` | `domain/chat/presentation/ChatController.java` | updateMessage | 200 |
+| PATCH | `/api/chat/read` | `domain/chat/presentation/ChatController.java` | readMessages | 200 |
+| GET | `/api/chat/room/{product_id}` | `domain/chat/presentation/ChatController.java` | getRoom | 200 |
+| POST | `/api/chat/room/{product_id}` | `domain/chat/presentation/ChatController.java` | createChatRoom | 201 |
+| DELETE | `/api/chat/room/{room_id}` | `domain/chat/presentation/ChatController.java` | deleteChatRoom | 204 |
+| GET | `/api/chat/room/{room_id}/sendable` | `domain/chat/presentation/ChatController.java` | validateSendable | 200 |
+| GET | `/api/chat/rooms` | `domain/chat/presentation/ChatController.java` | getRooms | 200 |
+| GET | `/api/chat/{room_id}` | `domain/chat/presentation/ChatController.java` | getChatMessage | 200 |
+| GET | `/api/health` | `domain/health/presentation/HealthController.java` | health | 200 |
+| POST | `/api/image` | `domain/image/presentation/ImageController.java` | upload | 200 |
+| DELETE | `/api/image/{image_id}` | `domain/image/presentation/ImageController.java` | delete | 204 |
+| DELETE | `/api/member` | `domain/member/peresentation/MemberController.java` | deleteMember | 204 |
+| GET | `/api/member` | `domain/member/peresentation/MemberController.java` | findMyInfo | 200 |
+| PATCH | `/api/member` | `domain/member/peresentation/MemberController.java` | updateMyInfo | 200 |
+| GET | `/api/member/all` | `domain/member/peresentation/MemberController.java` | findAllUserInfo | 200 |
+| GET | `/api/member/{id}` | `domain/member/peresentation/MemberController.java` | findUserInfo | 200 |
+| GET | `/api/notice` | `domain/notice/presentation/NoticeController.java` | findAllNotices | 200 |
+| POST | `/api/notice` | `domain/notice/presentation/NoticeController.java` | createNotice | 201 |
+| DELETE | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | deleteNotice | 204 |
+| GET | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | findNotice | 200 |
+| PATCH | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | updateNotice | 200 |
+| GET | `/api/related-keyword` | `domain/relatedkeyword/presentation/RelatedKeywordController.java` | findAllKeywords | 200 |
+| GET | `/api/related-keyword/current` | `domain/relatedkeyword/presentation/RelatedKeywordController.java` | findMyKeywords | 200 |
+| DELETE | `/api/related-keyword/{memberRelatedKeywordId}` | `domain/relatedkeyword/presentation/RelatedKeywordController.java` | deleteMyKeyword | 204 |
+| POST | `/api/report` | `domain/report/presentation/ReportController.java` | createReport | 201 |
+| GET | `/api/review` | `domain/review/presentation/ReviewController.java` | getMyReviews | 200 |
+| POST | `/api/review` | `domain/review/presentation/ReviewController.java` | createReview | 201 |
+| GET | `/api/review/current` | `domain/review/presentation/ReviewController.java` | getMyReceivedReviews | 200 / 400(분기) |
+| GET | `/api/review/detail/{reviewId}` | `domain/review/presentation/ReviewController.java` | getReviewDetail | 200 |
+| GET | `/api/review/{memberId}` | `domain/review/presentation/ReviewController.java` | getReviewByMember | 200 / 400(분기) |
+| POST | `/api/sms` | `domain/sms/presentation/SmsController.java` | sendSms | 200 |
+| POST | `/api/sms/nickname` | `domain/sms/presentation/SmsController.java` | sendFindNicknameSms | 200 |
+| POST | `/api/sms/nickname/verify` | `domain/sms/presentation/SmsController.java` | verifyFindNicknameSms | 200 |
+| POST | `/api/sms/password` | `domain/sms/presentation/SmsController.java` | sendResetPasswordSms | 200 |
+| POST | `/api/sms/password/verify` | `domain/sms/presentation/SmsController.java` | verifyResetPasswordSms | 200 |
+| POST | `/api/sms/verify` | `domain/sms/presentation/SmsController.java` | verifySms | 200 |
+| PATCH | `/api/suspend` | `domain/suspend/presentation/SuspendController.java` | suspend | 204 |
+| DELETE | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancelWithdraw | 204 |
+| POST | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancel | 200 |
+| GET | `/api/trade/graph/head` | `domain/trade/presentation/TradeController.java` | getHeadHistory | 200 |
+| GET | `/api/trade/graph/place` | `domain/trade/presentation/TradeController.java` | getPlaceHistory | 200 |
+| GET | `/api/trade/history` | `domain/trade/presentation/TradeController.java` | getMyTradeHistory | 200 |
+| GET | `/api/trade/statistics/head` | `domain/trade/presentation/TradeController.java` | getHeadStatistics | 200 |
+| GET | `/api/trade/statistics/place` | `domain/trade/presentation/TradeController.java` | getPlaceStatistics | 200 |
+| GET | `api/post` | `domain/post/presentation/PostController.java` | findProductByTypeAndMode | 200 |
+| POST | `api/post` | `domain/post/presentation/PostController.java` | createProduct | 201 |
+| GET | `api/post/current` | `domain/post/presentation/PostController.java` | findCurrentProduct | 200 / 400(분기) |
+| GET | `api/post/member/{member_id}` | `domain/post/presentation/PostController.java` | findByMemberID | 200 / 400(분기) |
+| DELETE | `api/post/reservation/{product_id}` | `domain/post/presentation/PostController.java` | deleteReservation | 204 |
+| PATCH | `api/post/reservation/{product_id}` | `domain/post/presentation/PostController.java` | reservation | 200 |
+| DELETE | `api/post/trade` | `domain/post/presentation/PostController.java` | tradeWithdraw | 204 |
+| POST | `api/post/trade` | `domain/post/presentation/PostController.java` | tradeRequest | 204 |
+| DELETE | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | deleteProduct | 204 |
+| GET | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | findProductById | 200 |
+| PATCH | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | updateProduct | 204 |
+
+총 81개 엔드포인트.
+
+## 4. 보안·인가 규칙 (infrastructure/security/SecurityConfig, 원문)
+
+```java
+.requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+// auth
+.requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
+.requestMatchers(HttpMethod.PATCH, "/api/auth/reissue").permitAll()
+.requestMatchers(HttpMethod.DELETE, "/api/auth/signout").authenticated()
+.requestMatchers(HttpMethod.PATCH, "/api/auth/password").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/auth/nickname").permitAll()
+// sms
+.requestMatchers(HttpMethod.POST, "/api/sms").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/sms/verify").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/sms/password").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/sms/password/verify").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/sms/nickname").permitAll()
+.requestMatchers(HttpMethod.POST, "/api/sms/nickname/verify").permitAll()
+// post
+.requestMatchers(HttpMethod.POST, "/api/post").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/post").authenticated()
+.requestMatchers(HttpMethod.PATCH, "/api/post/{post_id}").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/post/{post_id}").authenticated()
+.requestMatchers(HttpMethod.DELETE, "/api/post/{post_id}").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/post/current").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/post/member/{member_id}").authenticated()
+.requestMatchers(HttpMethod.POST, "/api/post/trade").authenticated()
+.requestMatchers(HttpMethod.PATCH, "/api/post/reservation/{post_id}").authenticated()
+.requestMatchers(HttpMethod.DELETE, "/api/post/reservation/{post_id}").authenticated()
+// notice
+.requestMatchers(HttpMethod.GET, "/api/notice").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/notice/{id}").authenticated()
+.requestMatchers(HttpMethod.POST, "/api/notice")
+.hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+.requestMatchers(HttpMethod.PATCH, "/api/notice/{id}").authenticated()
+.requestMatchers(HttpMethod.DELETE, "/api/notice/{id}").authenticated()
+// related-keyword
+.requestMatchers(HttpMethod.GET, "/api/related-keyword").permitAll()
+.requestMatchers(HttpMethod.GET, "/api/related-keyword/current").authenticated()
+.requestMatchers(HttpMethod.DELETE, "/api/related-keyword/{memberRelatedKeywordId}").authenticated()
+// admin
+.requestMatchers(HttpMethod.POST, "/api/admin/signin").permitAll()
+.requestMatchers("/api/admin/**")
+.hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+// review
+.requestMatchers(HttpMethod.POST, "/api/review").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/review").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/review/current").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/review/{memberId}").authenticated()
+.requestMatchers(HttpMethod.POST, "/api/review/detail/{reviewId}").authenticated()
+// member
+.requestMatchers(HttpMethod.GET, "/api/member").authenticated()
+.requestMatchers(HttpMethod.PATCH, "/api/member").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/member/{memberId}").authenticated()
+.requestMatchers(HttpMethod.GET, "/api/member/all")
+.hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+// report
+.requestMatchers(HttpMethod.POST, "/api/report").authenticated()
+// health
+.requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+.requestMatchers(HttpMethod.GET, "/api/app/version").permitAll()
+// suspend
+.requestMatchers(HttpMethod.PATCH, "/api/suspend")
+.hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
+// trade
+.requestMatchers(HttpMethod.GET, "/api/trade/graph/head").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name())
+.requestMatchers(HttpMethod.GET, "/api/trade/graph/place").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name(), MemberRole.ROLE_PLACE_ADMIN.name())
+.requestMatchers(HttpMethod.GET, "/api/trade/statistics/head").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name())
+.requestMatchers(HttpMethod.GET, "/api/trade/statistics/place").hasAnyAuthority(MemberRole.ROLE_HEAD_ADMIN.name(), MemberRole.ROLE_PLACE_ADMIN.name())
+.anyRequest().hasAnyAuthority(
+```
+필터 순서(기존 유지): RequestLogFilter → ExceptionFilter → JwtFilter → JwtAuthenticationFilter (모두 UsernamePasswordAuthenticationFilter 앞). JwtFilter와 JwtAuthenticationFilter가 둘 다 회원을 조회해 SecurityContext를 설정한다(기준선 동작, 요청당 회원 조회 2회). JwtAuthenticationFilter는 `/api/auth/**`, `/api/sms/**`, `/api/health`, OPTIONS를 건너뛴다.
+
+## 5. 실행자 식별·차단 검사 사용처
+
+새 유스케이스는 `domain.common.ActorContext`를 Command로 받는다. Controller는 `ActorContext` 파라미터를 선언하면 `adapter.security.auth.ActorContextArgumentResolver`가 인증 principal에서만 채운다(요청 body/query 회원 ID 미사용). 아래 `MemberUtil.getCurrentMember()` 호출은 각 담당 PR이 ActorContext로 교체하고, MemberUtil 클래스 삭제는 PR12가 한다.
+
+| 파일 | 호출 수 | 교체 PR |
+| --- | --- | --- |
+| `domain/admin/service/impl/AdjustGwangsanServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/DeleteAdminAlertServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/FindAlertByAlertTypeAndPlaceServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/RejectAdminAlertServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/UpdateMemberRoleServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java` | 1 | PR11 |
+| `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | 1 | PR11 |
+| `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java` | 1 | PR04 |
+| `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java` | 1 | PR04 |
+| `domain/alert/service/impl/ReadAlertServiceImpl.java` | 1 | PR04 |
+| `domain/auth/service/impl/SignOutServiceImpl.java` | 1 | PR02 |
+| `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | 1 | PR02 |
+| `domain/block/service/impl/BlockMemberServiceImpl.java` | 1 | PR09 |
+| `domain/block/service/impl/GetBlockListServiceImpl.java` | 1 | PR09 |
+| `domain/block/service/impl/UnblockMemberServiceImpl.java` | 1 | PR09 |
+| `domain/chat/service/impl/ChatMessageMutationService.java` | 1 | PR08 |
+| `domain/chat/service/impl/CreateChatRoomServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/DeleteChatRoomServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/FindChatMessageByRoomIdServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/FindRoomIdByProductIdServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | 1 | PR08 |
+| `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | 1 | PR08 |
+| `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | 1 | PR02 |
+| `domain/member/service/impl/FindMyInfoServiceImpl.java` | 1 | PR02 |
+| `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | 1 | PR02 |
+| `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | 1 | PR02 |
+| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/notice/service/impl/FindNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/post/service/impl/CreateProductServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/FindProductByIdServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/ReservationProductServiceImpl.java` | 1 | PR06 |
+| `domain/post/service/impl/UpdateProductServiceImpl.java` | 1 | PR06 |
+| `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java` | 1 | PR03 |
+| `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java` | 1 | PR03 |
+| `domain/report/service/impl/CreateReportServiceImpl.java` | 1 | PR09 |
+| `domain/review/service/impl/CreateReviewServiceImpl.java` | 1 | PR07 |
+| `domain/review/service/impl/GetMyReviewListServiceImpl.java` | 1 | PR07 |
+| `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | 1 | PR07 |
+| `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | 1 | PR07 |
+| `domain/trade/service/impl/TradeCancelServiceImpl.java` | 1 | PR07 |
+| `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | 1 | PR07 |
+| `global/aop/BlockAspect.java` | 1 | PR07 |
+
+총 51회 / 51파일.
+
+차단 검사(@CheckBlocked·BlockValidator) 사용처 — block 공개 query(PR09) + 각 consumer output Port로 교체, 기존 적용 범위·실행 순서 유지:
+
+- `domain/chat/service/impl/CreateChatRoomServiceImpl.java` → PR08
+- `domain/chat/service/impl/SaveChatMessageServiceImpl.java` → PR08
+- `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` → PR08
+- `domain/post/service/impl/FindProductByIdServiceImpl.java` → PR06
+- `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` → PR07
+- `domain/review/service/impl/CreateReviewServiceImpl.java` → PR07
+- `global/aop/BlockAspect.java` → PR07
+
+## 6. 비 HTTP 진입점 (scheduler·event listener·async·stream)
+
+| 파일 | 진입 annotation |
+| --- | --- |
+| `global/chat/stream/ChatStreamConsumerWorker.java` | `@Scheduled(fixedDelay = 60000)` |
+| `global/chat/stream/ChatStreamConsumerWorker.java` | `@Scheduled(fixedDelayString = "${chat.stream.blockMs:2000}")` |
+| `global/event/handler/ChatMessageMutationEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/ChatMessageMutationEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/CreateAdminAlertEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/CreateAdminAlertEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/CreateAlertEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/CreateAlertEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/CreateAlertMembersEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/CreateAlertMembersEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/DeleteNotUsedImageEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/DeleteNotUsedImageEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/ReservationCancelledEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/ReservationCancelledEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/SendNotificationEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/SendNotificationEventListener.java` | `@TransactionalEventListener(value = SendNotificationEvent.class, phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/event/handler/TradeStatusChangedEventListener.java` | `@Async("asyncExecutor")` |
+| `global/event/handler/TradeStatusChangedEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `global/scheduler/DeleteOrphanImageScheduler.java` | `@Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")` |
+| `global/scheduler/ReservationReminderScheduler.java` | `@Scheduled(fixedDelay = 30000)` |
+| `global/scheduler/SuspendReleaseScheduler.java` | `@Scheduled(cron = "0 0 * * * *")` |
+| `global/sms/SmsSendHelper.java` | `@Async("asyncExecutor")` |
+| `global/thirdparty/aws/s3/service/S3DeleteService.java` | `@Async` |
+| `global/thirdparty/aws/s3/service/S3UploadService.java` | `@Async` |
+
+이벤트 발행처(`publishEvent`):
+
+| 발행 파일 | 이벤트 |
+| --- | --- |
+| `domain/admin/service/impl/RejectAdminAlertServiceImpl.java` | CreateAlertEvent |
+| `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | CreateAlertEvent |
+| `domain/auth/service/impl/SignUpServiceImpl.java` | CreateAdminAlertEvent |
+| `domain/auth/service/impl/SignUpServiceImpl.java` | CreateAlertEvent |
+| `domain/chat/service/impl/ChatMessageMutationService.java` | ChatMessageMutationEvent |
+| `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | SendNotificationEvent |
+| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | CreateAlertMembersEvent |
+| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | SendNotificationEvent |
+| `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | ReservationCancelledEvent |
+| `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | TradeStatusChangedEvent |
+| `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | CreateAlertEvent |
+| `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | SendNotificationEvent |
+| `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | TradeStatusChangedEvent |
+| `domain/post/service/impl/ReservationProductServiceImpl.java` | TradeStatusChangedEvent |
+| `domain/post/service/impl/UpdateProductServiceImpl.java` | DeleteNotUsedImageEvent |
+| `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | TradeStatusChangedEvent |
+| `domain/report/service/impl/CreateReportServiceImpl.java` | CreateAdminAlertEvent |
+| `domain/review/service/impl/CreateReviewServiceImpl.java` | CreateAlertEvent |
+| `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | CreateAlertEvent |
+| `domain/trade/service/TradeCancelApplier.java` | CreateAlertEvent |
+| `domain/trade/service/TradeCancelApplier.java` | TradeStatusChangedEvent |
+| `domain/trade/service/impl/TradeCancelServiceImpl.java` | CreateAdminAlertEvent |
+
+## 7. 트랜잭션·락
+
+application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 readOnly/isolation/propagation/timeout과 락 순서를 보존한다.
+
+| 파일:행 | 대상 | 속성 |
+| --- | --- | --- |
+| `domain/admin/service/impl/AdjustGwangsanServiceImpl.java:24` | execute | `(기본)` |
+| `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java:44` | execute | `(isolation = Isolation.READ_COMMITTED)` |
+| `domain/admin/service/impl/CreateAdminAlertServiceImpl.java:42` | execute | `(기본)` |
+| `domain/admin/service/impl/DeleteAdminProductServiceImpl.java:19` | execute | `(기본)` |
+| `domain/admin/service/impl/FindAdminProductsServiceImpl.java:33` | execute | `(readOnly = true)` |
+| `domain/admin/service/impl/FindAlertByAlertTypeAndPlaceServiceImpl.java:65` | execute | `(기본)` |
+| `domain/admin/service/impl/RejectAdminAlertServiceImpl.java:46` | execute | `(isolation = Isolation.READ_COMMITTED)` |
+| `domain/admin/service/impl/SignInAdminServiceImpl.java:34` | execute | `(기본)` |
+| `domain/admin/service/impl/UpdateMemberRoleServiceImpl.java:31` | execute | `(기본)` |
+| `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java:32` | execute | `(기본)` |
+| `domain/admin/service/impl/VerificationSignUpServiceImpl.java:38` | execute | `(기본)` |
+| `domain/alert/service/impl/CreateAlertMembersServiceImpl.java:33` | execute | `(기본)` |
+| `domain/alert/service/impl/CreateAlertServiceImpl.java:70` | execute | `(기본)` |
+| `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java:20` | execute | `(readOnly = true)` |
+| `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java:35` | execute | `(readOnly = true)` |
+| `domain/alert/service/impl/ReadAlertServiceImpl.java:22` | execute | `(기본)` |
+| `domain/app/service/impl/FindAppVersionServiceImpl.java:16` | class FindAppVersionServiceImpl | `(readOnly = true)` |
+| `domain/auth/service/impl/FindNicknameServiceImpl.java:26` | execute | `(readOnly = true)` |
+| `domain/auth/service/impl/ReissueTokenServiceImpl.java:30` | execute | `(기본)` |
+| `domain/auth/service/impl/ResetPasswordServiceImpl.java:27` | execute | `(기본)` |
+| `domain/auth/service/impl/SignInServiceImpl.java:36` | execute | `(기본)` |
+| `domain/auth/service/impl/SignUpServiceImpl.java:52` | execute | `(기본)` |
+| `domain/auth/service/impl/TokenAuthenticationServiceImpl.java:20` | execute | `(readOnly = true)` |
+| `domain/block/service/impl/BlockMemberServiceImpl.java:25` | execute | `(기본)` |
+| `domain/block/service/impl/GetBlockListServiceImpl.java:22` | execute | `(readOnly = true)` |
+| `domain/block/service/impl/UnblockMemberServiceImpl.java:21` | execute | `(기본)` |
+| `domain/chat/service/impl/ChatMessageMutationService.java:30` | update | `(기본)` |
+| `domain/chat/service/impl/ChatMessageMutationService.java:45` | delete | `(기본)` |
+| `domain/chat/service/impl/CreateChatRoomServiceImpl.java:30` | execute | `(기본)` |
+| `domain/chat/service/impl/DeleteChatRoomServiceImpl.java:23` | execute | `(기본)` |
+| `domain/chat/service/impl/FindChatMessageByRoomIdServiceImpl.java:52` | execute | `(기본)` |
+| `domain/chat/service/impl/FindRoomIdByProductIdServiceImpl.java:22` | execute | `(readOnly = true)` |
+| `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java:29` | execute | `(readOnly = true)` |
+| `domain/chat/service/impl/ReadChatMessageServiceImpl.java:24` | execute | `(기본)` |
+| `domain/chat/service/impl/SaveChatMessageServiceImpl.java:53` | execute | `(기본)` |
+| `domain/chat/service/impl/ValidateChatSendableServiceImpl.java:35` | execute | `(readOnly = true)` |
+| `domain/image/service/impl/DeleteImageServiceImpl.java:20` | execute | `(기본)` |
+| `domain/image/service/impl/UploadImageServiceImpl.java:28` | execute | `(기본)` |
+| `domain/member/service/impl/FindAllUserInfoServiceImpl.java:25` | execute | `(readOnly = true)` |
+| `domain/member/service/impl/FindMyInfoServiceImpl.java:26` | execute | `(readOnly = true)` |
+| `domain/member/service/impl/FindUserInfoServiceImpl.java:24` | execute | `(readOnly = true)` |
+| `domain/member/service/impl/MemberDeletionServiceImpl.java:51` | delete | `(기본)` |
+| `domain/member/service/impl/MemberWithdrawalServiceImpl.java:26` | execute | `(기본)` |
+| `domain/member/service/impl/UpdateMyInfoServiceImpl.java:33` | execute | `(기본)` |
+| `domain/notice/service/impl/CreateNoticeServiceImpl.java:47` | execute | `(기본)` |
+| `domain/notice/service/impl/DeleteNoticeServiceImpl.java:25` | execute | `(기본)` |
+| `domain/notice/service/impl/UpdateNoticeServiceImpl.java:32` | execute | `(기본)` |
+| `domain/notification/service/impl/SendNotificationServiceImpl.java:29` | execute | `(기본)` |
+| `domain/post/service/impl/CreateProductServiceImpl.java:31` | execute | `(기본)` |
+| `domain/post/service/impl/DeleteProductByIdServiceImpl.java:24` | execute | `(기본)` |
+| `domain/post/service/impl/DeleteReservationProductServiceImpl.java:42` | execute | `(기본)` |
+| `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java:36` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java:42` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/FindProductByIdServiceImpl.java:42` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java:34` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java:40` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java:36` | execute | `(readOnly = true)` |
+| `domain/post/service/impl/RequestTradeCompleteServiceImpl.java:68` | execute | `(isolation = Isolation.READ_COMMITTED)` |
+| `domain/post/service/impl/ReservationProductServiceImpl.java:42` | execute | `(기본)` |
+| `domain/post/service/impl/ReservationReminderSender.java:30` | send | `(기본)` |
+| `domain/post/service/impl/UpdateProductServiceImpl.java:40` | execute | `(기본)` |
+| `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java:43` | execute | `(기본)` |
+| `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java:22` | execute | `(기본)` |
+| `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java:24` | execute | `(readOnly = true)` |
+| `domain/relatedkeyword/service/impl/FindRelatedKeywordServiceImpl.java:20` | execute | `(readOnly = true)` |
+| `domain/report/service/impl/CreateReportServiceImpl.java:45` | execute | `(기본)` |
+| `domain/review/service/impl/CreateReviewServiceImpl.java:47` | execute | `(기본)` |
+| `domain/review/service/impl/GetMyReviewListServiceImpl.java:27` | execute | `(readOnly = true)` |
+| `domain/review/service/impl/GetReceivedReviewListServiceImpl.java:29` | execute | `(readOnly = true)` |
+| `domain/review/service/impl/GetReceivedReviewListServiceImpl.java:35` | execute | `(readOnly = true)` |
+| `domain/review/service/impl/GetReviewByMemberServiceImpl.java:29` | execute | `(readOnly = true)` |
+| `domain/review/service/impl/GetReviewByMemberServiceImpl.java:35` | execute | `(readOnly = true)` |
+| `domain/review/service/impl/GetReviewDetailServiceImpl.java:24` | execute | `(readOnly = true)` |
+| `domain/sms/service/impl/SendFindNicknameSmsServiceImpl.java:36` | execute | `(기본)` |
+| `domain/sms/service/impl/SendResetPasswordSmsServiceImpl.java:33` | execute | `(기본)` |
+| `domain/sms/service/impl/VerifyCodeServiceImpl.java:27` | execute | `(기본)` |
+| `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java:25` | execute | `(기본)` |
+| `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java:25` | execute | `(기본)` |
+| `domain/suspend/service/impl/SuspendMemberServiceImpl.java:30` | execute | `(기본)` |
+| `domain/trade/service/TradeCancelApplier.java:47` | apply | `(propagation = Propagation.MANDATORY)` |
+| `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java:33` | execute | `(readOnly = true)` |
+| `domain/trade/service/impl/TradeCancelServiceImpl.java:55` | execute | `(isolation = Isolation.READ_COMMITTED)` |
+| `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java:37` | execute | `(isolation = Isolation.READ_COMMITTED)` |
+| `global/event/handler/ChatMessageMutationEventListener.java:19` | handle | `(기본)` |
+| `global/event/handler/CreateAdminAlertEventListener.java:18` | handleCreateAdminAlertEvent | `(기본)` |
+| `global/event/handler/CreateAlertEventListener.java:18` | handleCreateAlertEvent | `(기본)` |
+| `global/event/handler/CreateAlertMembersEventListener.java:18` | handleCreateAlertMembersEvent | `(기본)` |
+| `global/event/handler/DeleteNotUsedImageEventListener.java:24` | handleDeleteNotUsedImageEvent | `(기본)` |
+| `global/event/handler/ReservationCancelledEventListener.java:24` | handle | `(기본)` |
+| `global/event/handler/SendNotificationEventListener.java:18` | handleNotification | `(기본)` |
+| `global/event/handler/TradeStatusChangedEventListener.java:20` | handleTradeStatusChangedEvent | `(기본)` |
+| `global/scheduler/DeleteOrphanImageScheduler.java:67` | findOrphanImages | `(readOnly = true)` |
+| `global/scheduler/DeleteOrphanImageScheduler.java:87` | deleteFromDatabase | `(propagation = Propagation.REQUIRED, rollbackFor = Exception.class, timeout = 60)` |
+| `global/scheduler/SuspendReleaseScheduler.java:24` | releaseSuspensions | `(기본)` |
+
+@Transactional 94곳.
+
+락·격리 관련 코드:
+
+| 파일:행 | 코드 |
+| --- | --- |
+| `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java:44` | `@Transactional(isolation = Isolation.READ_COMMITTED)` |
+| `domain/admin/service/impl/RejectAdminAlertServiceImpl.java:46` | `@Transactional(isolation = Isolation.READ_COMMITTED)` |
+| `domain/chat/repository/ChatMessageRepository.java:19` | `@Lock(LockModeType.PESSIMISTIC_WRITE)` |
+| `domain/chat/repository/custom/impl/ChatMessageCustomRepositoryImpl.java:65` | `ChatMessage message = em.find(ChatMessage.class, messageId, LockModeType.PESSIMISTIC_READ);` |
+| `domain/chat/repository/custom/impl/ChatMessageCustomRepositoryImpl.java:72` | `.setLockMode(LockModeType.PESSIMISTIC_READ)` |
+| `domain/post/repository/ProductRepository.java:29` | `@Lock(LockModeType.PESSIMISTIC_WRITE)` |
+| `domain/post/repository/ProductRepository.java:41` | `@Lock(LockModeType.PESSIMISTIC_WRITE)` |
+| `domain/post/repository/ProductReservationRepository.java:21` | `@Lock(LockModeType.PESSIMISTIC_WRITE)` |
+| `domain/post/service/impl/RequestTradeCompleteServiceImpl.java:68` | `@Transactional(isolation = Isolation.READ_COMMITTED)` |
+| `domain/trade/service/impl/TradeCancelServiceImpl.java:55` | `@Transactional(isolation = Isolation.READ_COMMITTED)` |
+| `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java:37` | `@Transactional(isolation = Isolation.READ_COMMITTED)` |
+
+같은 클래스 안에 @Scheduled와 @Transactional 메서드가 공존하는 파일(자기 호출 시 프록시 미적용 여부를 담당 PR이 기준선으로 확인):
+
+- `global/scheduler/DeleteOrphanImageScheduler.java`
+- `global/scheduler/SuspendReleaseScheduler.java`
+
+## 8. 스키마 (JPA 매핑)
+
+운영 `application-prod.yml`: flyway enabled, `ddl-auto: validate`. 기본 `application.yml`: flyway disabled, `ddl-auto: update`. 테스트: `create-drop`. table/column/ID 생성/FK/cascade/enum 저장값을 전환 중 바꾸지 않는다. 배포형 validate 검증은 테스트 MariaDB에서만 한다.
+
+Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation.sql`, `V12__reservation_reminder_delivery.sql`, `V2__add_query_path_indexes.sql`, `V3__add_trade_complete_requested_by_seller.sql`, `V4__add_chat_room_hidden_at.sql`, `V5__add_product_reservation_schedule.sql`, `V6__drop_product_reservation_status_unique.sql`, `V7__optimize_chat_room_participant_lookup.sql`, `V8__drop_member_detail_dong_unique.sql`, `V9__add_report_product.sql`
+
+| 파일 | 종류 | table | 연관관계 | enum 저장 | auditing |
+| --- | --- | --- | --- | --- | --- |
+| `domain/admin/entity/AdminAlert.java` | Entity | tbl_admin_alert | ManyToOne otherMember:Member (fetch = FetchType.LAZY); ManyToOne requester:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/alert/entity/Alert.java` | Entity | tbl_alert | ManyToOne sendMember:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/alert/entity/AlertReceipt.java` | Entity | tbl_alert_receipt | ManyToOne alert:Alert (fetch = FetchType.LAZY, optional = false); ManyToOne member:Member (fetch = FetchType.LAZY, optional = false) | - | - |
+| `domain/app/entity/AppVersion.java` | Entity | tbl_app_version | - | - | - |
+| `domain/block/entity/MemberBlock.java` | Entity | tbl_member_block | ManyToOne blocker:Member (fetch = FetchType.LAZY); ManyToOne blocked:Member (fetch = FetchType.LAZY) | - | Y |
+| `domain/chat/entity/ChatMessage.java` | Entity | tbl_chat_message | ManyToOne room:ChatRoom (fetch = FetchType.LAZY); ManyToOne sender:Member (fetch = FetchType.LAZY) | EnumType.STRING | - |
+| `domain/chat/entity/ChatMessageImage.java` | Entity | tbl_chat_message_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne chatMessage:ChatMessage (fetch = FetchType.LAZY) | - | - |
+| `domain/chat/entity/ChatRoom.java` | Entity | tbl_chat_room | ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | Y |
+| `domain/dong/entity/Dong.java` | Entity | tbl_dong | - | - | - |
+| `domain/image/entity/Image.java` | Entity | tbl_image | - | - | Y |
+| `domain/member/entity/Member.java` | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/member/entity/MemberDetail.java` | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
+| `domain/member/entity/WithdrawalRecord.java` | Entity | tbl_withdrawal_record | - | - | Y |
+| `domain/notice/entity/Notice.java` | Entity | tbl_notice | ManyToOne place:Place (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
+| `domain/notice/entity/NoticeImage.java` | Entity | tbl_notice_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne notice:Notice (fetch = FetchType.LAZY) | - | - |
+| `domain/place/entity/Head.java` | Entity | tbl_head_place | - | - | - |
+| `domain/place/entity/Place.java` | Entity | tbl_place | ManyToOne head:Head (fetch = FetchType.LAZY) | - | - |
+| `domain/post/entity/Product.java` | Entity | tbl_product | ManyToOne member:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/post/entity/ProductImage.java` | Entity | tbl_product_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | - |
+| `domain/post/entity/ProductReservation.java` | Entity | tbl_product_reservation | ManyToOne product:Product (fetch = FetchType.LAZY); ManyToOne reserver:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | Entity | tbl_member_related_keyword | ManyToOne relatedKeyword:RelatedKeyword (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | - | - |
+| `domain/relatedkeyword/entity/RelatedKeyword.java` | Entity | tbl_related_keyword | - | - | - |
+| `domain/report/entity/Report.java` | Entity | tbl_report | ManyToOne reported:Member (fetch = FetchType.LAZY); ManyToOne reporter:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | EnumType.STRING | - |
+| `domain/report/entity/ReportImage.java` | Entity | tbl_report_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne report:Report (fetch = FetchType.LAZY) | - | - |
+| `domain/review/entity/Review.java` | Entity | tbl_review | ManyToOne reviewer:Member (fetch = FetchType.LAZY); ManyToOne reviewed:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | - |
+| `domain/suspend/entity/Suspend.java` | Entity | tbl_suspend | ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
+| `domain/trade/entity/TradeCancel.java` | Entity | tbl_trade_cancel | ManyToOne tradeComplete:TradeComplete (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `domain/trade/entity/TradeCancelImage.java` | Entity | tbl_trade_cancel_image | ManyToOne tradeCancel:TradeCancel (fetch = FetchType.LAZY); ManyToOne image:Image (fetch = FetchType.LAZY) | - | - |
+| `domain/trade/entity/TradeComplete.java` | Entity | tbl_trade_complete | ManyToOne product:Product (fetch = FetchType.LAZY); ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+
+업무 간 JPA association (persistence adapter 내부 저장 기술 예외로만 허용, core 교차 의존 허용 아님):
+
+| 엔티티 | 필드 | 대상(업무.타입) | 종류 |
+| --- | --- | --- | --- |
+| `domain/admin/entity/AdminAlert.java` | otherMember | member.Member | ManyToOne |
+| `domain/admin/entity/AdminAlert.java` | requester | member.Member | ManyToOne |
+| `domain/alert/entity/Alert.java` | sendMember | member.Member | ManyToOne |
+| `domain/alert/entity/AlertReceipt.java` | member | member.Member | ManyToOne |
+| `domain/block/entity/MemberBlock.java` | blocked | member.Member | ManyToOne |
+| `domain/block/entity/MemberBlock.java` | blocker | member.Member | ManyToOne |
+| `domain/chat/entity/ChatMessage.java` | sender | member.Member | ManyToOne |
+| `domain/chat/entity/ChatMessageImage.java` | image | image.Image | ManyToOne |
+| `domain/chat/entity/ChatRoom.java` | buyer | member.Member | ManyToOne |
+| `domain/chat/entity/ChatRoom.java` | product | post.Product | ManyToOne |
+| `domain/chat/entity/ChatRoom.java` | seller | member.Member | ManyToOne |
+| `domain/member/entity/MemberDetail.java` | dong | dong.Dong | ManyToOne |
+| `domain/member/entity/MemberDetail.java` | place | place.Place | ManyToOne |
+| `domain/notice/entity/Notice.java` | member | member.Member | ManyToOne |
+| `domain/notice/entity/Notice.java` | place | place.Place | ManyToOne |
+| `domain/notice/entity/NoticeImage.java` | image | image.Image | ManyToOne |
+| `domain/post/entity/Product.java` | member | member.Member | ManyToOne |
+| `domain/post/entity/ProductImage.java` | image | image.Image | ManyToOne |
+| `domain/post/entity/ProductReservation.java` | reserver | member.Member | ManyToOne |
+| `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | member | member.Member | ManyToOne |
+| `domain/report/entity/Report.java` | product | post.Product | ManyToOne |
+| `domain/report/entity/Report.java` | reported | member.Member | ManyToOne |
+| `domain/report/entity/Report.java` | reporter | member.Member | ManyToOne |
+| `domain/report/entity/ReportImage.java` | image | image.Image | ManyToOne |
+| `domain/review/entity/Review.java` | product | post.Product | ManyToOne |
+| `domain/review/entity/Review.java` | reviewed | member.Member | ManyToOne |
+| `domain/review/entity/Review.java` | reviewer | member.Member | ManyToOne |
+| `domain/suspend/entity/Suspend.java` | member | member.Member | ManyToOne |
+| `domain/trade/entity/TradeCancel.java` | member | member.Member | ManyToOne |
+| `domain/trade/entity/TradeCancelImage.java` | image | image.Image | ManyToOne |
+| `domain/trade/entity/TradeComplete.java` | buyer | member.Member | ManyToOne |
+| `domain/trade/entity/TradeComplete.java` | product | post.Product | ManyToOne |
+| `domain/trade/entity/TradeComplete.java` | seller | member.Member | ManyToOne |
+
+## 9. bridge·legacy 제거 책임
+
+| 항목 | 현재 상태 | 제거/교체 PR |
+| --- | --- | --- |
+| `legacy-classes.txt` 항목 | 전환 전 클래스 목록, PR별 태그 | 각 태그 PR (최종 0건은 PR12) |
+| `MemberUtil` | 5절 호출처가 사용 | 호출처: 각 업무 PR, 클래스: PR12 |
+| `@CheckBlocked`/`BlockAspect` | RequestTradeCompleteServiceImpl 1곳 | PR07 (block 공개 query는 PR09, 그 전에는 BlockValidator bridge) |
+| `BlockValidator` | 5절 사용처 | PR09 (공개 query 제공 후 각 호출처 PR에서 교체) |
+| `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 |
+| `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web |
+| `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config |
+| `JwtProvider`/`JwtProperties`/security exception | global/security | PR02 |
+| `MemberDetails`/`MemberDetailsService` | adapter/security/auth, legacy Member Entity·MemberRepository 직접 사용(bridge) | PR02 (회원 조회 Port로 교체) |
