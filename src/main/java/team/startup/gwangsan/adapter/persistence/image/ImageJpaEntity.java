@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.image.entity;
+package team.startup.gwangsan.adapter.persistence.image;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -9,12 +9,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "Image")
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_image")
 @EntityListeners(AuditingEntityListener.class)
-public class Image {
+public class ImageJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class Image {
     private LocalDateTime createdAt;
 
     @Builder
-    public Image(String imageUrl) {
+    public ImageJpaEntity(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 }

@@ -1,6 +1,6 @@
 package team.startup.gwangsan.adapter.web.admin.dto.response;
 
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
 
 import java.time.LocalDateTime;

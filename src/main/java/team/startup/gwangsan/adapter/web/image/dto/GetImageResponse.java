@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.image.presentation.dto.response;
+package team.startup.gwangsan.adapter.web.image.dto;
 
 public record GetImageResponse(
         Long imageId,

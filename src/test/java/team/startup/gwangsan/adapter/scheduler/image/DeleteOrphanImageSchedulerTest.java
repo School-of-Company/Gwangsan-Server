@@ -28,13 +28,13 @@ import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessageImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
 import team.startup.gwangsan.domain.chat.model.MessageType;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.application.image.data.DeleteResult;
 import team.startup.gwangsan.application.image.port.out.ImageStoragePort;
 import team.startup.gwangsan.application.image.service.CleanupOrphanImagesService;
 import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.image.OrphanImageQueryAdapter;
-import team.startup.gwangsan.domain.image.repository.ImageRepository;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -99,7 +99,7 @@ class DeleteOrphanImageSchedulerTest {
     }
 
     @Autowired private DeleteOrphanImageScheduler scheduler;
-    @Autowired private ImageRepository imageRepository;
+    @Autowired private ImageJpaRepository imageRepository;
     @Autowired private EntityManager entityManager;
     @Autowired private PlatformTransactionManager transactionManager;
     @Autowired private ApplicationContext applicationContext;
@@ -307,11 +307,11 @@ class DeleteOrphanImageSchedulerTest {
     }
 
     private ImageFixture image(String name) {
-        Image image = persist(Image.builder().imageUrl("scheduler/" + name).build());
+        ImageJpaEntity image = persist(ImageJpaEntity.builder().imageUrl("scheduler/" + name).build());
         return new ImageFixture(image, image.getId(), image.getImageUrl());
     }
 
-    private Image reference(List<ImageFixture> images, int index) {
+    private ImageJpaEntity reference(List<ImageFixture> images, int index) {
         return images.get(index).entity();
     }
 
@@ -351,7 +351,7 @@ class DeleteOrphanImageSchedulerTest {
         entityManager.createNativeQuery("delete from " + table).executeUpdate();
     }
 
-    private record ImageFixture(Image entity, Long id, String url) {
+    private record ImageFixture(ImageJpaEntity entity, Long id, String url) {
     }
 
     private record Relationships(Product product, NoticeJpaEntity notice, ReportJpaEntity report, ChatMessageJpaEntity message, TradeCancelJpaEntity cancel) {

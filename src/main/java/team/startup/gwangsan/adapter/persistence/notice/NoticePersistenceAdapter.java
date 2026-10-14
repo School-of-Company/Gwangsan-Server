@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.notice.data.NoticeImageResult;
 import team.startup.gwangsan.application.notice.port.out.NoticePort;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.model.Notice;
@@ -69,7 +69,7 @@ public class NoticePersistenceAdapter implements NoticePort {
         noticeImageJpaRepository.saveAll(imageIds.stream()
                 .map(imageId -> NoticeImageJpaEntity.builder()
                         .notice(notice)
-                        .image(entityManager.getReference(Image.class, imageId))
+                        .image(entityManager.getReference(ImageJpaEntity.class, imageId))
                         .build())
                 .toList());
     }

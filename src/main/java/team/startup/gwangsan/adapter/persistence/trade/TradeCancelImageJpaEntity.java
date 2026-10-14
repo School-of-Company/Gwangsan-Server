@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 
 @Entity
 @Getter
@@ -23,10 +23,10 @@ public class TradeCancelImageJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", nullable = false)
-    private Image image;
+    private ImageJpaEntity image;
 
     @Builder
-    public TradeCancelImageJpaEntity(TradeCancelJpaEntity tradeCancel, Image image) {
+    public TradeCancelImageJpaEntity(TradeCancelJpaEntity tradeCancel, ImageJpaEntity image) {
         this.tradeCancel = tradeCancel;
         this.image = image;
     }

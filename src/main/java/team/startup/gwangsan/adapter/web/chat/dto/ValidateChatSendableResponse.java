@@ -1,6 +1,6 @@
 package team.startup.gwangsan.adapter.web.chat.dto;
 
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 
 import java.util.List;
 

@@ -13,7 +13,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -65,7 +65,7 @@ class PostPersistenceAdapterIntegrationTest {
     }
 
     private Long image(String url) {
-        Image image = Image.builder().imageUrl(url).build();
+        ImageJpaEntity image = ImageJpaEntity.builder().imageUrl(url).build();
         em.persist(image);
         return image.getId();
     }

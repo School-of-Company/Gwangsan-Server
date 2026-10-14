@@ -28,7 +28,7 @@ import team.startup.gwangsan.adapter.persistence.place.PlacePersistenceAdapter;
 import team.startup.gwangsan.application.image.service.ImageQueryService;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.place.service.PlaceQueryService;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.model.Notice;
@@ -119,8 +119,8 @@ class NoticePersistenceAdapterTest {
         @Test
         @DisplayName("이미지 연결 추가·교체·삭제와 공지 삭제가 실제 행에 반영된다")
         void it_adds_replaces_and_deletes_images() {
-            Image first = image("first");
-            Image second = image("second");
+            ImageJpaEntity first = image("first");
+            ImageJpaEntity second = image("second");
             Notice notice = adapter.save(Notice.create("제목", "내용", place.getId(), author.getId()));
             adapter.addImages(notice.id(), List.of(first.getId(), second.getId()));
             em.flush();
@@ -175,10 +175,10 @@ class NoticePersistenceAdapterTest {
             Notice first = notice(place);
             Notice second = notice(place);
             Notice other = notice(place);
-            Image firstA = image("first-a");
-            Image firstB = image("first-b");
-            Image secondA = image("second-a");
-            Image otherA = image("other-a");
+            ImageJpaEntity firstA = image("first-a");
+            ImageJpaEntity firstB = image("first-b");
+            ImageJpaEntity secondA = image("second-a");
+            ImageJpaEntity otherA = image("other-a");
             adapter.addImages(first.id(), List.of(firstA.getId(), firstB.getId()));
             adapter.addImages(second.id(), List.of(secondA.getId()));
             adapter.addImages(other.id(), List.of(otherA.getId()));
@@ -251,8 +251,8 @@ class NoticePersistenceAdapterTest {
         @DisplayName("이미지 정리용 unlinkImage 가 해당 연결만 지운다")
         void it_deletes_single_notice_image() {
             Notice notice = notice(place);
-            Image keep = image("keep");
-            Image drop = image("drop");
+            ImageJpaEntity keep = image("keep");
+            ImageJpaEntity drop = image("drop");
             adapter.addImages(notice.id(), List.of(keep.getId(), drop.getId()));
             em.flush();
 
@@ -271,7 +271,7 @@ class NoticePersistenceAdapterTest {
         @Test
         @DisplayName("지점·본부·소속 회원·존재 이미지를 legacy 저장소에서 읽는다")
         void it_reads_from_legacy_repositories() {
-            Image image = image("exists");
+            ImageJpaEntity image = image("exists");
             em.flush();
             em.clear();
 
@@ -301,8 +301,8 @@ class NoticePersistenceAdapterTest {
         return adapter.save(Notice.create("제목", "내용", target.getId(), author.getId()));
     }
 
-    private Image image(String name) {
-        return em.persist(Image.builder().imageUrl("https://test.local/" + name).build());
+    private ImageJpaEntity image(String name) {
+        return em.persist(ImageJpaEntity.builder().imageUrl("https://test.local/" + name).build());
     }
 
     private MemberJpaEntity member(String nickname, String phoneNumber) {

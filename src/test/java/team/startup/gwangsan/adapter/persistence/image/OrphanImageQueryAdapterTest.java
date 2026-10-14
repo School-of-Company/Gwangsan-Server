@@ -19,7 +19,7 @@ import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessageImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
 import team.startup.gwangsan.domain.chat.model.MessageType;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -101,8 +101,8 @@ class OrphanImageQueryAdapterTest {
     @DisplayName("excludes images referenced only by chat messages or trade cancellations")
     void excludesImagesReferencedOnlyByChatMessagesOrTradeCancellations() {
         Relationships relationships = persistRelationships("chat-trade");
-        Image chatOnly = image("chat-only");
-        Image tradeCancelOnly = image("trade-cancel-only");
+        ImageJpaEntity chatOnly = image("chat-only");
+        ImageJpaEntity tradeCancelOnly = image("trade-cancel-only");
         em.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.tradeCancel()).image(tradeCancelOnly).build());
         em.flush();
@@ -117,11 +117,11 @@ class OrphanImageQueryAdapterTest {
     @DisplayName("keeps product notice and report images out before limiting candidates")
     void keepsProductNoticeAndReportImagesOutBeforeLimitingCandidates() {
         Relationships relationships = persistRelationships("existing-links");
-        Image productOnly = image("product-only");
-        Image noticeOnly = image("notice-only");
-        Image reportOnly = image("report-only");
-        Image firstOrphan = image("first-orphan");
-        Image secondOrphan = image("second-orphan");
+        ImageJpaEntity productOnly = image("product-only");
+        ImageJpaEntity noticeOnly = image("notice-only");
+        ImageJpaEntity reportOnly = image("report-only");
+        ImageJpaEntity firstOrphan = image("first-orphan");
+        ImageJpaEntity secondOrphan = image("second-orphan");
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
         em.persist(NoticeImageJpaEntity.builder().notice(relationships.notice()).image(noticeOnly).build());
         em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reportOnly).build());
@@ -145,16 +145,16 @@ class OrphanImageQueryAdapterTest {
     @DisplayName("returns each true orphan once in created-at and id order within the limit")
     void returnsEachTrueOrphanOnceInCreatedAtAndIdOrderWithinTheLimit() {
         Relationships relationships = persistRelationships("all-links");
-        Image productOnly = image("product-only");
-        Image noticeOnly = image("notice-only");
-        Image reportOnly = image("report-only");
-        Image chatOnly = image("chat-only");
-        Image tradeCancelOnly = image("trade-cancel-only");
-        Image multipleReferences = image("multiple-references");
-        Image later = image("later");
-        Image earlier = image("earlier");
-        Image sameTimeFirst = image("same-time-first");
-        Image sameTimeSecond = image("same-time-second");
+        ImageJpaEntity productOnly = image("product-only");
+        ImageJpaEntity noticeOnly = image("notice-only");
+        ImageJpaEntity reportOnly = image("report-only");
+        ImageJpaEntity chatOnly = image("chat-only");
+        ImageJpaEntity tradeCancelOnly = image("trade-cancel-only");
+        ImageJpaEntity multipleReferences = image("multiple-references");
+        ImageJpaEntity later = image("later");
+        ImageJpaEntity earlier = image("earlier");
+        ImageJpaEntity sameTimeFirst = image("same-time-first");
+        ImageJpaEntity sameTimeSecond = image("same-time-second");
 
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
         em.persist(NoticeImageJpaEntity.builder().notice(relationships.notice()).image(noticeOnly).build());
@@ -246,15 +246,15 @@ class OrphanImageQueryAdapterTest {
                 .build());
     }
 
-    private Image image(String name) {
-        return em.persist(Image.builder().imageUrl("https://test.local/" + name).build());
+    private ImageJpaEntity image(String name) {
+        return em.persist(ImageJpaEntity.builder().imageUrl("https://test.local/" + name).build());
     }
 
     private long rowCount(String table) {
         return ((Number) em.getEntityManager().createNativeQuery("select count(*) from " + table).getSingleResult()).longValue();
     }
 
-    private void updateCreatedAt(Image image, LocalDateTime createdAt) {
+    private void updateCreatedAt(ImageJpaEntity image, LocalDateTime createdAt) {
         em.getEntityManager().createNativeQuery("update tbl_image set created_at = ? where image_id = ?")
                 .setParameter(1, Timestamp.valueOf(createdAt))
                 .setParameter(2, image.getId())

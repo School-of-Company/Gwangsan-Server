@@ -15,7 +15,7 @@ import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAda
 import team.startup.gwangsan.application.admin.service.DeleteAdminProductService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -72,7 +72,7 @@ class AdminProductDeleteIntegrationTest {
         void it_soft_deletes_and_preserves_all_related_data(ProductStatus status) {
             Product product = persistProduct(status);
             MemberJpaEntity buyer = persistMember("buyer", MemberRole.ROLE_USER);
-            Image image = em.persist(Image.builder().imageUrl("https://example.com/product.jpg").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://example.com/product.jpg").build());
             ProductImage link = em.persist(ProductImage.builder().product(product).image(image).build());
             ChatRoomJpaEntity room = em.persist(ChatRoomJpaEntity.builder().product(product).buyer(buyer).seller(author)
                     .isActive(true).build());
@@ -91,7 +91,7 @@ class AdminProductDeleteIntegrationTest {
 
             assertThat(em.find(Product.class, product.getId()).getStatus()).isEqualTo(ProductStatus.DELETED);
             assertThat(productRepository.findActiveById(product.getId())).isEmpty();
-            assertThat(em.find(Image.class, image.getId()).getImageUrl()).isEqualTo(image.getImageUrl());
+            assertThat(em.find(ImageJpaEntity.class, image.getId()).getImageUrl()).isEqualTo(image.getImageUrl());
             ProductImage storedLink = em.find(ProductImage.class, link.getId());
             assertThat(storedLink.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedLink.getImage().getId()).isEqualTo(image.getId());

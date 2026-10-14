@@ -21,7 +21,7 @@ import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.data.AdminProductSearch;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
@@ -61,7 +61,7 @@ class AdminProductBridgeIntegrationTest {
                 detail(member, place, 30);
                 Product product = product(member, "게시글" + i, ProductStatus.ONGOING);
                 for (int imageIndex = 0; imageIndex < 2; imageIndex++) {
-                    Image image = em.persist(Image.builder().imageUrl("test/" + i + "/" + imageIndex).build());
+                    ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("test/" + i + "/" + imageIndex).build());
                     em.persist(ProductImage.builder().product(product).image(image).build());
                 }
             }

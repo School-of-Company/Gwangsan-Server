@@ -202,7 +202,7 @@
 | 180 | `domain/dong/entity/Dong.java` | `adapter/persistence/dong/DongJpaEntity.java` | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 181 | `domain/dong/repository/DongRepository.java` | `adapter/persistence/dong/DongJpaRepository.java` (+ application/dong/port/out/LoadDongPort.java) | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | PR03 완료 |
 | 182 | `domain/health/presentation/HealthController.java` | `adapter/web/health/controller/HealthController.java` | health | controller | adapter/web/health/controller | PR03 | PR03 완료 |
-| 183 | `domain/image/entity/Image.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy 유지(bridge→PR12): 5개 업무 Entity association·legacy 서비스 사용. 순수 모델은 domain/image/model/Image |
+| 183 | `domain/image/entity/Image.java` | `adapter/persistence/image/ImageJpaEntity.java` | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | PR05 완료(cleanup-A): `@Entity(name = "Image")`·tbl_image 유지. 순수 모델은 domain/image/model/Image |
 | 184 | `domain/image/entity/dto/DeleteResult.java` | `application/image/data/DeleteResult.java` | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | 이동 |
 | 185 | `domain/image/exception/ImageDeleteFailedException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
 | 186 | `domain/image/exception/ImageNotFoundException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
@@ -212,9 +212,9 @@
 | 190 | `domain/image/exception/NotFoundImageIdsException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
 | 191 | `domain/image/presentation/ImageController.java` | `adapter/web/image/controller/ImageController.java` | image | controller | adapter/web/image/controller | PR05 | 이동 |
 | 192 | `domain/image/presentation/dto/request/UploadImageRequest.java` | (삭제: 미사용) | image | web dto | adapter/web/image/dto | PR05 | 삭제 |
-| 193 | `domain/image/presentation/dto/response/GetImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy 유지(bridge→각 소비 업무 PR/PR12): 타 업무 web DTO 약 40곳 공유 |
+| 193 | `domain/image/presentation/dto/response/GetImageResponse.java` | `adapter/web/image/dto/GetImageResponse.java` | image | web dto | adapter/web/image/dto | PR05 | PR05 완료(cleanup-A): 공유 web DTO, 필드 불변 |
 | 194 | `domain/image/presentation/dto/response/UploadImageResponse.java` | `adapter/web/image/dto/UploadImageResponse.java` | image | web dto | adapter/web/image/dto | PR05 | 이동 |
-| 195 | `domain/image/repository/ImageRepository.java` | = | image | repository | adapter/persistence/image (JpaRepository) + application/image/port/out | PR05 | legacy 유지(bridge→PR12): ImagePersistenceAdapter 와 타 업무 legacy 서비스가 사용. custom 상속 제거 |
+| 195 | `domain/image/repository/ImageRepository.java` | `adapter/persistence/image/ImageJpaRepository.java` | image | repository | adapter/persistence/image (JpaRepository) + application/image/port/out | PR05 | PR05 완료(cleanup-A): custom 상속 제거 |
 | 196 | `domain/image/repository/custom/ImageCustomRepository.java` | (삭제) → application/image/port/out/LoadOrphanImageCandidatesPort.java | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | 삭제 |
 | 197 | `domain/image/repository/custom/impl/ImageCustomRepositoryImpl.java` | `adapter/persistence/image/OrphanImageQueryAdapter.java` | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | 이동 |
 | 198 | `domain/image/service/DeleteImageService.java` | `application/image/port/in/DeleteImageUseCase.java` | image | service interface | application/image/port/in (UseCase/Query) | PR05 | 전환 |
@@ -992,7 +992,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatMessageImage.java` | Entity | tbl_chat_message_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne chatMessage:ChatMessage (fetch = FetchType.LAZY) | - | - |
 | `domain/chat/entity/ChatRoom.java` | Entity | tbl_chat_room | ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | Y |
 | `adapter/persistence/dong/DongJpaEntity.java` (PR03) | Entity | tbl_dong | - | - | - |
-| `domain/image/entity/Image.java` | Entity | tbl_image | - | - | Y |
+| `adapter/persistence/image/ImageJpaEntity.java` | Entity | tbl_image | - | - | Y |
 | `adapter/persistence/member/MemberJpaEntity.java` (entity name `Member`) | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` (entity name `MemberDetail`) | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
 | `adapter/persistence/member/WithdrawalRecordJpaEntity.java` (entity name `WithdrawalRecord`) | Entity | tbl_withdrawal_record | - | - | Y |
@@ -1081,8 +1081,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) — **PR11 완료**: `MemberReferenceCleanupAdapter` 가 `AlertMemberCleanupUseCase` 사용 |
 | PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** — **PR08 완료(채팅 조회 제거)** |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) — **PR10 완료(공지)**: `noticeTitle` → notice 공개 `NoticeQuery.getTitle` |
-| `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 — **PR10 완료(notice)**: 이미지 존재 확인은 `ImageQuery.findAllByIds`, `NoticeImageJpaEntity` 의 Image 연관은 스키마 보존용 persistence 간 참조 |
-| `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
+| `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | cleanup-A 에서 `adapter/persistence/image/ImageJpaEntity`·`ImageJpaRepository` 로 이동, 소비자 import 만 갱신 | - (완료) |
+| `GetImageResponse` (PR05 잔여) | cleanup-A 에서 `adapter/web/image/dto/GetImageResponse` 로 이동, 소비 web DTO import 만 갱신 | - (완료) |
 | `ImageValidateUtil` (PR05 잔여) | **PR08 완료: 삭제**. chat `ChatImageBridge` 가 `ImageQuery.getAllByIds` 사용 | - |
 | `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | PR06 완료: 이벤트는 `adapter/event/image` 로 이동(ImageOwnerType 사용), ImageType 삭제 | - |
 | `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | PR06 완료: `adapter/http/ai` 로 이동, AiImageModerationAdapter·PostImageBridgeAdapter 가 사용 | - |

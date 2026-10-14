@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.post.data.ImageView;
 import team.startup.gwangsan.application.post.data.ProductImageLinkView;
 import team.startup.gwangsan.application.post.port.out.ProductImagePort;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -80,7 +80,7 @@ public class ProductImagePersistenceAdapter implements ProductImagePort {
     private ProductImage link(Long productId, Long imageId) {
         return ProductImage.builder()
                 .product(entityManager.getReference(Product.class, productId))
-                .image(entityManager.getReference(Image.class, imageId))
+                .image(entityManager.getReference(ImageJpaEntity.class, imageId))
                 .build();
     }
 

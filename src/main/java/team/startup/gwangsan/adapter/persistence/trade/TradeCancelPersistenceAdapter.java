@@ -4,8 +4,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.trade.port.out.TradeCancelPort;
-import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.image.repository.ImageRepository;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.model.TradeCancel;
@@ -28,7 +28,7 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
     private final TradeCancelJpaRepository tradeCancelJpaRepository;
     private final TradeCancelImageJpaRepository tradeCancelImageJpaRepository;
     // ponytail: 이미지 엔티티 조회는 PR05 image 공개 조회 전까지 기존 Repository 를 그대로 쓴다.
-    private final ImageRepository imageRepository;
+    private final ImageJpaRepository imageRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -91,7 +91,7 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
                 .status(tradeCancel.status())
                 .build());
 
-        List<Image> images = imageRepository.findAllById(imageIds);
+        List<ImageJpaEntity> images = imageRepository.findAllById(imageIds);
         tradeCancelImageJpaRepository.saveAll(images.stream()
                 .map(image -> TradeCancelImageJpaEntity.builder().tradeCancel(saved).image(image).build())
                 .toList());

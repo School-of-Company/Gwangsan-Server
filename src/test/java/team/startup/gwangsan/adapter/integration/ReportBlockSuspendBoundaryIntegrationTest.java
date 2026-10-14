@@ -42,7 +42,7 @@ import team.startup.gwangsan.application.suspend.service.SuspendMemberService;
 import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.block.exception.NotFoundBlockException;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -155,7 +155,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
         void it_saves_member_report_with_existing_images() {
             MemberJpaEntity reporter = member("신고자");
             MemberJpaEntity reported = member("피신고자");
-            Image image = em.persist(Image.builder().imageUrl("https://img/1").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/1").build());
 
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reported.getId(),
                     ReportType.SPAM_AD, "스팸", List.of(image.getId(), 999_999L)));
@@ -460,7 +460,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
         void it_serves_report_and_suspension_queries() {
             MemberJpaEntity reporter = member("공개신고자");
             MemberJpaEntity reported = member("공개피신고자");
-            Image image = em.persist(Image.builder().imageUrl("https://img/p").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/p").build());
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reported.getId(),
                     ReportType.ETC, "공개", List.of(image.getId())));
             suspendMemberService.execute(new SuspendMemberCommand(reported.getId(), 5, null));
@@ -487,7 +487,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
             em.clear();
             assertThat(em.getEntityManager().createQuery("select count(ri) from ReportImageJpaEntity ri", Long.class)
                     .getSingleResult()).isZero();
-            assertThat(em.find(Image.class, image.getId())).isNotNull();
+            assertThat(em.find(ImageJpaEntity.class, image.getId())).isNotNull();
         }
     }
 

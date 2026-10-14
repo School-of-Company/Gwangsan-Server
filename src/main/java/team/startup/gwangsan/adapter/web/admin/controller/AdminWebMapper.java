@@ -10,7 +10,7 @@ import team.startup.gwangsan.application.admin.data.AdminImage;
 import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.data.AdminSignInResult;
 import team.startup.gwangsan.adapter.web.auth.dto.response.TokenResponse;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
 import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;

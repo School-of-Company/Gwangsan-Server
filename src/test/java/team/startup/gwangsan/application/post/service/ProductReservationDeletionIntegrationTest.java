@@ -21,7 +21,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -196,7 +196,7 @@ class ProductReservationDeletionIntegrationTest {
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 Product product = em.find(Product.class, fixture.productId());
                 MemberJpaEntity buyer = em.find(ChatRoomJpaEntity.class, fixture.roomId()).getBuyer();
-                Image image = Image.builder().imageUrl("https://example.com/image.jpg").build();
+                ImageJpaEntity image = ImageJpaEntity.builder().imageUrl("https://example.com/image.jpg").build();
                 em.persist(image);
                 ProductImage link = ProductImage.builder().product(product).image(image).build();
                 em.persist(link);

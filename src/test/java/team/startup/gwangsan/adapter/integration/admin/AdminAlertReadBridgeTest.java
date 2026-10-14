@@ -30,7 +30,7 @@ import team.startup.gwangsan.application.post.data.ProductSnapshot;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
 import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -106,9 +106,9 @@ class AdminAlertReadBridgeTest {
                     alert(104L, AlertType.SIGN_UP, 21L, joinedWithoutRecommender), alert(105L, AlertType.TRADE_CANCEL, 40L, requester),
                     alert(106L, AlertType.TRADE_CANCEL, 41L, requester)
             );
-            Image reportImage = image(500L, "report-url");
-            Image cancelImage = image(501L, "cancel-url");
-            Image productImage = image(502L, "product-url");
+            ImageJpaEntity reportImage = image(500L, "report-url");
+            ImageJpaEntity cancelImage = image(501L, "cancel-url");
+            ImageJpaEntity productImage = image(502L, "product-url");
 
             when(adminAlertPersistenceAdapter.findByPlacesAndType(List.of(7), AlertType.REPORT)).thenReturn(alerts);
             when(memberDetailRepository.findPlaceNameMapByMemberIds(anySet())).thenReturn(Map.of(1L, "요청 지점", 20L, "가입 지점", 21L, "가입 지점"));
@@ -223,8 +223,8 @@ class AdminAlertReadBridgeTest {
         return alert;
     }
 
-    private Image image(Long id, String url) {
-        Image image = Image.builder().imageUrl(url).build();
+    private ImageJpaEntity image(Long id, String url) {
+        ImageJpaEntity image = ImageJpaEntity.builder().imageUrl(url).build();
         ReflectionTestUtils.setField(image, "id", id);
         return image;
     }

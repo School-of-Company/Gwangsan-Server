@@ -29,7 +29,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -275,7 +275,7 @@ class SalesListIntegrationTest {
                             assertThat(rows).isEqualTo(suffix.isEmpty() ? count : Math.min(count, 20));
                             // DTO enrichment cannot load products/images outside the requested page.
                             assertThat(statistics.getEntityStatistics(Product.class.getName()).getLoadCount()).isEqualTo(rows);
-                            assertThat(statistics.getEntityStatistics(Image.class.getName()).getLoadCount()).isEqualTo(rows * 2L);
+                            assertThat(statistics.getEntityStatistics(ImageJpaEntity.class.getName()).getLoadCount()).isEqualTo(rows * 2L);
                             assertThat(queries).isEqualTo(7);
                         }
                         times.sort(Double::compareTo);
@@ -329,7 +329,7 @@ class SalesListIntegrationTest {
                 .description("설명".repeat(100)).gwangsan(5000).type(type).mode(mode).status(state).build();
         em.persist(product);
         for (int i = 0; i < images; i++) {
-            Image image = Image.builder().imageUrl("https://example.invalid/image/" + product.getId() + "/" + i).build();
+            ImageJpaEntity image = ImageJpaEntity.builder().imageUrl("https://example.invalid/image/" + product.getId() + "/" + i).build();
             em.persist(image);
             em.persist(ProductImage.builder().product(product).image(image).build());
         }

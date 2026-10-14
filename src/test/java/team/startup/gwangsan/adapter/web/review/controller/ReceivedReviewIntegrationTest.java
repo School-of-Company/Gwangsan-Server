@@ -32,7 +32,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -351,7 +351,7 @@ class ReceivedReviewIntegrationTest {
                 if (i % 2 == 0) {
                     for (int image = 0; image < 3; image++) {
                         persist(ProductImage.builder().product(product)
-                                .image(persist(Image.builder().imageUrl("local/406/" + i + "/" + image).build())).build());
+                                .image(persist(ImageJpaEntity.builder().imageUrl("local/406/" + i + "/" + image).build())).build());
                     }
                 }
                 ids.add(persist(ReviewJpaEntity.builder().reviewer(other).reviewed(target).product(product)

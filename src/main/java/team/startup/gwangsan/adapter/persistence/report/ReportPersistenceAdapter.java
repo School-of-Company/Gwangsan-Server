@@ -8,7 +8,7 @@ import team.startup.gwangsan.application.report.data.ReportDetail;
 import team.startup.gwangsan.application.report.data.ReportImageLink;
 import team.startup.gwangsan.application.report.port.out.LoadReportPort;
 import team.startup.gwangsan.application.report.port.out.SaveReportPort;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.report.model.Report;
@@ -61,7 +61,7 @@ public class ReportPersistenceAdapter implements LoadReportPort, SaveReportPort 
     public void saveImages(Long reportId, List<Long> imageIds) {
         ReportJpaEntity report = entityManager.getReference(ReportJpaEntity.class, reportId);
         reportImageJpaRepository.saveAll(imageIds.stream()
-                .map(imageId -> new ReportImageJpaEntity(entityManager.getReference(Image.class, imageId), report))
+                .map(imageId -> new ReportImageJpaEntity(entityManager.getReference(ImageJpaEntity.class, imageId), report))
                 .toList());
     }
 
