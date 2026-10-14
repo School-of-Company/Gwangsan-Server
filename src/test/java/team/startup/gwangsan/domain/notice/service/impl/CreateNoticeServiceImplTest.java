@@ -19,10 +19,10 @@ import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.presentation.dto.request.CreateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
-import team.startup.gwangsan.global.event.CreateAlertMembersEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertMembersEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 

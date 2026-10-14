@@ -65,26 +65,26 @@
 | 43 | `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
 | 44 | `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
 | 45 | `domain/admin/util/ValidatePlaceUtil.java` | = | admin | util | domain/admin/policy (순수 인가 정책) | PR11 | legacy |
-| 46 | `domain/alert/entity/Alert.java` | = | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
-| 47 | `domain/alert/entity/AlertReceipt.java` | = | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
-| 48 | `domain/alert/entity/constant/AlertType.java` | = | alert | enum | domain/alert/model | PR04 | legacy |
-| 49 | `domain/alert/presentation/AlertController.java` | = | alert | controller | adapter/web/alert/controller | PR04 | legacy |
-| 50 | `domain/alert/presentation/dto/response/ExistsAlertResponse.java` | = | alert | web dto | adapter/web/alert/dto | PR04 | legacy |
-| 51 | `domain/alert/presentation/dto/response/GetAlertResponse.java` | = | alert | web dto | adapter/web/alert/dto | PR04 | legacy |
-| 52 | `domain/alert/repository/AlertReceiptRepository.java` | = | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | legacy |
-| 53 | `domain/alert/repository/AlertRepository.java` | = | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | legacy |
-| 54 | `domain/alert/repository/custom/AlertReceiptCustomRepository.java` | = | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | legacy |
-| 55 | `domain/alert/repository/custom/impl/AlertReceiptCustomRepositoryImpl.java` | = | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | legacy |
-| 56 | `domain/alert/service/CreateAlertMembersService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
-| 57 | `domain/alert/service/CreateAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
-| 58 | `domain/alert/service/ExistsUnreadAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
-| 59 | `domain/alert/service/FindAlertByCurrentService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
-| 60 | `domain/alert/service/ReadAlertService.java` | = | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | legacy |
-| 61 | `domain/alert/service/impl/CreateAlertMembersServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
-| 62 | `domain/alert/service/impl/CreateAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
-| 63 | `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
-| 64 | `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
-| 65 | `domain/alert/service/impl/ReadAlertServiceImpl.java` | = | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | legacy |
+| 46 | `domain/alert/entity/Alert.java` | `adapter/persistence/alert/AlertJpaEntity.java` + `domain/alert/model/Alert.java` | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 |
+| 47 | `domain/alert/entity/AlertReceipt.java` | `adapter/persistence/alert/AlertReceiptJpaEntity.java` | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 |
+| 48 | `domain/alert/entity/constant/AlertType.java` | `domain/alert/model/AlertType.java` | alert | enum | domain/alert/model | PR04 | PR04 완료 |
+| 49 | `domain/alert/presentation/AlertController.java` | `adapter/web/alert/controller/AlertController.java` | alert | controller | adapter/web/alert/controller | PR04 | PR04 완료 |
+| 50 | `domain/alert/presentation/dto/response/ExistsAlertResponse.java` | `adapter/web/alert/dto/ExistsAlertResponse.java` | alert | web dto | adapter/web/alert/dto | PR04 | PR04 완료 |
+| 51 | `domain/alert/presentation/dto/response/GetAlertResponse.java` | `adapter/web/alert/dto/GetAlertResponse.java` + `AlertImageResponse.java` | alert | web dto | adapter/web/alert/dto | PR04 | PR04 완료 |
+| 52 | `domain/alert/repository/AlertReceiptRepository.java` | `adapter/persistence/alert/AlertReceiptJpaRepository.java` | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | PR04 완료 |
+| 53 | `domain/alert/repository/AlertRepository.java` | `adapter/persistence/alert/AlertJpaRepository.java` | alert | repository | adapter/persistence/alert (JpaRepository) + application/alert/port/out | PR04 | PR04 완료 |
+| 54 | `domain/alert/repository/custom/AlertReceiptCustomRepository.java` | `adapter/persistence/alert/AlertPersistenceAdapter.java` | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | PR04 완료 (삭제·Adapter 흡수) |
+| 55 | `domain/alert/repository/custom/impl/AlertReceiptCustomRepositoryImpl.java` | `adapter/persistence/alert/AlertPersistenceAdapter.java` | alert | querydsl | adapter/persistence/alert (QueryPort 구현) | PR04 | PR04 완료 (삭제·Adapter 흡수) |
+| 56 | `domain/alert/service/CreateAlertMembersService.java` | `application/alert/port/in/CreateAlertFromSourceUseCase.java` | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 57 | `domain/alert/service/CreateAlertService.java` | `application/alert/port/in/RecordAlertUseCase.java` + `CreateAlertFromSourceUseCase.java` | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 58 | `domain/alert/service/ExistsUnreadAlertService.java` | `application/alert/port/in/UnreadAlertQuery.java` | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 59 | `domain/alert/service/FindAlertByCurrentService.java` | `application/alert/port/in/MyAlertsQuery.java` | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 60 | `domain/alert/service/ReadAlertService.java` | `application/alert/port/in/ReadAlertsUseCase.java` | alert | service interface | application/alert/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 61 | `domain/alert/service/impl/CreateAlertMembersServiceImpl.java` | `application/alert/service/CreateAlertService.java` | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | PR04 완료 |
+| 62 | `domain/alert/service/impl/CreateAlertServiceImpl.java` | `application/alert/service/CreateAlertService.java` + `adapter/integration/alert/LegacyAlertSourceAdapter.java` | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | PR04 완료 (원천 조회 bridge 는 각 업무 공개 조회로 교체 PR02/06/07/09/10, 최종 PR12) |
+| 63 | `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java` | `application/alert/service/AlertQueryService.java` | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | PR04 완료 |
+| 64 | `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java` | `application/alert/service/AlertQueryService.java` + `adapter/integration/alert/LegacyAlertImageAdapter.java` | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | PR04 완료 (이미지 조회 bridge 제거 PR06/07/09/10) |
+| 65 | `domain/alert/service/impl/ReadAlertServiceImpl.java` | `application/alert/service/ReadAlertsService.java` | alert | service impl | application/alert/service (+ 필요한 output Port) | PR04 | PR04 완료 |
 | 66 | `domain/app/entity/AppVersion.java` | `adapter/persistence/app/AppVersionJpaEntity.java (+ domain/app/model/AppVersion.java, adapter/persistence/app/AppVersionPersistenceAdapter.java)` | app | jpa entity | adapter/persistence/app (JpaEntity) + domain/app/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 67 | `domain/app/exception/AppVersionUnavailableException.java` | = (위치 유지) | app | exception | domain/app/exception | PR03 | PR03 완료 |
 | 68 | `domain/app/presentation/AppVersionController.java` | `adapter/web/app/controller/AppVersionController.java` | app | controller | adapter/web/app/controller | PR03 | PR03 완료 |
@@ -279,13 +279,13 @@
 | 257 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
 | 258 | `domain/notice/service/impl/FindNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
 | 259 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 260 | `domain/notification/NotificationPort.java` | = | notification | port | application/notification/port/out | PR04 | legacy |
-| 261 | `domain/notification/entity/DeviceToken.java` | = | notification | jpa entity | adapter/persistence/notification (JpaEntity) + domain/notification/model (순수 모델, 규칙 있을 때) | PR04 | legacy |
-| 262 | `domain/notification/entity/constant/NotificationType.java` | = | notification | enum | domain/notification/model | PR04 | legacy |
-| 263 | `domain/notification/entity/constant/OsType.java` | = | notification | enum | domain/notification/model | PR04 | legacy |
-| 264 | `domain/notification/repository/DeviceTokenRepository.java` | = | notification | repository | adapter/persistence/notification (JpaRepository) + application/notification/port/out | PR04 | legacy |
-| 265 | `domain/notification/service/SendNotificationService.java` | = | notification | service interface | application/notification/port/in (UseCase/Query) | PR04 | legacy |
-| 266 | `domain/notification/service/impl/SendNotificationServiceImpl.java` | = | notification | service impl | application/notification/service (+ 필요한 output Port) | PR04 | legacy |
+| 260 | `domain/notification/NotificationPort.java` | = | notification | port | application/notification/port/out | PR04 | PR04 bridge (구현 LegacyNotificationPortBridge, 제거 PR06) |
+| 261 | `domain/notification/entity/DeviceToken.java` | `adapter/persistence/notification/DeviceToken.java` | notification | jpa entity | adapter/persistence/notification (JpaEntity) + domain/notification/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 (@TypeAlias 로 _class 유지) |
+| 262 | `domain/notification/entity/constant/NotificationType.java` | `domain/notification/model/NotificationType.java` | notification | enum | domain/notification/model | PR04 | PR04 완료 |
+| 263 | `domain/notification/entity/constant/OsType.java` | `domain/notification/model/OsType.java` | notification | enum | domain/notification/model | PR04 | PR04 완료 |
+| 264 | `domain/notification/repository/DeviceTokenRepository.java` | `adapter/persistence/notification/DeviceTokenRepository.java` | notification | repository | adapter/persistence/notification (JpaRepository) + application/notification/port/out | PR04 | PR04 완료 (legacy 호출자 조회 직접 사용 PR06/07/08/10) |
+| 265 | `domain/notification/service/SendNotificationService.java` | `application/notification/port/in/SendPushUseCase.java` | notification | service interface | application/notification/port/in (UseCase/Query) | PR04 | PR04 완료 |
+| 266 | `domain/notification/service/impl/SendNotificationServiceImpl.java` | `application/notification/service/SendPushService.java` | notification | service impl | application/notification/service (+ 필요한 output Port) | PR04 | PR04 완료 |
 | 267 | `domain/place/entity/Head.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — Place association·QueryDSL 호출자(PR02·06·07·09·10·11) 전환 후 PR12 최종 단계에서 PR03 이 이동(legacy 태그 PR12) |
 | 268 | `domain/place/entity/Place.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — 위와 같음, PlaceQuery/PlacePersistenceAdapter 가 내부 사용(legacy 태그 PR12) |
 | 269 | `domain/place/exception/PlaceMismatchException.java` | = (위치 유지) | place | exception | domain/place/exception | PR03 | PR03 완료 |
@@ -506,20 +506,20 @@
 | 484 | `global/config/SchedulerConfig.java` | `infrastructure/config/SchedulerConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 485 | `global/event/ChatMessageMutationEvent.java` | = | chat | global/event | application/chat (기존 이벤트 경계 정리) | PR08 | legacy |
 | 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
-| 487 | `global/event/CreateAlertEvent.java` | = | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | legacy |
-| 488 | `global/event/CreateAlertMembersEvent.java` | = | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | legacy |
+| 487 | `global/event/CreateAlertEvent.java` | `adapter/event/alert/CreateAlertEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (비동기 경로 유지. OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 발행만 PR07 이 동기로 이동) |
+| 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 489 | `global/event/DeleteNotUsedImageEvent.java` | = | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | legacy |
 | 490 | `global/event/ReservationCancelledEvent.java` | = | post | global/event | application/post (기존 이벤트 경계 정리) | PR06 | legacy |
-| 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | legacy |
+| 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
 | 492 | `global/event/TradeStatusChangedEvent.java` | = | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | legacy |
 | 493 | `global/event/constant/ImageType.java` | = | image | global/event | domain/image/model | PR05 | legacy |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
 | 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
-| 496 | `global/event/handler/CreateAlertEventListener.java` | = | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | legacy |
-| 497 | `global/event/handler/CreateAlertMembersEventListener.java` | = | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | legacy |
+| 496 | `global/event/handler/CreateAlertEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (비동기 경로 유지) |
+| 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | = | image | global/event | adapter/event/image | PR05 | legacy |
 | 499 | `global/event/handler/ReservationCancelledEventListener.java` | = | post | global/event | adapter/event/post | PR06 | legacy |
-| 500 | `global/event/handler/SendNotificationEventListener.java` | = | notification | global/event | adapter/event/notification | PR04 | legacy |
+| 500 | `global/event/handler/SendNotificationEventListener.java` | `adapter/integration/notification/LegacySendNotificationEventBridge.java` | notification | global/event | adapter/event/notification | PR04 | PR04 완료 (bridge, 제거 PR10) |
 | 501 | `global/event/handler/TradeStatusChangedEventListener.java` | = | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | legacy |
 | 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
 | 503 | `global/exception/ErrorResponse.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
@@ -555,7 +555,7 @@
 | 533 | `global/thirdparty/aws/s3/config/S3Config.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
 | 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
 | 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
-| 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | = | notification | global/thirdparty | adapter/push/notification | PR04 | legacy |
+| 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
 | 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
 | 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy |
 | 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
@@ -577,9 +577,9 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | PATCH | `/api/admin/trade/{alert_id}` | `domain/admin/presentation/AdminController.java` | approveTradeCancel | 200 |
 | PATCH | `/api/admin/verify/signup/{alert_id}` | `domain/admin/presentation/AdminController.java` | verifySignUp | 204 |
 | DELETE | `/api/admin/{alert_id}` | `domain/admin/presentation/AdminController.java` | deleteAlert | 204 |
-| GET | `/api/alert` | `domain/alert/presentation/AlertController.java` | getAlerts | 200 |
-| PATCH | `/api/alert/read/{alert_id}` | `domain/alert/presentation/AlertController.java` | readAlerts | 204 |
-| GET | `/api/alert/unread` | `domain/alert/presentation/AlertController.java` | getUnreadAlerts | 200 |
+| GET | `/api/alert` | `adapter/web/alert/controller/AlertController.java` | getAlerts | 200 |
+| PATCH | `/api/alert/read/{alert_id}` | `adapter/web/alert/controller/AlertController.java` | readAlerts | 204 |
+| GET | `/api/alert/unread` | `adapter/web/alert/controller/AlertController.java` | getUnreadAlerts | 200 |
 | GET | `/api/app/version` | `adapter/web/app/controller/AppVersionController.java` | findVersion | 200 / 400(분기) |
 | GET | `/api/auth` | `adapter/web/auth/controller/AuthController.java` | getMemberInfo | 200 |
 | POST | `/api/auth/nickname` | `adapter/web/auth/controller/AuthController.java` | findNickname | 200 |
@@ -1066,10 +1066,18 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `MemberDetails`/`MemberDetailsService` | PR02 완료: member 공개 `MemberAccountQuery`·`MemberAccount` 사용 | - |
 | PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | PR03 완료: `adapter/integration/auth/SignUpLocationAdapter` → `DongQuery`·`PlaceQuery` | - |
 | PR02 bridge: `LegacyMemberKeywordAdapter` (RelatedKeyword·MemberRelatedKeyword Repository) | PR03 완료: `adapter/integration/member/MemberKeywordAdapter` → `FindMemberRelatedKeywordsQuery`·`MemberKeywordCommand` | - |
-| PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | adapter/integration/auth | PR04 (notification 기기 등록 command) |
+| PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | PR04 교체 완료: `adapter/integration/auth/DeviceTokenAdapter` → notification `RegisterDeviceTokenUseCase` | 완료 (PR04) |
 | PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
 | PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |
 | PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) |
 | PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR |
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
 | `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
+| PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | 예약 리마인더/취소가 DeviceToken 목록으로 호출, 회원 ID 로 변환해 SendPushUseCase 호출 | PR06 |
+| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) |
+| PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
+| PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
+| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 |
+| PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
+| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지·예약 리마인더·예약 취소(조회). 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR06·07·08·10 |
+| PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |

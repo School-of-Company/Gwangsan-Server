@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
-import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
+import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
@@ -19,7 +19,7 @@ import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
 /**

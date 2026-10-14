@@ -17,7 +17,7 @@ import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -67,7 +67,7 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
         applicationEventPublisher.publishEvent(new CreateAlertEvent(
                 member.getId(),
                 recommenderDetail.getId(),
-                team.startup.gwangsan.domain.alert.entity.constant.AlertType.RECOMMENDER));
+                team.startup.gwangsan.domain.alert.model.AlertType.RECOMMENDER));
     }
 
     private void applyGwangsanPolicy(MemberDetailJpaEntity memberDetail, WithdrawalRecordJpaEntity record) {

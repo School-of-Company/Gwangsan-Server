@@ -26,10 +26,12 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import jakarta.persistence.EntityManager;
 import team.startup.gwangsan.adapter.integration.auth.AccountAdapter;
-import team.startup.gwangsan.adapter.integration.auth.LegacyDeviceTokenAdapter;
+import team.startup.gwangsan.adapter.integration.auth.DeviceTokenAdapter;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenPersistenceAdapter;
+import team.startup.gwangsan.application.notification.service.RegisterDeviceTokenService;
 import team.startup.gwangsan.adapter.persistence.auth.RefreshTokenPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
@@ -96,7 +98,7 @@ class PendingApprovalHttpContractTest {
         context.registerBean(AuthController.class, () -> new AuthController(
                 mock(SignUpUseCase.class),
                 new SignInService(accounts, new PasswordHashAdapter(passwords), tokens, refreshTokenStore,
-                        new LegacyDeviceTokenAdapter(devices)),
+                        new DeviceTokenAdapter(new RegisterDeviceTokenService(new DeviceTokenPersistenceAdapter(devices)))),
                 new ReissueTokenService(refreshTokenStore, tokens, accounts), mock(SignOutUseCase.class),
                 mock(CurrentMemberQuery.class), mock(ResetPasswordUseCase.class), mock(FindNicknameQuery.class)));
         context.registerBean(AdminController.class, () -> new AdminController(

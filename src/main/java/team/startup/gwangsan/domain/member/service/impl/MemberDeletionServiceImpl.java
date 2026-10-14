@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
-import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
-import team.startup.gwangsan.domain.alert.repository.AlertRepository;
+import team.startup.gwangsan.adapter.persistence.alert.AlertReceiptJpaRepository;
+import team.startup.gwangsan.adapter.persistence.alert.AlertJpaRepository;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
@@ -40,12 +40,12 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     private final ReportRepository reportRepository;
     private final AdminAlertRepository adminAlertRepository;
     private final TradeCancelRepository tradeCancelRepository;
-    private final AlertRepository alertRepository;
+    private final AlertJpaRepository alertRepository;
     private final NoticeRepository noticeRepository;
     private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     private final SuspendRepository suspendRepository;
     private final MemberBlockRepository memberBlockRepository;
-    private final AlertReceiptRepository alertReceiptRepository;
+    private final AlertReceiptJpaRepository alertReceiptRepository;
 
     @Override
     @Transactional

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
+import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
@@ -26,7 +26,7 @@ import team.startup.gwangsan.domain.review.service.CreateReviewService;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 

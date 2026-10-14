@@ -1,7 +1,7 @@
 package team.startup.gwangsan.global.event;
 
-import team.startup.gwangsan.domain.notification.entity.DeviceToken;
-import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceToken;
+import team.startup.gwangsan.domain.notification.model.NotificationType;
 
 import java.util.List;
 

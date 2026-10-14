@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
-import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
+import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -13,7 +13,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 import team.startup.gwangsan.domain.suspend.service.SuspendMemberService;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 
 import java.time.LocalDateTime;
 

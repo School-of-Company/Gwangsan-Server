@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
+import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
@@ -18,12 +18,12 @@ import team.startup.gwangsan.domain.notice.presentation.dto.request.CreateNotice
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.notice.service.CreateNoticeService;
-import team.startup.gwangsan.domain.notification.entity.DeviceToken;
-import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceToken;
+import team.startup.gwangsan.domain.notification.model.NotificationType;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
-import team.startup.gwangsan.global.event.CreateAlertMembersEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertMembersEvent;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
