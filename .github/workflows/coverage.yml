@@ -3,7 +3,7 @@ name: Coverage
 on:
   pull_request:
     types: [opened]
-    branches: ["develop", "main"]
+    branches: ["develop", "main", "refactor/hexagonal"]
   issue_comment:
     types: [created]
 
@@ -70,13 +70,13 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const files = await github.rest.pulls.listFiles({
+            const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number,
               per_page: 100,
             });
-            const javaFiles = files.data
+            const javaFiles = files
               .filter(f => f.filename.endsWith('.java') && f.status !== 'removed')
               .map(f => f.filename);
             return JSON.stringify(javaFiles);

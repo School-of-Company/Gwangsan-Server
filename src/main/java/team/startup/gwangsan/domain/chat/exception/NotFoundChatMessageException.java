@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.chat.exception;
 
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 public class NotFoundChatMessageException extends GlobalException {
     public NotFoundChatMessageException() {

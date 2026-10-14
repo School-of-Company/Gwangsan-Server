@@ -1,0 +1,13 @@
+package team.startup.gwangsan.adapter.web.review.dto;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record CreateReviewRequest(
+        @NotNull Long productId,
+        @NotNull Long otherMemberId,
+        @NotBlank String content,
+        @Min(0) @Max(100) Integer light
+) {}

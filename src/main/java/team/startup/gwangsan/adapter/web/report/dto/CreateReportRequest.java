@@ -1,0 +1,24 @@
+package team.startup.gwangsan.adapter.web.report.dto;
+
+import team.startup.gwangsan.application.report.data.CreateReportCommand;
+import team.startup.gwangsan.domain.report.model.ReportTargetType;
+import team.startup.gwangsan.domain.report.model.ReportType;
+
+import java.util.List;
+
+public record CreateReportRequest(
+        ReportTargetType targetType,
+        Long sourceId,
+        ReportType reportType,
+        String content,
+        List<Long> imageIds
+) {
+    /** 기존 클라이언트는 targetType 을 보내지 않는다. 그 요청은 종전처럼 회원 신고로 해석한다. */
+    public ReportTargetType targetTypeOrMember() {
+        return targetType == null ? ReportTargetType.MEMBER : targetType;
+    }
+
+    public CreateReportCommand toCommand(Long reporterId) {
+        return new CreateReportCommand(reporterId, targetTypeOrMember(), sourceId, reportType, content, imageIds);
+    }
+}

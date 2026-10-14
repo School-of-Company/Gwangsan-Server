@@ -1,0 +1,46 @@
+package team.startup.gwangsan.adapter.event.admin;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import team.startup.gwangsan.domain.admin.model.AlertType;
+import team.startup.gwangsan.application.admin.data.CreateAdminAlertCommand;
+import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
+import team.startup.gwangsan.application.admin.port.in.CreateAdminAlertUseCase;
+
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("CreateAdminAlertEventListener 단위 테스트")
+class CreateAdminAlertEventListenerTest {
+
+    @InjectMocks private CreateAdminAlertEventListener listener;
+    @Mock private CreateAdminAlertUseCase createAdminAlertUseCase;
+
+    @Nested
+    @DisplayName("handleCreateAdminAlertEvent() 메서드는")
+    class Describe_handleCreateAdminAlertEvent {
+
+        @Nested
+        @DisplayName("이벤트를 전달받았을 때")
+        class Context_with_event {
+
+            @Test
+            @DisplayName("createAdminAlertUseCase.execute()를 올바른 인자로 호출한다")
+            void it_calls_execute_with_correct_args() {
+                AlertType type = AlertType.values()[0];
+                Long sourceId = 1L;
+                Long memberId = 2L;
+                CreateAdminAlertEvent event = new CreateAdminAlertEvent(type, sourceId, memberId);
+
+                listener.handleCreateAdminAlertEvent(event);
+
+                verify(createAdminAlertUseCase).execute(new CreateAdminAlertCommand(type, sourceId, memberId));
+            }
+        }
+    }
+}
