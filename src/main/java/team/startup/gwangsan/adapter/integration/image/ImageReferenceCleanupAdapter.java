@@ -8,10 +8,10 @@ import team.startup.gwangsan.application.notice.port.in.UnlinkNoticeImageUseCase
 import team.startup.gwangsan.application.post.port.in.UnlinkProductImageUseCase;
 import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase;
 
-// bridge: 링크 행은 각 업무 소유. post 는 공개 UnlinkProductImageUseCase 로 교체됨(PR06). report 는 공개 UnlinkReportImageUseCase 로 교체됨(PR09). notice 는 공개 UnlinkNoticeImageUseCase 로 교체됨(PR10).
+// 링크 행은 각 업무 소유라 post·notice·report 공개 Unlink UseCase 로 정리한다.
 @Component
 @RequiredArgsConstructor
-public class LegacyImageReferenceCleanupAdapter implements ImageReferenceCleanupPort {
+public class ImageReferenceCleanupAdapter implements ImageReferenceCleanupPort {
 
     private final UnlinkProductImageUseCase unlinkProductImageUseCase;
     private final UnlinkNoticeImageUseCase unlinkNoticeImageUseCase;

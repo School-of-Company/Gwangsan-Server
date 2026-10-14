@@ -14,10 +14,10 @@ import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("LegacyImageReferenceCleanupAdapter 단위 테스트")
-class LegacyImageReferenceCleanupAdapterTest {
+@DisplayName("ImageReferenceCleanupAdapter 단위 테스트")
+class ImageReferenceCleanupAdapterTest {
 
-    @InjectMocks private LegacyImageReferenceCleanupAdapter adapter;
+    @InjectMocks private ImageReferenceCleanupAdapter adapter;
     @Mock private UnlinkProductImageUseCase unlinkProductImageUseCase;
     @Mock private UnlinkNoticeImageUseCase unlinkNoticeImageUseCase;
     @Mock private UnlinkReportImageUseCase unlinkReportImageUseCase;
