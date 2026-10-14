@@ -58,6 +58,7 @@ import team.startup.gwangsan.adapter.security.auth.JwtProperties;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
+import team.startup.gwangsan.application.member.service.MemberSummaryService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ class SalesListIntegrationTest {
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
             "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
-            "team.startup.gwangsan.adapter.persistence.post"})
+            "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.image"})
     @EnableJpaAuditing
     @EnableJpaRepositories(basePackages = {"team.startup.gwangsan.adapter.persistence.post",
             "team.startup.gwangsan.adapter.persistence.member"})
@@ -100,7 +101,7 @@ class SalesListIntegrationTest {
             ProductImagePersistenceAdapter.class, PostMemberBridgeAdapter.class,
             WebMvcConfig.class, ActorContextArgumentResolver.class, QueryDslConfig.class,
             SecurityConfig.class, JwtProvider.class, TokenParser.class, MemberDetailsService.class,
-            MemberAccountService.class, MemberPersistenceAdapter.class,
+            MemberAccountService.class, MemberSummaryService.class, MemberPersistenceAdapter.class,
             JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class, GlobalExceptionHandler.class})
     static class Config { }
 
@@ -276,7 +277,8 @@ class SalesListIntegrationTest {
                             // DTO enrichment cannot load products/images outside the requested page.
                             assertThat(statistics.getEntityStatistics(Product.class.getName()).getLoadCount()).isEqualTo(rows);
                             assertThat(statistics.getEntityStatistics(ImageJpaEntity.class.getName()).getLoadCount()).isEqualTo(rows * 2L);
-                            assertThat(queries).isEqualTo(7);
+                            // 작성자 프로필은 회원 요약 join 1회(기존 상세 1 + 회원·지점 지연 로딩 2 → 1). 행 수와 무관하게 고정.
+                            assertThat(queries).isEqualTo(5);
                         }
                         times.sort(Double::compareTo);
                         System.out.printf("SALES_BENCH count=%d path=%s mode=%s rows=%d queries=%d bytes=%d median_ms=%.3f%n",
