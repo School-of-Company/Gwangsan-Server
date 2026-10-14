@@ -2,8 +2,6 @@ package team.startup.gwangsan.architecture;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,9 +27,7 @@ class HexagonalFinalGateTest {
     private static final String ROOT = "team.startup.gwangsan";
     private static final Pattern LEGACY_PACKAGE =
             Pattern.compile(Pattern.quote(ROOT) + "\\.domain\\.[a-z]+\\.(service|repository|entity|presentation)(\\..*)?");
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages(ROOT);
+    private static final JavaClasses PRODUCTION = ProductionClasses.ALL;
 
     @Nested
     @DisplayName("전환 완료 상태는")

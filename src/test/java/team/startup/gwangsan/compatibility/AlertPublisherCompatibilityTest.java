@@ -3,8 +3,7 @@ package team.startup.gwangsan.compatibility;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
+import team.startup.gwangsan.architecture.ProductionClasses;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,9 +39,7 @@ class AlertPublisherCompatibilityTest {
     private static final Set<String> DISPATCH_ENUMS = Set.of("MemberAlertKind");
     private static final Map<String, Long> ASYNC_MEMBERS_BASELINE = Map.of("NOTICE", 1L); // 공지(CreateNotice)
 
-    static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("team.startup.gwangsan");
+    static final JavaClasses PRODUCTION = ProductionClasses.ALL;
 
     @Nested
     @DisplayName("CreateAlertEvent 비동기 발행은")

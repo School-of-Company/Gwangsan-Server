@@ -44,9 +44,7 @@ class HexagonalArchitectureTest {
     private static final Set<String> SHARED_KERNEL = Set.of();
 
     private static final Map<String, String> LEGACY = loadLegacy();
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages(ROOT);
+    private static final JavaClasses PRODUCTION = ProductionClasses.ALL;
     private static final HexagonalRules PRODUCTION_RULES = new HexagonalRules(ROOT, LEGACY.keySet(), SHARED_KERNEL);
 
     @Nested
