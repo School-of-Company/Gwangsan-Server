@@ -233,6 +233,21 @@ class NoticePersistenceAdapterTest {
         }
 
         @Test
+        @DisplayName("공개 command 용 reassignAuthor 가 해당 회원 작성 공지만 dummy 로 바꾼다")
+        void it_reassigns_author_through_port() {
+            Notice mine = notice(place);
+            MemberJpaEntity other = member("other", "01000000003");
+            Notice others = adapter.save(Notice.create("제목", "내용", place.getId(), other.getId()));
+            MemberJpaEntity dummy = member("dummy2", "01000000004");
+            em.flush();
+
+            adapter.reassignAuthor(author.getId(), dummy.getId());
+
+            assertThat(adapter.findById(mine.id()).orElseThrow().authorId()).isEqualTo(dummy.getId());
+            assertThat(adapter.findById(others.id()).orElseThrow().authorId()).isEqualTo(other.getId());
+        }
+
+        @Test
         @DisplayName("이미지 정리용 unlinkImage 가 해당 연결만 지운다")
         void it_deletes_single_notice_image() {
             Notice notice = notice(place);

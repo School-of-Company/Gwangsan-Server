@@ -14,7 +14,7 @@ public interface NoticeJpaRepository extends JpaRepository<NoticeJpaEntity, Long
 
     List<NoticeJpaEntity> findByPlaceIdInAndIdLessThanOrderByIdDesc(List<Integer> placeIds, Long lastId, Pageable pageable);
 
-    // 회원 삭제(member 업무)가 사용하는 bridge. PR11 에서 notice 공개 command 로 교체한다.
+    // 회원 탈퇴 재지정. 공개 command ReassignNoticeAuthorUseCase 가 NoticePort 를 통해 사용한다.
     @Modifying(clearAutomatically = true)
     @Query("UPDATE NoticeJpaEntity n SET n.member = :dummy WHERE n.member = :target")
     void reassignMember(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);

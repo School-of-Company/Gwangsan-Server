@@ -100,6 +100,12 @@ public class NoticePersistenceAdapter implements NoticePort {
         noticeImageJpaRepository.deleteByNoticeIdAndImageId(noticeId, imageId);
     }
 
+    @Override
+    public void reassignAuthor(Long memberId, Long dummyMemberId) {
+        noticeJpaRepository.reassignMember(entityManager.getReference(MemberJpaEntity.class, memberId),
+                entityManager.getReference(MemberJpaEntity.class, dummyMemberId));
+    }
+
     // 연관 엔티티는 프록시의 id 만 읽어 추가 조회를 만들지 않는다.
     private static Notice toModel(NoticeJpaEntity entity) {
         return new Notice(
