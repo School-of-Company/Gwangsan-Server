@@ -7,11 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
+import team.startup.gwangsan.support.MemberAccounts;
 
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ class MemberDetailsServiceTest {
 
     private static final String PHONE_NUMBER = "010-1234-5678";
 
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
 
     @Nested
     @DisplayName("loadUserByUsername()은")
@@ -35,14 +36,14 @@ class MemberDetailsServiceTest {
         @Test
         @DisplayName("it_회원이 있으면 실제 MemberDetails를 반환한다")
         void it_returns_member_details_when_member_exists() {
-            Member member = member();
+            MemberJpaEntity member = member();
             when(memberRepository.findByPhoneNumber(PHONE_NUMBER)).thenReturn(Optional.of(member));
 
             UserDetails userDetails = service().loadUserByUsername(PHONE_NUMBER);
 
             assertThat(userDetails).isInstanceOf(MemberDetails.class);
             MemberDetails memberDetails = (MemberDetails) userDetails;
-            assertThat(memberDetails.getMember()).isSameAs(member);
+            assertThat(memberDetails.getMember()).isEqualTo(MemberAccounts.of(member));
             assertThat(memberDetails.getUsername()).isEqualTo(PHONE_NUMBER);
             assertThat(memberDetails.getAuthorities()).extracting("authority").containsExactly("ROLE_USER");
             verify(memberRepository).findByPhoneNumber(PHONE_NUMBER);
@@ -61,11 +62,11 @@ class MemberDetailsServiceTest {
     }
 
     private MemberDetailsService service() {
-        return new MemberDetailsService(memberRepository);
+        return MemberAccounts.detailsService(memberRepository);
     }
 
-    private Member member() {
-        return Member.builder()
+    private MemberJpaEntity member() {
+        return MemberJpaEntity.builder()
                 .name("회원")
                 .nickname("회원닉네임")
                 .phoneNumber(PHONE_NUMBER)

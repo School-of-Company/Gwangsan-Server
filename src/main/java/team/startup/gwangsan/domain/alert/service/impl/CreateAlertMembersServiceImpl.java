@@ -9,8 +9,8 @@ import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
 import team.startup.gwangsan.domain.alert.service.CreateAlertMembersService;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
@@ -23,7 +23,7 @@ import java.util.List;
 public class CreateAlertMembersServiceImpl implements CreateAlertMembersService {
 
     private final AlertRepository alertRepository;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final NoticeRepository noticeRepository;
     private final AlertReceiptRepository alertReceiptRepository;
 
@@ -32,7 +32,7 @@ public class CreateAlertMembersServiceImpl implements CreateAlertMembersService 
     @Override
     @Transactional
     public void execute(Long sourceId, List<Long> memberIds, AlertType alertType) {
-        List<Member> members = memberRepository.findAllByIdIn(memberIds);
+        List<MemberJpaEntity> members = memberRepository.findAllByIdIn(memberIds);
 
         if (members.isEmpty()) {
             return;
@@ -55,7 +55,7 @@ public class CreateAlertMembersServiceImpl implements CreateAlertMembersService 
                 .build();
     }
 
-    private AlertReceipt createAlertReceipt(Alert alert, Member member) {
+    private AlertReceipt createAlertReceipt(Alert alert, MemberJpaEntity member) {
         return AlertReceipt.builder()
                 .alert(alert)
                 .member(member)
@@ -63,12 +63,12 @@ public class CreateAlertMembersServiceImpl implements CreateAlertMembersService 
                 .build();
     }
 
-    private void saveAlert(Long sourceId, AlertType alertType, String title, String content, List<Member> members) {
+    private void saveAlert(Long sourceId, AlertType alertType, String title, String content, List<MemberJpaEntity> members) {
         Alert alert = alertRepository.save(createAlert(sourceId, alertType, title, content));
 
         List<AlertReceipt> alertReceipts = new ArrayList<>();
 
-        for (Member member : members) {
+        for (MemberJpaEntity member : members) {
             alertReceipts.add(createAlertReceipt(alert, member));
         }
 

@@ -12,10 +12,10 @@ import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -49,26 +49,26 @@ class ApproveTradeCancelServiceImplTest {
     @Mock private TradeCancelRepository tradeCancelRepository;
     @Mock private ProductRepository productRepository;
     @Mock private MemberUtil memberUtil;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private ValidatePlaceUtil validatePlaceUtil;
     @Mock private TradeCancelApplier tradeCancelApplier;
 
-    private Member member(Long id) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity member(Long id) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         lenient().when(member.getId()).thenReturn(id);
         return member;
     }
 
     /** 관리자 로그인 + 알림 조회까지 준비한다. */
     private void givenAdminAndAlert() {
-        Member admin = member(ADMIN_ID);
+        MemberJpaEntity admin = member(ADMIN_ID);
         when(memberUtil.getCurrentMember()).thenReturn(admin);
 
         AdminAlert alert = mock(AdminAlert.class);
         lenient().when(alert.getSourceId()).thenReturn(TRADE_CANCEL_ID);
         when(adminAlertRepository.findByIdWithMember(ALERT_ID)).thenReturn(Optional.of(alert));
 
-        when(memberDetailRepository.findById(ADMIN_ID)).thenReturn(Optional.of(mock(MemberDetail.class)));
+        when(memberDetailRepository.findById(ADMIN_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
     }
 
     /** 잠금까지 통과한 뒤 반환될 TradeCancel 을 준비한다. */
@@ -76,8 +76,8 @@ class ApproveTradeCancelServiceImplTest {
         when(tradeCancelRepository.findProductIdById(TRADE_CANCEL_ID)).thenReturn(Optional.of(PRODUCT_ID));
         when(productRepository.findByIdForUpdate(PRODUCT_ID)).thenReturn(Optional.of(mock(Product.class)));
 
-        Member buyer = member(BUYER_ID);
-        Member seller = member(SELLER_ID);
+        MemberJpaEntity buyer = member(BUYER_ID);
+        MemberJpaEntity seller = member(SELLER_ID);
 
         TradeComplete tradeComplete = mock(TradeComplete.class);
         lenient().when(tradeComplete.getBuyer()).thenReturn(buyer);
@@ -89,8 +89,8 @@ class ApproveTradeCancelServiceImplTest {
         when(tradeCancelRepository.findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(TRADE_CANCEL_ID))
                 .thenReturn(Optional.of(tradeCancel));
 
-        lenient().when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(mock(MemberDetail.class)));
-        lenient().when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(mock(MemberDetail.class)));
+        lenient().when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
+        lenient().when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
 
         return tradeCancel;
     }
@@ -163,7 +163,7 @@ class ApproveTradeCancelServiceImplTest {
             @Test
             @DisplayName("NotFoundAdminAlertException을 던진다")
             void it_throws_not_found_admin_alert_exception() {
-                when(memberUtil.getCurrentMember()).thenReturn(mock(Member.class));
+                when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
                 when(adminAlertRepository.findByIdWithMember(ALERT_ID)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(ALERT_ID))

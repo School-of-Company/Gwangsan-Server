@@ -7,7 +7,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.CreateChatRoomResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.CreateChatRoomService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
@@ -29,16 +29,16 @@ public class CreateChatRoomServiceImpl implements CreateChatRoomService {
     @Override
     @Transactional
     public CreateChatRoomResponse execute(Long productId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
-        Member productMember = product.getMember();
+        MemberJpaEntity productMember = product.getMember();
 
         blockValidator.validate(member, productMember);
 
-        Member buyer;
-        Member seller;
+        MemberJpaEntity buyer;
+        MemberJpaEntity seller;
 
         if (product.getMode() == Mode.GIVER) {
             buyer = member;

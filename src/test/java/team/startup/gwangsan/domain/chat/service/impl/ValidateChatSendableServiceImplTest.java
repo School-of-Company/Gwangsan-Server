@@ -18,8 +18,8 @@ import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.exception.InvalidImageIdsException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.global.security.exception.InvalidMemberPrincipalException;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.security.auth.exception.InvalidMemberPrincipalException;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -110,7 +110,7 @@ class ValidateChatSendableServiceImplTest {
             assertThat(service.execute(10L, List.of(value)).images())
                     .containsExactly(new GetImageResponse(id, "https://example.com/image.jpg"));
             var order = inOrder(blockValidator, imageRepository);
-            order.verify(blockValidator).validate(any(Member.class), nullable(Member.class));
+            order.verify(blockValidator).validate(any(MemberJpaEntity.class), nullable(MemberJpaEntity.class));
             order.verify(imageRepository).findAllById(List.of(id));
         }
 
@@ -129,7 +129,7 @@ class ValidateChatSendableServiceImplTest {
 
     private void allowRoom() {
 
-        Member member = mock(Member.class);
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         ChatRoom room = mock(ChatRoom.class);
         when(memberUtil.getCurrentMember()).thenReturn(member);
         when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
@@ -143,7 +143,7 @@ class ValidateChatSendableServiceImplTest {
         @Test
         @DisplayName("채팅방이 존재하지 않으면 NotFoundChatRoomException 을 던진다")
         void it_throws_NotFoundChatRoomException_when_room_not_found() {
-            when(memberUtil.getCurrentMember()).thenReturn(mock(Member.class));
+            when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
             when(chatRoomRepository.findChatRoomByRoomId(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.execute(1L, List.of("11")))
@@ -155,7 +155,7 @@ class ValidateChatSendableServiceImplTest {
         @Test
         @DisplayName("요청자가 채팅방의 참여자가 아니면 NotFoundChatRoomException 을 던진다")
         void it_throws_NotFoundChatRoomException_when_member_is_not_participant() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
@@ -170,8 +170,8 @@ class ValidateChatSendableServiceImplTest {
         @Test
         @DisplayName("상대방과 차단 관계면 BlockedMemberException 을 던진다")
         void it_throws_BlockedMemberException_when_blocked() {
-            Member member = mock(Member.class);
-            Member otherMember = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
+            MemberJpaEntity otherMember = mock(MemberJpaEntity.class);
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));
@@ -187,8 +187,8 @@ class ValidateChatSendableServiceImplTest {
         @Test
         @DisplayName("참여자이고 차단 관계가 없으면 예외 없이 통과한다")
         void it_passes_when_participant_and_not_blocked() {
-            Member member = mock(Member.class);
-            Member otherMember = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
+            MemberJpaEntity otherMember = mock(MemberJpaEntity.class);
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(chatRoom));

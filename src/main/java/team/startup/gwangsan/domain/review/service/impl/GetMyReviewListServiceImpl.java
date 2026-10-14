@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
@@ -26,7 +26,7 @@ public class GetMyReviewListServiceImpl implements GetMyReviewListService {
     @Override
     @Transactional(readOnly = true)
     public List<ReviewResponse> execute() {
-        Member reviewer = memberUtil.getCurrentMember();
+        MemberJpaEntity reviewer = memberUtil.getCurrentMember();
 
         List<MyReviewDto> rows = reviewRepository.findMyReviews(reviewer.getId());
         if (rows.isEmpty()) return List.of();

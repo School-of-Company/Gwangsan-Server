@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.dong.entity.Dong;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.report.entity.Report;
@@ -51,10 +51,10 @@ class ReportCustomRepositoryImplTest {
         void it_selects_reports_by_the_reporter_member_detail_place() {
             Place targetPlace = place("대상");
             Place otherPlace = place("다른");
-            Member targetReporter = memberAtPlace("대상신고자", targetPlace);
-            Member otherReporter = memberAtPlace("다른신고자", otherPlace);
-            Member targetPlaceReported = memberAtPlace("대상지점피신고자", targetPlace);
-            Member otherPlaceReported = memberAtPlace("다른지점피신고자", otherPlace);
+            MemberJpaEntity targetReporter = memberAtPlace("대상신고자", targetPlace);
+            MemberJpaEntity otherReporter = memberAtPlace("다른신고자", otherPlace);
+            MemberJpaEntity targetPlaceReported = memberAtPlace("대상지점피신고자", targetPlace);
+            MemberJpaEntity otherPlaceReported = memberAtPlace("다른지점피신고자", otherPlace);
             Report included = report(targetReporter, otherPlaceReported, "포함 신고");
             report(otherReporter, targetPlaceReported, "제외 신고");
             em.flush();
@@ -73,8 +73,8 @@ class ReportCustomRepositoryImplTest {
         return em.persist(Place.builder().name("지점-" + suffix).head(head).build());
     }
 
-    private Member memberAtPlace(String suffix, Place place) {
-        Member member = em.persist(Member.builder()
+    private MemberJpaEntity memberAtPlace(String suffix, Place place) {
+        MemberJpaEntity member = em.persist(MemberJpaEntity.builder()
                 .name("이름-" + suffix)
                 .nickname("회원-" + suffix)
                 .password("pw")
@@ -82,7 +82,7 @@ class ReportCustomRepositoryImplTest {
                 .role(MemberRole.ROLE_USER)
                 .status(MemberStatus.ACTIVE)
                 .build());
-        em.persist(MemberDetail.builder()
+        em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
                 .dong(em.persist(Dong.builder().name("동-" + suffix).build()))
                 .place(place)
@@ -93,7 +93,7 @@ class ReportCustomRepositoryImplTest {
         return member;
     }
 
-    private Report report(Member reporter, Member reported, String content) {
+    private Report report(MemberJpaEntity reporter, MemberJpaEntity reported, String content) {
         return em.persist(Report.builder()
                 .reportType(ReportType.ETC)
                 .content(content)

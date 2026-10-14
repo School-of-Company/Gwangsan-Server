@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -38,7 +38,7 @@ class DeleteChatRoomServiceImplTest {
         @Test
         @DisplayName("채팅방이 존재하지 않으면 NotFoundChatRoomException 을 던진다")
         void it_throws_NotFoundChatRoomException_when_room_not_found() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(chatRoomRepository.findChatRoomByRoomId(1L)).thenReturn(Optional.empty());
 
@@ -49,7 +49,7 @@ class DeleteChatRoomServiceImplTest {
         @Test
         @DisplayName("요청자가 채팅방의 참여자가 아니면 NotFoundChatRoomException 을 던지고 숨김 처리하지 않는다")
         void it_throws_NotFoundChatRoomException_when_member_is_not_participant() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.isParticipant(member)).thenReturn(false);
             when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -64,7 +64,7 @@ class DeleteChatRoomServiceImplTest {
         @Test
         @DisplayName("요청자가 참여자면 요청자 쪽만 숨김 처리한다")
         void it_hides_room_only_for_requester() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             ChatRoom chatRoom = mock(ChatRoom.class);
             when(chatRoom.isParticipant(member)).thenReturn(true);
             when(memberUtil.getCurrentMember()).thenReturn(member);

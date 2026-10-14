@@ -7,10 +7,10 @@ import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.DeleteAdminAlertService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -18,19 +18,19 @@ import team.startup.gwangsan.global.util.MemberUtil;
 public class DeleteAdminAlertServiceImpl implements DeleteAdminAlertService {
 
     private final AdminAlertRepository adminAlertRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final ValidatePlaceUtil validatePlaceUtil;
 
     @Override
     public void execute(Long alertId) {
-        Member admin = memberUtil.getCurrentMember();
-        MemberDetail adminDetail = getMemberDetail(admin.getId());
+        MemberJpaEntity admin = memberUtil.getCurrentMember();
+        MemberDetailJpaEntity adminDetail = getMemberDetail(admin.getId());
 
         AdminAlert adminAlert = adminAlertRepository.findById(alertId)
                 .orElseThrow(NotFoundAdminAlertException::new);
 
-        MemberDetail alertMemberDetail = memberDetailRepository.findById(adminAlert.getRequester().getId())
+        MemberDetailJpaEntity alertMemberDetail = memberDetailRepository.findById(adminAlert.getRequester().getId())
                 .orElseThrow(NotFoundMemberDetailException::new);
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, alertMemberDetail);
@@ -38,7 +38,7 @@ public class DeleteAdminAlertServiceImpl implements DeleteAdminAlertService {
         adminAlertRepository.delete(adminAlert);
     }
 
-    private MemberDetail getMemberDetail(Long memberId) {
+    private MemberDetailJpaEntity getMemberDetail(Long memberId) {
         return memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
     }

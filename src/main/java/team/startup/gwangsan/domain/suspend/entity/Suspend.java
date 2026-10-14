@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -33,7 +33,7 @@ public class Suspend {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberJpaEntity member;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -41,7 +41,7 @@ public class Suspend {
 
 
     @Builder
-    public Suspend(LocalDateTime suspendedAt, Integer suspendedDays, LocalDateTime suspendedUntil, Member member) {
+    public Suspend(LocalDateTime suspendedAt, Integer suspendedDays, LocalDateTime suspendedUntil, MemberJpaEntity member) {
         this.suspendedAt = suspendedAt;
         this.suspendedDays = suspendedDays;
         this.suspendedUntil = suspendedUntil;

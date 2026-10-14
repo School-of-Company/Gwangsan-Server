@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 
@@ -28,11 +28,11 @@ public class Report {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_id")
-    private Member reported;
+    private MemberJpaEntity reported;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id")
-    private Member reporter;
+    private MemberJpaEntity reporter;
 
     /**
      * 게시글 신고일 때만 채워진다. 회원 신고는 null 이며, 이 값의 존재 여부가 곧 신고 대상 종류다.
@@ -44,7 +44,7 @@ public class Report {
     private Product product;
 
     @Builder
-    public Report(ReportType reportType, String content, Member reported, Member reporter, Product product) {
+    public Report(ReportType reportType, String content, MemberJpaEntity reported, MemberJpaEntity reporter, Product product) {
         this.reportType = reportType;
         this.content = content;
         this.reported = reported;

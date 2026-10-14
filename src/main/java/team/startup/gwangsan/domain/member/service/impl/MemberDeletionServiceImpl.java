@@ -9,11 +9,11 @@ import team.startup.gwangsan.domain.alert.repository.AlertRepository;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.DummyMemberDeletionNotAllowedException;
 import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.member.service.MemberDeletionService;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -30,8 +30,8 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
 
     private static final String WITHDRAWN_NICKNAME = "__withdrawn__";
 
-    private final MemberRepository memberRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberJpaRepository memberRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ProductRepository productRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
     private final ChatRoomRepository chatRoomRepository;
@@ -49,8 +49,8 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
 
     @Override
     @Transactional
-    public void delete(Member member) {
-        Member dummy = memberRepository.findByNickname(WITHDRAWN_NICKNAME)
+    public void delete(MemberJpaEntity member) {
+        MemberJpaEntity dummy = memberRepository.findByNickname(WITHDRAWN_NICKNAME)
                 .orElseThrow(NotFoundDummyMemberException::new);
 
         validateDummyMember(member, dummy);
@@ -59,7 +59,7 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
         memberRepository.delete(member);
     }
 
-    private void reassignReferences(Member member, Member dummy) {
+    private void reassignReferences(MemberJpaEntity member, MemberJpaEntity dummy) {
         memberRepository.reassignRecommender(member, dummy);
         productRepository.reassignMember(member, dummy);
         tradeCompleteRepository.reassignBuyer(member, dummy);
@@ -78,7 +78,7 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
         noticeRepository.reassignMember(member, dummy);
     }
 
-    private void deletePersonalData(Member member) {
+    private void deletePersonalData(MemberJpaEntity member) {
         memberRelatedKeywordRepository.deleteAllByMember(member);
         suspendRepository.deleteAllByMember(member);
         memberBlockRepository.deleteAllByBlockerOrBlocked(member);
@@ -86,7 +86,7 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
         memberDetailRepository.deleteByMember(member);
     }
 
-    private void validateDummyMember(Member member, Member dummy) {
+    private void validateDummyMember(MemberJpaEntity member, MemberJpaEntity dummy) {
         if (member.getId().equals(dummy.getId())) {
             throw new DummyMemberDeletionNotAllowedException();
         }

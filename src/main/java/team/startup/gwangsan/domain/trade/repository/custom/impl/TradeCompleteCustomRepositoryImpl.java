@@ -3,7 +3,7 @@ package team.startup.gwangsan.domain.trade.repository.custom.impl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.custom.TradeCompleteCustomRepository;
@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static team.startup.gwangsan.domain.member.entity.QMember.member;
-import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
 import static team.startup.gwangsan.domain.place.entity.QHead.head;
 import static team.startup.gwangsan.domain.place.entity.QPlace.place;
 import static team.startup.gwangsan.domain.trade.entity.QTradeComplete.tradeComplete;
@@ -25,6 +25,8 @@ import static team.startup.gwangsan.domain.trade.entity.QTradeComplete.tradeComp
 @Repository
 @RequiredArgsConstructor
 public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRepository {
+    private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
+    private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
 
     private final JPAQueryFactory queryFactory;
 
@@ -121,7 +123,7 @@ public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRep
     }
 
     @Override
-    public List<TradeComplete> findAllByMemberAndStatus(Member member, TradeStatus status) {
+    public List<TradeComplete> findAllByMemberAndStatus(MemberJpaEntity member, TradeStatus status) {
         return queryFactory
                 .selectFrom(tradeComplete)
                 .join(tradeComplete.product).fetchJoin()

@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.infrastructure.web.ExceptionFilter;
 import team.startup.gwangsan.adapter.security.auth.JwtAuthenticationFilter;
@@ -23,7 +23,7 @@ import team.startup.gwangsan.adapter.security.auth.JwtFilter;
 import team.startup.gwangsan.infrastructure.web.RequestLogFilter;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
-import team.startup.gwangsan.global.security.jwt.JwtProvider;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.security.auth.TokenParser;
 
 @Configuration

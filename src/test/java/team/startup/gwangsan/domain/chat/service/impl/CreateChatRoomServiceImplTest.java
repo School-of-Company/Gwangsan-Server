@@ -13,7 +13,7 @@ import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.CreateChatRoomResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
@@ -45,14 +45,14 @@ class CreateChatRoomServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member currentMember;
-        private Member productOwner;
+        private MemberJpaEntity currentMember;
+        private MemberJpaEntity productOwner;
         private Product product;
 
         @BeforeEach
         void setUp() {
-            currentMember = mock(Member.class);
-            productOwner = mock(Member.class);
+            currentMember = mock(MemberJpaEntity.class);
+            productOwner = mock(MemberJpaEntity.class);
             product = mock(Product.class);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
         }
@@ -60,7 +60,7 @@ class CreateChatRoomServiceImplTest {
         private void arrangeDefaultScenario() {
             when(product.getMember()).thenReturn(productOwner);
             when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
-            doNothing().when(blockValidator).validate(any(Member.class), any(Member.class));
+            doNothing().when(blockValidator).validate(any(MemberJpaEntity.class), any(MemberJpaEntity.class));
         }
 
         @Test
@@ -77,7 +77,7 @@ class CreateChatRoomServiceImplTest {
         void it_throws_BlockedMemberException_when_blocked() {
             when(product.getMember()).thenReturn(productOwner);
             when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
-            doThrow(new BlockedMemberException()).when(blockValidator).validate(any(Member.class), any(Member.class));
+            doThrow(new BlockedMemberException()).when(blockValidator).validate(any(MemberJpaEntity.class), any(MemberJpaEntity.class));
 
             assertThatThrownBy(() -> service.execute(10L))
                     .isInstanceOf(BlockedMemberException.class);
@@ -159,7 +159,7 @@ class CreateChatRoomServiceImplTest {
         void it_creates_room_where_buyer_and_seller_are_same_when_self_product() {
             when(product.getMember()).thenReturn(currentMember);
             when(productRepository.findActiveById(10L)).thenReturn(Optional.of(product));
-            doNothing().when(blockValidator).validate(any(Member.class), any(Member.class));
+            doNothing().when(blockValidator).validate(any(MemberJpaEntity.class), any(MemberJpaEntity.class));
             when(product.getMode()).thenReturn(Mode.GIVER);
             when(chatRoomRepository.findByProductIdAndBuyerAndSeller(eq(10L), eq(currentMember), eq(currentMember)))
                     .thenReturn(Optional.empty());

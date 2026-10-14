@@ -33,9 +33,9 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.*;
@@ -54,7 +54,10 @@ import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
 import team.startup.gwangsan.adapter.security.auth.TokenParser;
-import team.startup.gwangsan.global.security.jwt.*;
+import team.startup.gwangsan.adapter.security.auth.JwtProperties;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
+import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
+import team.startup.gwangsan.application.member.service.MemberAccountService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.net.URI;
@@ -98,13 +101,13 @@ class ReceivedReviewIntegrationTest {
 
     @Configuration
     @EnableAutoConfiguration
-    @EntityScan("team.startup.gwangsan.domain")
-    @EnableJpaRepositories("team.startup.gwangsan.domain")
+    @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member"})
+    @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member"})
     @EnableJpaAuditing
     @EnableConfigurationProperties(JwtProperties.class)
     @Import({ReviewController.class, GetReceivedReviewListServiceImpl.class, GetReviewByMemberServiceImpl.class,
             QueryDslConfig.class, MemberUtil.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
-            MemberDetailsService.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class,
+            MemberDetailsService.class, MemberAccountService.class, MemberPersistenceAdapter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class,
             GlobalExceptionHandler.class, RedisConfig.class, RedisUtil.class})
     static class Config {
         @Bean
@@ -330,8 +333,8 @@ class ReceivedReviewIntegrationTest {
     private Fixture fixture(int count) {
         return new TransactionTemplate(transactions).execute(status -> {
             String suffix = UUID.randomUUID().toString().substring(0, 8);
-            Member target = member("target" + suffix);
-            Member other = member("other" + suffix);
+            MemberJpaEntity target = member("target" + suffix);
+            MemberJpaEntity other = member("other" + suffix);
             List<Long> ids = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Product product = persist(Product.builder().member(target).title("product" + i).description("description")
@@ -354,8 +357,8 @@ class ReceivedReviewIntegrationTest {
         });
     }
 
-    private Member member(String name) {
-        return persist(Member.builder().name(name).nickname(name).phoneNumber(name).password("local-test")
+    private MemberJpaEntity member(String name) {
+        return persist(MemberJpaEntity.builder().name(name).nickname(name).phoneNumber(name).password("local-test")
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
     }
 

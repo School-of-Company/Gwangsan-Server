@@ -18,9 +18,9 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.repository.projection.LatestMessageDto;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -53,8 +53,8 @@ class ChatRoomCustomRepositoryImplTest {
         @EnumSource(Mode.class)
         @DisplayName("두 Mode에서 작성자 ID 접근으로 추가 SQL을 실행하지 않는다")
         void it_reads_author_id_without_an_extra_query(Mode mode) {
-            Member owner = createMember("owner", "01011111111");
-            Member partner = createMember("partner", "01022222222");
+            MemberJpaEntity owner = createMember("owner", "01011111111");
+            MemberJpaEntity partner = createMember("partner", "01022222222");
             Product product = createProduct(owner);
             product.update(Type.SERVICE, mode, "상품", "설명", 5000);
             ChatRoom room = createRoom(mode == Mode.GIVER ? partner : owner,
@@ -78,8 +78,8 @@ class ChatRoomCustomRepositoryImplTest {
         }
     }
 
-    private Member createMember(String nickname, String phone) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity createMember(String nickname, String phone) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("테스트")
                 .nickname(nickname)
                 .password("pw")
@@ -89,7 +89,7 @@ class ChatRoomCustomRepositoryImplTest {
                 .build());
     }
 
-    private Product createProduct(Member owner) {
+    private Product createProduct(MemberJpaEntity owner) {
         return em.persist(Product.builder()
                 .title("상품")
                 .description("설명")
@@ -101,11 +101,11 @@ class ChatRoomCustomRepositoryImplTest {
                 .build());
     }
 
-    private ChatRoom createRoom(Member buyer, Member seller, Product product) {
+    private ChatRoom createRoom(MemberJpaEntity buyer, MemberJpaEntity seller, Product product) {
         return createRoom(true, buyer, seller, product);
     }
 
-    private ChatRoom createRoom(boolean active, Member buyer, Member seller, Product product) {
+    private ChatRoom createRoom(boolean active, MemberJpaEntity buyer, MemberJpaEntity seller, Product product) {
         return em.persist(ChatRoom.builder()
                 .isActive(active)
                 .buyer(buyer)
@@ -114,11 +114,11 @@ class ChatRoomCustomRepositoryImplTest {
                 .build());
     }
 
-    private void createMessage(Long id, ChatRoom room, Member sender, String content, LocalDateTime createdAt) {
+    private void createMessage(Long id, ChatRoom room, MemberJpaEntity sender, String content, LocalDateTime createdAt) {
         createMessage(id, room, sender, content, createdAt, false);
     }
 
-    private void createMessage(Long id, ChatRoom room, Member sender, String content, LocalDateTime createdAt,
+    private void createMessage(Long id, ChatRoom room, MemberJpaEntity sender, String content, LocalDateTime createdAt,
                                boolean checked) {
         em.persist(ChatMessage.builder()
                 .id(id)
@@ -137,8 +137,8 @@ class ChatRoomCustomRepositoryImplTest {
 
         @Test
         void systemMessageDoesNotChangePreviewOrUnreadCount() {
-            Member buyer = createMember("system-buyer", "010-3001-0001");
-            Member seller = createMember("system-seller", "010-3001-0002");
+            MemberJpaEntity buyer = createMember("system-buyer", "010-3001-0001");
+            MemberJpaEntity seller = createMember("system-seller", "010-3001-0002");
             ChatRoom room = createRoom(buyer, seller, createProduct(seller));
             LocalDateTime older = LocalDateTime.of(2026, 9, 30, 10, 0);
             createMessage(100L, room, seller, "일반 메시지", older);
@@ -157,8 +157,8 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("createdAt이 최신인데 id가 더 작은 메시지를 최신 메시지로 반환한다")
         void it_selects_message_with_latest_createdAt_even_if_id_is_smaller() {
-            Member buyer = createMember("buyer1", "010-0001-0001");
-            Member seller = createMember("seller1", "010-0001-0002");
+            MemberJpaEntity buyer = createMember("buyer1", "010-0001-0001");
+            MemberJpaEntity seller = createMember("seller1", "010-0001-0002");
             ChatRoom room = createRoom(buyer, seller, createProduct(seller));
 
             LocalDateTime older = LocalDateTime.of(2024, 1, 1, 10, 0);
@@ -180,8 +180,8 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("createdAt이 같을 때 id가 더 큰 메시지를 최신 메시지로 반환한다")
         void it_selects_message_with_larger_id_when_createdAt_is_same() {
-            Member buyer = createMember("buyer2", "010-0002-0001");
-            Member seller = createMember("seller2", "010-0002-0002");
+            MemberJpaEntity buyer = createMember("buyer2", "010-0002-0001");
+            MemberJpaEntity seller = createMember("seller2", "010-0002-0002");
             ChatRoom room = createRoom(buyer, seller, createProduct(seller));
 
             LocalDateTime sameTime = LocalDateTime.of(2024, 1, 1, 10, 0);
@@ -202,8 +202,8 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("요청자 쪽에서 숨김 처리한 채팅방은 결과에서 제외한다")
         void it_excludes_room_hidden_by_requester() {
-            Member buyer = createMember("buyer3", "010-0003-0001");
-            Member seller = createMember("seller3", "010-0003-0002");
+            MemberJpaEntity buyer = createMember("buyer3", "010-0003-0001");
+            MemberJpaEntity seller = createMember("seller3", "010-0003-0002");
             ChatRoom room = createRoom(buyer, seller, createProduct(seller));
             room.hideFor(buyer, LocalDateTime.of(2024, 1, 1, 0, 0));
             em.persist(room);
@@ -217,8 +217,8 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("상대방이 숨김 처리해도 요청자의 결과에는 그대로 노출된다")
         void it_keeps_room_visible_for_the_other_participant() {
-            Member buyer = createMember("buyer4", "010-0004-0001");
-            Member seller = createMember("seller4", "010-0004-0002");
+            MemberJpaEntity buyer = createMember("buyer4", "010-0004-0001");
+            MemberJpaEntity seller = createMember("seller4", "010-0004-0002");
             ChatRoom room = createRoom(buyer, seller, createProduct(seller));
             room.hideFor(buyer, LocalDateTime.of(2024, 1, 1, 0, 0));
             em.persist(room);
@@ -232,8 +232,8 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("활성 채팅방만 최신 메시지와 상대방의 미확인 메시지 수를 함께 반환한다")
         void it_returns_active_rooms_with_latest_message_and_unread_count() {
-            Member buyer = createMember("buyer5", "010-0005-0001");
-            Member seller = createMember("seller5", "010-0005-0002");
+            MemberJpaEntity buyer = createMember("buyer5", "010-0005-0001");
+            MemberJpaEntity seller = createMember("seller5", "010-0005-0002");
             ChatRoom messageRoom = createRoom(buyer, seller, createProduct(seller));
             ChatRoom noMessageRoom = createRoom(buyer, seller, createProduct(seller));
             createRoom(false, buyer, seller, createProduct(seller));
@@ -264,9 +264,9 @@ class ChatRoomCustomRepositoryImplTest {
         @Test
         @DisplayName("참여하는 공개 활성 채팅방이 없으면 빈 목록을 반환한다")
         void it_returns_empty_when_member_has_no_visible_active_rooms() {
-            Member buyer = createMember("buyer6", "010-0006-0001");
-            Member seller = createMember("seller6", "010-0006-0002");
-            Member outsider = createMember("outsider6", "010-0006-0003");
+            MemberJpaEntity buyer = createMember("buyer6", "010-0006-0001");
+            MemberJpaEntity seller = createMember("seller6", "010-0006-0002");
+            MemberJpaEntity outsider = createMember("outsider6", "010-0006-0003");
             createRoom(buyer, seller, createProduct(seller));
 
             em.flush();

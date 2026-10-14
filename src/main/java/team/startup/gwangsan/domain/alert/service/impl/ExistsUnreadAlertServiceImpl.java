@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.alert.presentation.dto.response.ExistsAlertResponse;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.service.ExistsUnreadAlertService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -19,7 +19,7 @@ public class ExistsUnreadAlertServiceImpl implements ExistsUnreadAlertService {
     @Override
     @Transactional(readOnly = true)
     public ExistsAlertResponse execute() {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         return new ExistsAlertResponse(alertReceiptRepository.existsByMemberIdAndChecked(member.getId(), false));
     }

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberIdService {
 
     private final ProductRepository productRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ProductImageRepository productImageRepository;
 
     @Override
@@ -39,9 +39,9 @@ public class FindProductsByMemberIdServiceImpl implements FindProductsByMemberId
     @Override
     @Transactional(readOnly = true)
     public List<GetProductResponse> execute(Long memberId, Type type, Mode mode, Long lastId, Integer size, Boolean completed) {
-        MemberDetail memberDetail = memberDetailRepository.findById(memberId)
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
-        Member member = memberDetail.getMember();
+        MemberJpaEntity member = memberDetail.getMember();
 
         List<Product> products = size == null
                 ? productRepository.findProductByMemberAndTypeAndModeAndStatusIn(

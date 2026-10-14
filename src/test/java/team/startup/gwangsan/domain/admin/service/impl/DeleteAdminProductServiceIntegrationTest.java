@@ -13,9 +13,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -53,7 +53,7 @@ class DeleteAdminProductServiceIntegrationTest {
     @MockitoBean
     private MemberUtil memberUtil;
 
-    private Member author;
+    private MemberJpaEntity author;
 
     @BeforeEach
     void setUp() {
@@ -69,7 +69,7 @@ class DeleteAdminProductServiceIntegrationTest {
         @DisplayName("상태만 삭제로 변경하고 이미지·채팅·거래·리뷰·예약을 보존한다")
         void it_soft_deletes_and_preserves_all_related_data(ProductStatus status) {
             Product product = persistProduct(status);
-            Member buyer = persistMember("buyer", MemberRole.ROLE_USER);
+            MemberJpaEntity buyer = persistMember("buyer", MemberRole.ROLE_USER);
             Image image = em.persist(Image.builder().imageUrl("https://example.com/product.jpg").build());
             ProductImage link = em.persist(ProductImage.builder().product(product).image(image).build());
             ChatRoom room = em.persist(ChatRoom.builder().product(product).buyer(buyer).seller(author)
@@ -147,7 +147,7 @@ class DeleteAdminProductServiceIntegrationTest {
         @DisplayName("관리자를 포함해 모든 역할의 타인 삭제를 거부한다")
         void it_rejects_every_non_author_role(MemberRole role) {
             Product product = persistProduct(ProductStatus.ONGOING);
-            Member other = persistMember("other", role);
+            MemberJpaEntity other = persistMember("other", role);
             when(memberUtil.getCurrentMember()).thenReturn(other);
 
             assertThatThrownBy(() -> userService.execute(product.getId()))
@@ -170,8 +170,8 @@ class DeleteAdminProductServiceIntegrationTest {
 
     }
 
-    private Member persistMember(String name, MemberRole role) {
-        return em.persist(Member.builder().name(name).nickname(name).phoneNumber(name)
+    private MemberJpaEntity persistMember(String name, MemberRole role) {
+        return em.persist(MemberJpaEntity.builder().name(name).nickname(name).phoneNumber(name)
                 .password("test-password").role(role).status(MemberStatus.ACTIVE).build());
     }
 

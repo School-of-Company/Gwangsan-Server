@@ -13,7 +13,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -76,8 +76,8 @@ class DeleteReservationProductServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
-            Member owner = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             ProductReservation reservation = mock(ProductReservation.class);
             Product product = mock(Product.class);
 
@@ -135,8 +135,8 @@ class DeleteReservationProductServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
-            Member reserver = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
+            MemberJpaEntity reserver = mock(MemberJpaEntity.class);
             ProductReservation reservation = mock(ProductReservation.class);
             Product product = mock(Product.class);
 
@@ -173,7 +173,7 @@ class DeleteReservationProductServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
             when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.empty());
@@ -191,7 +191,7 @@ class DeleteReservationProductServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             Product product = mock(Product.class);
 
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
@@ -216,9 +216,9 @@ class DeleteReservationProductServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
-            Member owner = mock(Member.class);
-            Member reserver = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
+            MemberJpaEntity reserver = mock(MemberJpaEntity.class);
             Product product = mock(Product.class);
             ProductReservation reservation = mock(ProductReservation.class);
 

@@ -12,9 +12,9 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -53,7 +53,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final DeviceTokenRepository deviceTokenRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProductReservationRepository productReservationRepository;
@@ -69,8 +69,8 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     @CheckBlocked(param = "otherMemberId")
     public void execute(Long productId, Long otherMemberId) {
         String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        MemberDetail memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);
-        Member member = memberDetail.getMember();
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);
+        MemberJpaEntity member = memberDetail.getMember();
 
         validateNotSelfTrade(member.getId(), otherMemberId);
 
@@ -78,11 +78,11 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .orElseThrow(NotFoundProductException::new);
         validateProductStatus(product);
 
-        MemberDetail otherMemberDetail = memberDetailRepository.findByMemberIdWithMember(otherMemberId);
+        MemberDetailJpaEntity otherMemberDetail = memberDetailRepository.findByMemberIdWithMember(otherMemberId);
 
         boolean isBuyer = isBuyer(product, member);
-        MemberDetail buyerDetail  = isBuyer ? memberDetail    : otherMemberDetail;
-        MemberDetail sellerDetail = isBuyer ? otherMemberDetail: memberDetail;
+        MemberDetailJpaEntity buyerDetail  = isBuyer ? memberDetail    : otherMemberDetail;
+        MemberDetailJpaEntity sellerDetail = isBuyer ? otherMemberDetail: memberDetail;
 
         ProductReservation reservation =
                 validateReservationParticipant(product, buyerDetail.getMember(), sellerDetail.getMember());
@@ -112,7 +112,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private ChatRoom findChatRoom(Product product, Member buyer, Member seller) {
+    private ChatRoom findChatRoom(Product product, MemberJpaEntity buyer, MemberJpaEntity seller) {
         return chatRoomRepository.findByProductIdAndBuyerAndSeller(product.getId(), buyer, seller)
                 .orElseThrow(NotFoundChatRoomException::new);
     }
@@ -124,7 +124,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private boolean isBuyer(Product product, Member member) {
+    private boolean isBuyer(Product product, MemberJpaEntity member) {
         if (product.getMode() == Mode.GIVER) {
             return !product.getMember().equals(member);
         } else {
@@ -132,7 +132,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         }
     }
 
-    private ProductReservation validateReservationParticipant(Product product, Member buyer, Member seller) {
+    private ProductReservation validateReservationParticipant(Product product, MemberJpaEntity buyer, MemberJpaEntity seller) {
         if (product.getStatus() != ProductStatus.RESERVATION) {
             return null;
         }
@@ -141,7 +141,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
                 .findByProductAndStatus(product, ReservationStatus.PENDING)
                 .orElseThrow(ReservationParticipantOnlyException::new);
 
-        Member reserver = reservation.getReserver();
+        MemberJpaEntity reserver = reservation.getReserver();
 
         if (!reserver.equals(buyer) && !reserver.equals(seller)) {
             throw new ReservationParticipantOnlyException();
@@ -159,7 +159,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
     }
 
     private void confirmTradeCompletion(TradeComplete pending, boolean isBuyer, ChatRoom chatRoom, Product product,
-                                         MemberDetail buyerDetail, MemberDetail sellerDetail, Member requester,
+                                         MemberDetailJpaEntity buyerDetail, MemberDetailJpaEntity sellerDetail, MemberJpaEntity requester,
                                          ProductReservation reservation) {
         if (isCallerTheRequester(isBuyer, pending)) {
             throw new TradeAlreadyCompleteRequestException();
@@ -208,7 +208,7 @@ public class RequestTradeCompleteServiceImpl implements RequestTradeCompleteServ
         ));
     }
 
-    private void requestTradeCompletion(ChatRoom chatRoom, Product product, boolean isBuyer, Member buyer, Member seller, Member requestTarget) {
+    private void requestTradeCompletion(ChatRoom chatRoom, Product product, boolean isBuyer, MemberJpaEntity buyer, MemberJpaEntity seller, MemberJpaEntity requestTarget) {
         TradeComplete newTradeComplete = TradeComplete.builder()
                 .product(product)
                 .buyer(buyer)

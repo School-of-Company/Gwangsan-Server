@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.custom.ChatMessageCustomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 
@@ -24,5 +24,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>,
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE ChatMessage c SET c.sender = :dummy WHERE c.sender = :target")
-    void reassignSender(@Param("target") Member target, @Param("dummy") Member dummy);
+    void reassignSender(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);
 }

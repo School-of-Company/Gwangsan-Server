@@ -13,7 +13,7 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.impl.ValidateChatSendableServiceImpl;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -36,7 +36,7 @@ class ChatSendableControllerTest {
         MemberUtil members = mock(MemberUtil.class);
         BlockValidator blocks = mock(BlockValidator.class);
         imageRepository = mock(ImageRepository.class);
-        Member member = mock(Member.class);
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         ChatRoom room = mock(ChatRoom.class);
         when(members.getCurrentMember()).thenReturn(member);
         when(rooms.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
 
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class TradeCancel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberJpaEntity member;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -45,7 +45,7 @@ public class TradeCancel {
 
 
     @Builder
-    public TradeCancel(TradeComplete tradeComplete, Member member, String reason, TradeCancelStatus status) {
+    public TradeCancel(TradeComplete tradeComplete, MemberJpaEntity member, String reason, TradeCancelStatus status) {
         this.tradeComplete = tradeComplete;
         this.member = member;
         this.reason = reason;

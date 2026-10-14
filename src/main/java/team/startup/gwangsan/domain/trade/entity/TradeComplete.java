@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 
@@ -31,11 +31,11 @@ public class TradeComplete {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", referencedColumnName = "member_id", nullable = false)
-    private Member buyer;
+    private MemberJpaEntity buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", referencedColumnName = "member_id", nullable = false)
-    private Member seller;
+    private MemberJpaEntity seller;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -52,7 +52,7 @@ public class TradeComplete {
     private boolean requestedBySeller;
 
     @Builder
-    public TradeComplete(Product product, Member buyer, Member seller, TradeStatus status, boolean requestedBySeller) {
+    public TradeComplete(Product product, MemberJpaEntity buyer, MemberJpaEntity seller, TradeStatus status, boolean requestedBySeller) {
         this.product = product;
         this.buyer = buyer;
         this.seller = seller;

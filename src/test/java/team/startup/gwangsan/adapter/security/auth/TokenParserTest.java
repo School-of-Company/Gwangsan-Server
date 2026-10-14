@@ -12,11 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.Authentication;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.global.security.jwt.JwtProperties;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.security.auth.JwtProperties;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
+import team.startup.gwangsan.support.MemberAccounts;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -36,7 +37,7 @@ class TokenParserTest {
     private static final String REFRESH_SECRET = "refresh-secret-that-is-long-enough-for-hs256";
     private static final String PHONE_NUMBER = "010-1234-5678";
 
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
 
     @Nested
     @DisplayName("resolveToken()은")
@@ -97,14 +98,14 @@ class TokenParserTest {
         @Test
         @DisplayName("it_토큰 주체의 실제 MemberDetails를 principal로 반환한다")
         void it_returns_authentication_with_member_details() {
-            Member member = member();
+            MemberJpaEntity member = member();
             when(memberRepository.findByPhoneNumber(PHONE_NUMBER)).thenReturn(Optional.of(member));
 
             Authentication authentication = parser().getAuthentication(accessToken(PHONE_NUMBER, Instant.now().plusSeconds(60)));
 
             assertThat(authentication.getPrincipal()).isInstanceOf(MemberDetails.class);
             MemberDetails principal = (MemberDetails) authentication.getPrincipal();
-            assertThat(principal.getMember()).isSameAs(member);
+            assertThat(principal.getMember()).isEqualTo(MemberAccounts.of(member));
             assertThat(authentication.getAuthorities()).extracting("authority").containsExactly("ROLE_USER");
             verify(memberRepository).findByPhoneNumber(PHONE_NUMBER);
         }
@@ -129,7 +130,7 @@ class TokenParserTest {
     }
 
     private TokenParser parser() {
-        return new TokenParser(new MemberDetailsService(memberRepository), new JwtProperties(ACCESS_SECRET, REFRESH_SECRET));
+        return new TokenParser(MemberAccounts.detailsService(memberRepository), new JwtProperties(ACCESS_SECRET, REFRESH_SECRET));
     }
 
     private String accessToken(String subject, Instant expiration) {
@@ -140,8 +141,8 @@ class TokenParserTest {
                 .compact();
     }
 
-    private Member member() {
-        return Member.builder()
+    private MemberJpaEntity member() {
+        return MemberJpaEntity.builder()
                 .name("회원")
                 .nickname("회원닉네임")
                 .phoneNumber(PHONE_NUMBER)

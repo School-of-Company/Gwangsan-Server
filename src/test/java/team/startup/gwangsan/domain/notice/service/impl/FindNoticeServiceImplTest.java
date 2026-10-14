@@ -10,11 +10,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
@@ -42,7 +42,7 @@ class FindNoticeServiceImplTest {
 
     @Mock private NoticeRepository noticeRepository;
     @Mock private NoticeImageRepository noticeImageRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private MemberUtil memberUtil;
 
     @Nested
@@ -56,8 +56,8 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("FindNoticeResponse를 반환한다")
             void it_returns_find_notice_response() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
                 Notice notice = mock(Notice.class);
 
@@ -84,8 +84,8 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("공지 이미지의 실제 ID와 URL을 응답에 매핑한다")
             void it_maps_real_notice_image_to_response() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
                 Notice notice = Notice.builder()
                         .title("제목")
@@ -121,8 +121,8 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeNotFoundException을 던진다")
             void it_throws_notice_not_found_exception() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place myPlace = mock(Place.class);
                 Place otherPlace = mock(Place.class);
                 Notice notice = mock(Notice.class);
@@ -146,8 +146,8 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("FindNoticeResponse를 반환한다")
             void it_returns_find_notice_response() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place myPlace = mock(Place.class);
                 Place noticePlace = mock(Place.class);
                 Head sameHead = mock(Head.class);
@@ -184,8 +184,8 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeNotFoundException을 던진다")
             void it_throws_notice_not_found_exception() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place myPlace = mock(Place.class);
                 Place noticePlace = mock(Place.class);
                 Head myHead = mock(Head.class);
@@ -213,7 +213,7 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeNotFoundException을 던진다")
             void it_throws_notice_not_found_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(noticeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -229,7 +229,7 @@ class FindNoticeServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberDetailException을 던진다")
             void it_throws_not_found_member_detail_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
                 Notice notice = mock(Notice.class);

@@ -24,11 +24,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import static team.startup.gwangsan.domain.chat.entity.QChatMessage.chatMessage;
-import static team.startup.gwangsan.domain.member.entity.QMember.member;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 
 @Repository
 @RequiredArgsConstructor
 public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomRepository {
+    private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
 
     private final JPAQueryFactory queryFactory;
     private final NamedParameterJdbcTemplate jdbcTemplate;

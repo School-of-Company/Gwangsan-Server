@@ -9,12 +9,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -49,28 +49,28 @@ class CreateReviewServiceImplTest {
 
     @Mock private ReviewRepository reviewRepository;
     @Mock private MemberUtil memberUtil;
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ProductRepository productRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private TradeCompleteRepository tradeCompleteRepository;
     @Mock private org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
     @Mock private BlockValidator blockValidator;
 
-    private Member mockMember(Long id) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity mockMember(Long id) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         lenient().when(member.getId()).thenReturn(id);
         return member;
     }
 
-    private TradeComplete mockCompletedTrade(Member buyer, Member seller) {
+    private TradeComplete mockCompletedTrade(MemberJpaEntity buyer, MemberJpaEntity seller) {
         TradeComplete tradeComplete = mock(TradeComplete.class);
         lenient().when(tradeComplete.getBuyer()).thenReturn(buyer);
         lenient().when(tradeComplete.getSeller()).thenReturn(seller);
         return tradeComplete;
     }
 
-    private Member member(Long id) {
-        Member member = Member.builder()
+    private MemberJpaEntity member(Long id) {
+        MemberJpaEntity member = MemberJpaEntity.builder()
                 .name("회원" + id)
                 .nickname("회원" + id)
                 .phoneNumber("0100000000" + id)
@@ -80,7 +80,7 @@ class CreateReviewServiceImplTest {
         return member;
     }
 
-    private Product completedProduct(Member seller) {
+    private Product completedProduct(MemberJpaEntity seller) {
         return Product.builder()
                 .title("거래")
                 .description("완료된 거래")
@@ -92,8 +92,8 @@ class CreateReviewServiceImplTest {
                 .build();
     }
 
-    private MemberDetail detail(Member member) {
-        return MemberDetail.builder()
+    private MemberDetailJpaEntity detail(MemberJpaEntity member) {
+        return MemberDetailJpaEntity.builder()
                 .member(member)
                 .dong(mock(team.startup.gwangsan.domain.dong.entity.Dong.class))
                 .place(mock(team.startup.gwangsan.domain.place.entity.Place.class))
@@ -114,13 +114,13 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("리뷰를 저장하고 이벤트를 발행한다")
             void it_saves_review_and_publishes_event() {
-                Member reviewer = mockMember(1L);
-                Member reviewed = mockMember(2L);
+                MemberJpaEntity reviewer = mockMember(1L);
+                MemberJpaEntity reviewed = mockMember(2L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
 
-                MemberDetail reviewedDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity reviewedDetail = mock(MemberDetailJpaEntity.class);
                 TradeComplete completedTrade = mockCompletedTrade(reviewer, reviewed);
 
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
@@ -147,8 +147,8 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("구매자의 실제 점수만 올리고 리뷰와 알림을 만든다")
             void it_creates_review_for_buyer() {
-                Member buyer = member(1L);
-                Member seller = member(2L);
+                MemberJpaEntity buyer = member(1L);
+                MemberJpaEntity seller = member(2L);
                 Product product = completedProduct(seller);
                 TradeComplete trade = TradeComplete.builder()
                         .product(product)
@@ -157,7 +157,7 @@ class CreateReviewServiceImplTest {
                         .status(TradeStatus.COMPLETED)
                         .requestedBySeller(true)
                         .build();
-                MemberDetail buyerDetail = detail(buyer);
+                MemberDetailJpaEntity buyerDetail = detail(buyer);
 
                 when(memberUtil.getCurrentMember()).thenReturn(seller);
                 when(productRepository.findActiveById(1L)).thenReturn(Optional.of(product));
@@ -188,9 +188,9 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("구매자는 외부인을 리뷰할 수 없고 부작용이 없다")
             void it_rejects_buyer_reviewing_outsider_without_side_effects() {
-                Member buyer = member(1L);
-                Member seller = member(2L);
-                Member outsider = member(3L);
+                MemberJpaEntity buyer = member(1L);
+                MemberJpaEntity seller = member(2L);
+                MemberJpaEntity outsider = member(3L);
                 Product product = completedProduct(seller);
                 TradeComplete trade = TradeComplete.builder()
                         .product(product).buyer(buyer).seller(seller)
@@ -211,9 +211,9 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("판매자는 외부인을 리뷰할 수 없고 부작용이 없다")
             void it_rejects_seller_reviewing_outsider_without_side_effects() {
-                Member buyer = member(1L);
-                Member seller = member(2L);
-                Member outsider = member(3L);
+                MemberJpaEntity buyer = member(1L);
+                MemberJpaEntity seller = member(2L);
+                MemberJpaEntity outsider = member(3L);
                 Product product = completedProduct(seller);
                 TradeComplete trade = TradeComplete.builder()
                         .product(product).buyer(buyer).seller(seller)
@@ -234,9 +234,9 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("외부인은 구매자를 리뷰할 수 없고 부작용이 없다")
             void it_rejects_outsider_reviewing_buyer_without_side_effects() {
-                Member buyer = member(1L);
-                Member seller = member(2L);
-                Member outsider = member(3L);
+                MemberJpaEntity buyer = member(1L);
+                MemberJpaEntity seller = member(2L);
+                MemberJpaEntity outsider = member(3L);
                 Product product = completedProduct(seller);
                 TradeComplete trade = TradeComplete.builder()
                         .product(product).buyer(buyer).seller(seller)
@@ -262,7 +262,7 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("CannotReviewSelfException을 던진다")
             void it_throws_cannot_review_self_exception() {
-                Member reviewer = mockMember(1L);
+                MemberJpaEntity reviewer = mockMember(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
 
                 assertThatThrownBy(() -> service.execute(new CreateReviewRequest(1L, 1L, "내용", 50)))
@@ -277,7 +277,7 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("NotFoundProductException을 던진다")
             void it_throws_not_found_product_exception() {
-                Member reviewer = mockMember(1L);
+                MemberJpaEntity reviewer = mockMember(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(reviewer);
                 when(productRepository.findActiveById(99L)).thenReturn(Optional.empty());
 
@@ -293,7 +293,7 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("CannotReviewBeforeTradeException을 던진다")
             void it_throws_cannot_review_before_trade_exception() {
-                Member reviewer = mockMember(1L);
+                MemberJpaEntity reviewer = mockMember(1L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
@@ -313,7 +313,7 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                Member reviewer = mockMember(1L);
+                MemberJpaEntity reviewer = mockMember(1L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
@@ -334,8 +334,8 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("CannotReviewBeforeTradeException을 던진다")
             void it_throws_cannot_review_before_trade_exception() {
-                Member reviewer = mockMember(1L);
-                Member reviewed = mockMember(2L);
+                MemberJpaEntity reviewer = mockMember(1L);
+                MemberJpaEntity reviewed = mockMember(2L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
@@ -358,9 +358,9 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("NotTradeParticipantException을 던진다")
             void it_throws_not_trade_participant_exception() {
-                Member reviewer = mockMember(1L);
-                Member reviewed = mockMember(2L);
-                Member thirdParty = mockMember(3L);
+                MemberJpaEntity reviewer = mockMember(1L);
+                MemberJpaEntity reviewed = mockMember(2L);
+                MemberJpaEntity thirdParty = mockMember(3L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
@@ -385,8 +385,8 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("AlreadyReviewedException을 던진다")
             void it_throws_already_reviewed_exception() {
-                Member reviewer = mockMember(1L);
-                Member reviewed = mockMember(2L);
+                MemberJpaEntity reviewer = mockMember(1L);
+                MemberJpaEntity reviewed = mockMember(2L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);
@@ -412,8 +412,8 @@ class CreateReviewServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberDetailException을 던진다")
             void it_throws_not_found_member_detail_exception() {
-                Member reviewer = mockMember(1L);
-                Member reviewed = mockMember(2L);
+                MemberJpaEntity reviewer = mockMember(1L);
+                MemberJpaEntity reviewed = mockMember(2L);
 
                 Product product = mock(Product.class);
                 when(product.getStatus()).thenReturn(ProductStatus.COMPLETED);

@@ -8,9 +8,9 @@ import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.SelfBlockNotAllowedException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.block.service.BlockMemberService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -18,13 +18,13 @@ import team.startup.gwangsan.global.util.MemberUtil;
 public class BlockMemberServiceImpl implements BlockMemberService {
 
     private final MemberUtil memberUtil;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final MemberBlockRepository memberBlockRepository;
 
     @Override
     @Transactional
     public void execute(Long targetMemberId) {
-        Member currentMember = memberUtil.getCurrentMember();
+        MemberJpaEntity currentMember = memberUtil.getCurrentMember();
 
         if (currentMember.getId().equals(targetMemberId)) {
             throw new SelfBlockNotAllowedException();
@@ -34,7 +34,7 @@ public class BlockMemberServiceImpl implements BlockMemberService {
             throw new AlreadyBlockedException();
         }
 
-        Member targetMember = memberRepository.findById(targetMemberId)
+        MemberJpaEntity targetMember = memberRepository.findById(targetMemberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         memberBlockRepository.save(MemberBlock.builder()

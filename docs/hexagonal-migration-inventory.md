@@ -92,44 +92,44 @@
 | 70 | `domain/app/repository/AppVersionRepository.java` | = | app | repository | adapter/persistence/app (JpaRepository) + application/app/port/out | PR03 | legacy |
 | 71 | `domain/app/service/FindAppVersionService.java` | = | app | service interface | application/app/port/in (UseCase/Query) | PR03 | legacy |
 | 72 | `domain/app/service/impl/FindAppVersionServiceImpl.java` | = | app | service impl | application/app/service (+ 필요한 output Port) | PR03 | legacy |
-| 73 | `domain/auth/entity/RefreshToken.java` | = | auth | jpa entity | adapter/persistence/auth (JpaEntity) + domain/auth/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
-| 74 | `domain/auth/entity/constant/OsType.java` | = | auth | enum | domain/auth/model | PR02 | legacy |
-| 75 | `domain/auth/exception/BannedPhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 76 | `domain/auth/exception/DongNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 77 | `domain/auth/exception/DuplicateNicknameException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 78 | `domain/auth/exception/DuplicatePhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 79 | `domain/auth/exception/ForbiddenException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 80 | `domain/auth/exception/InvalidVerificationCodeException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 81 | `domain/auth/exception/NotFoundUserException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 82 | `domain/auth/exception/PendingApprovalException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 83 | `domain/auth/exception/PlaceNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 84 | `domain/auth/exception/RecommenderNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 85 | `domain/auth/exception/SmsAuthNotCompletedException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 86 | `domain/auth/exception/SmsAuthNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 87 | `domain/auth/exception/UnauthorizedException.java` | = | auth | exception | domain/auth/exception | PR02 | legacy |
-| 88 | `domain/auth/presentation/AuthController.java` | = | auth | controller | adapter/web/auth/controller | PR02 | legacy |
-| 89 | `domain/auth/presentation/dto/request/FindNicknameRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 90 | `domain/auth/presentation/dto/request/ResetPasswordRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 91 | `domain/auth/presentation/dto/request/SignInRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 92 | `domain/auth/presentation/dto/request/SignUpRequest.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 93 | `domain/auth/presentation/dto/response/FindNicknameResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 94 | `domain/auth/presentation/dto/response/MemberInfoResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 95 | `domain/auth/presentation/dto/response/TokenResponse.java` | = | auth | web dto | adapter/web/auth/dto | PR02 | legacy |
-| 96 | `domain/auth/repository/RefreshTokenRepository.java` | = | auth | repository | adapter/persistence/auth (JpaRepository) + application/auth/port/out | PR02 | legacy |
-| 97 | `domain/auth/service/FindNicknameService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 98 | `domain/auth/service/ReissueTokenService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 99 | `domain/auth/service/ResetPasswordService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 100 | `domain/auth/service/SignInService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 101 | `domain/auth/service/SignOutService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 102 | `domain/auth/service/SignUpService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 103 | `domain/auth/service/TokenAuthenticationService.java` | = | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | legacy |
-| 104 | `domain/auth/service/impl/FindNicknameServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 105 | `domain/auth/service/impl/ReissueTokenServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 106 | `domain/auth/service/impl/ResetPasswordServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 107 | `domain/auth/service/impl/SignInServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 108 | `domain/auth/service/impl/SignOutServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 109 | `domain/auth/service/impl/SignUpServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
-| 110 | `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | = | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | legacy |
+| 73 | `domain/auth/entity/RefreshToken.java` | `adapter/persistence/auth/RefreshToken.java` | auth | jpa entity | adapter/persistence/auth (JpaEntity) + domain/auth/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (Redis hash, 구 _class 호환 테스트) |
+| 74 | `domain/auth/entity/constant/OsType.java` | 삭제 | auth | enum | domain/auth/model | PR02 | 삭제 (참조 0건, 실제 사용은 notification OsType) |
+| 75 | `domain/auth/exception/BannedPhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 76 | `domain/auth/exception/DongNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 77 | `domain/auth/exception/DuplicateNicknameException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 78 | `domain/auth/exception/DuplicatePhoneNumberException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 79 | `domain/auth/exception/ForbiddenException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 80 | `domain/auth/exception/InvalidVerificationCodeException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 81 | `domain/auth/exception/NotFoundUserException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 82 | `domain/auth/exception/PendingApprovalException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 83 | `domain/auth/exception/PlaceNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 84 | `domain/auth/exception/RecommenderNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 85 | `domain/auth/exception/SmsAuthNotCompletedException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 86 | `domain/auth/exception/SmsAuthNotFoundException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 87 | `domain/auth/exception/UnauthorizedException.java` | = | auth | exception | domain/auth/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 88 | `adapter/web/auth/controller/AuthController.java` | `adapter/web/auth/controller/AuthController.java` | auth | controller | adapter/web/auth/controller | PR02 | 전환 |
+| 89 | `domain/auth/presentation/dto/request/FindNicknameRequest.java` | `adapter/web/auth/dto/request/FindNicknameRequest.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 90 | `domain/auth/presentation/dto/request/ResetPasswordRequest.java` | `adapter/web/auth/dto/request/ResetPasswordRequest.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 91 | `domain/auth/presentation/dto/request/SignInRequest.java` | `adapter/web/auth/dto/request/SignInRequest.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 92 | `domain/auth/presentation/dto/request/SignUpRequest.java` | `adapter/web/auth/dto/request/SignUpRequest.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 93 | `domain/auth/presentation/dto/response/FindNicknameResponse.java` | `adapter/web/auth/dto/response/FindNicknameResponse.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 94 | `domain/auth/presentation/dto/response/MemberInfoResponse.java` | `adapter/web/auth/dto/response/MemberInfoResponse.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 95 | `domain/auth/presentation/dto/response/TokenResponse.java` | `adapter/web/auth/dto/response/TokenResponse.java` | auth | web dto | adapter/web/auth/dto | PR02 | 전환 |
+| 96 | `domain/auth/repository/RefreshTokenRepository.java` | `adapter/persistence/auth/RefreshTokenRepository.java` | auth | repository | adapter/persistence/auth (JpaRepository) + application/auth/port/out | PR02 | 전환 |
+| 97 | `domain/auth/service/FindNicknameService.java` | `application/auth/port/in/FindNicknameQuery.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 98 | `domain/auth/service/ReissueTokenService.java` | `application/auth/port/in/ReissueTokenUseCase.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 99 | `domain/auth/service/ResetPasswordService.java` | `application/auth/port/in/ResetPasswordUseCase.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 100 | `domain/auth/service/SignInService.java` | `application/auth/port/in/SignInUseCase.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 101 | `domain/auth/service/SignOutService.java` | `application/auth/port/in/SignOutUseCase.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 102 | `domain/auth/service/SignUpService.java` | `application/auth/port/in/SignUpUseCase.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 103 | `domain/auth/service/TokenAuthenticationService.java` | `application/auth/port/in/CurrentMemberQuery.java` | auth | service interface | application/auth/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 104 | `domain/auth/service/impl/FindNicknameServiceImpl.java` | `application/auth/service/FindNicknameService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 105 | `domain/auth/service/impl/ReissueTokenServiceImpl.java` | `application/auth/service/ReissueTokenService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 106 | `domain/auth/service/impl/ResetPasswordServiceImpl.java` | `application/auth/service/ResetPasswordService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 107 | `domain/auth/service/impl/SignInServiceImpl.java` | `application/auth/service/SignInService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 108 | `domain/auth/service/impl/SignOutServiceImpl.java` | `application/auth/service/SignOutService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 109 | `domain/auth/service/impl/SignUpServiceImpl.java` | `application/auth/service/SignUpService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
+| 110 | `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | `application/auth/service/CurrentMemberService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
 | 111 | `domain/block/entity/MemberBlock.java` | = | block | jpa entity | adapter/persistence/block (JpaEntity) + domain/block/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
 | 112 | `domain/block/exception/AlreadyBlockedException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
 | 113 | `domain/block/exception/BlockedMemberException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
@@ -221,40 +221,40 @@
 | 199 | `domain/image/service/UploadImageService.java` | = | image | service interface | application/image/port/in (UseCase/Query) | PR05 | legacy |
 | 200 | `domain/image/service/impl/DeleteImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
 | 201 | `domain/image/service/impl/UploadImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
-| 202 | `domain/member/entity/Member.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
-| 203 | `domain/member/entity/MemberDetail.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
-| 204 | `domain/member/entity/WithdrawalRecord.java` | = | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | legacy |
-| 205 | `domain/member/entity/constant/MemberRole.java` | = | member | enum | domain/member/model | PR02 | legacy |
-| 206 | `domain/member/entity/constant/MemberStatus.java` | = | member | enum | domain/member/model | PR02 | legacy |
-| 207 | `domain/member/exception/DummyMemberDeletionNotAllowedException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
-| 208 | `domain/member/exception/NotAllowedUserAccessException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
-| 209 | `domain/member/exception/NotFoundDummyMemberException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
-| 210 | `domain/member/exception/NotFoundMemberDetailException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
-| 211 | `domain/member/exception/NotFoundMemberException.java` | = | member | exception | domain/member/exception | PR02 | legacy |
-| 212 | `domain/member/peresentation/MemberController.java` | = | member | controller | adapter/web/member/controller | PR02 | legacy |
-| 213 | `domain/member/peresentation/dto/request/UpdateMyInfoRequest.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
-| 214 | `domain/member/peresentation/dto/response/FindAllUserInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
-| 215 | `domain/member/peresentation/dto/response/FindMyInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
-| 216 | `domain/member/peresentation/dto/response/FindUserInfoResponse.java` | = | member | web dto | adapter/web/member/dto | PR02 | legacy |
-| 217 | `domain/member/repository/MemberDetailRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
-| 218 | `domain/member/repository/MemberRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
-| 219 | `domain/member/repository/WithdrawalRecordRepository.java` | = | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | legacy |
-| 220 | `domain/member/repository/custom/MemberCustomRepository.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
-| 221 | `domain/member/repository/custom/MemberDetailCustomRepository.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
-| 222 | `domain/member/repository/custom/impl/MemberCustomRepositoryImpl.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
-| 223 | `domain/member/repository/custom/impl/MemberDetailCustomRepositoryImpl.java` | = | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | legacy |
-| 224 | `domain/member/service/FindAllUserInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 225 | `domain/member/service/FindMyInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 226 | `domain/member/service/FindUserInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 227 | `domain/member/service/MemberDeletionService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 228 | `domain/member/service/MemberWithdrawalService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 229 | `domain/member/service/UpdateMyInfoService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy |
-| 230 | `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
-| 231 | `domain/member/service/impl/FindMyInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
-| 232 | `domain/member/service/impl/FindUserInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
-| 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
-| 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
-| 235 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy |
+| 202 | `domain/member/entity/Member.java` | `adapter/persistence/member/MemberJpaEntity.java + domain/member/model/Member.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
+| 203 | `domain/member/entity/MemberDetail.java` | `adapter/persistence/member/MemberDetailJpaEntity.java + domain/member/model/MemberDetail.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
+| 204 | `domain/member/entity/WithdrawalRecord.java` | `adapter/persistence/member/WithdrawalRecordJpaEntity.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
+| 205 | `domain/member/entity/constant/MemberRole.java` | `domain/member/model/MemberRole.java` | member | enum | domain/member/model | PR02 | 전환 |
+| 206 | `domain/member/entity/constant/MemberStatus.java` | `domain/member/model/MemberStatus.java` | member | enum | domain/member/model | PR02 | 전환 |
+| 207 | `domain/member/exception/DummyMemberDeletionNotAllowedException.java` | = | member | exception | domain/member/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 208 | `domain/member/exception/NotAllowedUserAccessException.java` | = | member | exception | domain/member/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 209 | `domain/member/exception/NotFoundDummyMemberException.java` | = | member | exception | domain/member/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 210 | `domain/member/exception/NotFoundMemberDetailException.java` | = | member | exception | domain/member/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 211 | `domain/member/exception/NotFoundMemberException.java` | = | member | exception | domain/member/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 212 | `adapter/web/member/controller/MemberController.java` | `adapter/web/member/controller/MemberController.java` | member | controller | adapter/web/member/controller | PR02 | 전환 |
+| 213 | `domain/member/peresentation/dto/request/UpdateMyInfoRequest.java` | `adapter/web/member/dto/request/UpdateMyInfoRequest.java` | member | web dto | adapter/web/member/dto | PR02 | 전환 |
+| 214 | `domain/member/peresentation/dto/response/FindAllUserInfoResponse.java` | `adapter/web/member/dto/response/FindAllUserInfoResponse.java` | member | web dto | adapter/web/member/dto | PR02 | 전환 |
+| 215 | `domain/member/peresentation/dto/response/FindMyInfoResponse.java` | `adapter/web/member/dto/response/FindMyInfoResponse.java` | member | web dto | adapter/web/member/dto | PR02 | 전환 |
+| 216 | `domain/member/peresentation/dto/response/FindUserInfoResponse.java` | `adapter/web/member/dto/response/FindUserInfoResponse.java` | member | web dto | adapter/web/member/dto | PR02 | 전환 |
+| 217 | `domain/member/repository/MemberDetailRepository.java` | `adapter/persistence/member/MemberDetailJpaRepository.java` | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | 전환 |
+| 218 | `domain/member/repository/MemberRepository.java` | `adapter/persistence/member/MemberJpaRepository.java` | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | 전환 |
+| 219 | `domain/member/repository/WithdrawalRecordRepository.java` | `adapter/persistence/member/WithdrawalRecordJpaRepository.java` | member | repository | adapter/persistence/member (JpaRepository) + application/member/port/out | PR02 | 전환 |
+| 220 | `domain/member/repository/custom/MemberCustomRepository.java` | `adapter/persistence/member/MemberCustomRepository.java` | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | 전환 |
+| 221 | `domain/member/repository/custom/MemberDetailCustomRepository.java` | `adapter/persistence/member/MemberDetailCustomRepository.java` | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | 전환 |
+| 222 | `domain/member/repository/custom/impl/MemberCustomRepositoryImpl.java` | `adapter/persistence/member/MemberCustomRepositoryImpl.java` | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | 전환 |
+| 223 | `domain/member/repository/custom/impl/MemberDetailCustomRepositoryImpl.java` | `adapter/persistence/member/MemberDetailCustomRepositoryImpl.java` | member | querydsl | adapter/persistence/member (QueryPort 구현) | PR02 | 전환 |
+| 224 | `domain/member/service/FindAllUserInfoService.java` | `application/member/port/in/FindAllUserInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 225 | `domain/member/service/FindMyInfoService.java` | `application/member/port/in/FindMyInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 226 | `domain/member/service/FindUserInfoService.java` | `application/member/port/in/FindUserInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 227 | `domain/member/service/MemberDeletionService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 228 | `domain/member/service/MemberWithdrawalService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 229 | `domain/member/service/UpdateMyInfoService.java` | `application/member/port/in/UpdateMyInfoUseCase.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 230 | `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | `application/member/service/FindAllUserInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
+| 231 | `domain/member/service/impl/FindMyInfoServiceImpl.java` | `application/member/service/FindMyInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
+| 232 | `domain/member/service/impl/FindUserInfoServiceImpl.java` | `application/member/service/FindUserInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
+| 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 235 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | `application/member/service/UpdateMyInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
 | 236 | `domain/notice/entity/Notice.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
 | 237 | `domain/notice/entity/NoticeImage.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
 | 238 | `domain/notice/exception/NoticeForbiddenException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
@@ -406,27 +406,27 @@
 | 384 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
 | 385 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
 | 386 | `domain/review/service/impl/GetReviewDetailServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
-| 387 | `domain/sms/exception/AlreadyRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 388 | `domain/sms/exception/AuthCodeGenerationException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 389 | `domain/sms/exception/NotMatchRandomCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 390 | `domain/sms/exception/NotRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 391 | `domain/sms/exception/SmsSendFailedException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 392 | `domain/sms/exception/TooManyRequestAuthCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | legacy |
-| 393 | `domain/sms/presentation/SmsController.java` | = | sms | controller | adapter/web/sms/controller | PR02 | legacy |
-| 394 | `domain/sms/presentation/dto/SendSmsRequest.java` | = | sms | web dto | adapter/web/sms/dto | PR02 | legacy |
-| 395 | `domain/sms/presentation/dto/VerifyCodeRequest.java` | = | sms | web dto | adapter/web/sms/dto | PR02 | legacy |
-| 396 | `domain/sms/service/SendFindNicknameSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 397 | `domain/sms/service/SendResetPasswordSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 398 | `domain/sms/service/SendSmsService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 399 | `domain/sms/service/VerifyCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 400 | `domain/sms/service/VerifyFindNicknameCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 401 | `domain/sms/service/VerifyResetPasswordCodeService.java` | = | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | legacy |
-| 402 | `domain/sms/service/impl/SendFindNicknameSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
-| 403 | `domain/sms/service/impl/SendResetPasswordSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
-| 404 | `domain/sms/service/impl/SendSmsServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
-| 405 | `domain/sms/service/impl/VerifyCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
-| 406 | `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
-| 407 | `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java` | = | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | legacy |
+| 387 | `domain/sms/exception/AlreadyRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 388 | `domain/sms/exception/AuthCodeGenerationException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 389 | `domain/sms/exception/NotMatchRandomCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 390 | `domain/sms/exception/NotRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 391 | `domain/sms/exception/SmsSendFailedException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 392 | `domain/sms/exception/TooManyRequestAuthCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
+| 393 | `adapter/web/sms/controller/SmsController.java` | `adapter/web/sms/controller/SmsController.java` | sms | controller | adapter/web/sms/controller | PR02 | 전환 |
+| 394 | `domain/sms/presentation/dto/SendSmsRequest.java` | `adapter/web/sms/dto/SendSmsRequest.java` | sms | web dto | adapter/web/sms/dto | PR02 | 전환 |
+| 395 | `domain/sms/presentation/dto/VerifyCodeRequest.java` | `adapter/web/sms/dto/VerifyCodeRequest.java` | sms | web dto | adapter/web/sms/dto | PR02 | 전환 |
+| 396 | `domain/sms/service/SendFindNicknameSmsService.java` | `application/sms/port/in/SendFindNicknameSmsUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 397 | `domain/sms/service/SendResetPasswordSmsService.java` | `application/sms/port/in/SendResetPasswordSmsUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 398 | `domain/sms/service/SendSmsService.java` | `application/sms/port/in/SendSmsUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 399 | `domain/sms/service/VerifyCodeService.java` | `application/sms/port/in/VerifyCodeUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 400 | `domain/sms/service/VerifyFindNicknameCodeService.java` | `application/sms/port/in/VerifyCodeUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 401 | `domain/sms/service/VerifyResetPasswordCodeService.java` | `application/sms/port/in/VerifyCodeUseCase.java` | sms | service interface | application/sms/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
+| 402 | `domain/sms/service/impl/SendFindNicknameSmsServiceImpl.java` | `application/sms/service/SendFindNicknameSmsService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 |
+| 403 | `domain/sms/service/impl/SendResetPasswordSmsServiceImpl.java` | `application/sms/service/SendResetPasswordSmsService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 |
+| 404 | `domain/sms/service/impl/SendSmsServiceImpl.java` | `application/sms/service/SendSmsService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 |
+| 405 | `domain/sms/service/impl/VerifyCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
+| 406 | `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
+| 407 | `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
 | 408 | `domain/suspend/entity/Suspend.java` | = | suspend | jpa entity | adapter/persistence/suspend (JpaEntity) + domain/suspend/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
 | 409 | `domain/suspend/exception/NotFoundSuspendException.java` | = | suspend | exception | domain/suspend/exception | PR09 | legacy |
 | 410 | `domain/suspend/presentation/SuspendController.java` | = | suspend | controller | adapter/web/suspend/controller | PR09 | legacy |
@@ -538,18 +538,18 @@
 | 516 | `global/security/config/JwtSecurityConfig.java` | `(삭제)` | infrastructure | global/security | 삭제 (어디서도 적용되지 않는 dead code) | PR01 | PR01 완료 |
 | 517 | `global/security/config/SecurityConfig.java` | `infrastructure/security/SecurityConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
 | 518 | `global/security/config/WebMvcConfig.java` | `infrastructure/config/WebMvcConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
-| 519 | `global/security/exception/ExpiredTokenException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
-| 520 | `global/security/exception/InvalidMemberPrincipalException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
-| 521 | `global/security/exception/InvalidTokenException.java` | = | auth | global/security | domain/auth/exception | PR02 | legacy |
+| 519 | `global/security/exception/ExpiredTokenException.java` | `adapter/security/auth/exception/ExpiredTokenException.java` | auth | global/security | domain/auth/exception | PR02 | 전환 |
+| 520 | `global/security/exception/InvalidMemberPrincipalException.java` | `adapter/security/auth/exception/InvalidMemberPrincipalException.java` | auth | global/security | domain/auth/exception | PR02 | 전환 |
+| 521 | `global/security/exception/InvalidTokenException.java` | `adapter/security/auth/exception/InvalidTokenException.java` | auth | global/security | domain/auth/exception | PR02 | 전환 |
 | 522 | `global/security/handler/JwtAccessDeniedHandler.java` | `infrastructure/security/JwtAccessDeniedHandler.java` | infrastructure | global/security | infrastructure/security | PR01 | PR01 완료 |
 | 523 | `global/security/handler/JwtAuthenticationEntryPoint.java` | `infrastructure/security/JwtAuthenticationEntryPoint.java` | infrastructure | global/security | infrastructure/security | PR01 | PR01 완료 |
-| 524 | `global/security/jwt/JwtProperties.java` | = | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | legacy |
-| 525 | `global/security/jwt/JwtProvider.java` | = | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | legacy |
+| 524 | `global/security/jwt/JwtProperties.java` | `adapter/security/auth/JwtProperties.java` | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | 전환 |
+| 525 | `global/security/jwt/JwtProvider.java` | `adapter/security/auth/JwtProvider.java` | auth | global/security | adapter/security/auth (토큰 발급 output Adapter) | PR02 | 전환 |
 | 526 | `global/security/jwt/TokenParser.java` | `adapter/security/auth/TokenParser.java` | auth | global/security | adapter/security/auth | PR01 | PR01 완료 |
-| 527 | `global/sms/SmsConfig.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
-| 528 | `global/sms/SmsDemoAccount.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
-| 529 | `global/sms/SmsProperties.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
-| 530 | `global/sms/SmsSendHelper.java` | = | sms | global/sms | adapter/sms | PR02 | legacy |
+| 527 | `global/sms/SmsConfig.java` | `adapter/sms/SmsConfig.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
+| 528 | `global/sms/SmsDemoAccount.java` | `domain/sms/policy/SmsDemoAccount.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
+| 529 | `global/sms/SmsProperties.java` | `adapter/sms/SmsProperties.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
+| 530 | `global/sms/SmsSendHelper.java` | `adapter/sms/CoolSmsSenderAdapter.java` | sms | global/sms | adapter/sms | PR02 | 전환 (SmsSenderPort 구현) |
 | 531 | `global/thirdparty/ai/AiModerationClient.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
 | 532 | `global/thirdparty/ai/AiModerationProperties.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
 | 533 | `global/thirdparty/aws/s3/config/S3Config.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
@@ -581,13 +581,13 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | PATCH | `/api/alert/read/{alert_id}` | `domain/alert/presentation/AlertController.java` | readAlerts | 204 |
 | GET | `/api/alert/unread` | `domain/alert/presentation/AlertController.java` | getUnreadAlerts | 200 |
 | GET | `/api/app/version` | `domain/app/presentation/AppVersionController.java` | findVersion | 200 / 400(분기) |
-| GET | `/api/auth` | `domain/auth/presentation/AuthController.java` | getMemberInfo | 200 |
-| POST | `/api/auth/nickname` | `domain/auth/presentation/AuthController.java` | findNickname | 200 |
-| PATCH | `/api/auth/password` | `domain/auth/presentation/AuthController.java` | resetPassword | 200 |
-| PATCH | `/api/auth/reissue` | `domain/auth/presentation/AuthController.java` | reissueToken | 200 |
-| POST | `/api/auth/signin` | `domain/auth/presentation/AuthController.java` | signIn | 200 |
-| DELETE | `/api/auth/signout` | `domain/auth/presentation/AuthController.java` | signout | 204 |
-| POST | `/api/auth/signup` | `domain/auth/presentation/AuthController.java` | signUp | 201 |
+| GET | `/api/auth` | `adapter/web/auth/controller/AuthController.java` | getMemberInfo | 200 |
+| POST | `/api/auth/nickname` | `adapter/web/auth/controller/AuthController.java` | findNickname | 200 |
+| PATCH | `/api/auth/password` | `adapter/web/auth/controller/AuthController.java` | resetPassword | 200 |
+| PATCH | `/api/auth/reissue` | `adapter/web/auth/controller/AuthController.java` | reissueToken | 200 |
+| POST | `/api/auth/signin` | `adapter/web/auth/controller/AuthController.java` | signIn | 200 |
+| DELETE | `/api/auth/signout` | `adapter/web/auth/controller/AuthController.java` | signout | 204 |
+| POST | `/api/auth/signup` | `adapter/web/auth/controller/AuthController.java` | signUp | 201 |
 | GET | `/api/block` | `domain/block/presentation/BlockController.java` | getBlockList | 200 |
 | DELETE | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | unblock | 204 |
 | POST | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | block | 201 |
@@ -603,11 +603,11 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | GET | `/api/health` | `domain/health/presentation/HealthController.java` | health | 200 |
 | POST | `/api/image` | `domain/image/presentation/ImageController.java` | upload | 200 |
 | DELETE | `/api/image/{image_id}` | `domain/image/presentation/ImageController.java` | delete | 204 |
-| DELETE | `/api/member` | `domain/member/peresentation/MemberController.java` | deleteMember | 204 |
-| GET | `/api/member` | `domain/member/peresentation/MemberController.java` | findMyInfo | 200 |
-| PATCH | `/api/member` | `domain/member/peresentation/MemberController.java` | updateMyInfo | 200 |
-| GET | `/api/member/all` | `domain/member/peresentation/MemberController.java` | findAllUserInfo | 200 |
-| GET | `/api/member/{id}` | `domain/member/peresentation/MemberController.java` | findUserInfo | 200 |
+| DELETE | `/api/member` | `adapter/web/member/controller/MemberController.java` | deleteMember | 204 |
+| GET | `/api/member` | `adapter/web/member/controller/MemberController.java` | findMyInfo | 200 |
+| PATCH | `/api/member` | `adapter/web/member/controller/MemberController.java` | updateMyInfo | 200 |
+| GET | `/api/member/all` | `adapter/web/member/controller/MemberController.java` | findAllUserInfo | 200 |
+| GET | `/api/member/{id}` | `adapter/web/member/controller/MemberController.java` | findUserInfo | 200 |
 | GET | `/api/notice` | `domain/notice/presentation/NoticeController.java` | findAllNotices | 200 |
 | POST | `/api/notice` | `domain/notice/presentation/NoticeController.java` | createNotice | 201 |
 | DELETE | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | deleteNotice | 204 |
@@ -622,12 +622,12 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | GET | `/api/review/current` | `domain/review/presentation/ReviewController.java` | getMyReceivedReviews | 200 / 400(분기) |
 | GET | `/api/review/detail/{reviewId}` | `domain/review/presentation/ReviewController.java` | getReviewDetail | 200 |
 | GET | `/api/review/{memberId}` | `domain/review/presentation/ReviewController.java` | getReviewByMember | 200 / 400(분기) |
-| POST | `/api/sms` | `domain/sms/presentation/SmsController.java` | sendSms | 200 |
-| POST | `/api/sms/nickname` | `domain/sms/presentation/SmsController.java` | sendFindNicknameSms | 200 |
-| POST | `/api/sms/nickname/verify` | `domain/sms/presentation/SmsController.java` | verifyFindNicknameSms | 200 |
-| POST | `/api/sms/password` | `domain/sms/presentation/SmsController.java` | sendResetPasswordSms | 200 |
-| POST | `/api/sms/password/verify` | `domain/sms/presentation/SmsController.java` | verifyResetPasswordSms | 200 |
-| POST | `/api/sms/verify` | `domain/sms/presentation/SmsController.java` | verifySms | 200 |
+| POST | `/api/sms` | `adapter/web/sms/controller/SmsController.java` | sendSms | 200 |
+| POST | `/api/sms/nickname` | `adapter/web/sms/controller/SmsController.java` | sendFindNicknameSms | 200 |
+| POST | `/api/sms/nickname/verify` | `adapter/web/sms/controller/SmsController.java` | verifyFindNicknameSms | 200 |
+| POST | `/api/sms/password` | `adapter/web/sms/controller/SmsController.java` | sendResetPasswordSms | 200 |
+| POST | `/api/sms/password/verify` | `adapter/web/sms/controller/SmsController.java` | verifyResetPasswordSms | 200 |
+| POST | `/api/sms/verify` | `adapter/web/sms/controller/SmsController.java` | verifySms | 200 |
 | PATCH | `/api/suspend` | `domain/suspend/presentation/SuspendController.java` | suspend | 204 |
 | DELETE | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancelWithdraw | 204 |
 | POST | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancel | 200 |
@@ -740,8 +740,8 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/alert/service/impl/ExistsUnreadAlertServiceImpl.java` | 1 | PR04 |
 | `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java` | 1 | PR04 |
 | `domain/alert/service/impl/ReadAlertServiceImpl.java` | 1 | PR04 |
-| `domain/auth/service/impl/SignOutServiceImpl.java` | 1 | PR02 |
-| `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | 1 | PR02 |
+| `domain/auth/service/impl/SignOutServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/auth/service/SignOutService.java`) |
+| `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/auth/service/CurrentMemberService.java`) |
 | `domain/block/service/impl/BlockMemberServiceImpl.java` | 1 | PR09 |
 | `domain/block/service/impl/GetBlockListServiceImpl.java` | 1 | PR09 |
 | `domain/block/service/impl/UnblockMemberServiceImpl.java` | 1 | PR09 |
@@ -753,10 +753,10 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java` | 1 | PR08 |
 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | 1 | PR08 |
 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | 1 | PR08 |
-| `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | 1 | PR02 |
-| `domain/member/service/impl/FindMyInfoServiceImpl.java` | 1 | PR02 |
-| `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | 1 | PR02 |
-| `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | 1 | PR02 |
+| `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/member/service/FindAllUserInfoService.java`) |
+| `domain/member/service/impl/FindMyInfoServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/member/service/FindMyInfoService.java`) |
+| `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | 1 | PR11 (탈퇴 bridge, PR02 에서 유지) |
+| `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/member/service/UpdateMyInfoService.java`) |
 | `domain/notice/service/impl/CreateNoticeServiceImpl.java` | 1 | PR10 |
 | `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | 1 | PR10 |
 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | 1 | PR10 |
@@ -872,12 +872,12 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `domain/alert/service/impl/FindAlertByCurrentServiceImpl.java:35` | execute | `(readOnly = true)` |
 | `domain/alert/service/impl/ReadAlertServiceImpl.java:22` | execute | `(기본)` |
 | `domain/app/service/impl/FindAppVersionServiceImpl.java:16` | class FindAppVersionServiceImpl | `(readOnly = true)` |
-| `domain/auth/service/impl/FindNicknameServiceImpl.java:26` | execute | `(readOnly = true)` |
-| `domain/auth/service/impl/ReissueTokenServiceImpl.java:30` | execute | `(기본)` |
-| `domain/auth/service/impl/ResetPasswordServiceImpl.java:27` | execute | `(기본)` |
-| `domain/auth/service/impl/SignInServiceImpl.java:36` | execute | `(기본)` |
-| `domain/auth/service/impl/SignUpServiceImpl.java:52` | execute | `(기본)` |
-| `domain/auth/service/impl/TokenAuthenticationServiceImpl.java:20` | execute | `(readOnly = true)` |
+| `application/auth/service/FindNicknameService.java:21` | execute | `(readOnly = true)` |
+| `application/auth/service/ReissueTokenService.java:25` | execute | `(기본)` |
+| `application/auth/service/ResetPasswordService.java:24` | execute | `(기본)` |
+| `application/auth/service/SignInService.java:32` | execute | `(기본)` |
+| `application/auth/service/SignUpService.java:37` | execute | `(기본)` |
+| `application/auth/service/CurrentMemberService.java:22` | execute | `(readOnly = true)` |
 | `domain/block/service/impl/BlockMemberServiceImpl.java:25` | execute | `(기본)` |
 | `domain/block/service/impl/GetBlockListServiceImpl.java:22` | execute | `(readOnly = true)` |
 | `domain/block/service/impl/UnblockMemberServiceImpl.java:21` | execute | `(기본)` |
@@ -893,12 +893,16 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java:35` | execute | `(readOnly = true)` |
 | `domain/image/service/impl/DeleteImageServiceImpl.java:20` | execute | `(기본)` |
 | `domain/image/service/impl/UploadImageServiceImpl.java:28` | execute | `(기본)` |
-| `domain/member/service/impl/FindAllUserInfoServiceImpl.java:25` | execute | `(readOnly = true)` |
-| `domain/member/service/impl/FindMyInfoServiceImpl.java:26` | execute | `(readOnly = true)` |
-| `domain/member/service/impl/FindUserInfoServiceImpl.java:24` | execute | `(readOnly = true)` |
+| `application/member/service/FindAllUserInfoService.java:23` | execute | `(readOnly = true)` |
+| `application/member/service/FindMyInfoService.java:22` | execute | `(readOnly = true)` |
+| `application/member/service/FindUserInfoService.java:21` | execute | `(readOnly = true)` |
 | `domain/member/service/impl/MemberDeletionServiceImpl.java:51` | delete | `(기본)` |
 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java:26` | execute | `(기본)` |
-| `domain/member/service/impl/UpdateMyInfoServiceImpl.java:33` | execute | `(기본)` |
+| `application/member/service/UpdateMyInfoService.java:25` | execute | `(기본)` |
+| `application/member/service/ChangeGwangsanService.java:21` (PR02 신규) | plus/minus/adjust | `(propagation = Propagation.MANDATORY)` 호출자 트랜잭션 필수 |
+| `application/member/service/RegisterMemberService.java` (PR02 신규) | execute | `(기본)` 가입 트랜잭션에 참여 |
+| `application/member/service/ChangePasswordService.java` (PR02 신규) | execute | `(기본)` |
+| `application/member/service/MemberAccountService.java` (PR02 신규) | 클래스 | `(readOnly = true)` |
 | `domain/notice/service/impl/CreateNoticeServiceImpl.java:47` | execute | `(기본)` |
 | `domain/notice/service/impl/DeleteNoticeServiceImpl.java:25` | execute | `(기본)` |
 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java:32` | execute | `(기본)` |
@@ -928,11 +932,9 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java:29` | execute | `(readOnly = true)` |
 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java:35` | execute | `(readOnly = true)` |
 | `domain/review/service/impl/GetReviewDetailServiceImpl.java:24` | execute | `(readOnly = true)` |
-| `domain/sms/service/impl/SendFindNicknameSmsServiceImpl.java:36` | execute | `(기본)` |
-| `domain/sms/service/impl/SendResetPasswordSmsServiceImpl.java:33` | execute | `(기본)` |
-| `domain/sms/service/impl/VerifyCodeServiceImpl.java:27` | execute | `(기본)` |
-| `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java:25` | execute | `(기본)` |
-| `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java:25` | execute | `(기본)` |
+| `application/sms/service/SendFindNicknameSmsService.java:26` | execute | `(기본)` |
+| `application/sms/service/SendResetPasswordSmsService.java:25` | execute | `(기본)` |
+| `application/sms/service/VerifyCodeService.java:22` | execute | `(기본)` (기존 Verify 3개 서비스 통합) |
 | `domain/suspend/service/impl/SuspendMemberServiceImpl.java:30` | execute | `(기본)` |
 | `domain/trade/service/TradeCancelApplier.java:47` | apply | `(propagation = Propagation.MANDATORY)` |
 | `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java:33` | execute | `(readOnly = true)` |
@@ -991,9 +993,9 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatRoom.java` | Entity | tbl_chat_room | ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | Y |
 | `domain/dong/entity/Dong.java` | Entity | tbl_dong | - | - | - |
 | `domain/image/entity/Image.java` | Entity | tbl_image | - | - | Y |
-| `domain/member/entity/Member.java` | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
-| `domain/member/entity/MemberDetail.java` | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
-| `domain/member/entity/WithdrawalRecord.java` | Entity | tbl_withdrawal_record | - | - | Y |
+| `adapter/persistence/member/MemberJpaEntity.java` (entity name `Member`) | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
+| `adapter/persistence/member/MemberDetailJpaEntity.java` (entity name `MemberDetail`) | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
+| `adapter/persistence/member/WithdrawalRecordJpaEntity.java` (entity name `WithdrawalRecord`) | Entity | tbl_withdrawal_record | - | - | Y |
 | `domain/notice/entity/Notice.java` | Entity | tbl_notice | ManyToOne place:Place (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
 | `domain/notice/entity/NoticeImage.java` | Entity | tbl_notice_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne notice:Notice (fetch = FetchType.LAZY) | - | - |
 | `domain/place/entity/Head.java` | Entity | tbl_head_place | - | - | - |
@@ -1026,8 +1028,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatRoom.java` | buyer | member.Member | ManyToOne |
 | `domain/chat/entity/ChatRoom.java` | product | post.Product | ManyToOne |
 | `domain/chat/entity/ChatRoom.java` | seller | member.Member | ManyToOne |
-| `domain/member/entity/MemberDetail.java` | dong | dong.Dong | ManyToOne |
-| `domain/member/entity/MemberDetail.java` | place | place.Place | ManyToOne |
+| `adapter/persistence/member/MemberDetailJpaEntity.java` | dong | dong.Dong | ManyToOne |
+| `adapter/persistence/member/MemberDetailJpaEntity.java` | place | place.Place | ManyToOne |
 | `domain/notice/entity/Notice.java` | member | member.Member | ManyToOne |
 | `domain/notice/entity/Notice.java` | place | place.Place | ManyToOne |
 | `domain/notice/entity/NoticeImage.java` | image | image.Image | ManyToOne |
@@ -1060,5 +1062,14 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 |
 | `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web |
 | `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config |
-| `JwtProvider`/`JwtProperties`/security exception | global/security | PR02 |
-| `MemberDetails`/`MemberDetailsService` | adapter/security/auth, legacy Member Entity·MemberRepository 직접 사용(bridge) | PR02 (회원 조회 Port로 교체) |
+| `JwtProvider`/`JwtProperties`/security exception | PR02 완료: adapter/security/auth(+/exception) | - |
+| `MemberDetails`/`MemberDetailsService` | PR02 완료: member 공개 `MemberAccountQuery`·`MemberAccount` 사용 | - |
+| PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | adapter/integration/auth | PR03 (dong/place 공개 query) |
+| PR02 bridge: `LegacyMemberKeywordAdapter` (RelatedKeyword·MemberRelatedKeyword Repository) | adapter/integration/member | PR03 (relatedkeyword 공개 command/query) |
+| PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | adapter/integration/auth | PR04 (notification 기기 등록 command) |
+| PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
+| PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |
+| PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) |
+| PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR |
+| PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
+| `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |

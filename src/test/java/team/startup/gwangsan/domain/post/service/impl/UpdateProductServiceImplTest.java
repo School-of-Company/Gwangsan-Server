@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -52,14 +52,14 @@ class UpdateProductServiceImplTest {
     @Mock
     private MemberUtil memberUtil;
 
-    private Member author;
-    private Member otherUser;
+    private MemberJpaEntity author;
+    private MemberJpaEntity otherUser;
     private Product product;
 
     @BeforeEach
     void setUp() {
-        author = mock(Member.class);
-        otherUser = mock(Member.class);
+        author = mock(MemberJpaEntity.class);
+        otherUser = mock(MemberJpaEntity.class);
         product = mock(Product.class);
 
         lenient().when(author.getId()).thenReturn(1L);

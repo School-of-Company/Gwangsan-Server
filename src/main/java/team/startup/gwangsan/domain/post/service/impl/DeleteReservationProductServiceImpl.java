@@ -10,7 +10,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.global.event.ReservationCancelledEvent;
 import java.time.LocalDateTime;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -41,7 +41,7 @@ public class DeleteReservationProductServiceImpl implements DeleteReservationPro
     @Override
     @Transactional
     public void execute(Long productId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(NotFoundProductException::new);

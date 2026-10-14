@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.place.entity.Place;
 
@@ -22,5 +22,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Notice n SET n.member = :dummy WHERE n.member = :target")
-    void reassignMember(@Param("target") Member target, @Param("dummy") Member dummy);
+    void reassignMember(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);
 }

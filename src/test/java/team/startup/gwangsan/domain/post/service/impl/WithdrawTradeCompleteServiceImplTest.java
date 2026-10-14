@@ -14,9 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -57,7 +57,7 @@ class WithdrawTradeCompleteServiceImplTest {
     private TradeCompleteRepository tradeCompleteRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -86,11 +86,11 @@ class WithdrawTradeCompleteServiceImplTest {
         SecurityContextHolder.clearContext();
     }
 
-    private MemberDetail mockMemberDetail(Long memberId) {
-        Member member = mock(Member.class);
+    private MemberDetailJpaEntity mockMemberDetail(Long memberId) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         when(member.getId()).thenReturn(memberId);
 
-        MemberDetail detail = mock(MemberDetail.class);
+        MemberDetailJpaEntity detail = mock(MemberDetailJpaEntity.class);
         when(detail.getMember()).thenReturn(member);
         when(detail.getId()).thenReturn(memberId);
         return detail;
@@ -104,7 +104,7 @@ class WithdrawTradeCompleteServiceImplTest {
         @DisplayName("본인과 거래를 시도하면 CannotSelectSelfException 을 던진다")
         void execute_shouldThrowCannotSelectSelfException_whenSelfTrade() {
             Long memberId = 1L;
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(memberDetail);
@@ -121,7 +121,7 @@ class WithdrawTradeCompleteServiceImplTest {
             Long memberId = 1L;
             Long otherMemberId = 2L;
 
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(memberDetail);
             when(productRepository.findByIdWithLock(100L)).thenReturn(Optional.empty());
 
@@ -134,7 +134,7 @@ class WithdrawTradeCompleteServiceImplTest {
             Long memberId = 1L;
             Long otherMemberId = 2L;
 
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(memberDetail);
 
@@ -154,8 +154,8 @@ class WithdrawTradeCompleteServiceImplTest {
             Long sellerId = 2L;
             Long productId = 100L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -166,7 +166,7 @@ class WithdrawTradeCompleteServiceImplTest {
             when(product.getId()).thenReturn(productId);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.GIVER);
-            when(product.getMember()).thenReturn(mock(Member.class));
+            when(product.getMember()).thenReturn(mock(MemberJpaEntity.class));
 
             when(productRepository.findByIdWithLock(productId))
                     .thenReturn(Optional.of(product));
@@ -188,15 +188,15 @@ class WithdrawTradeCompleteServiceImplTest {
             Long buyerId = 2L;
             Long productId = 100L;
 
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(sellerDetail);
             when(memberDetailRepository.findByMemberIdWithMember(buyerId))
                     .thenReturn(buyerDetail);
 
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(productId);
@@ -227,15 +227,15 @@ class WithdrawTradeCompleteServiceImplTest {
             Long buyerId = 2L;
             Long productId = 100L;
 
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(sellerDetail);
             when(memberDetailRepository.findByMemberIdWithMember(buyerId))
                     .thenReturn(buyerDetail);
 
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(productId);
@@ -271,11 +271,11 @@ class WithdrawTradeCompleteServiceImplTest {
             Long productId = 100L;
             Long roomId = 700L;
 
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
 
-            Member sellerMember = sellerDetail.getMember();
-            Member buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(sellerDetail);
@@ -330,10 +330,10 @@ class WithdrawTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            Member buyer = buyerDetail.getMember();
-            Member seller = sellerDetail.getMember();
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberJpaEntity buyer = buyerDetail.getMember();
+            MemberJpaEntity seller = sellerDetail.getMember();
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(buyerDetail);
             when(memberDetailRepository.findByMemberIdWithMember(sellerId)).thenReturn(sellerDetail);
 

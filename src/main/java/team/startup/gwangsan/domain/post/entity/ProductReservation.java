@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
 
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ public class ProductReservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reserver_id")
-    private Member reserver;
+    private MemberJpaEntity reserver;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -67,7 +67,7 @@ public class ProductReservation {
     private LocalDateTime reminderAtSentAt;
 
     @Builder
-    public ProductReservation(Product product, Member reserver, ReservationStatus status, LocalDateTime scheduledAt,
+    public ProductReservation(Product product, MemberJpaEntity reserver, ReservationStatus status, LocalDateTime scheduledAt,
                                String placeName, String address, Double latitude, Double longitude) {
         this.product = product;
         this.reserver = reserver;

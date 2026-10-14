@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -38,7 +38,7 @@ public class BlockAspect {
             throw new IllegalArgumentException("@CheckBlocked param 이름이 잘못되었습니다: " + paramName);
         }
 
-        Member currentMember = memberUtil.getCurrentMember();
+        MemberJpaEntity currentMember = memberUtil.getCurrentMember();
         blockValidator.validate(currentMember.getId(), targetMemberId);
     }
 }

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeForbiddenException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
@@ -42,7 +42,7 @@ class DeleteNoticeServiceImplTest {
             @Test
             @DisplayName("공지를 삭제한다")
             void it_deletes_notice() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -63,8 +63,8 @@ class DeleteNoticeServiceImplTest {
             @Test
             @DisplayName("공지를 삭제한다")
             void it_deletes_notice_by_head_admin() {
-                Member headAdmin = mock(Member.class);
-                Member noticeOwner = mock(Member.class);
+                MemberJpaEntity headAdmin = mock(MemberJpaEntity.class);
+                MemberJpaEntity noticeOwner = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(headAdmin);
@@ -86,7 +86,7 @@ class DeleteNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeNotFoundException을 던진다")
             void it_throws_notice_not_found_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(noticeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -102,8 +102,8 @@ class DeleteNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeForbiddenException을 던진다")
             void it_throws_notice_forbidden_exception() {
-                Member member = mock(Member.class);
-                Member noticeOwner = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberJpaEntity noticeOwner = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);

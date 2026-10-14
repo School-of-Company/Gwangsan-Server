@@ -13,11 +13,11 @@ import team.startup.gwangsan.domain.alert.repository.AlertRepository;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.DummyMemberDeletionNotAllowedException;
 import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
@@ -38,7 +38,7 @@ class MemberDeletionServiceImplTest {
 
     @InjectMocks private MemberDeletionServiceImpl service;
 
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ProductRepository productRepository;
     @Mock private TradeCompleteRepository tradeCompleteRepository;
     @Mock private TradeCancelRepository tradeCancelRepository;
@@ -53,7 +53,7 @@ class MemberDeletionServiceImplTest {
     @Mock private SuspendRepository suspendRepository;
     @Mock private MemberBlockRepository memberBlockRepository;
     @Mock private AlertReceiptRepository alertReceiptRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
 
     @Nested
     @DisplayName("delete() 메서드는")
@@ -66,8 +66,8 @@ class MemberDeletionServiceImplTest {
             @Test
             @DisplayName("모든 참조를 재할당하고 멤버를 삭제한다")
             void it_reassigns_all_references_and_deletes_member() {
-                Member member = mock(Member.class);
-                Member dummy = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberJpaEntity dummy = mock(MemberJpaEntity.class);
 
                 when(member.getId()).thenReturn(1L);
                 when(dummy.getId()).thenReturn(99L);
@@ -109,7 +109,7 @@ class MemberDeletionServiceImplTest {
             @Test
             @DisplayName("NotFoundDummyMemberException을 던진다")
             void it_throws_not_found_dummy_member_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
 
                 when(memberRepository.findByNickname("__withdrawn__")).thenReturn(Optional.empty());
 
@@ -125,8 +125,8 @@ class MemberDeletionServiceImplTest {
             @Test
             @DisplayName("DummyMemberDeletionNotAllowedException을 던진다")
             void it_throws_dummy_member_deletion_not_allowed_exception() {
-                Member member = mock(Member.class);
-                Member dummy = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberJpaEntity dummy = mock(MemberJpaEntity.class);
 
                 when(member.getId()).thenReturn(99L);
                 when(dummy.getId()).thenReturn(99L);

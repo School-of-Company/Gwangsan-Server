@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -59,16 +59,16 @@ class TradeCancelServiceImplTest {
 
     // 케이스마다 실제로 호출되는 getter 가 달라(구매자가 먼저 매치되면 판매자 getId() 는
     // 호출되지 않는다) 헬퍼가 만드는 목은 lenient 로 둔다. 동작 검증은 verify 로 한다.
-    private Member member(Long id) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity member(Long id) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         lenient().when(member.getId()).thenReturn(id);
         return member;
     }
 
     /** 잠긴 상품 + COMPLETED 거래를 준비하고 그 거래를 돌려준다. */
     private TradeComplete givenLockedTrade() {
-        Member buyer = member(BUYER_ID);
-        Member seller = member(SELLER_ID);
+        MemberJpaEntity buyer = member(BUYER_ID);
+        MemberJpaEntity seller = member(SELLER_ID);
 
         TradeComplete tradeComplete = mock(TradeComplete.class);
         lenient().when(tradeComplete.getId()).thenReturn(TRADE_COMPLETE_ID);
@@ -84,7 +84,7 @@ class TradeCancelServiceImplTest {
     }
 
     private TradeCancel pendingRequestedBy(Long memberId) {
-        Member requester = member(memberId);
+        MemberJpaEntity requester = member(memberId);
         TradeCancel tradeCancel = mock(TradeCancel.class);
         lenient().when(tradeCancel.getMember()).thenReturn(requester);
         return tradeCancel;
@@ -106,7 +106,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("취소 요청을 저장하고 관리자 알림 이벤트를 발행한다")
             void it_saves_trade_cancel_and_publishes_event() {
-                Member currentMember = member(BUYER_ID);
+                MemberJpaEntity currentMember = member(BUYER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
                 givenPending(null);
@@ -129,7 +129,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("상품 행을 비관적 잠금으로 조회한다")
             void it_locks_product_row() {
-                Member currentMember = member(BUYER_ID);
+                MemberJpaEntity currentMember = member(BUYER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
                 givenPending(null);
@@ -148,7 +148,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("양측 동의로 보고 즉시 철회하며 새 요청을 저장하지 않는다")
             void it_applies_cancel_immediately() {
-                Member currentMember = member(SELLER_ID);
+                MemberJpaEntity currentMember = member(SELLER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
 
@@ -169,7 +169,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("구매자가 동의하는 방향에서도 똑같이 즉시 철회한다")
             void it_applies_cancel_for_buyer_side_too() {
-                Member currentMember = member(BUYER_ID);
+                MemberJpaEntity currentMember = member(BUYER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
 
@@ -190,7 +190,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("AlreadyTradeCancelRequestException을 던진다")
             void it_throws_already_trade_cancel_request_exception() {
-                Member currentMember = member(BUYER_ID);
+                MemberJpaEntity currentMember = member(BUYER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
                 givenPending(pendingRequestedBy(BUYER_ID));
@@ -210,7 +210,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("삭제 여부를 가리지 않는 잠금을 써서 철회를 막지 않는다")
             void it_does_not_block_cancel_for_deleted_product() {
-                Member currentMember = member(SELLER_ID);
+                MemberJpaEntity currentMember = member(SELLER_ID);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
 
@@ -233,7 +233,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("NotFoundProductException을 던진다")
             void it_throws_not_found_product_exception() {
-                when(memberUtil.getCurrentMember()).thenReturn(mock(Member.class));
+                when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
                 when(productRepository.findByIdForUpdate(PRODUCT_ID)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> service.execute(PRODUCT_ID, "이유", List.of()))
@@ -248,7 +248,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("NotFoundTradeCompleteException을 던진다")
             void it_throws_not_found_trade_complete_exception() {
-                when(memberUtil.getCurrentMember()).thenReturn(mock(Member.class));
+                when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
                 when(productRepository.findByIdForUpdate(PRODUCT_ID)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(PRODUCT_ID, TradeStatus.COMPLETED))
                         .thenReturn(Optional.empty());
@@ -265,7 +265,7 @@ class TradeCancelServiceImplTest {
             @Test
             @DisplayName("TradeParticipantOnlyException을 던진다")
             void it_throws_trade_participant_only_exception() {
-                Member currentMember = member(99L);
+                MemberJpaEntity currentMember = member(99L);
                 when(memberUtil.getCurrentMember()).thenReturn(currentMember);
                 givenLockedTrade();
 

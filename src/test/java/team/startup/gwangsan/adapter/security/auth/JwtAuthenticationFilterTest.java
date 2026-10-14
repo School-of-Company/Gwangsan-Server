@@ -12,11 +12,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
-import team.startup.gwangsan.global.security.jwt.JwtProvider;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
+import team.startup.gwangsan.support.MemberAccounts;
 
 import java.util.Optional;
 
@@ -33,7 +34,7 @@ class JwtAuthenticationFilterTest {
     private static final String PHONE_NUMBER = "010-1234-5678";
 
     @Mock private JwtProvider jwtProvider;
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
 
     @AfterEach
     void clearSecurityContext() {
@@ -91,7 +92,7 @@ class JwtAuthenticationFilterTest {
         @Test
         @DisplayName("it_유효한 Bearer 토큰이면 실제 회원 상세 정보를 SecurityContext에 저장하고 다음 필터로 전달한다")
         void it_authenticates_with_member_details_when_bearer_token_is_valid() throws Exception {
-            Member member = member();
+            MemberJpaEntity member = member();
             when(jwtProvider.validateAccessToken("access-token")).thenReturn(true);
             when(jwtProvider.validateAndGetSubject("access-token")).thenReturn(PHONE_NUMBER);
             when(memberRepository.findByPhoneNumber(PHONE_NUMBER)).thenReturn(Optional.of(member));
@@ -106,7 +107,7 @@ class JwtAuthenticationFilterTest {
             assertThat(SecurityContextHolder.getContext().getAuthentication())
                     .isInstanceOf(UsernamePasswordAuthenticationToken.class);
             MemberDetails principal = (MemberDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            assertThat(principal.getMember()).isSameAs(member);
+            assertThat(principal.getMember()).isEqualTo(MemberAccounts.of(member));
             assertThat(principal.getAuthorities()).extracting("authority").containsExactly("ROLE_USER");
             verify(jwtProvider).validateAccessToken("access-token");
             verify(jwtProvider).validateAndGetSubject("access-token");
@@ -146,11 +147,11 @@ class JwtAuthenticationFilterTest {
     }
 
     private JwtAuthenticationFilter filter() {
-        return new JwtAuthenticationFilter(jwtProvider, new MemberDetailsService(memberRepository));
+        return new JwtAuthenticationFilter(jwtProvider, MemberAccounts.detailsService(memberRepository));
     }
 
-    private Member member() {
-        return Member.builder()
+    private MemberJpaEntity member() {
+        return MemberJpaEntity.builder()
                 .name("회원")
                 .nickname("회원닉네임")
                 .phoneNumber(PHONE_NUMBER)

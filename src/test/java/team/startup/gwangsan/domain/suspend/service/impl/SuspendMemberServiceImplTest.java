@@ -12,11 +12,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
@@ -36,7 +36,7 @@ class SuspendMemberServiceImplTest {
     private SuspendMemberServiceImpl service;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
     private SuspendRepository suspendRepository;
@@ -58,7 +58,7 @@ class SuspendMemberServiceImplTest {
             @Test
             @DisplayName("정지 처리 후 이벤트를 발행한다")
             void it_suspends_member_and_publishes_event() {
-                Member member = actualMember();
+                MemberJpaEntity member = actualMember();
 
                 when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
                 when(suspendRepository.save(any(Suspend.class))).thenAnswer(invocation -> {
@@ -96,7 +96,7 @@ class SuspendMemberServiceImplTest {
             @Test
             @DisplayName("정지 처리만 수행하고 이벤트를 발행하지 않는다")
             void it_suspends_member_without_publishing_event() {
-                Member member = actualMember();
+                MemberJpaEntity member = actualMember();
 
                 when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
                 when(suspendRepository.save(any(Suspend.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -116,7 +116,7 @@ class SuspendMemberServiceImplTest {
             @Test
             @DisplayName("정지 처리만 수행하고 이벤트를 발행하지 않는다")
             void it_suspends_member_without_publishing_event() {
-                Member member = actualMember();
+                MemberJpaEntity member = actualMember();
 
                 when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
                 when(suspendRepository.save(any(Suspend.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -145,8 +145,8 @@ class SuspendMemberServiceImplTest {
         }
     }
 
-    private Member actualMember() {
-        return Member.builder()
+    private MemberJpaEntity actualMember() {
+        return MemberJpaEntity.builder()
                 .name("회원")
                 .nickname("member")
                 .phoneNumber("010-0000-0001")

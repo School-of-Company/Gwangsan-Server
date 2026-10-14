@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 
 @Entity
@@ -26,18 +26,18 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id")
-    private Member reviewer;
+    private MemberJpaEntity reviewer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_id", nullable = false)
-    private Member reviewed;
+    private MemberJpaEntity reviewed;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @Builder
-    public Review(String content, Integer light, Member reviewer, Member reviewed, Product product) {
+    public Review(String content, Integer light, MemberJpaEntity reviewer, MemberJpaEntity reviewed, Product product) {
         this.content = content;
         this.light = light;
         this.reviewer = reviewer;

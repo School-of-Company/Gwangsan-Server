@@ -8,11 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.place.entity.Head;
@@ -43,7 +43,7 @@ class FindAllNoticeServiceImplTest {
 
     @Mock private NoticeRepository noticeRepository;
     @Mock private NoticeImageRepository noticeImageRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private PlaceRepository placeRepository;
 
@@ -58,8 +58,8 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("findByPlaceOrderByIdDesc를 호출한다")
             void it_calls_find_by_place_order_by_id_desc() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -84,8 +84,8 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("findByPlaceAndIdLessThanOrderByIdDesc를 호출한다")
             void it_calls_find_by_place_and_id_less_than_order_by_id_desc() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -110,8 +110,8 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("findByPlaceInOrderByIdDesc를 호출한다")
             void it_calls_find_by_place_in_order_by_id_desc() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
                 Head head = mock(Head.class);
 
@@ -139,8 +139,8 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("findByPlaceInAndIdLessThanOrderByIdDesc를 호출한다")
             void it_calls_find_by_place_in_and_id_less_than_order_by_id_desc() {
-                Member member = mock(Member.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
                 Head head = mock(Head.class);
 
@@ -168,16 +168,16 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("이미지가 포함된 FindAllNoticeResponse 목록을 반환한다")
             void it_returns_notice_responses_with_images() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getId()).thenReturn(1L);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 Place place = mock(Place.class);
 
                 Notice notice = mock(Notice.class);
                 when(notice.getId()).thenReturn(100L);
                 when(notice.getTitle()).thenReturn("공지 제목");
                 when(notice.getContent()).thenReturn("공지 내용");
-                Member noticeMember = mock(Member.class);
+                MemberJpaEntity noticeMember = mock(MemberJpaEntity.class);
                 when(noticeMember.getId()).thenReturn(1L);
                 when(notice.getMember()).thenReturn(noticeMember);
 
@@ -212,7 +212,7 @@ class FindAllNoticeServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberDetailException을 던진다")
             void it_throws_not_found_member_detail_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(memberDetailRepository.findByMember(member)).thenReturn(Optional.empty());
 

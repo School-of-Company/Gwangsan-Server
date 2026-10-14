@@ -12,7 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -80,7 +80,7 @@ class ReservationProductServiceImplTest {
         @DisplayName("상품이 존재하지 않으면 NotFoundProductException을 던진다")
         void throw_exception_when_product_not_found() {
             Long productId = 1L;
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
             // given
@@ -98,9 +98,9 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_not_author() {
             Long productId = 1L;
 
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
-            Member other = mock(Member.class);
+            MemberJpaEntity other = mock(MemberJpaEntity.class);
             when(other.getId()).thenReturn(2L);
             when(memberUtil.getCurrentMember()).thenReturn(other);
 
@@ -120,7 +120,7 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_already_reserved() {
             Long productId = 1L;
 
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
@@ -141,7 +141,7 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_status_is_not_ongoing() {
             Long productId = 1L;
 
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
@@ -162,7 +162,7 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_chat_room_not_found() {
             Long productId = 1L;
 
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
@@ -182,7 +182,7 @@ class ReservationProductServiceImplTest {
         void throw_exception_when_chat_room_product_mismatch() {
             Long productId = 1L;
 
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
@@ -208,7 +208,7 @@ class ReservationProductServiceImplTest {
             Long productId = 1L;
 
             // given
-            Member author = mock(Member.class);
+            MemberJpaEntity author = mock(MemberJpaEntity.class);
             when(author.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(author);
 
@@ -219,7 +219,7 @@ class ReservationProductServiceImplTest {
 
             when(productRepository.findByIdWithLock(productId)).thenReturn(Optional.of(product));
 
-            Member buyer = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
             when(buyer.getId()).thenReturn(2L);
 
             ChatRoom chatRoom = mock(ChatRoom.class);
@@ -256,8 +256,8 @@ class ReservationProductServiceImplTest {
         @DisplayName("작성자가 채팅방 구매자이면 판매자를 예약자로 저장한다")
         void saves_seller_as_reserver_when_author_is_room_buyer() {
             Long productId = 1L;
-            Member authorBuyer = mock(Member.class);
-            Member seller = mock(Member.class);
+            MemberJpaEntity authorBuyer = mock(MemberJpaEntity.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
             when(authorBuyer.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(authorBuyer);
 

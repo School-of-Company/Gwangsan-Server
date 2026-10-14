@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.service.ReadAlertService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class ReadAlertServiceImpl implements ReadAlertService {
     @Override
     @Transactional
     public void execute(Long alertId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
         List<AlertReceipt> alertReceipts = alertReceiptRepository.findByMemberIdAndCheckedUpToAlertId(member.getId(), false, alertId);
 
         for (AlertReceipt alert : alertReceipts) {

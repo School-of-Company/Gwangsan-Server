@@ -20,9 +20,9 @@ import team.startup.gwangsan.domain.chat.entity.ChatMessageImage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.place.entity.Head;
@@ -189,8 +189,8 @@ class ImageCustomRepositoryImplTest {
     }
 
     private Relationships persistRelationships(String suffix) {
-        Member buyer = member("buyer-" + suffix, "010-0000-" + suffix.hashCode());
-        Member seller = member("seller-" + suffix, "010-0001-" + suffix.hashCode());
+        MemberJpaEntity buyer = member("buyer-" + suffix, "010-0000-" + suffix.hashCode());
+        MemberJpaEntity seller = member("seller-" + suffix, "010-0001-" + suffix.hashCode());
         Product product = em.persist(Product.builder()
                 .title("product-" + suffix)
                 .description("description")
@@ -235,8 +235,8 @@ class ImageCustomRepositoryImplTest {
         return new Relationships(product, notice, report, chatMessage, tradeCancel);
     }
 
-    private Member member(String nickname, String phoneNumber) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity member(String nickname, String phoneNumber) {
+        return em.persist(MemberJpaEntity.builder()
                 .name(nickname)
                 .nickname(nickname)
                 .password("pw")

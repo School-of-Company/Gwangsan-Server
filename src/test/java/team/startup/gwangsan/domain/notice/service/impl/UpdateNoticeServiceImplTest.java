@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.exception.UnauthorizedNoticeAccessException;
@@ -48,7 +48,7 @@ class UpdateNoticeServiceImplTest {
             @Test
             @DisplayName("notice를 업데이트하고 이미지를 저장한다")
             void it_updates_notice_and_saves_images() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
                 Image image = mock(Image.class);
 
@@ -69,7 +69,7 @@ class UpdateNoticeServiceImplTest {
             @Test
             @DisplayName("빈 이미지 ID 목록이면 기존 이미지를 모두 제거하고 빈 목록으로 저장한다")
             void it_clears_all_images_when_image_ids_are_empty() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -92,7 +92,7 @@ class UpdateNoticeServiceImplTest {
             @Test
             @DisplayName("NoticeNotFoundException을 던진다")
             void it_throws_notice_not_found_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(noticeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -110,8 +110,8 @@ class UpdateNoticeServiceImplTest {
             @Test
             @DisplayName("UnauthorizedNoticeAccessException을 던진다")
             void it_throws_unauthorized_notice_access_exception() {
-                Member member = mock(Member.class);
-                Member noticeOwner = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
+                MemberJpaEntity noticeOwner = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
@@ -134,7 +134,7 @@ class UpdateNoticeServiceImplTest {
             @Test
             @DisplayName("ImageNotFoundException을 던진다")
             void it_throws_image_not_found_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 Notice notice = mock(Notice.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 
 import java.time.LocalDateTime;
@@ -32,11 +32,11 @@ public class ChatRoom {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
-    private Member buyer;
+    private MemberJpaEntity buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
-    private Member seller;
+    private MemberJpaEntity seller;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
@@ -49,7 +49,7 @@ public class ChatRoom {
     private LocalDateTime hiddenBySellerAt;
 
     @Builder
-    public ChatRoom(LocalDateTime createdAt, Boolean isActive, Member buyer, Member seller, Product product) {
+    public ChatRoom(LocalDateTime createdAt, Boolean isActive, MemberJpaEntity buyer, MemberJpaEntity seller, Product product) {
         this.createdAt = createdAt;
         this.isActive = isActive;
         this.buyer = buyer;
@@ -57,15 +57,15 @@ public class ChatRoom {
         this.product = product;
     }
 
-    public boolean isParticipant(Member member) {
+    public boolean isParticipant(MemberJpaEntity member) {
         return buyer.getId().equals(member.getId()) || seller.getId().equals(member.getId());
     }
 
-    public Member getOtherMember(Member member) {
+    public MemberJpaEntity getOtherMember(MemberJpaEntity member) {
         return buyer.getId().equals(member.getId()) ? seller : buyer;
     }
 
-    public boolean isHiddenFor(Member member) {
+    public boolean isHiddenFor(MemberJpaEntity member) {
         if (buyer.getId().equals(member.getId())) {
             return hiddenByBuyerAt != null;
         }
@@ -75,7 +75,7 @@ public class ChatRoom {
         return false;
     }
 
-    public void hideFor(Member member, LocalDateTime hiddenAt) {
+    public void hideFor(MemberJpaEntity member, LocalDateTime hiddenAt) {
         if (buyer.getId().equals(member.getId())) {
             this.hiddenByBuyerAt = hiddenAt;
         } else if (seller.getId().equals(member.getId())) {
@@ -83,7 +83,7 @@ public class ChatRoom {
         }
     }
 
-    public void unhideFor(Member member) {
+    public void unhideFor(MemberJpaEntity member) {
         if (buyer.getId().equals(member.getId())) {
             this.hiddenByBuyerAt = null;
         } else if (seller.getId().equals(member.getId())) {

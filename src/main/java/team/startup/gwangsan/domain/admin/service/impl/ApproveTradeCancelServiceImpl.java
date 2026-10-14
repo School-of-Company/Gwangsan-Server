@@ -9,10 +9,10 @@ import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.ApproveTradeCancelService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -30,7 +30,7 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
     private final TradeCancelRepository tradeCancelRepository;
     private final ProductRepository productRepository;
     private final MemberUtil memberUtil;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
     private final TradeCancelApplier tradeCancelApplier;
 
@@ -43,11 +43,11 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void execute(Long alertId) {
-        Member admin = memberUtil.getCurrentMember();
+        MemberJpaEntity admin = memberUtil.getCurrentMember();
         AdminAlert alert = adminAlertRepository.findByIdWithMember(alertId)
                 .orElseThrow(NotFoundAdminAlertException::new);
 
-        MemberDetail adminDetail = getMemberDetail(admin.getId());
+        MemberDetailJpaEntity adminDetail = getMemberDetail(admin.getId());
 
         Long productId = tradeCancelRepository.findProductIdById(alert.getSourceId())
                 .orElseThrow(NotFoundTradeCancelException::new);
@@ -60,8 +60,8 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
 
         TradeComplete tradeComplete = tradeCancel.getTradeComplete();
 
-        MemberDetail buyerDetail = getMemberDetail(tradeComplete.getBuyer().getId());
-        MemberDetail sellerDetail = getMemberDetail(tradeComplete.getSeller().getId());
+        MemberDetailJpaEntity buyerDetail = getMemberDetail(tradeComplete.getBuyer().getId());
+        MemberDetailJpaEntity sellerDetail = getMemberDetail(tradeComplete.getSeller().getId());
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, buyerDetail);
         validatePlaceUtil.validateSamePlace(admin, adminDetail, sellerDetail);
@@ -69,7 +69,7 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
         tradeCancelApplier.apply(tradeCancel);
     }
 
-    private MemberDetail getMemberDetail(Long memberId) {
+    private MemberDetailJpaEntity getMemberDetail(Long memberId) {
         return memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
     }

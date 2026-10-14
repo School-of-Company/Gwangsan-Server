@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import java.sql.Timestamp;
@@ -48,8 +48,8 @@ class AlertReceiptCustomRepositoryImplTest {
         @Test
         @DisplayName("현재 회원의 요청한 읽음 상태와 기준 알림 ID 이하 영수증만 반환한다")
         void it_limits_receipts_to_the_current_member_check_state_and_alert_id_cutoff() {
-            Member currentMember = member("현재회원");
-            Member otherMember = member("다른회원");
+            MemberJpaEntity currentMember = member("현재회원");
+            MemberJpaEntity otherMember = member("다른회원");
             Alert checkedAlert = alert(currentMember, "읽은 알림");
             Alert uncheckedAtCutoff = alert(currentMember, "기준 미확인 알림");
             Alert uncheckedAfterCutoff = alert(currentMember, "기준 이후 미확인 알림");
@@ -78,9 +78,9 @@ class AlertReceiptCustomRepositoryImplTest {
         @Test
         @DisplayName("현재 회원에게 도착한 읽은 알림과 미확인 알림을 생성 시각 내림차순으로 반환한다")
         void it_returns_only_current_member_alerts_in_descending_created_at_order() {
-            Member currentMember = member("현재회원");
-            Member sender = member("발신회원");
-            Member otherMember = member("다른회원");
+            MemberJpaEntity currentMember = member("현재회원");
+            MemberJpaEntity sender = member("발신회원");
+            MemberJpaEntity otherMember = member("다른회원");
             Alert oldest = alert(sender, "오래된 알림");
             Alert newest = alert(sender, "최신 알림");
             Alert foreign = alert(sender, "제외 알림");
@@ -100,8 +100,8 @@ class AlertReceiptCustomRepositoryImplTest {
         }
     }
 
-    private Member member(String suffix) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity member(String suffix) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("이름-" + suffix)
                 .nickname("회원-" + suffix)
                 .password("pw")
@@ -111,7 +111,7 @@ class AlertReceiptCustomRepositoryImplTest {
                 .build());
     }
 
-    private Alert alert(Member sender, String title) {
+    private Alert alert(MemberJpaEntity sender, String title) {
         return em.persist(Alert.builder()
                 .sourceId(1L)
                 .sendMember(sender)
@@ -121,7 +121,7 @@ class AlertReceiptCustomRepositoryImplTest {
                 .build());
     }
 
-    private AlertReceipt receipt(Alert alert, Member member, boolean checked) {
+    private AlertReceipt receipt(Alert alert, MemberJpaEntity member, boolean checked) {
         return em.persist(AlertReceipt.builder().alert(alert).member(member).checked(checked).build());
     }
 

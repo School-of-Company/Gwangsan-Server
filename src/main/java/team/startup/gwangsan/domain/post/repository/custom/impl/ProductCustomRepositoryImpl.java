@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -22,14 +22,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static team.startup.gwangsan.domain.image.entity.QImage.image;
-import static team.startup.gwangsan.domain.member.entity.QMember.member;
-import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
 import static team.startup.gwangsan.domain.post.entity.QProduct.product;
 import static team.startup.gwangsan.domain.post.entity.QProductImage.productImage;
 
 @Repository
 @RequiredArgsConstructor
 public class ProductCustomRepositoryImpl implements ProductCustomRepository {
+    private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
+    private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
 
     private final JPAQueryFactory queryFactory;
 
@@ -85,7 +87,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
     @Override
-    public List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses) {
+    public List<Product> findProductByMemberAndTypeAndModeAndStatusIn(MemberJpaEntity member, Type type, Mode mode, Collection<ProductStatus> statuses) {
         return queryFactory
                 .selectFrom(product).distinct()
                 .where(

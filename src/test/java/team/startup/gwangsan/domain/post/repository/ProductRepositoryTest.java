@@ -12,9 +12,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -37,11 +37,11 @@ class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;
 
-    private Member member;
+    private MemberJpaEntity member;
 
     @BeforeEach
     void setUp() {
-        member = em.persist(Member.builder()
+        member = em.persist(MemberJpaEntity.builder()
                 .name("홍길동")
                 .nickname("길동")
                 .phoneNumber("01000000000")

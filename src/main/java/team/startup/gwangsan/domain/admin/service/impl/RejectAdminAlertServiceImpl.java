@@ -11,10 +11,10 @@ import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.RejectAdminAlertService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
@@ -35,7 +35,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
     private final AdminAlertRepository adminAlertRepository;
     private final ReportRepository reportRepository;
     private final MemberUtil memberUtil;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
     private final TradeCancelRepository tradeCancelRepository;
     private final ProductRepository productRepository;
@@ -45,11 +45,11 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void execute(Long alertId) {
-        Member admin = memberUtil.getCurrentMember();
-        MemberDetail adminDetail = getMemberDetail(admin.getId());
+        MemberJpaEntity admin = memberUtil.getCurrentMember();
+        MemberDetailJpaEntity adminDetail = getMemberDetail(admin.getId());
 
         AdminAlert alert = getAdminAlert(alertId);
-        MemberDetail alertMemberDetail = getMemberDetail(alert.getRequester().getId());
+        MemberDetailJpaEntity alertMemberDetail = getMemberDetail(alert.getRequester().getId());
 
         validatePlaceUtil.validateSamePlace(admin, adminDetail, alertMemberDetail);
 
@@ -71,7 +71,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
         }
     }
 
-    private MemberDetail getMemberDetail(Long memberId) {
+    private MemberDetailJpaEntity getMemberDetail(Long memberId) {
         return memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
     }
@@ -81,7 +81,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
                 .orElseThrow(NotFoundAdminAlertException::new);
     }
 
-    private void rejectSignUp(MemberDetail memberDetail) {
+    private void rejectSignUp(MemberDetailJpaEntity memberDetail) {
         memberDetailRepository.delete(memberDetail);
     }
 

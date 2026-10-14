@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.dong.entity.Dong;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -47,7 +47,7 @@ class ProductCustomRepositoryImplTest {
     @Test
     @DisplayName("관리자 조회는 null 선택 필터에서 삭제 글을 숨기고 ID 내림차순 커서를 적용한다")
     void it_filters_admin_products_and_uses_an_exclusive_cursor() {
-        Member owner = member("owner");
+        MemberJpaEntity owner = member("owner");
         Product oldest = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.ONGOING);
         Product cursor = product(owner, Type.OBJECT, Mode.RECEIVER, ProductStatus.RESERVATION);
         Product newest = product(owner, Type.SERVICE, Mode.RECEIVER, ProductStatus.COMPLETED);
@@ -91,8 +91,8 @@ class ProductCustomRepositoryImplTest {
     @Test
     @DisplayName("내 글 조회는 회원을 고정하고 null 또는 빈 상태 목록을 생략하며 전달한 상태 목록만 제한한다")
     void it_filters_member_products_by_optional_fields_and_statuses() {
-        Member owner = member("owner");
-        Member other = member("other");
+        MemberJpaEntity owner = member("owner");
+        MemberJpaEntity other = member("other");
         Product ongoing = product(owner, Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING);
         Product reservation = product(owner, Type.SERVICE, Mode.GIVER, ProductStatus.RESERVATION);
         Product completed = product(owner, Type.OBJECT, Mode.RECEIVER, ProductStatus.COMPLETED);
@@ -126,8 +126,8 @@ class ProductCustomRepositoryImplTest {
         }
     }
 
-    private Member member(String suffix) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity member(String suffix) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("회원-" + suffix)
                 .nickname("별명-" + suffix)
                 .phoneNumber("010-0000-" + String.format("%04d", suffix.hashCode() & 0x7fff))
@@ -137,9 +137,9 @@ class ProductCustomRepositoryImplTest {
                 .build());
     }
 
-    private Member memberWithDetail(String suffix, Place place) {
-        Member member = member(suffix);
-        em.persist(MemberDetail.builder()
+    private MemberJpaEntity memberWithDetail(String suffix, Place place) {
+        MemberJpaEntity member = member(suffix);
+        em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
                 .dong(em.persist(Dong.builder().name("동-" + suffix).build()))
                 .place(place)
@@ -155,7 +155,7 @@ class ProductCustomRepositoryImplTest {
         return em.persist(Place.builder().name("지점-" + suffix).head(head).build());
     }
 
-    private Product product(Member member, Type type, Mode mode, ProductStatus status) {
+    private Product product(MemberJpaEntity member, Type type, Mode mode, ProductStatus status) {
         return em.persist(Product.builder()
                 .title("글-" + status + "-" + type + "-" + mode)
                 .description("설명")

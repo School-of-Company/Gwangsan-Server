@@ -8,9 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -39,7 +39,7 @@ class FindProductsByTypeAndModeServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -58,7 +58,7 @@ class FindProductsByTypeAndModeServiceImplTest {
         @DisplayName("현재 사용자 동네와 동일한 동네의 상품을 조회하고 DTO 리스트를 반환한다")
         void execute() {
             // given
-            Member me = mock(Member.class);
+            MemberJpaEntity me = mock(MemberJpaEntity.class);
             when(me.getId()).thenReturn(99L);
             when(memberUtil.getCurrentMember()).thenReturn(me);
 
@@ -69,9 +69,9 @@ class FindProductsByTypeAndModeServiceImplTest {
             Product product2 = mock(Product.class);
             Product product3 = mock(Product.class);
 
-            Member member1 = mock(Member.class);
-            Member member2 = mock(Member.class);
-            Member member3 = mock(Member.class);
+            MemberJpaEntity member1 = mock(MemberJpaEntity.class);
+            MemberJpaEntity member2 = mock(MemberJpaEntity.class);
+            MemberJpaEntity member3 = mock(MemberJpaEntity.class);
 
             when(member1.getId()).thenReturn(1L);
             when(member2.getId()).thenReturn(2L);
@@ -108,9 +108,9 @@ class FindProductsByTypeAndModeServiceImplTest {
                     TYPE, MODE, myPlace, ProductStatus.ONGOING
             )).thenReturn(List.of(product1, product2, product3));
 
-            MemberDetail detail1 = mock(MemberDetail.class);
-            MemberDetail detail2 = mock(MemberDetail.class);
-            MemberDetail detail3 = mock(MemberDetail.class);
+            MemberDetailJpaEntity detail1 = mock(MemberDetailJpaEntity.class);
+            MemberDetailJpaEntity detail2 = mock(MemberDetailJpaEntity.class);
+            MemberDetailJpaEntity detail3 = mock(MemberDetailJpaEntity.class);
             Place place1 = mock(Place.class);
             Place place2 = mock(Place.class);
             Place place3 = mock(Place.class);
@@ -195,7 +195,7 @@ class FindProductsByTypeAndModeServiceImplTest {
         @DisplayName("조회된 상품이 0개이면 빈 리스트를 반환한다")
         void execute_returnsEmptyList_whenNoProducts() {
             // given
-            Member me = mock(Member.class);
+            MemberJpaEntity me = mock(MemberJpaEntity.class);
             when(me.getId()).thenReturn(99L);
             when(memberUtil.getCurrentMember()).thenReturn(me);
 

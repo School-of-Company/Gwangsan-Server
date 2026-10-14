@@ -8,9 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -40,7 +40,7 @@ class DeleteAdminProductServiceImplTest {
         @DisplayName("활성 상품의 실제 상태를 DELETED로 변경한다")
         void it_changes_real_product_status_to_deleted() {
             Product product = Product.builder().title("상품").description("설명").gwangsan(100)
-                    .member(Member.builder().name("회원").nickname("회원").phoneNumber("010").password("password")
+                    .member(MemberJpaEntity.builder().name("회원").nickname("회원").phoneNumber("010").password("password")
                             .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build())
                     .type(Type.SERVICE).mode(Mode.GIVER).status(ProductStatus.ONGOING).build();
             ReflectionTestUtils.setField(product, "id", 1L);

@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.block.exception.NotFoundBlockException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ class UnblockMemberServiceImplTest {
         @DisplayName("차단 내역이 있으면 삭제한다")
         void it_deletes_block() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -58,7 +58,7 @@ class UnblockMemberServiceImplTest {
         @DisplayName("차단 내역이 없으면 NotFoundBlockException 을 던진다")
         void it_throws_NotFoundBlockException_when_block_not_found() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 

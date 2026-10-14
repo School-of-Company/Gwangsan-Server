@@ -12,7 +12,7 @@ import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.presentation.dto.response.GetAlertResponse;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
@@ -75,11 +75,11 @@ class FindAlertByCurrentServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member member;
+        private MemberJpaEntity member;
 
         @BeforeEach
         void setUp() {
-            member = mock(Member.class);
+            member = mock(MemberJpaEntity.class);
             when(member.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             lenient().when(noticeImageRepository.findAllByNoticeIdIn(anyList())).thenReturn(List.of());
@@ -260,7 +260,7 @@ class FindAlertByCurrentServiceImplTest {
         @Test
         @DisplayName("sendMember 가 있는 알림이면 sendMemberId 를 포함해 반환한다")
         void it_includes_send_member_id_when_present() {
-            Member sendMember = mock(Member.class);
+            MemberJpaEntity sendMember = mock(MemberJpaEntity.class);
             when(sendMember.getId()).thenReturn(200L);
 
             Alert alert = mock(Alert.class);

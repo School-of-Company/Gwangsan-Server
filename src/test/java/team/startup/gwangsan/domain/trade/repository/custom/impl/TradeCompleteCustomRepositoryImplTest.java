@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.dong.entity.Dong;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -59,9 +59,9 @@ class TradeCompleteCustomRepositoryImplTest {
             Head head = createHead("본부-범위");
             Place targetPlace = createPlace(head, "지점-범위");
             Place otherPlace = createPlace(head, "지점-다른범위");
-            Member buyer = createMember("buyer-range", "010-1000-0001");
-            Member targetSeller = createMemberAtPlace(targetPlace, "seller-range", "010-1000-0002");
-            Member otherSeller = createMemberAtPlace(otherPlace, "seller-other", "010-1000-0003");
+            MemberJpaEntity buyer = createMember("buyer-range", "010-1000-0001");
+            MemberJpaEntity targetSeller = createMemberAtPlace(targetPlace, "seller-range", "010-1000-0002");
+            MemberJpaEntity otherSeller = createMemberAtPlace(otherPlace, "seller-other", "010-1000-0003");
             LocalDateTime start = LocalDateTime.of(2024, 1, 10, 0, 0);
             LocalDateTime end = LocalDateTime.of(2024, 1, 11, 0, 0);
 
@@ -82,8 +82,8 @@ class TradeCompleteCustomRepositoryImplTest {
         void it_uses_calendar_day_boundaries_for_period_counts() {
             Head head = createHead("본부-기간");
             Place place = createPlace(head, "지점-기간");
-            Member buyer = createMember("buyer-period", "010-2000-0001");
-            Member seller = createMemberAtPlace(place, "seller-period", "010-2000-0002");
+            MemberJpaEntity buyer = createMember("buyer-period", "010-2000-0001");
+            MemberJpaEntity seller = createMemberAtPlace(place, "seller-period", "010-2000-0002");
             LocalDateTime now = LocalDateTime.of(2024, 1, 10, 12, 0);
 
             createTrade(buyer, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 1, 8, 0, 0));
@@ -107,8 +107,8 @@ class TradeCompleteCustomRepositoryImplTest {
             Head head = createHead("본부-집계");
             Place countedPlace = createPlace(head, "지점-집계-1");
             Place emptyPlace = createPlace(head, "지점-집계-2");
-            Member buyer = createMember("buyer-head", "010-3000-0001");
-            Member seller = createMemberAtPlace(countedPlace, "seller-head", "010-3000-0002");
+            MemberJpaEntity buyer = createMember("buyer-head", "010-3000-0001");
+            MemberJpaEntity seller = createMemberAtPlace(countedPlace, "seller-head", "010-3000-0002");
             LocalDateTime start = LocalDateTime.of(2024, 2, 1, 0, 0);
             LocalDateTime end = LocalDateTime.of(2024, 2, 2, 0, 0);
 
@@ -129,8 +129,8 @@ class TradeCompleteCustomRepositoryImplTest {
         void it_uses_calendar_day_boundaries_for_head_period_counts() {
             Head head = createHead("본부-기간");
             Place place = createPlace(head, "지점-본부기간");
-            Member buyer = createMember("buyer-head-period", "010-4000-0001");
-            Member seller = createMemberAtPlace(place, "seller-head-period", "010-4000-0002");
+            MemberJpaEntity buyer = createMember("buyer-head-period", "010-4000-0001");
+            MemberJpaEntity seller = createMemberAtPlace(place, "seller-head-period", "010-4000-0002");
             LocalDateTime now = LocalDateTime.of(2024, 1, 10, 12, 0);
 
             createTrade(buyer, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 1, 8, 0, 0));
@@ -152,8 +152,8 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("일치하는 거래와 상품을 반환한다")
         void it_returns_the_trade_matching_product_and_status() {
-            Member buyer = createMember("buyer-product-match", "010-5000-0001");
-            Member seller = createMember("seller-product-match", "010-5000-0002");
+            MemberJpaEntity buyer = createMember("buyer-product-match", "010-5000-0001");
+            MemberJpaEntity seller = createMember("seller-product-match", "010-5000-0002");
             Product product = createProduct(seller, "상품-상품상태일치");
             TradeComplete matching = createTrade(product, buyer, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 3, 1, 10, 0));
 
@@ -177,8 +177,8 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("상품은 같아도 상태가 다르면 빈 결과를 반환한다")
         void it_returns_empty_when_status_does_not_match() {
-            Member buyer = createMember("buyer-product-status", "010-5000-0003");
-            Member seller = createMember("seller-product-status", "010-5000-0004");
+            MemberJpaEntity buyer = createMember("buyer-product-status", "010-5000-0003");
+            MemberJpaEntity seller = createMember("seller-product-status", "010-5000-0004");
             Product product = createProduct(seller, "상품-상품상태불일치");
             createTrade(product, buyer, seller, TradeStatus.PENDING, null);
 
@@ -195,8 +195,8 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("상품, 구매자, 판매자를 즉시 조회한다")
         void it_fetches_product_buyer_and_seller() {
-            Member buyer = createMember("buyer-fetch", "010-6000-0001");
-            Member seller = createMember("seller-fetch", "010-6000-0002");
+            MemberJpaEntity buyer = createMember("buyer-fetch", "010-6000-0001");
+            MemberJpaEntity seller = createMember("seller-fetch", "010-6000-0002");
             TradeComplete trade = createTrade(buyer, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 3, 2, 10, 0));
 
             em.clear();
@@ -225,10 +225,10 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("구매자 또는 판매자 거래만 완료 시각 내림차순, null 마지막, ID 내림차순으로 반환한다")
         void it_includes_buyer_or_seller_trades_and_orders_completed_at_with_nulls_last_and_id_ties() {
-            Member member = createMember("member-history", "010-7000-0001");
-            Member buyer = createMember("buyer-history", "010-7000-0002");
-            Member seller = createMember("seller-history", "010-7000-0003");
-            Member outsider = createMember("outsider-history", "010-7000-0004");
+            MemberJpaEntity member = createMember("member-history", "010-7000-0001");
+            MemberJpaEntity buyer = createMember("buyer-history", "010-7000-0002");
+            MemberJpaEntity seller = createMember("seller-history", "010-7000-0003");
+            MemberJpaEntity outsider = createMember("outsider-history", "010-7000-0004");
             TradeComplete newest = createTrade(member, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 3, 3, 12, 0));
             TradeComplete sellerTrade = createTrade(buyer, member, TradeStatus.COMPLETED, LocalDateTime.of(2024, 3, 3, 11, 0));
             TradeComplete firstTie = createTrade(member, seller, TradeStatus.COMPLETED, LocalDateTime.of(2024, 3, 3, 10, 0));
@@ -267,8 +267,8 @@ class TradeCompleteCustomRepositoryImplTest {
         return em.persist(Place.builder().name(name).head(head).build());
     }
 
-    private Member createMember(String nickname, String phone) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity createMember(String nickname, String phone) {
+        return em.persist(MemberJpaEntity.builder()
                 .name(nickname)
                 .nickname(nickname)
                 .password("pw")
@@ -278,9 +278,9 @@ class TradeCompleteCustomRepositoryImplTest {
                 .build());
     }
 
-    private Member createMemberAtPlace(Place place, String nickname, String phone) {
-        Member member = createMember(nickname, phone);
-        em.persist(MemberDetail.builder()
+    private MemberJpaEntity createMemberAtPlace(Place place, String nickname, String phone) {
+        MemberJpaEntity member = createMember(nickname, phone);
+        em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
                 .dong(em.persist(Dong.builder().name("동-" + nickname).build()))
                 .place(place)
@@ -291,11 +291,11 @@ class TradeCompleteCustomRepositoryImplTest {
         return member;
     }
 
-    private TradeComplete createTrade(Member buyer, Member seller, TradeStatus status, LocalDateTime completedAt) {
+    private TradeComplete createTrade(MemberJpaEntity buyer, MemberJpaEntity seller, TradeStatus status, LocalDateTime completedAt) {
         return createTrade(createProduct(seller, "상품-" + completedAt + "-" + status), buyer, seller, status, completedAt);
     }
 
-    private Product createProduct(Member seller, String title) {
+    private Product createProduct(MemberJpaEntity seller, String title) {
         return em.persist(Product.builder()
                 .title(title)
                 .description("설명")
@@ -307,7 +307,7 @@ class TradeCompleteCustomRepositoryImplTest {
                 .build());
     }
 
-    private TradeComplete createTrade(Product product, Member buyer, Member seller, TradeStatus status, LocalDateTime completedAt) {
+    private TradeComplete createTrade(Product product, MemberJpaEntity buyer, MemberJpaEntity seller, TradeStatus status, LocalDateTime completedAt) {
         TradeComplete trade = em.persist(TradeComplete.builder()
                 .product(product)
                 .buyer(buyer)

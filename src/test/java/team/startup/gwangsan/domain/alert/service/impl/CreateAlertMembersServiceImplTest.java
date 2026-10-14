@@ -12,8 +12,8 @@ import team.startup.gwangsan.domain.alert.entity.Alert;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
@@ -35,7 +35,7 @@ class CreateAlertMembersServiceImplTest {
     private AlertRepository alertRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
     private NoticeRepository noticeRepository;
@@ -63,8 +63,8 @@ class CreateAlertMembersServiceImplTest {
         @Test
         @DisplayName("NOTICE 타입이면 공지를 조회하고 모든 회원에게 AlertReceipt 를 저장한다")
         void it_saves_alert_and_receipts_for_notice() {
-            Member member1 = mock(Member.class);
-            Member member2 = mock(Member.class);
+            MemberJpaEntity member1 = mock(MemberJpaEntity.class);
+            MemberJpaEntity member2 = mock(MemberJpaEntity.class);
             when(memberRepository.findAllByIdIn(anyList())).thenReturn(List.of(member1, member2));
 
             Notice notice = mock(Notice.class);
@@ -88,7 +88,7 @@ class CreateAlertMembersServiceImplTest {
         @Test
         @DisplayName("NOTICE 타입인데 공지가 없으면 NoticeNotFoundException 을 던진다")
         void it_throws_NoticeNotFoundException_when_notice_not_found() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberRepository.findAllByIdIn(anyList())).thenReturn(List.of(member));
             when(noticeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -101,7 +101,7 @@ class CreateAlertMembersServiceImplTest {
         @Test
         @DisplayName("NOTICE 외 타입이면 알림을 저장하지 않는다")
         void it_does_nothing_for_non_notice_alert_type() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberRepository.findAllByIdIn(anyList())).thenReturn(List.of(member));
 
             service.execute(1L, List.of(10L), AlertType.REVIEW);

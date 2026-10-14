@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import team.startup.gwangsan.global.security.jwt.JwtProperties;
+import team.startup.gwangsan.adapter.security.auth.JwtProperties;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

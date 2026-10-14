@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -33,7 +33,7 @@ import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 @RequiredArgsConstructor
 public class TradeCancelApplier {
 
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final AdminAlertRepository adminAlertRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final TradeStateReader tradeStateReader;
@@ -52,11 +52,11 @@ public class TradeCancelApplier {
 
         TradeComplete tradeComplete = tradeCancel.getTradeComplete();
         Product product = tradeComplete.getProduct();
-        Member buyer = tradeComplete.getBuyer();
-        Member seller = tradeComplete.getSeller();
+        MemberJpaEntity buyer = tradeComplete.getBuyer();
+        MemberJpaEntity seller = tradeComplete.getSeller();
 
-        MemberDetail buyerDetail = getMemberDetail(buyer.getId());
-        MemberDetail sellerDetail = getMemberDetail(seller.getId());
+        MemberDetailJpaEntity buyerDetail = getMemberDetail(buyer.getId());
+        MemberDetailJpaEntity sellerDetail = getMemberDetail(seller.getId());
 
         int gwangsan = product.getGwangsan();
 
@@ -103,7 +103,7 @@ public class TradeCancelApplier {
                 });
     }
 
-    private MemberDetail getMemberDetail(Long memberId) {
+    private MemberDetailJpaEntity getMemberDetail(Long memberId) {
         return memberDetailRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberDetailException::new);
     }

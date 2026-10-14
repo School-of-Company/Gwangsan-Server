@@ -13,12 +13,12 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -42,13 +42,13 @@ class VerificationSignUpServiceImplTest {
     private MemberUtil memberUtil;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private ValidatePlaceUtil validatePlaceUtil;
 
     @Mock
-    private WithdrawalRecordRepository withdrawalRecordRepository;
+    private WithdrawalRecordJpaRepository withdrawalRecordRepository;
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -64,25 +64,25 @@ class VerificationSignUpServiceImplTest {
             @Test
             @DisplayName("탈퇴 이력의 광산을 복원하고 기록을 삭제한다")
             void it_restores_gwangsan_from_withdrawal_record() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 AdminAlert alert = mock(AdminAlert.class);
                 when(alert.getSourceId()).thenReturn(2L);
 
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getPhoneNumber()).thenReturn("010-0000-0000");
-                Member recommender = mock(Member.class);
+                MemberJpaEntity recommender = mock(MemberJpaEntity.class);
                 when(recommender.getId()).thenReturn(3L);
                 when(member.getRecommender()).thenReturn(recommender);
 
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 when(memberDetail.getMember()).thenReturn(member);
 
-                MemberDetail recommenderDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity recommenderDetail = mock(MemberDetailJpaEntity.class);
 
-                WithdrawalRecord record = mock(WithdrawalRecord.class);
+                WithdrawalRecordJpaEntity record = mock(WithdrawalRecordJpaEntity.class);
                 when(record.getGwangsan()).thenReturn(5000);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
@@ -109,23 +109,23 @@ class VerificationSignUpServiceImplTest {
             @Test
             @DisplayName("기본 가입 광산 10000을 지급한다")
             void it_gives_default_signup_gwangsan() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 AdminAlert alert = mock(AdminAlert.class);
                 when(alert.getSourceId()).thenReturn(2L);
 
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getPhoneNumber()).thenReturn("010-1111-1111");
-                Member recommender = mock(Member.class);
+                MemberJpaEntity recommender = mock(MemberJpaEntity.class);
                 when(recommender.getId()).thenReturn(3L);
                 when(member.getRecommender()).thenReturn(recommender);
 
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 when(memberDetail.getMember()).thenReturn(member);
 
-                MemberDetail recommenderDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity recommenderDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -149,9 +149,9 @@ class VerificationSignUpServiceImplTest {
             @Test
             @DisplayName("NotFoundAdminAlertException을 던진다")
             void it_throws_not_found_admin_alert_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
@@ -32,7 +32,7 @@ public class FindMyTradeHistoryServiceImpl implements FindMyTradeHistoryService 
     @Override
     @Transactional(readOnly = true)
     public List<GetTradeHistoryResponse> execute(TradeStatus status) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         List<TradeComplete> trades = tradeCompleteRepository.findAllByMemberAndStatus(member, status);
 
@@ -59,7 +59,7 @@ public class FindMyTradeHistoryServiceImpl implements FindMyTradeHistoryService 
                     TradeRole role = trade.getBuyer().getId().equals(member.getId())
                             ? TradeRole.BUYER
                             : TradeRole.SELLER;
-                    Member otherMember = role == TradeRole.BUYER ? trade.getSeller() : trade.getBuyer();
+                    MemberJpaEntity otherMember = role == TradeRole.BUYER ? trade.getSeller() : trade.getBuyer();
 
                     return new GetTradeHistoryResponse(
                             trade.getId(),

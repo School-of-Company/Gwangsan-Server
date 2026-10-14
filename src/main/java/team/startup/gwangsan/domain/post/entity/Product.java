@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.entity.constant.Type;
@@ -45,7 +45,7 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberJpaEntity member;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -60,7 +60,7 @@ public class Product {
     private ProductStatus status;
 
     @Builder
-    public Product(String title, String description, Integer gwangsan, Member member, ProductStatus status, Type type, Mode mode) {
+    public Product(String title, String description, Integer gwangsan, MemberJpaEntity member, ProductStatus status, Type type, Mode mode) {
         this.title = title;
         this.description = description;
         this.gwangsan = gwangsan;

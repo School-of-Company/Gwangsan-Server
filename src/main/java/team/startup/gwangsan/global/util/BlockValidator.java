@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 @Component
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class BlockValidator {
         }
     }
 
-    public void validate(Member currentMember, Member targetMember) {
+    public void validate(MemberJpaEntity currentMember, MemberJpaEntity targetMember) {
         validate(currentMember.getId(), targetMember.getId());
     }
 }

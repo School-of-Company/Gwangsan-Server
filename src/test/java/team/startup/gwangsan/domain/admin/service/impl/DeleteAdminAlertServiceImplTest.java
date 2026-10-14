@@ -11,10 +11,10 @@ import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -33,7 +33,7 @@ class DeleteAdminAlertServiceImplTest {
     private AdminAlertRepository adminAlertRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -52,15 +52,15 @@ class DeleteAdminAlertServiceImplTest {
             @Test
             @DisplayName("AdminAlert를 삭제한다")
             void it_deletes_admin_alert() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                Member requester = mock(Member.class);
+                MemberJpaEntity requester = mock(MemberJpaEntity.class);
                 when(requester.getId()).thenReturn(2L);
                 AdminAlert alert = mock(AdminAlert.class);
                 when(alert.getRequester()).thenReturn(requester);
-                MemberDetail alertMemberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity alertMemberDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -81,9 +81,9 @@ class DeleteAdminAlertServiceImplTest {
             @Test
             @DisplayName("NotFoundAdminAlertException을 던진다")
             void it_throws_not_found_admin_alert_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -101,7 +101,7 @@ class DeleteAdminAlertServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberDetailException을 던진다")
             void it_throws_not_found_member_detail_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);

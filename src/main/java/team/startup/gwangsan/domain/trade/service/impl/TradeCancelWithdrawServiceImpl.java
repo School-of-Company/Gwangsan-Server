@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -36,7 +36,7 @@ public class TradeCancelWithdrawServiceImpl implements TradeCancelWithdrawServic
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void execute(Long productId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         productRepository.findByIdForUpdate(productId)
                 .orElseThrow(NotFoundProductException::new);

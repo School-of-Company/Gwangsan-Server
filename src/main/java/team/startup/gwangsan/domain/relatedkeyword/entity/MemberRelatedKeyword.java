@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 @Entity
 @Getter
@@ -23,10 +23,10 @@ public class MemberRelatedKeyword {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberJpaEntity member;
 
     @Builder
-    public MemberRelatedKeyword(RelatedKeyword relatedKeyword, Member member) {
+    public MemberRelatedKeyword(RelatedKeyword relatedKeyword, MemberJpaEntity member) {
         this.relatedKeyword = relatedKeyword;
         this.member = member;
     }

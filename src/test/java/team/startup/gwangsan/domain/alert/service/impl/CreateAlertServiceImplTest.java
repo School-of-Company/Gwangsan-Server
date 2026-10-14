@@ -15,9 +15,9 @@ import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -52,7 +52,7 @@ class CreateAlertServiceImplTest {
     @Mock
     private AlertRepository alertRepository;
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
     @Mock
     private ReviewRepository reviewRepository;
     @Mock
@@ -75,11 +75,11 @@ class CreateAlertServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member member;
+        private MemberJpaEntity member;
 
         @BeforeEach
         void setUp() {
-            member = mock(Member.class);
+            member = mock(MemberJpaEntity.class);
             lenient().when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         }
 
@@ -95,8 +95,8 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("TRADE_COMPLETE 타입이면 buyer 에게 차감, seller 에게 추가 content 로 Alert 를 저장한다")
         void it_saves_two_receipts_for_trade_complete() {
-            Member buyer = mock(Member.class);
-            Member seller = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
@@ -172,9 +172,9 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("OTHER_MEMBER_TRADE_COMPLETE 타입이면 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_other_member_trade_complete() {
-            Member buyer = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
             when(buyer.getNickname()).thenReturn("구매자");
-            Member seller = mock(Member.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(10L);
             when(product.getTitle()).thenReturn("상품명");
@@ -202,7 +202,7 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("REVIEW 타입이면 리뷰 조회 후 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_review() {
-            Member reviewer = mock(Member.class);
+            MemberJpaEntity reviewer = mock(MemberJpaEntity.class);
             when(reviewer.getNickname()).thenReturn("리뷰어");
             Review review = mock(Review.class);
             when(review.getReviewer()).thenReturn(reviewer);
@@ -234,8 +234,8 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("REPORT_REJECT 타입이면 신고 조회 후 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_report_reject() {
-            Member reporter = mock(Member.class);
-            Member reported = mock(Member.class);
+            MemberJpaEntity reporter = mock(MemberJpaEntity.class);
+            MemberJpaEntity reported = mock(MemberJpaEntity.class);
             when(reported.getNickname()).thenReturn("신고대상");
             Report report = mock(Report.class);
             when(report.getReporter()).thenReturn(reporter);
@@ -268,7 +268,7 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("REPORT 타입이면 신고 및 정지 조회 후 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_report() {
-            Member reporter = mock(Member.class);
+            MemberJpaEntity reporter = mock(MemberJpaEntity.class);
             Report report = mock(Report.class);
             when(report.getReporter()).thenReturn(reporter);
             when(reportRepository.findById(30L)).thenReturn(Optional.of(report));
@@ -317,13 +317,13 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("TRADE_CANCEL 타입이면 buyer/seller 각각 AlertReceipt 를 저장한다")
         void it_saves_receipts_for_trade_cancel() {
-            Member buyer = mock(Member.class);
-            Member seller = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
             TradeComplete tradeComplete = mock(TradeComplete.class);
             when(tradeComplete.getBuyer()).thenReturn(buyer);
             when(tradeComplete.getSeller()).thenReturn(seller);
 
-            Member cancelMember = mock(Member.class);
+            MemberJpaEntity cancelMember = mock(MemberJpaEntity.class);
             TradeCancel tradeCancel = mock(TradeCancel.class);
             when(tradeCancel.getMember()).thenReturn(cancelMember);
             when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
@@ -349,7 +349,7 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("TRADE_CANCEL_REJECT 타입이면 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_trade_cancel_reject() {
-            Member cancelMember = mock(Member.class);
+            MemberJpaEntity cancelMember = mock(MemberJpaEntity.class);
             TradeCancel tradeCancel = mock(TradeCancel.class);
             when(tradeCancel.getMember()).thenReturn(cancelMember);
             when(tradeCancelRepository.findById(20L)).thenReturn(Optional.of(tradeCancel));
@@ -389,7 +389,7 @@ class CreateAlertServiceImplTest {
         @Test
         @DisplayName("RECOMMENDER 타입이면 추천인 조회 후 member 에게 AlertReceipt 를 저장한다")
         void it_saves_receipt_for_recommender() {
-            Member signUpMember = mock(Member.class);
+            MemberJpaEntity signUpMember = mock(MemberJpaEntity.class);
             when(memberRepository.findById(50L)).thenReturn(Optional.of(signUpMember));
 
             when(alertRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));

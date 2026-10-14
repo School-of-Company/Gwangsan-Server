@@ -23,9 +23,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -137,7 +137,7 @@ class ProductReservationDeletionIntegrationTest {
         @DisplayName("예약 상품도 비작성자에게는 권한 에러가 우선하며 상태를 보존한다")
         void it_rejects_non_author_before_reservation_validation() {
             Fixture fixture = fixture(ProductStatus.RESERVATION);
-            Member buyer = new TransactionTemplate(transactionManager).execute(status ->
+            MemberJpaEntity buyer = new TransactionTemplate(transactionManager).execute(status ->
                     em.find(ChatRoom.class, fixture.roomId()).getBuyer());
             when(memberUtil.getCurrentMember()).thenReturn(buyer);
             var before = snapshot(fixture);
@@ -180,7 +180,7 @@ class ProductReservationDeletionIntegrationTest {
             when(memberUtil.getCurrentMember()).thenReturn(fixture.author());
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 Product product = em.find(Product.class, fixture.productId());
-                Member buyer = em.find(ChatRoom.class, fixture.roomId()).getBuyer();
+                MemberJpaEntity buyer = em.find(ChatRoom.class, fixture.roomId()).getBuyer();
                 Image image = Image.builder().imageUrl("https://example.com/image.jpg").build();
                 em.persist(image);
                 ProductImage link = ProductImage.builder().product(product).image(image).build();
@@ -316,8 +316,8 @@ class ProductReservationDeletionIntegrationTest {
     private Fixture fixture(ProductStatus productStatus) {
         return new TransactionTemplate(transactionManager).execute(status -> {
             String suffix = java.util.UUID.randomUUID().toString().substring(0, 8);
-            Member author = member("author" + suffix);
-            Member buyer = member("buyer" + suffix);
+            MemberJpaEntity author = member("author" + suffix);
+            MemberJpaEntity buyer = member("buyer" + suffix);
             em.persist(author);
             em.persist(buyer);
             Product product = Product.builder().title("상품").description("설명").gwangsan(100)
@@ -330,10 +330,10 @@ class ProductReservationDeletionIntegrationTest {
         });
     }
 
-    private Member member(String name) {
-        return Member.builder().name(name).nickname(name).phoneNumber(name).password("test-password")
+    private MemberJpaEntity member(String name) {
+        return MemberJpaEntity.builder().name(name).nickname(name).phoneNumber(name).password("test-password")
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
     }
 
-    private record Fixture(Member author, Long productId, Long roomId) {}
+    private record Fixture(MemberJpaEntity author, Long productId, Long roomId) {}
 }

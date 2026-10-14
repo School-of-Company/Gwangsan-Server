@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -40,14 +40,14 @@ public class AdminAlert {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "other_member_id", referencedColumnName = "member_id")
-    private Member otherMember;
+    private MemberJpaEntity otherMember;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", referencedColumnName = "member_id")
-    private Member requester;
+    private MemberJpaEntity requester;
 
     @Builder
-    public AdminAlert(AlertType type, String title, Long sourceId, Member otherMember, Member requester) {
+    public AdminAlert(AlertType type, String title, Long sourceId, MemberJpaEntity otherMember, MemberJpaEntity requester) {
         this.type = type;
         this.title = title;
         this.sourceId = sourceId;

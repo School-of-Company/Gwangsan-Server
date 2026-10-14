@@ -9,13 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -33,10 +33,10 @@ class UpdateMemberRoleServiceImplTest {
     private UpdateMemberRoleServiceImpl service;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -58,13 +58,13 @@ class UpdateMemberRoleServiceImplTest {
             @Test
             @DisplayName("역할과 소속 장소를 함께 변경한다")
             void it_updates_role_and_place() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                Member target = mock(Member.class);
+                MemberJpaEntity target = mock(MemberJpaEntity.class);
                 when(target.getId()).thenReturn(2L);
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
 
                 Place place = mock(Place.class);
 
@@ -88,13 +88,13 @@ class UpdateMemberRoleServiceImplTest {
             @Test
             @DisplayName("역할만 변경한다")
             void it_updates_role_only() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                Member target = mock(Member.class);
+                MemberJpaEntity target = mock(MemberJpaEntity.class);
                 when(target.getId()).thenReturn(2L);
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -116,9 +116,9 @@ class UpdateMemberRoleServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -136,13 +136,13 @@ class UpdateMemberRoleServiceImplTest {
             @Test
             @DisplayName("PlaceNotFoundException을 던진다")
             void it_throws_place_not_found_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                Member target = mock(Member.class);
+                MemberJpaEntity target = mock(MemberJpaEntity.class);
                 when(target.getId()).thenReturn(2L);
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));

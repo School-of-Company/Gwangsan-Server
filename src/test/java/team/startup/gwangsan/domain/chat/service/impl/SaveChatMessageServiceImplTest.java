@@ -31,9 +31,9 @@ import team.startup.gwangsan.domain.chat.exception.NotFoundChatMessageException;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -57,7 +57,7 @@ class SaveChatMessageServiceImplTest {
 
     @Mock private ChatMessageRepository chatMessageRepository;
     @Mock private ChatRoomRepository chatRoomRepository;
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ImageRepository imageRepository;
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
@@ -69,8 +69,8 @@ class SaveChatMessageServiceImplTest {
 
     @Test
     void systemMessageDoesNotCreateChatPush() {
-        Member sender = mock(Member.class);
-        Member recipient = mock(Member.class);
+        MemberJpaEntity sender = mock(MemberJpaEntity.class);
+        MemberJpaEntity recipient = mock(MemberJpaEntity.class);
         ChatRoom room = mock(ChatRoom.class);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(sender));
         when(chatRoomRepository.findChatRoomByRoomId(10L)).thenReturn(Optional.of(room));
@@ -91,12 +91,12 @@ class SaveChatMessageServiceImplTest {
         @CsvSource({"true,true", "false,true", "true,false", "false,false"})
         @DisplayName("양방향에서 재참여 전까지 숨김과 푸시 차단을 유지하고 재참여 후 알림을 보낸다")
         void it_notifies_only_previously_visible_recipient(boolean senderIsBuyer, boolean recipientHidden) {
-            Member buyer = mock(Member.class);
-            Member seller = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
             when(buyer.getId()).thenReturn(1L);
             when(seller.getId()).thenReturn(2L);
-            Member sender = senderIsBuyer ? buyer : seller;
-            Member recipient = senderIsBuyer ? seller : buyer;
+            MemberJpaEntity sender = senderIsBuyer ? buyer : seller;
+            MemberJpaEntity recipient = senderIsBuyer ? seller : buyer;
             ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
             ReflectionTestUtils.setField(room, "id", 10L);
             LocalDateTime now = LocalDateTime.of(2024, 1, 1, 0, 0);
@@ -166,15 +166,15 @@ class SaveChatMessageServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member sender;
-        private Member otherMember;
+        private MemberJpaEntity sender;
+        private MemberJpaEntity otherMember;
         private ChatRoom chatRoom;
         private final LocalDateTime now = LocalDateTime.of(2024, 1, 1, 0, 0);
 
         @BeforeEach
         void setUp() {
-            sender = mock(Member.class);
-            otherMember = mock(Member.class);
+            sender = mock(MemberJpaEntity.class);
+            otherMember = mock(MemberJpaEntity.class);
             chatRoom = mock(ChatRoom.class);
         }
 
@@ -333,8 +333,8 @@ class SaveChatMessageServiceImplTest {
         @Test
         @DisplayName("sender 가 seller 이면 buyer 에게 알림을 보낸다")
         void it_sends_notification_to_buyer_when_sender_is_seller() {
-            Member sellerMember = mock(Member.class);
-            Member buyerMember = mock(Member.class);
+            MemberJpaEntity sellerMember = mock(MemberJpaEntity.class);
+            MemberJpaEntity buyerMember = mock(MemberJpaEntity.class);
             ChatRoom room = mock(ChatRoom.class);
 
             when(sellerMember.getId()).thenReturn(3L);
@@ -378,8 +378,8 @@ class SaveChatMessageServiceImplTest {
         private static final Long SENDER_ID = 20L;
         private static final LocalDateTime CREATED_AT = LocalDateTime.of(2024, 1, 1, 12, 0, 0, 123_456_000);
 
-        private Member sender;
-        private Member recipient;
+        private MemberJpaEntity sender;
+        private MemberJpaEntity recipient;
         private ChatRoom room;
 
         @BeforeEach
@@ -530,14 +530,14 @@ class SaveChatMessageServiceImplTest {
                     .isInstanceOf(ChatMessageIdConflictException.class);
         }
 
-        private static Member member(Long id, String nickname) {
-            Member member = Member.builder()
+        private static MemberJpaEntity member(Long id, String nickname) {
+            MemberJpaEntity member = MemberJpaEntity.builder()
                     .name(nickname).nickname(nickname).phoneNumber(id + "0000000000").password("password").build();
             ReflectionTestUtils.setField(member, "id", id);
             return member;
         }
 
-        private static ChatRoom room(Long id, Member buyer, Member seller) {
+        private static ChatRoom room(Long id, MemberJpaEntity buyer, MemberJpaEntity seller) {
             ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
             ReflectionTestUtils.setField(room, "id", id);
             return room;

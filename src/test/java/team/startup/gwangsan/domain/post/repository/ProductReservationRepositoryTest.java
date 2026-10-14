@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -36,8 +36,8 @@ class ProductReservationRepositoryTest {
     @Autowired
     private ProductReservationRepository productReservationRepository;
 
-    private Member createMember(String nickname, String phone) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity createMember(String nickname, String phone) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("테스트")
                 .nickname(nickname)
                 .password("pw")
@@ -47,7 +47,7 @@ class ProductReservationRepositoryTest {
                 .build());
     }
 
-    private Product createProduct(Member owner) {
+    private Product createProduct(MemberJpaEntity owner) {
         return em.persist(Product.builder()
                 .title("상품")
                 .description("설명")
@@ -59,7 +59,7 @@ class ProductReservationRepositoryTest {
                 .build());
     }
 
-    private ProductReservation reserveAndCancel(Product product, Member reserver) {
+    private ProductReservation reserveAndCancel(Product product, MemberJpaEntity reserver) {
         ProductReservation reservation = productReservationRepository.save(ProductReservation.builder()
                 .product(product)
                 .reserver(reserver)
@@ -72,8 +72,8 @@ class ProductReservationRepositoryTest {
 
     @Test
     void dueReminderStateSurvivesReloadAndCancelledReservationsAreExcluded() {
-        Member seller = createMember("reminder-seller", "010-2001-0001");
-        Member buyer = createMember("reminder-buyer", "010-2001-0002");
+        MemberJpaEntity seller = createMember("reminder-seller", "010-2001-0001");
+        MemberJpaEntity buyer = createMember("reminder-buyer", "010-2001-0002");
         Product product = createProduct(seller);
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         ProductReservation reservation = productReservationRepository.save(ProductReservation.builder()
@@ -105,8 +105,8 @@ class ProductReservationRepositoryTest {
         @Test
         @DisplayName("취소 이력이 여러 건 쌓여도 저장에 실패하지 않는다")
         void it_saves_multiple_cancelled_reservations_for_same_product() {
-            Member seller = createMember("seller", "010-0001-0001");
-            Member reserver = createMember("reserver", "010-0001-0002");
+            MemberJpaEntity seller = createMember("seller", "010-0001-0001");
+            MemberJpaEntity reserver = createMember("reserver", "010-0001-0002");
             Product product = createProduct(seller);
 
             reserveAndCancel(product, reserver);

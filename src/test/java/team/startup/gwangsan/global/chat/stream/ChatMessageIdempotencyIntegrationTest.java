@@ -40,9 +40,9 @@ import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.chat.service.impl.SaveChatMessageServiceImpl;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.OsType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -137,8 +137,8 @@ class ChatMessageIdempotencyIntegrationTest {
         }
         fixture = new TransactionTemplate(transactionManager).execute(status -> {
             String suffix = UUID.randomUUID().toString();
-            Member buyer = member("buyer-" + suffix);
-            Member seller = member("seller-" + suffix);
+            MemberJpaEntity buyer = member("buyer-" + suffix);
+            MemberJpaEntity seller = member("seller-" + suffix);
             entityManager.persist(buyer);
             entityManager.persist(seller);
             ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller)
@@ -148,7 +148,7 @@ class ChatMessageIdempotencyIntegrationTest {
             entityManager.persist(image);
             return new Fixture(buyer.getId(), seller.getId(), room.getId(), image.getId());
         });
-        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.buyerId()));
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(MemberJpaEntity.class, fixture.buyerId()));
         deviceTokens.save(DeviceToken.builder().deviceId("test-device").userId(fixture.sellerId())
                 .deviceToken("test-token").osType(OsType.ANDROID).build());
         events.count.set(0);
@@ -251,12 +251,12 @@ class ChatMessageIdempotencyIntegrationTest {
         Map<String, String> text = recentPayload(1015L, "TEXT");
         publish(text);
         worker.consumeMessages();
-        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.sellerId()));
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(MemberJpaEntity.class, fixture.sellerId()));
         assertThatThrownBy(() -> mutations.update(1015L, "수정"))
                 .isInstanceOf(GlobalException.class)
                 .extracting("errorCode.status").isEqualTo(403);
 
-        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(Member.class, fixture.buyerId()));
+        when(memberUtil.getCurrentMember()).thenReturn(entityManager.find(MemberJpaEntity.class, fixture.buyerId()));
         jdbc.update("UPDATE tbl_chat_message SET created_at=? WHERE message_id=?",
                 java.sql.Timestamp.valueOf(LocalDateTime.now().minusHours(24).minusSeconds(1)), 1015L);
         assertThatThrownBy(() -> mutations.delete(1015L))
@@ -409,8 +409,8 @@ class ChatMessageIdempotencyIntegrationTest {
         publish(2300L, "TEXT");
         worker.consumeMessages();
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> entityManager.persist(
-                MemberBlock.builder().blocker(entityManager.getReference(Member.class, fixture.sellerId()))
-                        .blocked(entityManager.getReference(Member.class, fixture.buyerId())).build()));
+                MemberBlock.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.sellerId()))
+                        .blocked(entityManager.getReference(MemberJpaEntity.class, fixture.buyerId())).build()));
         deviceTokens.deleteAll();
         publish(2300L, "TEXT");
         worker.consumeMessages();
@@ -609,8 +609,8 @@ class ChatMessageIdempotencyIntegrationTest {
     @Test
     void blocked_first_processing_leaves_no_partial_message() {
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> entityManager.persist(
-                MemberBlock.builder().blocker(entityManager.getReference(Member.class, fixture.buyerId()))
-                        .blocked(entityManager.getReference(Member.class, fixture.sellerId())).build()));
+                MemberBlock.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.buyerId()))
+                        .blocked(entityManager.getReference(MemberJpaEntity.class, fixture.sellerId())).build()));
         publish(3200L, "IMAGE");
         worker.consumeMessages();
         assertThat(messageCount(3200L)).isZero();
@@ -768,8 +768,8 @@ class ChatMessageIdempotencyIntegrationTest {
         return jdbc.queryForObject("SELECT COUNT(*) FROM tbl_chat_message_image WHERE message_id=?", Integer.class, id);
     }
 
-    private Member member(String name) {
-        return Member.builder().name(name).nickname(name).phoneNumber(name).password("pw")
+    private MemberJpaEntity member(String name) {
+        return MemberJpaEntity.builder().name(name).nickname(name).phoneNumber(name).password("pw")
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
     }
 

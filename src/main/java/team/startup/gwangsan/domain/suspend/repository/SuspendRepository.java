@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 
 import java.time.LocalDateTime;
@@ -15,5 +15,5 @@ public interface SuspendRepository extends JpaRepository<Suspend, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Suspend s WHERE s.member = :member")
-    void deleteAllByMember(@Param("member") Member member);
+    void deleteAllByMember(@Param("member") MemberJpaEntity member);
 }

@@ -3,7 +3,7 @@ package team.startup.gwangsan.domain.relatedkeyword.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.RelatedKeywordResponse;
 import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
@@ -23,7 +23,7 @@ public class FindMyRelatedKeywordServiceImpl implements FindMyRelatedKeywordServ
     @Override
     @Transactional(readOnly = true)
     public List<RelatedKeywordResponse> execute() {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         List<MemberRelatedKeyword> list = memberRelatedKeywordRepository.findAllByMember(member);
 

@@ -16,9 +16,9 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -67,7 +67,7 @@ class RequestTradeCompleteServiceImplTest {
     private TradeCompleteRepository tradeCompleteRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private DeviceTokenRepository deviceTokenRepository;
@@ -99,11 +99,11 @@ class RequestTradeCompleteServiceImplTest {
         SecurityContextHolder.clearContext();
     }
 
-    private MemberDetail mockMemberDetail(Long memberId) {
-        Member member = mock(Member.class);
+    private MemberDetailJpaEntity mockMemberDetail(Long memberId) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         when(member.getId()).thenReturn(memberId);
 
-        MemberDetail detail = mock(MemberDetail.class);
+        MemberDetailJpaEntity detail = mock(MemberDetailJpaEntity.class);
         when(detail.getMember()).thenReturn(member);
         when(detail.getId()).thenReturn(memberId);
         return detail;
@@ -118,7 +118,7 @@ class RequestTradeCompleteServiceImplTest {
         void execute_shouldThrowCannotSelectSelfException_whenSelfTrade() {
             // given
             Long memberId = 1L;
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(memberDetail);
@@ -136,7 +136,7 @@ class RequestTradeCompleteServiceImplTest {
             Long memberId = 1L;
             Long otherMemberId = 2L;
 
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(memberDetail);
             when(productRepository.findByIdWithLock(100L)).thenReturn(Optional.empty());
 
@@ -150,7 +150,7 @@ class RequestTradeCompleteServiceImplTest {
             Long memberId = 1L;
             Long otherMemberId = 2L;
 
-            MemberDetail memberDetail = mockMemberDetail(memberId);
+            MemberDetailJpaEntity memberDetail = mockMemberDetail(memberId);
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(memberDetail);
 
@@ -174,8 +174,8 @@ class RequestTradeCompleteServiceImplTest {
             Long sellerId = 2L;
             Long productId = 100L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -186,7 +186,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getId()).thenReturn(productId);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.GIVER);
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
 
             when(productRepository.findByIdWithLock(productId))
@@ -211,8 +211,8 @@ class RequestTradeCompleteServiceImplTest {
             Long sellerId = 2L;
             Long productId = 100L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -223,7 +223,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getId()).thenReturn(productId);
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.GIVER);
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
 
             when(productRepository.findByIdWithLock(productId))
@@ -252,11 +252,11 @@ class RequestTradeCompleteServiceImplTest {
             Long sellerId = 2L;
             Long productId = 100L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
-            Member buyerMember = buyerDetail.getMember();
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -268,7 +268,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
             when(product.getMode()).thenReturn(Mode.GIVER);
 
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
 
             when(productRepository.findByIdWithLock(productId))
@@ -278,7 +278,7 @@ class RequestTradeCompleteServiceImplTest {
             when(productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING))
                     .thenReturn(Optional.of(reservation));
 
-            Member thirdMember = mock(Member.class);
+            MemberJpaEntity thirdMember = mock(MemberJpaEntity.class);
             when(reservation.getReserver()).thenReturn(thirdMember);
 
             // when & then
@@ -295,11 +295,11 @@ class RequestTradeCompleteServiceImplTest {
             Long productId = 100L;
             Long roomId = 700L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
-            Member buyerMember = buyerDetail.getMember();
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -311,7 +311,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.RESERVATION);
             when(product.getMode()).thenReturn(Mode.GIVER);
 
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
             when(product.getGwangsan()).thenReturn(10);
 
@@ -370,11 +370,11 @@ class RequestTradeCompleteServiceImplTest {
             Long productId = 100L;
             Long roomId = 701L;
 
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
 
-            Member sellerMember = sellerDetail.getMember();
-            Member buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(sellerDetail);
@@ -436,11 +436,11 @@ class RequestTradeCompleteServiceImplTest {
             Long productId = 100L;
             Long roomId = 703L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
-            Member buyerMember = buyerDetail.getMember();
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -452,7 +452,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.GIVER);
 
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
 
             when(productRepository.findByIdWithLock(productId))
@@ -502,11 +502,11 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 2L;
             Long productId = 100L;
 
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
 
-            Member sellerMember = sellerDetail.getMember();
-            Member buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(sellerDetail);
@@ -561,11 +561,11 @@ class RequestTradeCompleteServiceImplTest {
             Long productId = 100L;
             Long roomId = 702L;
 
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
 
-            Member buyerMember = buyerDetail.getMember();
-            Member sellerMember = sellerDetail.getMember();
+            MemberJpaEntity buyerMember = buyerDetail.getMember();
+            MemberJpaEntity sellerMember = sellerDetail.getMember();
 
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER))
                     .thenReturn(buyerDetail);
@@ -577,7 +577,7 @@ class RequestTradeCompleteServiceImplTest {
             when(product.getStatus()).thenReturn(ProductStatus.ONGOING);
             when(product.getMode()).thenReturn(Mode.GIVER);
 
-            Member productOwner = mock(Member.class);
+            MemberJpaEntity productOwner = mock(MemberJpaEntity.class);
             when(product.getMember()).thenReturn(productOwner);
             when(product.getGwangsan()).thenReturn(10);
 
@@ -630,10 +630,10 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 1L;
             Long sellerId = 2L;
             Long productId = 100L;
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            Member buyer = buyerDetail.getMember();
-            Member seller = sellerDetail.getMember();
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberJpaEntity buyer = buyerDetail.getMember();
+            MemberJpaEntity seller = sellerDetail.getMember();
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(buyerDetail);
             when(memberDetailRepository.findByMemberIdWithMember(sellerId)).thenReturn(sellerDetail);
 
@@ -668,10 +668,10 @@ class RequestTradeCompleteServiceImplTest {
             Long buyerId = 2L;
             Long productId = 100L;
             Long roomId = 30L;
-            MemberDetail sellerDetail = mockMemberDetail(sellerId);
-            MemberDetail buyerDetail = mockMemberDetail(buyerId);
-            Member seller = sellerDetail.getMember();
-            Member buyer = buyerDetail.getMember();
+            MemberDetailJpaEntity sellerDetail = mockMemberDetail(sellerId);
+            MemberDetailJpaEntity buyerDetail = mockMemberDetail(buyerId);
+            MemberJpaEntity seller = sellerDetail.getMember();
+            MemberJpaEntity buyer = buyerDetail.getMember();
             when(memberDetailRepository.findByPhoneNumberWithMember(PHONE_NUMBER)).thenReturn(sellerDetail);
             when(memberDetailRepository.findByMemberIdWithMember(buyerId)).thenReturn(buyerDetail);
 

@@ -10,10 +10,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -40,11 +40,11 @@ class FindAdminProductsIntegrationTest {
         void it_lists_different_places_without_n_plus_one() {
             Dong dong = em.persist(Dong.builder().name("테스트동").build());
             for (int i = 0; i < 3; i++) {
-                Member member = em.persist(Member.builder().name("회원" + i).nickname("회원" + i)
+                MemberJpaEntity member = em.persist(MemberJpaEntity.builder().name("회원" + i).nickname("회원" + i)
                         .phoneNumber("0100000000" + i).password("password")
                         .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
                 Place place = em.persist(Place.builder().name("지점" + i).build());
-                em.persist(MemberDetail.builder().member(member).dong(dong).place(place)
+                em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                         .gwangsan(10000).light(30).description("소개").build());
                 Product product = em.persist(Product.builder().member(member).title("게시글" + i)
                         .description("설명").gwangsan(5000).type(Type.OBJECT).mode(Mode.GIVER)

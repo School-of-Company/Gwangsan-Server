@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
@@ -39,7 +39,7 @@ public class GetReceivedReviewListServiceImpl implements GetReceivedReviewListSe
 
     private List<ReviewResponse> findReviews(Long cursor, Integer size) {
 
-        Member reviewed = memberUtil.getCurrentMember();
+        MemberJpaEntity reviewed = memberUtil.getCurrentMember();
 
         List<ReceivedReviewDto> rows = size == null
                 ? reviewRepository.findReceivedReviews(reviewed.getId())

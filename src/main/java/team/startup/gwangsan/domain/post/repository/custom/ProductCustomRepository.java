@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.post.repository.custom;
 
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -18,7 +18,7 @@ public interface ProductCustomRepository {
 
     List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status);
 
-    List<Product> findProductByMemberAndTypeAndModeAndStatusIn(Member member, Type type, Mode mode, Collection<ProductStatus> statuses);
+    List<Product> findProductByMemberAndTypeAndModeAndStatusIn(MemberJpaEntity member, Type type, Mode mode, Collection<ProductStatus> statuses);
 
     List<GetRoomProductDto> findRoomProductsWithImagesByIds(Collection<Long> productIds);
 }

@@ -2,7 +2,7 @@ package team.startup.gwangsan.domain.chat.repository.custom;
 
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface ChatRoomCustomRepository {
     Optional<ChatRoom> findChatRoomByRoomId(Long roomId);
 
-    Optional<ChatRoom> findByProductIdAndMember(Long productId, Member member);
+    Optional<ChatRoom> findByProductIdAndMember(Long productId, MemberJpaEntity member);
 
     List<GetRoomsDto> findRoomsByMemberId(Long memberId);
 
