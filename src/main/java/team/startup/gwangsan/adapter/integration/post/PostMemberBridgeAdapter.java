@@ -10,7 +10,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepositor
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.application.block.port.in.BlockRelationQuery;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * member·block 연결. 닉네임은 member 공개 {@link MemberAccountQuery} 를 쓴다.
  * bridge: 지점 ID·작성자 프로필(지점명·빛)은 member 공개 query 가 없어 MemberDetailJpaRepository 를 직접 쓰고(PR11/PR12 에서 공개 query 로 교체),
- * 차단 검사는 BlockValidator(PR09) 를 쓴다.
+ * 차단 검사는 block 공개 BlockRelationQuery(PR09) 를 쓴다.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class PostMemberBridgeAdapter implements ProductMemberPort, BlockPolicyPo
 
     private final MemberAccountQuery memberAccountQuery;
     private final MemberDetailJpaRepository memberDetailRepository;
-    private final BlockValidator blockValidator;
+    private final BlockRelationQuery blockRelationQuery;
 
     @Override
     public Integer placeIdOf(Long memberId) {
@@ -58,7 +58,7 @@ public class PostMemberBridgeAdapter implements ProductMemberPort, BlockPolicyPo
 
     @Override
     public void validateNotBlocked(Long actorId, Long targetId) {
-        blockValidator.validate(actorId, targetId);
+        blockRelationQuery.validateNotBlocked(actorId, targetId);
     }
 
     private static AuthorProfile toProfile(MemberDetailJpaEntity detail) {

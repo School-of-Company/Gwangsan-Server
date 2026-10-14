@@ -130,22 +130,22 @@
 | 108 | `domain/auth/service/impl/SignOutServiceImpl.java` | `application/auth/service/SignOutService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
 | 109 | `domain/auth/service/impl/SignUpServiceImpl.java` | `application/auth/service/SignUpService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
 | 110 | `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | `application/auth/service/CurrentMemberService.java` | auth | service impl | application/auth/service (+ 필요한 output Port) | PR02 | 전환 |
-| 111 | `domain/block/entity/MemberBlock.java` | = | block | jpa entity | adapter/persistence/block (JpaEntity) + domain/block/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
-| 112 | `domain/block/exception/AlreadyBlockedException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
-| 113 | `domain/block/exception/BlockedMemberException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
-| 114 | `domain/block/exception/NotFoundBlockException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
-| 115 | `domain/block/exception/SelfBlockNotAllowedException.java` | = | block | exception | domain/block/exception | PR09 | legacy |
-| 116 | `domain/block/presentation/BlockController.java` | = | block | controller | adapter/web/block/controller | PR09 | legacy |
-| 117 | `domain/block/presentation/dto/response/GetBlockedMemberResponse.java` | = | block | web dto | adapter/web/block/dto | PR09 | legacy |
-| 118 | `domain/block/repository/MemberBlockRepository.java` | = | block | repository | adapter/persistence/block (JpaRepository) + application/block/port/out | PR09 | legacy |
-| 119 | `domain/block/repository/custom/MemberBlockCustomRepository.java` | = | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | legacy |
-| 120 | `domain/block/repository/custom/impl/MemberBlockCustomRepositoryImpl.java` | = | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | legacy |
-| 121 | `domain/block/service/BlockMemberService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
-| 122 | `domain/block/service/GetBlockListService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
-| 123 | `domain/block/service/UnblockMemberService.java` | = | block | service interface | application/block/port/in (UseCase/Query) | PR09 | legacy |
-| 124 | `domain/block/service/impl/BlockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
-| 125 | `domain/block/service/impl/GetBlockListServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
-| 126 | `domain/block/service/impl/UnblockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
+| 111 | `domain/block/entity/MemberBlock.java` | `adapter/persistence/block/MemberBlockJpaEntity.java + domain/block/model/MemberBlock.java` | block | jpa entity | adapter/persistence/block (JpaEntity) + domain/block/model (순수 모델, 규칙 있을 때) | PR09 | PR09 완료 |
+| 112 | `domain/block/exception/AlreadyBlockedException.java` | = | block | exception | domain/block/exception | PR09 | PR09 완료 |
+| 113 | `domain/block/exception/BlockedMemberException.java` | = | block | exception | domain/block/exception | PR09 | PR09 완료 |
+| 114 | `domain/block/exception/NotFoundBlockException.java` | = | block | exception | domain/block/exception | PR09 | PR09 완료 |
+| 115 | `domain/block/exception/SelfBlockNotAllowedException.java` | = | block | exception | domain/block/exception | PR09 | PR09 완료 |
+| 116 | `domain/block/presentation/BlockController.java` | `adapter/web/block/BlockController.java` | block | controller | adapter/web/block/controller | PR09 | PR09 완료 |
+| 117 | `domain/block/presentation/dto/response/GetBlockedMemberResponse.java` | `adapter/web/block/dto/GetBlockedMemberResponse.java` | block | web dto | adapter/web/block/dto | PR09 | PR09 완료 |
+| 118 | `domain/block/repository/MemberBlockRepository.java` | `adapter/persistence/block/MemberBlockJpaRepository.java + MemberBlockPersistenceAdapter.java` | block | repository | adapter/persistence/block (JpaRepository) + application/block/port/out | PR09 | PR09 완료 |
+| 119 | `domain/block/repository/custom/MemberBlockCustomRepository.java` | `adapter/persistence/block/custom/MemberBlockCustomRepository.java` | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | PR09 완료 |
+| 120 | `domain/block/repository/custom/impl/MemberBlockCustomRepositoryImpl.java` | `adapter/persistence/block/custom/impl/MemberBlockCustomRepositoryImpl.java` | block | querydsl | adapter/persistence/block (QueryPort 구현) | PR09 | PR09 완료 |
+| 121 | `domain/block/service/BlockMemberService.java` | `application/block/port/in/BlockMemberUseCase.java` (삭제·대체) | block | service interface | application/block/port/in (UseCase/Query) | PR09 | PR09 완료 |
+| 122 | `domain/block/service/GetBlockListService.java` | `application/block/port/in/BlockListQuery.java` (삭제·대체) | block | service interface | application/block/port/in (UseCase/Query) | PR09 | PR09 완료 |
+| 123 | `domain/block/service/UnblockMemberService.java` | `application/block/port/in/UnblockMemberUseCase.java` (삭제·대체) | block | service interface | application/block/port/in (UseCase/Query) | PR09 | PR09 완료 |
+| 124 | `domain/block/service/impl/BlockMemberServiceImpl.java` | `application/block/service/BlockMemberService.java` | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | PR09 완료 |
+| 125 | `domain/block/service/impl/GetBlockListServiceImpl.java` | `application/block/service/BlockQueryService.java` | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | PR09 완료 |
+| 126 | `domain/block/service/impl/UnblockMemberServiceImpl.java` | `application/block/service/UnblockMemberService.java` | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | PR09 완료 |
 | 127 | `domain/chat/entity/ChatMessage.java` | `adapter/persistence/chat/ChatMessageJpaEntity.java` + `domain/chat/model/ChatMessage.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
 | 128 | `domain/chat/entity/ChatMessageImage.java` | `adapter/persistence/chat/ChatMessageImageJpaEntity.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
 | 129 | `domain/chat/entity/ChatRoom.java` | `adapter/persistence/chat/ChatRoomJpaEntity.java` + `domain/chat/model/ChatRoom.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
@@ -362,25 +362,25 @@
 | 340 | `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java` | `application/relatedkeyword/service/DeleteMemberRelatedKeywordService.java (+ domain/relatedkeyword/model/MemberKeyword.java)` | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | PR03 완료 |
 | 341 | `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java` | `application/relatedkeyword/service/FindMemberRelatedKeywordsService.java` | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | PR03 완료 |
 | 342 | `domain/relatedkeyword/service/impl/FindRelatedKeywordServiceImpl.java` | `application/relatedkeyword/service/FindRelatedKeywordsService.java (+ adapter/persistence/relatedkeyword/RelatedKeywordPersistenceAdapter.java)` | relatedkeyword | service impl | application/relatedkeyword/service (+ 필요한 output Port) | PR03 | PR03 완료 |
-| 343 | `domain/report/entity/Report.java` | = | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
-| 344 | `domain/report/entity/ReportImage.java` | = | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
-| 345 | `domain/report/entity/constant/ReportTargetType.java` | = | report | enum | domain/report/model | PR09 | legacy |
-| 346 | `domain/report/entity/constant/ReportType.java` | = | report | enum | domain/report/model | PR09 | legacy |
-| 347 | `domain/report/exception/AlreadyReportedException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
-| 348 | `domain/report/exception/InvalidReportTypeException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
-| 349 | `domain/report/exception/NotFoundReportException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
-| 350 | `domain/report/exception/SelfReportNotAllowedException.java` | = | report | exception | domain/report/exception | PR09 | legacy |
-| 351 | `domain/report/presentation/ReportController.java` | = | report | controller | adapter/web/report/controller | PR09 | legacy |
-| 352 | `domain/report/presentation/dto/request/CreateReportRequest.java` | = | report | web dto | adapter/web/report/dto | PR09 | legacy |
-| 353 | `domain/report/presentation/dto/response/GetReportResponse.java` | = | report | web dto | adapter/web/report/dto | PR09 | legacy |
-| 354 | `domain/report/repository/ReportImageRepository.java` | = | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | legacy |
-| 355 | `domain/report/repository/ReportRepository.java` | = | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | legacy |
-| 356 | `domain/report/repository/custom/ReportCustomRepository.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
-| 357 | `domain/report/repository/custom/ReportImageCustomRepository.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
-| 358 | `domain/report/repository/custom/impl/ReportCustomRepositoryImpl.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
-| 359 | `domain/report/repository/custom/impl/ReportImageCustomRepositoryImpl.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
-| 360 | `domain/report/service/CreateReportService.java` | = | report | service interface | application/report/port/in (UseCase/Query) | PR09 | legacy |
-| 361 | `domain/report/service/impl/CreateReportServiceImpl.java` | = | report | service impl | application/report/service (+ 필요한 output Port) | PR09 | legacy |
+| 343 | `domain/report/entity/Report.java` | `adapter/persistence/report/ReportJpaEntity.java + domain/report/model/Report.java` | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | PR09 완료 |
+| 344 | `domain/report/entity/ReportImage.java` | `adapter/persistence/report/ReportImageJpaEntity.java` | report | jpa entity | adapter/persistence/report (JpaEntity) + domain/report/model (순수 모델, 규칙 있을 때) | PR09 | PR09 완료 |
+| 345 | `domain/report/entity/constant/ReportTargetType.java` | `domain/report/model/ReportTargetType.java` | report | enum | domain/report/model | PR09 | PR09 완료 |
+| 346 | `domain/report/entity/constant/ReportType.java` | `domain/report/model/ReportType.java` | report | enum | domain/report/model | PR09 | PR09 완료 |
+| 347 | `domain/report/exception/AlreadyReportedException.java` | = | report | exception | domain/report/exception | PR09 | PR09 완료 |
+| 348 | `domain/report/exception/InvalidReportTypeException.java` | = | report | exception | domain/report/exception | PR09 | PR09 완료 |
+| 349 | `domain/report/exception/NotFoundReportException.java` | = | report | exception | domain/report/exception | PR09 | PR09 완료 |
+| 350 | `domain/report/exception/SelfReportNotAllowedException.java` | = | report | exception | domain/report/exception | PR09 | PR09 완료 |
+| 351 | `domain/report/presentation/ReportController.java` | `adapter/web/report/ReportController.java` | report | controller | adapter/web/report/controller | PR09 | PR09 완료 |
+| 352 | `domain/report/presentation/dto/request/CreateReportRequest.java` | `adapter/web/report/dto/CreateReportRequest.java` | report | web dto | adapter/web/report/dto | PR09 | PR09 완료 |
+| 353 | `domain/report/presentation/dto/response/GetReportResponse.java` | `adapter/web/report/dto/GetReportResponse.java` | report | web dto | adapter/web/report/dto | PR09 | PR09 완료 |
+| 354 | `domain/report/repository/ReportImageRepository.java` | `adapter/persistence/report/ReportImageJpaRepository.java` | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | PR09 완료 |
+| 355 | `domain/report/repository/ReportRepository.java` | `adapter/persistence/report/ReportJpaRepository.java + ReportPersistenceAdapter.java` | report | repository | adapter/persistence/report (JpaRepository) + application/report/port/out | PR09 | PR09 완료 |
+| 356 | `domain/report/repository/custom/ReportCustomRepository.java` | `adapter/persistence/report/custom/ReportCustomRepository.java` | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | PR09 완료 |
+| 357 | `domain/report/repository/custom/ReportImageCustomRepository.java` | `adapter/persistence/report/custom/ReportImageCustomRepository.java` | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | PR09 완료 |
+| 358 | `domain/report/repository/custom/impl/ReportCustomRepositoryImpl.java` | `adapter/persistence/report/custom/impl/ReportCustomRepositoryImpl.java` | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | PR09 완료 |
+| 359 | `domain/report/repository/custom/impl/ReportImageCustomRepositoryImpl.java` | `adapter/persistence/report/custom/impl/ReportImageCustomRepositoryImpl.java` | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | PR09 완료 |
+| 360 | `domain/report/service/CreateReportService.java` | `application/report/port/in/CreateReportUseCase.java` (삭제·대체) | report | service interface | application/report/port/in (UseCase/Query) | PR09 | PR09 완료 |
+| 361 | `domain/report/service/impl/CreateReportServiceImpl.java` | `application/report/service/CreateReportService.java` | report | service impl | application/report/service (+ 필요한 output Port) | PR09 | PR09 완료 |
 | 362 | `domain/review/entity/Review.java` | `adapter/persistence/review/ReviewJpaEntity.java` + `domain/review/model/Review.java` | review | jpa entity | adapter/persistence/review (JpaEntity) + domain/review/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
 | 363 | `domain/review/exception/AlreadyReviewedException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
 | 364 | `domain/review/exception/CannotReviewBeforeTradeException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
@@ -427,13 +427,13 @@
 | 405 | `domain/sms/service/impl/VerifyCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
 | 406 | `domain/sms/service/impl/VerifyFindNicknameCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
 | 407 | `domain/sms/service/impl/VerifyResetPasswordCodeServiceImpl.java` | `application/sms/service/VerifyCodeService.java` | sms | service impl | application/sms/service (+ 필요한 output Port) | PR02 | 전환 (3개 확인 서비스 통합) |
-| 408 | `domain/suspend/entity/Suspend.java` | = | suspend | jpa entity | adapter/persistence/suspend (JpaEntity) + domain/suspend/model (순수 모델, 규칙 있을 때) | PR09 | legacy |
-| 409 | `domain/suspend/exception/NotFoundSuspendException.java` | = | suspend | exception | domain/suspend/exception | PR09 | legacy |
-| 410 | `domain/suspend/presentation/SuspendController.java` | = | suspend | controller | adapter/web/suspend/controller | PR09 | legacy |
-| 411 | `domain/suspend/presentation/dto/request/SuspendMemberRequest.java` | = | suspend | web dto | adapter/web/suspend/dto | PR09 | legacy |
-| 412 | `domain/suspend/repository/SuspendRepository.java` | = | suspend | repository | adapter/persistence/suspend (JpaRepository) + application/suspend/port/out | PR09 | legacy |
-| 413 | `domain/suspend/service/SuspendMemberService.java` | = | suspend | service interface | application/suspend/port/in (UseCase/Query) | PR09 | legacy |
-| 414 | `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | = | suspend | service impl | application/suspend/service (+ 필요한 output Port) | PR09 | legacy |
+| 408 | `domain/suspend/entity/Suspend.java` | `adapter/persistence/suspend/SuspendJpaEntity.java + domain/suspend/model/Suspension.java` | suspend | jpa entity | adapter/persistence/suspend (JpaEntity) + domain/suspend/model (순수 모델, 규칙 있을 때) | PR09 | PR09 완료 |
+| 409 | `domain/suspend/exception/NotFoundSuspendException.java` | = | suspend | exception | domain/suspend/exception | PR09 | PR09 완료 |
+| 410 | `domain/suspend/presentation/SuspendController.java` | `adapter/web/suspend/SuspendController.java` | suspend | controller | adapter/web/suspend/controller | PR09 | PR09 완료 |
+| 411 | `domain/suspend/presentation/dto/request/SuspendMemberRequest.java` | `adapter/web/suspend/dto/SuspendMemberRequest.java` | suspend | web dto | adapter/web/suspend/dto | PR09 | PR09 완료 |
+| 412 | `domain/suspend/repository/SuspendRepository.java` | `adapter/persistence/suspend/SuspendJpaRepository.java + SuspendPersistenceAdapter.java` | suspend | repository | adapter/persistence/suspend (JpaRepository) + application/suspend/port/out | PR09 | PR09 완료 |
+| 413 | `domain/suspend/service/SuspendMemberService.java` | `application/suspend/port/in/SuspendMemberUseCase.java` (삭제·대체) | suspend | service interface | application/suspend/port/in (UseCase/Query) | PR09 | PR09 완료 |
+| 414 | `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | `application/suspend/service/SuspendMemberService.java` | suspend | service impl | application/suspend/service (+ 필요한 output Port) | PR09 | PR09 완료 |
 | 415 | `domain/trade/entity/TradeCancel.java` | `adapter/persistence/trade/TradeCancelJpaEntity.java` + `domain/trade/model/TradeCancel.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
 | 416 | `domain/trade/entity/TradeCancelImage.java` | `adapter/persistence/trade/TradeCancelImageJpaEntity.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
 | 417 | `domain/trade/entity/TradeComplete.java` | `adapter/persistence/trade/TradeCompleteJpaEntity.java` + `domain/trade/model/TradeComplete.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
@@ -534,7 +534,7 @@
 | 512 | `global/redis/RedisUtil.java` | = | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | legacy |
 | 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | `adapter/scheduler/image/DeleteOrphanImageScheduler.java (+ application/image/service/CleanupOrphanImagesService)` | image | global/scheduler | adapter/scheduler/image | PR05 | 전환 |
 | 514 | `global/scheduler/ReservationReminderScheduler.java` | `adapter/scheduler/post/ReservationReminderScheduler.java` | post | global/scheduler | adapter/scheduler/post | PR06 | PR06 완료 |
-| 515 | `global/scheduler/SuspendReleaseScheduler.java` | = | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | legacy |
+| 515 | `global/scheduler/SuspendReleaseScheduler.java` | `adapter/scheduler/suspend/SuspendReleaseScheduler.java + application/suspend/service/ReleaseExpiredSuspensionsService.java` | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | PR09 완료 |
 | 516 | `global/security/config/JwtSecurityConfig.java` | `(삭제)` | infrastructure | global/security | 삭제 (어디서도 적용되지 않는 dead code) | PR01 | PR01 완료 |
 | 517 | `global/security/config/SecurityConfig.java` | `infrastructure/security/SecurityConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
 | 518 | `global/security/config/WebMvcConfig.java` | `infrastructure/config/WebMvcConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
@@ -556,7 +556,7 @@
 | 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | `adapter/s3/image/S3ImageStorageAdapter.java (병합)` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | `adapter/s3/image/S3ImageStorageAdapter.java` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
-| 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
+| 537 | `global/util/BlockValidator.java` | 삭제 (호출처 0: 각 consumer bridge 가 BlockRelationQuery 직접 사용) | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | PR09 완료 |
 | 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | 삭제 (PR08: chat `ChatImageBridge` → `ImageQuery.getAllByIds`) |
 | 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
 
@@ -588,9 +588,9 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | POST | `/api/auth/signin` | `adapter/web/auth/controller/AuthController.java` | signIn | 200 |
 | DELETE | `/api/auth/signout` | `adapter/web/auth/controller/AuthController.java` | signout | 204 |
 | POST | `/api/auth/signup` | `adapter/web/auth/controller/AuthController.java` | signUp | 201 |
-| GET | `/api/block` | `domain/block/presentation/BlockController.java` | getBlockList | 200 |
-| DELETE | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | unblock | 204 |
-| POST | `/api/block/{targetMemberId}` | `domain/block/presentation/BlockController.java` | block | 201 |
+| GET | `/api/block` | `adapter/web/block/BlockController.java` | getBlockList | 200 |
+| DELETE | `/api/block/{targetMemberId}` | `adapter/web/block/BlockController.java` | unblock | 204 |
+| POST | `/api/block/{targetMemberId}` | `adapter/web/block/BlockController.java` | block | 201 |
 | DELETE | `/api/chat/message/{message_id}` | `domain/chat/presentation/ChatController.java` | deleteMessage | 204 |
 | PATCH | `/api/chat/message/{message_id}` | `domain/chat/presentation/ChatController.java` | updateMessage | 200 |
 | PATCH | `/api/chat/read` | `domain/chat/presentation/ChatController.java` | readMessages | 200 |
@@ -616,7 +616,7 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | GET | `/api/related-keyword` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | findAllKeywords | 200 |
 | GET | `/api/related-keyword/current` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | findMyKeywords | 200 |
 | DELETE | `/api/related-keyword/{memberRelatedKeywordId}` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | deleteMyKeyword | 204 |
-| POST | `/api/report` | `domain/report/presentation/ReportController.java` | createReport | 201 |
+| POST | `/api/report` | `adapter/web/report/ReportController.java` | createReport | 201 |
 | GET | `/api/review` | `adapter/web/review/controller/ReviewController.java` | getMyReviews | 200 |
 | POST | `/api/review` | `adapter/web/review/controller/ReviewController.java` | createReview | 201 |
 | GET | `/api/review/current` | `adapter/web/review/controller/ReviewController.java` | getMyReceivedReviews | 200 / 400(분기) |
@@ -628,7 +628,7 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | POST | `/api/sms/password` | `adapter/web/sms/controller/SmsController.java` | sendResetPasswordSms | 200 |
 | POST | `/api/sms/password/verify` | `adapter/web/sms/controller/SmsController.java` | verifyResetPasswordSms | 200 |
 | POST | `/api/sms/verify` | `adapter/web/sms/controller/SmsController.java` | verifySms | 200 |
-| PATCH | `/api/suspend` | `domain/suspend/presentation/SuspendController.java` | suspend | 204 |
+| PATCH | `/api/suspend` | `adapter/web/suspend/SuspendController.java` | suspend | 204 |
 | DELETE | `/api/trade/cancel/{product_id}` | `adapter/web/trade/controller/TradeController.java` | cancelWithdraw | 204 |
 | POST | `/api/trade/cancel/{product_id}` | `adapter/web/trade/controller/TradeController.java` | cancel | 200 |
 | GET | `/api/trade/graph/head` | `adapter/web/trade/controller/TradeController.java` | getHeadHistory | 200 |
@@ -742,9 +742,9 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/alert/service/impl/ReadAlertServiceImpl.java` | 1 | PR04 |
 | `domain/auth/service/impl/SignOutServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/auth/service/SignOutService.java`) |
 | `domain/auth/service/impl/TokenAuthenticationServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/auth/service/CurrentMemberService.java`) |
-| `domain/block/service/impl/BlockMemberServiceImpl.java` | 1 | PR09 |
-| `domain/block/service/impl/GetBlockListServiceImpl.java` | 1 | PR09 |
-| `domain/block/service/impl/UnblockMemberServiceImpl.java` | 1 | PR09 |
+| `domain/block/service/impl/BlockMemberServiceImpl.java` | 1 | PR09 완료 (ActorContext → `application/block/service/BlockMemberService`) |
+| `domain/block/service/impl/GetBlockListServiceImpl.java` | 1 | PR09 완료 (ActorContext → `application/block/service/BlockQueryService`) |
+| `domain/block/service/impl/UnblockMemberServiceImpl.java` | 1 | PR09 완료 (ActorContext → `application/block/service/UnblockMemberService`) |
 | `domain/chat/service/impl/ChatMessageMutationService.java` | 1 | PR08 |
 | `domain/chat/service/impl/CreateChatRoomServiceImpl.java` | 1 | PR08 |
 | `domain/chat/service/impl/DeleteChatRoomServiceImpl.java` | 1 | PR08 |
@@ -772,7 +772,7 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/post/service/impl/UpdateProductServiceImpl.java` | 1 | PR06 |
 | `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java` | 0 (PR03 완료: ActorContext) | PR03 |
 | `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java` | 0 (PR03 완료: ActorContext) | PR03 |
-| `domain/report/service/impl/CreateReportServiceImpl.java` | 1 | PR09 |
+| `domain/report/service/impl/CreateReportServiceImpl.java` | 1 | PR09 완료 (ActorContext → `application/report/service/CreateReportService`) |
 | `domain/review/service/impl/CreateReviewServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
 | `domain/review/service/impl/GetMyReviewListServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
@@ -785,10 +785,10 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 
 차단 검사(@CheckBlocked·BlockValidator) 사용처 — block 공개 query(PR09) + 각 consumer output Port로 교체, 기존 적용 범위·실행 순서 유지:
 
-- `domain/chat/service/impl/CreateChatRoomServiceImpl.java` → PR08
+- `domain/chat/service/impl/CreateChatRoomServiceImpl.java` → PR08 (PR09 완료: `ChatBlockBridge` → `BlockRelationQuery`)
 - `domain/chat/service/impl/SaveChatMessageServiceImpl.java` → PR08
 - `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` → PR08
-- `domain/post/service/impl/FindProductByIdServiceImpl.java` → PR06
+- `domain/post/service/impl/FindProductByIdServiceImpl.java` → PR06 (PR09 완료: `PostMemberBridgeAdapter` → `BlockRelationQuery`)
 - `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` → PR07 완료: `RequestTradeCompletionService` 첫 단계 `TradeBlockPort` (기존과 같이 다른 검증·잠금보다 먼저)
 - `domain/review/service/impl/CreateReviewServiceImpl.java` → PR07 완료: `CreateReviewService` 의 `ReviewBlockPort` (대상 회원 확인 뒤, 기존 순서)
 - `global/aop/BlockAspect.java` → PR07 완료: 삭제
@@ -817,7 +817,7 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `global/event/handler/TradeStatusChangedEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
 | `adapter/scheduler/image/DeleteOrphanImageScheduler.java` (PR05 이동) | `@Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")` |
 | `global/scheduler/ReservationReminderScheduler.java` | `@Scheduled(fixedDelay = 30000)` |
-| `global/scheduler/SuspendReleaseScheduler.java` | `@Scheduled(cron = "0 0 * * * *")` |
+| `adapter/scheduler/suspend/SuspendReleaseScheduler.java` | `@Scheduled(cron = "0 0 * * * *")` (트랜잭션은 ReleaseExpiredSuspensionsService) |
 | `global/sms/SmsSendHelper.java` | `@Async("asyncExecutor")` |
 | ~~`global/thirdparty/aws/s3/service/S3DeleteService.java`~~ | ~~`@Async`~~ PR05 제거: 단건 삭제는 SDK 비동기 호출로 대기 없이 반환, deleteAll 은 self-call 이라 원래 미적용 |
 | ~~`global/thirdparty/aws/s3/service/S3UploadService.java`~~ | ~~`@Async`~~ PR05 제거: 호출자가 결과를 동기 대기했음. S3ImageStorageAdapter.upload 가 직접 대기 |
@@ -842,9 +842,9 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/post/service/impl/ReservationProductServiceImpl.java` | TradeStatusChangedEvent |
 | `domain/post/service/impl/UpdateProductServiceImpl.java` | DeleteNotUsedImageEvent |
 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | TradeStatusChangedEvent |
-| `domain/report/service/impl/CreateReportServiceImpl.java` | CreateAdminAlertEvent |
+| `adapter/event/report/ReportAlertEventAdapter.java` (← CreateReportService) | CreateAdminAlertEvent |
 | `domain/review/service/impl/CreateReviewServiceImpl.java` | CreateAlertEvent |
-| `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | CreateAlertEvent |
+| `adapter/event/suspend/SuspensionAlertEventAdapter.java` (← SuspendMemberService) | CreateAlertEvent |
 | `domain/trade/service/TradeCancelApplier.java` | CreateAlertEvent |
 | `domain/trade/service/TradeCancelApplier.java` | TradeStatusChangedEvent |
 | `domain/trade/service/impl/TradeCancelServiceImpl.java` | CreateAdminAlertEvent |
@@ -878,9 +878,9 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `application/auth/service/SignInService.java:32` | execute | `(기본)` |
 | `application/auth/service/SignUpService.java:37` | execute | `(기본)` |
 | `application/auth/service/CurrentMemberService.java:22` | execute | `(readOnly = true)` |
-| `domain/block/service/impl/BlockMemberServiceImpl.java:25` | execute | `(기본)` |
-| `domain/block/service/impl/GetBlockListServiceImpl.java:22` | execute | `(readOnly = true)` |
-| `domain/block/service/impl/UnblockMemberServiceImpl.java:21` | execute | `(기본)` |
+| `application/block/service/BlockMemberService.java` | execute | `(기본)` |
+| `application/block/service/BlockQueryService.java` | query | `(readOnly = true)` (validateNotBlocked 는 기존 BlockValidator 처럼 무트랜잭션) |
+| `application/block/service/UnblockMemberService.java` | execute | `(기본)` |
 | `domain/chat/service/impl/ChatMessageMutationService.java:30` | update | `(기본)` |
 | `domain/chat/service/impl/ChatMessageMutationService.java:45` | delete | `(기본)` |
 | `domain/chat/service/impl/CreateChatRoomServiceImpl.java:30` | execute | `(기본)` |
@@ -924,7 +924,7 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `application/relatedkeyword/service/DeleteMemberRelatedKeywordService.java` (PR03) | execute | `(기본)` |
 | `application/relatedkeyword/service/FindMemberRelatedKeywordsService.java` (PR03) | query | `(readOnly = true)` |
 | `application/relatedkeyword/service/FindRelatedKeywordsService.java` (PR03) | query | `(readOnly = true)` |
-| `domain/report/service/impl/CreateReportServiceImpl.java:45` | execute | `(기본)` |
+| `application/report/service/CreateReportService.java` | execute | `(기본)` |
 | `domain/review/service/impl/CreateReviewServiceImpl.java:47` | execute | `(기본)` |
 | `domain/review/service/impl/GetMyReviewListServiceImpl.java:27` | execute | `(readOnly = true)` |
 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java:29` | execute | `(readOnly = true)` |
@@ -935,7 +935,7 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `application/sms/service/SendFindNicknameSmsService.java:26` | execute | `(기본)` |
 | `application/sms/service/SendResetPasswordSmsService.java:25` | execute | `(기본)` |
 | `application/sms/service/VerifyCodeService.java:22` | execute | `(기본)` (기존 Verify 3개 서비스 통합) |
-| `domain/suspend/service/impl/SuspendMemberServiceImpl.java:30` | execute | `(기본)` |
+| `application/suspend/service/SuspendMemberService.java` | execute | `(기본)` |
 | `domain/trade/service/TradeCancelApplier.java:47` | apply | `(propagation = Propagation.MANDATORY)` |
 | `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java:33` | execute | `(readOnly = true)` |
 | `domain/trade/service/impl/TradeCancelServiceImpl.java:55` | execute | `(isolation = Isolation.READ_COMMITTED)` |
@@ -950,7 +950,7 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `global/event/handler/TradeStatusChangedEventListener.java:20` | handleTradeStatusChangedEvent | `(기본)` |
 | ~~`global/scheduler/DeleteOrphanImageScheduler.java:67`~~ | findOrphanImages | ~~`(readOnly = true)`~~ self-call 로 미적용이었음. PR05: CleanupOrphanImagesService 는 트랜잭션 없음(저장소 기본 트랜잭션) |
 | ~~`global/scheduler/DeleteOrphanImageScheduler.java:87`~~ | deleteFromDatabase | ~~`(REQUIRED, rollbackFor, timeout = 60)`~~ self-call 로 미적용이었음. PR05: 200건 배치마다 deleteAllByIdInBatch 자체 트랜잭션(기준선 동작 유지) |
-| `global/scheduler/SuspendReleaseScheduler.java:24` | releaseSuspensions | `(기본)` |
+| `application/suspend/service/ReleaseExpiredSuspensionsService.java` | execute | `(기본)` (scheduler 는 트랜잭션 없이 input Port 호출) |
 
 @Transactional 94곳.
 
@@ -973,7 +973,7 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 같은 클래스 안에 @Scheduled와 @Transactional 메서드가 공존하는 파일(자기 호출 시 프록시 미적용 여부를 담당 PR이 기준선으로 확인):
 
 - `global/scheduler/DeleteOrphanImageScheduler.java` — PR05 확인: 프록시 미적용이 기준선. 전환 후에도 바깥 트랜잭션 없음(DeleteOrphanImageSchedulerTest 가 S3 호출 중 트랜잭션 비활성 assert)
-- `global/scheduler/SuspendReleaseScheduler.java`
+- `global/scheduler/SuspendReleaseScheduler.java` → PR09에서 해소: scheduler(adapter)와 트랜잭션(application service) 분리
 
 ## 8. 스키마 (JPA 매핑)
 
@@ -987,7 +987,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/alert/entity/Alert.java` | Entity | tbl_alert | ManyToOne sendMember:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `domain/alert/entity/AlertReceipt.java` | Entity | tbl_alert_receipt | ManyToOne alert:Alert (fetch = FetchType.LAZY, optional = false); ManyToOne member:Member (fetch = FetchType.LAZY, optional = false) | - | - |
 | `adapter/persistence/app/AppVersionJpaEntity.java` (PR03) | Entity | tbl_app_version | - | - | - |
-| `domain/block/entity/MemberBlock.java` | Entity | tbl_member_block | ManyToOne blocker:Member (fetch = FetchType.LAZY); ManyToOne blocked:Member (fetch = FetchType.LAZY) | - | Y |
+| `adapter/persistence/block/MemberBlockJpaEntity.java` | Entity | tbl_member_block | ManyToOne blocker:Member (fetch = FetchType.LAZY); ManyToOne blocked:Member (fetch = FetchType.LAZY) | - | Y |
 | `domain/chat/entity/ChatMessage.java` | Entity | tbl_chat_message | ManyToOne room:ChatRoom (fetch = FetchType.LAZY); ManyToOne sender:Member (fetch = FetchType.LAZY) | EnumType.STRING | - |
 | `domain/chat/entity/ChatMessageImage.java` | Entity | tbl_chat_message_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne chatMessage:ChatMessage (fetch = FetchType.LAZY) | - | - |
 | `domain/chat/entity/ChatRoom.java` | Entity | tbl_chat_room | ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | Y |
@@ -1005,10 +1005,10 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/post/entity/ProductReservation.java` | Entity | tbl_product_reservation | ManyToOne product:Product (fetch = FetchType.LAZY); ManyToOne reserver:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` (PR03) | Entity | tbl_member_related_keyword | ManyToOne relatedKeyword:RelatedKeywordJpaEntity (fetch = FetchType.LAZY); ManyToOne member:MemberJpaEntity (fetch = FetchType.LAZY) | - | - |
 | `adapter/persistence/relatedkeyword/RelatedKeywordJpaEntity.java` (PR03) | Entity | tbl_related_keyword | - | - | - |
-| `domain/report/entity/Report.java` | Entity | tbl_report | ManyToOne reported:Member (fetch = FetchType.LAZY); ManyToOne reporter:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | EnumType.STRING | - |
-| `domain/report/entity/ReportImage.java` | Entity | tbl_report_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne report:Report (fetch = FetchType.LAZY) | - | - |
+| `adapter/persistence/report/ReportJpaEntity.java` | Entity | tbl_report | ManyToOne reported:Member (fetch = FetchType.LAZY); ManyToOne reporter:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | EnumType.STRING | - |
+| `adapter/persistence/report/ReportImageJpaEntity.java` | Entity | tbl_report_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne report:Report (fetch = FetchType.LAZY) | - | - |
 | `domain/review/entity/Review.java` | Entity | tbl_review | ManyToOne reviewer:Member (fetch = FetchType.LAZY); ManyToOne reviewed:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | - |
-| `domain/suspend/entity/Suspend.java` | Entity | tbl_suspend | ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
+| `adapter/persistence/suspend/SuspendJpaEntity.java` | Entity | tbl_suspend | ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
 | `domain/trade/entity/TradeCancel.java` | Entity | tbl_trade_cancel | ManyToOne tradeComplete:TradeComplete (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `domain/trade/entity/TradeCancelImage.java` | Entity | tbl_trade_cancel_image | ManyToOne tradeCancel:TradeCancel (fetch = FetchType.LAZY); ManyToOne image:Image (fetch = FetchType.LAZY) | - | - |
 | `domain/trade/entity/TradeComplete.java` | Entity | tbl_trade_complete | ManyToOne product:Product (fetch = FetchType.LAZY); ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
@@ -1021,8 +1021,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/admin/entity/AdminAlert.java` | requester | member.Member | ManyToOne |
 | `domain/alert/entity/Alert.java` | sendMember | member.Member | ManyToOne |
 | `domain/alert/entity/AlertReceipt.java` | member | member.Member | ManyToOne |
-| `domain/block/entity/MemberBlock.java` | blocked | member.Member | ManyToOne |
-| `domain/block/entity/MemberBlock.java` | blocker | member.Member | ManyToOne |
+| `adapter/persistence/block/MemberBlockJpaEntity.java` | blocked | member.Member | ManyToOne |
+| `adapter/persistence/block/MemberBlockJpaEntity.java` | blocker | member.Member | ManyToOne |
 | `domain/chat/entity/ChatMessage.java` | sender | member.Member | ManyToOne |
 | `domain/chat/entity/ChatMessageImage.java` | image | image.Image | ManyToOne |
 | `domain/chat/entity/ChatRoom.java` | buyer | member.Member | ManyToOne |
@@ -1037,14 +1037,14 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/post/entity/ProductImage.java` | image | image.Image | ManyToOne |
 | `domain/post/entity/ProductReservation.java` | reserver | member.Member | ManyToOne |
 | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` (PR03) | member | member.MemberJpaEntity | ManyToOne |
-| `domain/report/entity/Report.java` | product | post.Product | ManyToOne |
-| `domain/report/entity/Report.java` | reported | member.Member | ManyToOne |
-| `domain/report/entity/Report.java` | reporter | member.Member | ManyToOne |
-| `domain/report/entity/ReportImage.java` | image | image.Image | ManyToOne |
+| `adapter/persistence/report/ReportJpaEntity.java` | product | post.Product | ManyToOne |
+| `adapter/persistence/report/ReportJpaEntity.java` | reported | member.Member | ManyToOne |
+| `adapter/persistence/report/ReportJpaEntity.java` | reporter | member.Member | ManyToOne |
+| `adapter/persistence/report/ReportImageJpaEntity.java` | image | image.Image | ManyToOne |
 | `domain/review/entity/Review.java` | product | post.Product | ManyToOne |
 | `domain/review/entity/Review.java` | reviewed | member.Member | ManyToOne |
 | `domain/review/entity/Review.java` | reviewer | member.Member | ManyToOne |
-| `domain/suspend/entity/Suspend.java` | member | member.Member | ManyToOne |
+| `adapter/persistence/suspend/SuspendJpaEntity.java` | member | member.Member | ManyToOne |
 | `domain/trade/entity/TradeCancel.java` | member | member.Member | ManyToOne |
 | `domain/trade/entity/TradeCancelImage.java` | image | image.Image | ManyToOne |
 | `domain/trade/entity/TradeComplete.java` | buyer | member.Member | ManyToOne |
@@ -1057,8 +1057,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | --- | --- | --- |
 | `legacy-classes.txt` 항목 | 전환 전 클래스 목록, PR별 태그 | 각 태그 PR (최종 0건은 PR12) |
 | `MemberUtil` | 5절 호출처가 사용 | 호출처: 각 업무 PR, 클래스: PR12 |
-| `@CheckBlocked`/`BlockAspect` | PR07에서 삭제. 거래 완료 요청은 `TradeBlockPort` → `adapter/integration/trade/TradeBlockBridge`(BlockValidator) | 완료 (bridge 교체는 PR09) |
-| `BlockValidator` | 5절 사용처 | PR09 (공개 query 제공 후 각 호출처 PR에서 교체) |
+| `@CheckBlocked`/`BlockAspect` | PR07에서 삭제. 거래 완료 요청은 `TradeBlockPort` → `adapter/integration/trade/TradeBlockBridge` → `BlockRelationQuery` | 완료 (PR09 bridge 교체 완료) |
+| `BlockValidator` | **PR09 완료: 삭제**. 호출처 Trade/Review/Chat/Post bridge 가 block 공개 `BlockRelationQuery` 직접 사용 | - |
 | `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 |
 | `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web |
 | `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config |
@@ -1086,20 +1086,25 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `ImageValidateUtil` (PR05 잔여) | **PR08 완료: 삭제**. chat `ChatImageBridge` 가 `ImageQuery.getAllByIds` 사용 | - |
 | `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | PR06 완료: 이벤트는 `adapter/event/image` 로 이동(ImageOwnerType 사용), ImageType 삭제 | - |
 | `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | PR06 완료: `adapter/http/ai` 로 이동, AiImageModerationAdapter·PostImageBridgeAdapter 가 사용 | - |
-| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | Notice/ReportImageRepository 직접 사용 (post 는 UnlinkProductImageUseCase 로 교체 완료) | post=PR06 완료, report=PR09, notice=PR10 공개 command 로 교체 |
+| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | NoticeImageRepository 직접 사용 (post 는 UnlinkProductImageUseCase, report 는 UnlinkReportImageUseCase 로 교체 완료) | post=PR06 완료, report=PR09 완료, notice=PR10 공개 command 로 교체 |
 | PR06 `PostImageBridgeAdapter` (adapter/integration/post) | image 공개 ImageQuery 사용. 미사용 이미지 정리는 adapter/event/image 이벤트, 텍스트 검열은 adapter/http/ai 클라이언트 | - (전환 완료, 연결 adapter) |
-| PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 BlockValidator | 프로필 공개 query PR11/PR12, 차단 PR09 |
+| PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 block 공개 BlockRelationQuery(PR09 완료) | 프로필 공개 query PR11/PR12 |
 | PR06 `PostChatBridgeAdapter` (adapter/integration/post) | **PR08 완료**: chat 공개 `ChatRoomLookupQuery`(방·대화 여부)·`SaveChatSystemMessageUseCase`(예약 취소 시스템 메시지, 호출자 트랜잭션 참여) 사용 | - (전환 완료, 연결 adapter) |
 | PR06 `PostTradeStatusBridgeAdapter` (adapter/integration/post) | TradeStateReader + legacy TradeStatusChangedEvent 발행 | PR07 — **PR07 완료**: 삭제, `adapter/integration/post/PostTradeStatusAdapter`(trade `TradeStateQuery` + `adapter.event.trade.TradeStatusChangedEvent`) |
 | PR06 `ReservationNotificationBridgeAdapter`·`ReservationCancelledEventListener`·`ReservationCancelledEvent` (adapter/integration/post) | SendPushUseCase(공개, reminder 최종 실패 시 예외)·ChattingServerSystemMessageNotifier | 채팅 서버 HTTP PR08 (푸시는 PR06 에서 공개 Port 로 교체 완료) — PR08: notifier 는 `adapter/http/chat` 으로 이동(import 만 갱신), listener 는 adapter 간 직접 호출 유지(이벤트 소유 PR06) |
 | PR06 `PostController` `/api/post/trade` POST·DELETE | legacy RequestTradeCompleteService/WithdrawTradeCompleteService 직접 주입 | PR07 (trade input Port로 교체) — **PR07 완료**: 핸들러 제거, 같은 URL은 `adapter/web/trade/controller/TradeCompletionController` |
 | PR06 공개 Port 소비 전 타 업무 legacy 호출자(trade·review·chat·report·alert·admin·member·image 의 post Entity/Repository 직접 사용) | `adapter/persistence/post` 의 Entity·Repository 를 import 만 바꿔 계속 사용 | 각 호출자 PR(PR02·PR04·PR05·PR07·PR08·PR09·PR11)이 `.omo/evidence/hex-pr06-handoff.md` 의 post 공개 Port 로 교체 — **PR08 완료(chat)**: `ChatProductBridge` 가 `ProductSnapshotQuery`·`ProductImageQuery`·`PendingReservationUseCase` 사용 |
-| PR07 남은 legacy bridge (`adapter/integration/{trade,review}/*Bridge`) | `TradeBlockBridge`·`ReviewBlockBridge`(BlockValidator), `TradeChatBridge`(chat Repository), `TradeAlertBridge` 의 관리자 알림 생성·삭제(CreateAdminAlertEvent·AdminAlertRepository, 중요 알림 2종은 `RecordAlertUseCase` 로 교체 완료), `ReviewMemberBridge.addLight`(member 빛 command 없음) | PR09, PR08, PR11, PR02 후속/PR12 — **PR08 완료(`TradeChatBridge`)**: chat 공개 `ChatRoomLookupQuery` 사용 |
+| PR07 남은 legacy bridge (`adapter/integration/{trade,review}/*Bridge`) | `TradeBlockBridge`·`ReviewBlockBridge`(**PR09 완료**: BlockRelationQuery), `TradeChatBridge`(chat Repository), `TradeAlertBridge` 의 관리자 알림 생성·삭제(CreateAdminAlertEvent·AdminAlertRepository, 중요 알림 2종은 `RecordAlertUseCase` 로 교체 완료), `ReviewMemberBridge.addLight`(member 빛 command 없음) | PR09, PR08, PR11, PR02 후속/PR12 — **PR08 완료(`TradeChatBridge`)**: chat 공개 `ChatRoomLookupQuery` 사용 |
 | PR07 `TradeCancelPersistenceAdapter` 의 `ImageRepository`·legacy `Image` Entity | 철회 이미지 연결 저장(JPA association) | PR05 후속/PR12 |
 | PR07 공개 Port 를 직접 쓰는 legacy 호출자 | chat `FindChatMessageByRoomIdServiceImpl`(`TradeStateQuery`·`CompletedTradeQuery`), admin `ApproveTradeCancelServiceImpl`(`ApproveTradeCancelUseCase`) | PR08, PR11 — **PR08 완료(chat)**: legacy 서비스 삭제, `ChatProductBridge` 가 `TradeStateQuery`·`CompletedTradeQuery` 사용 |
 | trade/review JpaRepository 를 직접 쓰는 legacy 호출자 | admin `RejectAdminAlertServiceImpl`·`CreateAdminAlertServiceImpl`·`FindAlertByAlertTypeAndPlaceServiceImpl`, member `MemberDeletionServiceImpl`, PR04 `LegacyAlertSourceAdapter`(후기·철회 기각 원천) | PR11, PR02·PR11, PR04/PR12 |
 | PR08 `adapter/integration/chat/ChatProductBridge` | post 공개 `ProductSnapshotQuery`·`ProductImageQuery`·`PendingReservationUseCase`, trade 공개 `TradeStateQuery`·`CompletedTradeQuery` 사용. 채팅방 목록 상품 조회는 1 쿼리 → 2 쿼리(PR06 handoff 승인) | - (전환 완료, 연결 adapter) |
 | PR08 `adapter/integration/chat/ChatImageBridge`·`ChatMemberBridge`·`ChatPushBridge` | image `ImageQuery.getAllByIds`, member `MemberAccountQuery.findById`, notification `PushRequestedEvent`(커밋 후 발송) | - (전환 완료, 연결 adapter) |
-| PR08 `adapter/integration/chat/ChatBlockBridge` | chat → `BlockValidator` | PR09 |
+| PR08 `adapter/integration/chat/ChatBlockBridge` | chat → block 공개 `BlockRelationQuery` | - (**PR09 완료**) |
+| PR09 `adapter/integration/report/ReportTargetBridgeAdapter`·`ReportImageBridgeAdapter`·`block/BlockTargetBridgeAdapter` | member `MemberAccountQuery.findById`, post `ProductSnapshotQuery.getActive`, image `ImageQuery.findAllByIds` 공개 Port 사용 | - (전환 완료, 연결 adapter) |
+| PR09 `adapter/integration/suspend/MemberStatusBridgeAdapter` | 회원 상태 공개 command 가 없어 `MemberJpaRepository`·`MemberJpaEntity.updateMemberStatus` 직접 사용(같은 트랜잭션 변경 감지) | PR02 후속/PR11 (회원 상태 command 제공 시) |
+| PR09 `adapter/integration/suspend/AdminAlertBridgeAdapter` | legacy `AdminAlertRepository.existsById` | PR11 |
+| PR09 공개 Port 제공 | `BlockRelationQuery`(Trade/Review/Chat/Post bridge), `ReportQuery`(PR04 `LegacyAlertSourceAdapter.report`·`LegacyAlertImageAdapter.reportImages`), `UnlinkReportImageUseCase`(PR05 cleanup REPORT), `SuspensionQuery`(PR04 `LegacyAlertSourceAdapter.suspendedDays`) | - |
+| report/suspend/block JpaRepository 직접 사용 (legacy) | admin `CreateAdminAlert`·`FindAlertByAlertTypeAndPlace`·`RejectAdminAlert`, member `MemberDeletionServiceImpl`(reassign/delete) | PR11 (필요 공개 Port 를 PR09 범위에 요청) |
 | PR08 chat 공개 Port 소비 | trade `TradeChatBridge`, post `PostChatBridgeAdapter` 가 `ChatRoomLookupQuery`·`SaveChatSystemMessageUseCase` 사용. post `ProductCustomRepository` 의 chat DTO 반환 메서드(`findRoomProductsWithImagesByIds`)는 삭제 | - |
 | chat JPA Repository 직접 사용 (legacy) | member `MemberDeletionServiceImpl` 의 채팅방·메시지 재지정(`reassignBuyer/Seller/Sender`). image `OrphanImageQueryAdapter` 의 `QChatMessageImageJpaEntity` 는 persistence 간 참조(허용) | PR11 (회원 탈퇴 정리 시 chat 공개 command 요청) |

@@ -3,17 +3,17 @@ package team.startup.gwangsan.adapter.integration.review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.review.port.out.ReviewBlockPort;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.application.block.port.in.BlockRelationQuery;
 
-/** legacy bridge: block 공개 query(PR09) 전까지 BlockValidator 로 연결한다. */
+/** block 공개 query(PR09) 연결. 차단이면 BlockedMemberException(403). */
 @Component
 @RequiredArgsConstructor
 public class ReviewBlockBridge implements ReviewBlockPort {
 
-    private final BlockValidator blockValidator;
+    private final BlockRelationQuery blockRelationQuery;
 
     @Override
     public void validateNotBlocked(long memberId, long otherMemberId) {
-        blockValidator.validate(memberId, otherMemberId);
+        blockRelationQuery.validateNotBlocked(memberId, otherMemberId);
     }
 }

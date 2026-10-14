@@ -18,10 +18,10 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.entity.constant.ReportType;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
@@ -44,7 +44,7 @@ class CreateAdminAlertServiceImplTest {
     private AdminAlertRepository adminAlertRepository;
 
     @Mock
-    private ReportRepository reportRepository;
+    private ReportJpaRepository reportRepository;
 
     @Mock
     private MemberJpaRepository memberRepository;
@@ -71,7 +71,7 @@ class CreateAdminAlertServiceImplTest {
             })
             @DisplayName("신고 타입에 맞는 제목으로 AdminAlert를 저장한다")
             void it_saves_report_alert(ReportType reportType, String expectedTitle) {
-                Report report = mock(Report.class);
+                ReportJpaEntity report = mock(ReportJpaEntity.class);
                 MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(report.getReportType()).thenReturn(reportType);
                 when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
@@ -99,7 +99,7 @@ class CreateAdminAlertServiceImplTest {
             @Test
             @DisplayName("Member가 없으면 NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                Report report = mock(Report.class);
+                ReportJpaEntity report = mock(ReportJpaEntity.class);
                 when(report.getReportType()).thenReturn(ReportType.SPAM_AD);
                 when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
                 when(memberRepository.findById(2L)).thenReturn(Optional.empty());

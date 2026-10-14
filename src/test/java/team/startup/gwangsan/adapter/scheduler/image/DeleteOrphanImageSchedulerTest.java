@@ -47,9 +47,9 @@ import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.entity.ReportImage;
-import team.startup.gwangsan.domain.report.entity.constant.ReportType;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaEntity;
+import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
@@ -157,7 +157,7 @@ class DeleteOrphanImageSchedulerTest {
                     image("product"), image("notice"), image("report"), image("chat"), image("trade-cancel"));
             entityManager.persist(ProductImage.builder().product(relationships.product()).image(reference(protectedImages, 0)).build());
             entityManager.persist(NoticeImage.builder().notice(relationships.notice()).image(reference(protectedImages, 1)).build());
-            entityManager.persist(ReportImage.builder().report(relationships.report()).image(reference(protectedImages, 2)).build());
+            entityManager.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reference(protectedImages, 2)).build());
             entityManager.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.message()).image(reference(protectedImages, 3)).build());
             entityManager.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.cancel()).image(reference(protectedImages, 4)).build());
             ImageFixture oldOrphan = image("old-orphan");
@@ -290,7 +290,7 @@ class DeleteOrphanImageSchedulerTest {
         Head head = persist(new Head("head"));
         Place place = persist(Place.builder().name("place").head(head).build());
         Notice notice = persist(Notice.builder().title("notice").content("content").place(place).member(seller).build());
-        Report report = persist(Report.builder().reportType(ReportType.ETC).content("content").reported(seller).reporter(buyer).build());
+        ReportJpaEntity report = persist(ReportJpaEntity.builder().reportType(ReportType.ETC).content("content").reported(seller).reporter(buyer).build());
         TradeCompleteJpaEntity complete = persist(TradeCompleteJpaEntity.builder().product(product).buyer(buyer).seller(seller)
                 .status(TradeStatus.COMPLETED).requestedBySeller(true).build());
         TradeCancelJpaEntity cancel = persist(TradeCancelJpaEntity.builder().tradeComplete(complete).member(buyer).reason("reason")
@@ -354,6 +354,6 @@ class DeleteOrphanImageSchedulerTest {
     private record ImageFixture(Image entity, Long id, String url) {
     }
 
-    private record Relationships(Product product, Notice notice, Report report, ChatMessageJpaEntity message, TradeCancelJpaEntity cancel) {
+    private record Relationships(Product product, Notice notice, ReportJpaEntity report, ChatMessageJpaEntity message, TradeCancelJpaEntity cancel) {
     }
 }

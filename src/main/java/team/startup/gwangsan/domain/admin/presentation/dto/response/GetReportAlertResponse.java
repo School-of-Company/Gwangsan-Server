@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.admin.presentation.dto.response;
 
-import team.startup.gwangsan.domain.report.entity.constant.ReportTargetType;
-import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
+import team.startup.gwangsan.domain.report.model.ReportTargetType;
+import team.startup.gwangsan.adapter.web.report.dto.GetReportResponse;
 
 import java.time.LocalDateTime;
 

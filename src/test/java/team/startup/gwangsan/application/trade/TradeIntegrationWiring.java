@@ -22,7 +22,12 @@ import team.startup.gwangsan.application.post.service.PendingReservationService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.application.trade.service.*;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.report.ReportPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.suspend.SuspendPersistenceAdapter;
+import team.startup.gwangsan.application.block.service.BlockQueryService;
+import team.startup.gwangsan.application.report.service.ReportQueryService;
+import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
 
 /**
  * @DataJpaTest 에서 거래 쓰기 유스케이스를 실제 persistence adapter 와 선행 업무 공개 Port 구현
@@ -39,6 +44,7 @@ import team.startup.gwangsan.global.util.BlockValidator;
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ChangeGwangsanService.class, MemberAccountService.class, MemberPersistenceAdapter.class,
         CreateAlertService.class, AlertPersistenceAdapter.class, LegacyAlertSourceAdapter.class,
-        BlockValidator.class})
+        BlockQueryService.class, MemberBlockPersistenceAdapter.class,
+        ReportQueryService.class, ReportPersistenceAdapter.class, SuspensionQueryService.class, SuspendPersistenceAdapter.class})
 public class TradeIntegrationWiring {
 }

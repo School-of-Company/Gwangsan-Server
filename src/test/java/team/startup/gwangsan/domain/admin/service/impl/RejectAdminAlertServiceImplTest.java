@@ -18,8 +18,8 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
@@ -44,7 +44,7 @@ class RejectAdminAlertServiceImplTest {
     private AdminAlertRepository adminAlertRepository;
 
     @Mock
-    private ReportRepository reportRepository;
+    private ReportJpaRepository reportRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -126,7 +126,7 @@ class RejectAdminAlertServiceImplTest {
 
                 MemberJpaEntity reporter = mock(MemberJpaEntity.class);
                 when(reporter.getId()).thenReturn(3L);
-                Report report = mock(Report.class);
+                ReportJpaEntity report = mock(ReportJpaEntity.class);
                 when(report.getId()).thenReturn(5L);
                 when(report.getReporter()).thenReturn(reporter);
 

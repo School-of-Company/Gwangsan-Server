@@ -10,14 +10,12 @@ import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.application.report.data.ReportAlertSource;
+import team.startup.gwangsan.application.report.port.in.ReportQuery;
+import team.startup.gwangsan.application.suspend.port.in.SuspensionQuery;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
-import team.startup.gwangsan.domain.suspend.exception.NotFoundSuspendException;
-import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
@@ -32,7 +30,7 @@ import static team.startup.gwangsan.domain.admin.service.impl.VerificationSignUp
 /**
  * 임시 bridge: 기존 CreateAlertServiceImpl 이 하던 원천 조회를 legacy Repository 로 그대로 수행한다.
  * 비동기 알림 경로는 유지되므로 Port 는 남고, 구현만 각 업무의 공개 조회로 교체한다
- * (회원 PR02, 상품 PR06 완료: ProductSnapshotQuery, 거래·후기 PR07, 신고·정지 PR09, 공지 PR10, 최종 PR12).
+ * (회원 PR02, 상품 PR06 완료: ProductSnapshotQuery, 거래·후기 PR07, 신고·정지 PR09 완료: ReportQuery·SuspensionQuery, 공지 PR10, 최종 PR12).
  */
 @Component
 @RequiredArgsConstructor
@@ -44,8 +42,8 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
     private final TradeCompleteJpaRepository tradeCompleteRepository;
     private final ProductSnapshotQuery productSnapshotQuery;
     private final ReviewJpaRepository reviewRepository;
-    private final ReportRepository reportRepository;
-    private final SuspendRepository suspendRepository;
+    private final ReportQuery reportQuery;
+    private final SuspensionQuery suspensionQuery;
     private final TradeCancelJpaRepository tradeCancelRepository;
     private final NoticeRepository noticeRepository;
 
@@ -91,14 +89,13 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public ReportSource report(Long reportId) {
-        Report report = reportRepository.findById(reportId).orElseThrow(NotFoundReportException::new);
-        return new ReportSource(report.getReporter().getId(), report.getReported().getNickname());
+        ReportAlertSource source = reportQuery.getAlertSource(reportId);
+        return new ReportSource(source.reporterId(), source.reportedNickname());
     }
 
     @Override
     public int suspendedDays(Long suspendId) {
-        if (suspendId == null) throw new NotFoundSuspendException();
-        return suspendRepository.findById(suspendId).orElseThrow(NotFoundSuspendException::new).getSuspendedDays();
+        return suspensionQuery.getSuspendedDays(suspendId);
     }
 
     @Override

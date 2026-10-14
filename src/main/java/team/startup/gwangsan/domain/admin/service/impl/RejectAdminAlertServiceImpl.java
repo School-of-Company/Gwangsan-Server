@@ -17,9 +17,9 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
@@ -33,7 +33,7 @@ import team.startup.gwangsan.global.util.MemberUtil;
 public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
 
     private final AdminAlertRepository adminAlertRepository;
-    private final ReportRepository reportRepository;
+    private final ReportJpaRepository reportRepository;
     private final MemberUtil memberUtil;
     private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
@@ -86,7 +86,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
     }
 
     private void rejectReport(AdminAlert alert) {
-        Report report = reportRepository.findById(alert.getSourceId())
+        ReportJpaEntity report = reportRepository.findById(alert.getSourceId())
                 .orElseThrow(NotFoundReportException::new);
 
         applicationEventPublisher.publishEvent(new CreateAlertEvent(

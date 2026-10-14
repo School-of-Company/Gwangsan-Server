@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.adapter.persistence.alert.AlertReceiptJpaRepository;
 import team.startup.gwangsan.adapter.persistence.alert.AlertJpaRepository;
-import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
+import team.startup.gwangsan.adapter.persistence.block.MemberBlockJpaRepository;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaRepository;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
@@ -18,9 +18,9 @@ import team.startup.gwangsan.domain.member.service.MemberDeletionService;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
-import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
+import team.startup.gwangsan.adapter.persistence.suspend.SuspendJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
@@ -37,14 +37,14 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     private final ChatRoomJpaRepository chatRoomRepository;
     private final ChatMessageJpaRepository chatMessageRepository;
     private final ReviewJpaRepository reviewRepository;
-    private final ReportRepository reportRepository;
+    private final ReportJpaRepository reportRepository;
     private final AdminAlertRepository adminAlertRepository;
     private final TradeCancelJpaRepository tradeCancelRepository;
     private final AlertJpaRepository alertRepository;
     private final NoticeRepository noticeRepository;
     private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
-    private final SuspendRepository suspendRepository;
-    private final MemberBlockRepository memberBlockRepository;
+    private final SuspendJpaRepository suspendRepository;
+    private final MemberBlockJpaRepository memberBlockRepository;
     private final AlertReceiptJpaRepository alertReceiptRepository;
 
     @Override

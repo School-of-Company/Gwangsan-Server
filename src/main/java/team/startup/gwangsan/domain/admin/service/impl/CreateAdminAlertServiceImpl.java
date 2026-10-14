@@ -13,9 +13,9 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
@@ -25,7 +25,7 @@ import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
     private final AdminAlertRepository adminAlertRepository;
-    private final ReportRepository reportRepository;
+    private final ReportJpaRepository reportRepository;
     private final MemberJpaRepository memberRepository;
     private final TradeCancelJpaRepository tradeCancelRepository;
 
@@ -43,7 +43,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
     public void execute(AlertType type, Long sourceId, Long memberId) {
         switch (type) {
             case REPORT -> {
-                Report report = reportRepository.findById(sourceId)
+                ReportJpaEntity report = reportRepository.findById(sourceId)
                         .orElseThrow(NotFoundReportException::new);
 
                 String alertTile = resolveReportAlertTitle(report);
@@ -91,7 +91,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
         }
     }
 
-    private String resolveReportAlertTitle(Report report) {
+    private String resolveReportAlertTitle(ReportJpaEntity report) {
         return switch (report.getReportType()) {
             case SEXUAL -> REPORT_SEXUAL_ALERT_TITLE;
             case ABUSE_HATE_HARASSMENT -> REPORT_ABUSE_HATE_HARASSMENT_ALERT_TITLE;
