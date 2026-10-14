@@ -40,7 +40,8 @@ import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.*;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
-import team.startup.gwangsan.adapter.integration.review.ReviewMemberBridge;
+import team.startup.gwangsan.adapter.integration.review.ReviewMemberAdapter;
+import team.startup.gwangsan.application.member.service.AddMemberLightService;
 import team.startup.gwangsan.adapter.integration.review.ReviewPostAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
@@ -108,14 +109,14 @@ class ReceivedReviewIntegrationTest {
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
             "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
-            "team.startup.gwangsan.adapter.persistence.post",
+            "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.image",
             "team.startup.gwangsan.adapter.persistence.review"})
     @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
             "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.review"})
     @EnableJpaAuditing
     @EnableConfigurationProperties(JwtProperties.class)
     @Import({ReviewController.class, ReviewQueryService.class, ReviewPersistenceAdapter.class, ReviewPostAdapter.class,
-            ReviewMemberBridge.class, ProductPublicQueryService.class, ProductPersistenceAdapter.class,
+            ReviewMemberAdapter.class, AddMemberLightService.class, ProductPublicQueryService.class, ProductPersistenceAdapter.class,
             ProductImagePersistenceAdapter.class, ActorContextArgumentResolver.class, WebMvcConfig.class,
             QueryDslConfig.class, MemberUtil.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
             MemberDetailsService.class, MemberAccountService.class, MemberPersistenceAdapter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class,

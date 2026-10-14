@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.trade.port.out.TradeCancelPort;
 import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
-import team.startup.gwangsan.adapter.persistence.image.ImageJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.model.TradeCancel;
@@ -27,8 +26,6 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
 
     private final TradeCancelJpaRepository tradeCancelJpaRepository;
     private final TradeCancelImageJpaRepository tradeCancelImageJpaRepository;
-    // ponytail: 이미지 엔티티 조회는 PR05 image 공개 조회 전까지 기존 Repository 를 그대로 쓴다.
-    private final ImageJpaRepository imageRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -83,20 +80,25 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
     }
 
     @Override
-    public TradeCancel create(TradeCancel tradeCancel, List<Long> imageIds) {
-        TradeCancelJpaEntity saved = tradeCancelJpaRepository.save(TradeCancelJpaEntity.builder()
+    public TradeCancel create(TradeCancel tradeCancel) {
+        return toDomain(tradeCancelJpaRepository.save(TradeCancelJpaEntity.builder()
                 .tradeComplete(entityManager.getReference(TradeCompleteJpaEntity.class, tradeCancel.tradeCompleteId()))
                 .member(entityManager.getReference(MemberJpaEntity.class, tradeCancel.requesterId()))
                 .reason(tradeCancel.reason())
                 .status(tradeCancel.status())
-                .build());
+                .build()));
+    }
 
-        List<ImageJpaEntity> images = imageRepository.findAllById(imageIds);
-        tradeCancelImageJpaRepository.saveAll(images.stream()
-                .map(image -> TradeCancelImageJpaEntity.builder().tradeCancel(saved).image(image).build())
+    /** 이미지 Entity 는 FK 연관 저장에만 getReference 로 쓴다(존재 확인은 image 공개 query 가 이미 했다). */
+    @Override
+    public void attachImages(long tradeCancelId, List<Long> imageIds) {
+        TradeCancelJpaEntity tradeCancel = entityManager.getReference(TradeCancelJpaEntity.class, tradeCancelId);
+        tradeCancelImageJpaRepository.saveAll(imageIds.stream()
+                .map(imageId -> TradeCancelImageJpaEntity.builder()
+                        .tradeCancel(tradeCancel)
+                        .image(entityManager.getReference(ImageJpaEntity.class, imageId))
+                        .build())
                 .toList());
-
-        return toDomain(saved);
     }
 
     @Override

@@ -29,7 +29,10 @@ public interface TradeCancelPort {
     /** 철회 요청 ID → 상품 ID (1 쿼리). */
     Map<Long, Long> findProductIds(Collection<Long> tradeCancelIds);
 
-    TradeCancel create(TradeCancel tradeCancel, List<Long> imageIds);
+    TradeCancel create(TradeCancel tradeCancel);
+
+    /** 철회 요청에 이미지 연결 행을 저장한다. imageIds 는 이미 존재가 확인된 ID 다. */
+    void attachImages(long tradeCancelId, List<Long> imageIds);
 
     void update(TradeCancel tradeCancel);
 

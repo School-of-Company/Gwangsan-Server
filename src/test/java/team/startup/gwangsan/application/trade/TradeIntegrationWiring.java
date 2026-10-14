@@ -24,6 +24,8 @@ import team.startup.gwangsan.application.post.service.PendingReservationService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.application.trade.service.*;
+import team.startup.gwangsan.application.image.service.ImageQueryService;
+import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.report.ReportPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.suspend.SuspendPersistenceAdapter;
@@ -42,6 +44,7 @@ import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
         TradePostAdapter.class, TradeChatBridge.class, ChatRoomLookupService.class, ChatRoomPersistenceAdapter.class,
         ChatMessagePersistenceAdapter.class, TradeMemberAdapter.class, TradeBlockBridge.class,
         TradeAlertBridge.class, TradePushAdapter.class, TradeStatusEventPublisher.class,
+        TradeImageAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class,
         ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ChangeGwangsanService.class, MemberAccountService.class, MemberPersistenceAdapter.class,

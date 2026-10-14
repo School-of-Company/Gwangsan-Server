@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import team.startup.gwangsan.adapter.integration.trade.TradeImageAdapter;
+import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.application.image.service.ImageQueryService;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
 import team.startup.gwangsan.adapter.persistence.review.ReviewPersistenceAdapter;
@@ -39,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Import({QueryDslConfig.class, TradeCancelPersistenceAdapter.class, TradeMemberReferencePersistenceAdapter.class,
-        ReviewPersistenceAdapter.class})
+        ReviewPersistenceAdapter.class, TradeImageAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class})
 @DisplayName("trade/review provider 공개 Port 저장소 경로")
 class TradeProviderPortPersistenceTest {
 
@@ -48,6 +51,7 @@ class TradeProviderPortPersistenceTest {
     @Autowired private TradeCancelPersistenceAdapter tradeCancelAdapter;
     @Autowired private TradeMemberReferencePersistenceAdapter memberReferenceAdapter;
     @Autowired private ReviewPersistenceAdapter reviewAdapter;
+    @Autowired private TradeImageAdapter tradeImageAdapter;
 
     private MemberJpaEntity buyer;
     private MemberJpaEntity seller;
@@ -119,6 +123,22 @@ class TradeProviderPortPersistenceTest {
             assertThat(statistics().getPrepareStatementCount()).isEqualTo(1);
             assertThat(tradeCancelAdapter.findRequesterId(9999L)).isEmpty();
         }
+    }
+
+    @Test
+    @DisplayName("철회 첨부: image 공개 query 로 존재하는 이미지만 골라(1 쿼리) 연결 행을 저장한다")
+    void it_attaches_only_existing_images() {
+        List<Long> existing = tradeImageAdapter.findExistingImageIds(List.of(first.getId(), 99999L, second.getId()));
+        assertThat(statistics().getPrepareStatementCount()).isEqualTo(1);
+        assertThat(existing).containsExactlyInAnyOrder(first.getId(), second.getId());
+
+        tradeCancelAdapter.attachImages(withoutImages.getId(), existing);
+        em.flush();
+        em.clear();
+
+        assertThat(tradeCancelAdapter.findImageViews(List.of(withoutImages.getId())).get(withoutImages.getId()))
+                .extracting(TradeCancelImageView::imageId)
+                .containsExactlyInAnyOrder(first.getId(), second.getId());
     }
 
     @Test
