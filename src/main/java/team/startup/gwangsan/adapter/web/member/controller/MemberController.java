@@ -17,7 +17,8 @@ import team.startup.gwangsan.application.member.port.in.FindMyInfoQuery;
 import team.startup.gwangsan.application.member.port.in.FindUserInfoQuery;
 import team.startup.gwangsan.application.member.port.in.UpdateMyInfoUseCase;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.member.service.MemberWithdrawalService;
+import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
+import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class MemberController {
     private final FindUserInfoQuery findUserInfoQuery;
     private final FindAllUserInfoQuery findAllUserInfoQuery;
     // bridge: 탈퇴·회원 삭제는 모든 업무 참조를 정리하는 PR11 에서 member input Port 로 교체한다.
-    private final MemberWithdrawalService memberWithdrawalService;
+    private final WithdrawMemberUseCase withdrawMemberUseCase;
 
     @GetMapping
     public ResponseEntity<FindMyInfoResponse> findMyInfo(ActorContext actor) {
@@ -69,8 +70,8 @@ public class MemberController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteMember() {
-        memberWithdrawalService.execute();
+    public ResponseEntity<Void> deleteMember(ActorContext actor) {
+        withdrawMemberUseCase.execute(new WithdrawMemberCommand(actor.memberId(), false));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

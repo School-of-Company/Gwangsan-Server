@@ -21,50 +21,50 @@
 | # | 기준 경로 | 현재 경로 | 업무 | 역할 | 목표 배치 | 담당 PR | 상태 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `GwangsanApplication.java` | = | - | bootstrap | 유지 (team.startup.gwangsan) | PR01 | 유지 |
-| 2 | `domain/admin/entity/AdminAlert.java` | = | admin | jpa entity | adapter/persistence/admin (JpaEntity) + domain/admin/model (순수 모델, 규칙 있을 때) | PR11 | legacy |
-| 3 | `domain/admin/entity/constant/AlertType.java` | = | admin | enum | domain/admin/model | PR11 | legacy |
-| 4 | `domain/admin/exception/NotFoundAdminAlertException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
-| 5 | `domain/admin/exception/NotFoundAlertTypeException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
-| 6 | `domain/admin/exception/NotFoundPendingMemberException.java` | = | admin | exception | domain/admin/exception | PR11 | legacy |
-| 7 | `domain/admin/presentation/AdminController.java` | = | admin | controller | adapter/web/admin/controller | PR11 | legacy |
-| 8 | `domain/admin/presentation/AdminProductController.java` | = | admin | controller | adapter/web/admin/controller | PR11 | legacy |
-| 9 | `domain/admin/presentation/dto/request/AdjustGwangsanRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 10 | `domain/admin/presentation/dto/request/AdminSignInRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 11 | `domain/admin/presentation/dto/request/UpdateMemberRoleRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 12 | `domain/admin/presentation/dto/request/UpdateMemberStatusRequest.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 13 | `domain/admin/presentation/dto/response/GetAdminAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 14 | `domain/admin/presentation/dto/response/GetReportAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 15 | `domain/admin/presentation/dto/response/GetSignUpAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 16 | `domain/admin/presentation/dto/response/GetTradeCancelAlertResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 17 | `domain/admin/presentation/dto/response/SignInAdminResponse.java` | = | admin | web dto | adapter/web/admin/dto | PR11 | legacy |
-| 18 | `domain/admin/repository/AdminAlertRepository.java` | = | admin | repository | adapter/persistence/admin (JpaRepository) + application/admin/port/out | PR11 | legacy |
-| 19 | `domain/admin/repository/custom/AdminAlertCustomRepository.java` | = | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | legacy |
-| 20 | `domain/admin/repository/custom/impl/AdminAlertCustomRepositoryImpl.java` | = | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | legacy |
-| 21 | `domain/admin/service/AdjustGwangsanService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 22 | `domain/admin/service/ApproveTradeCancelService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 23 | `domain/admin/service/CreateAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 24 | `domain/admin/service/DeleteAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 25 | `domain/admin/service/DeleteAdminProductService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 26 | `domain/admin/service/FindAdminProductsService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 27 | `domain/admin/service/FindAlertByAlertTypeAndPlaceService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 28 | `domain/admin/service/RejectAdminAlertService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 29 | `domain/admin/service/SignInAdminService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 30 | `domain/admin/service/UpdateMemberRoleService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 31 | `domain/admin/service/UpdateMemberStatusService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 32 | `domain/admin/service/VerificationSignUpService.java` | = | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | legacy |
-| 33 | `domain/admin/service/impl/AdjustGwangsanServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 34 | `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 35 | `domain/admin/service/impl/CreateAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 36 | `domain/admin/service/impl/DeleteAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 37 | `domain/admin/service/impl/DeleteAdminProductServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 38 | `domain/admin/service/impl/FindAdminProductsServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 39 | `domain/admin/service/impl/FindAlertByAlertTypeAndPlaceServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 40 | `domain/admin/service/impl/RejectAdminAlertServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 41 | `domain/admin/service/impl/SignInAdminServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 42 | `domain/admin/service/impl/UpdateMemberRoleServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 43 | `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 44 | `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | = | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | legacy |
-| 45 | `domain/admin/util/ValidatePlaceUtil.java` | = | admin | util | domain/admin/policy (순수 인가 정책) | PR11 | legacy |
+| 2 | `domain/admin/entity/AdminAlert.java` | `adapter/persistence/admin/AdminAlertJpaEntity.java` + `domain/admin/model/AdminAlert.java` | admin | jpa entity | adapter/persistence/admin (JpaEntity) + domain/admin/model (순수 모델, 규칙 있을 때) | PR11 | PR11 완료 |
+| 3 | `domain/admin/entity/constant/AlertType.java` | = (순수 enum, 위치 유지) | admin | enum | domain/admin/model | PR11 | PR11 완료 |
+| 4 | `domain/admin/exception/NotFoundAdminAlertException.java` | = (순수, 위치 유지) | admin | exception | domain/admin/exception | PR11 | PR11 완료 |
+| 5 | `domain/admin/exception/NotFoundAlertTypeException.java` | = (순수, 위치 유지) | admin | exception | domain/admin/exception | PR11 | PR11 완료 |
+| 6 | `domain/admin/exception/NotFoundPendingMemberException.java` | = (순수, 위치 유지) | admin | exception | domain/admin/exception | PR11 | PR11 완료 |
+| 7 | `domain/admin/presentation/AdminController.java` | `adapter/web/admin/controller/AdminController.java` | admin | controller | adapter/web/admin/controller | PR11 | PR11 완료 |
+| 8 | `domain/admin/presentation/AdminProductController.java` | `adapter/web/admin/controller/AdminProductController.java` | admin | controller | adapter/web/admin/controller | PR11 | PR11 완료 |
+| 9 | `domain/admin/presentation/dto/request/AdjustGwangsanRequest.java` | `adapter/web/admin/dto/request/AdjustGwangsanRequest.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 10 | `domain/admin/presentation/dto/request/AdminSignInRequest.java` | `adapter/web/admin/dto/request/AdminSignInRequest.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 11 | `domain/admin/presentation/dto/request/UpdateMemberRoleRequest.java` | `adapter/web/admin/dto/request/UpdateMemberRoleRequest.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 12 | `domain/admin/presentation/dto/request/UpdateMemberStatusRequest.java` | `adapter/web/admin/dto/request/UpdateMemberStatusRequest.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 13 | `domain/admin/presentation/dto/response/GetAdminAlertResponse.java` | `adapter/web/admin/dto/response/GetAdminAlertResponse.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 14 | `domain/admin/presentation/dto/response/GetReportAlertResponse.java` | `adapter/web/admin/dto/response/GetReportAlertResponse.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 15 | `domain/admin/presentation/dto/response/GetSignUpAlertResponse.java` | `adapter/web/admin/dto/response/GetSignUpAlertResponse.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 16 | `domain/admin/presentation/dto/response/GetTradeCancelAlertResponse.java` | `adapter/web/admin/dto/response/GetTradeCancelAlertResponse.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 17 | `domain/admin/presentation/dto/response/SignInAdminResponse.java` | `adapter/web/admin/dto/response/SignInAdminResponse.java` | admin | web dto | adapter/web/admin/dto | PR11 | PR11 완료 |
+| 18 | `domain/admin/repository/AdminAlertRepository.java` | `adapter/persistence/admin/AdminAlertJpaRepository.java` + `application/admin/port/out/AdminAlertPort.java` | admin | repository | adapter/persistence/admin (JpaRepository) + application/admin/port/out | PR11 | PR11 완료 |
+| 19 | `domain/admin/repository/custom/AdminAlertCustomRepository.java` | 삭제 (QueryDSL 은 AdminAlertPersistenceAdapter) | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | PR11 완료 |
+| 20 | `domain/admin/repository/custom/impl/AdminAlertCustomRepositoryImpl.java` | `adapter/persistence/admin/AdminAlertPersistenceAdapter.java` | admin | querydsl | adapter/persistence/admin (QueryPort 구현) | PR11 | PR11 완료 |
+| 21 | `domain/admin/service/AdjustGwangsanService.java` | `application/admin/port/in/AdjustGwangsanUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 22 | `domain/admin/service/ApproveTradeCancelService.java` | `application/admin/port/in/ApproveTradeCancelUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 23 | `domain/admin/service/CreateAdminAlertService.java` | `application/admin/port/in/CreateAdminAlertUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 24 | `domain/admin/service/DeleteAdminAlertService.java` | `application/admin/port/in/DeleteAdminAlertUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 25 | `domain/admin/service/DeleteAdminProductService.java` | `application/admin/port/in/DeleteAdminProductUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 26 | `domain/admin/service/FindAdminProductsService.java` | `application/admin/port/in/FindAdminProductsQuery.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 27 | `domain/admin/service/FindAlertByAlertTypeAndPlaceService.java` | `application/admin/port/in/FindAdminAlertsQuery.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 28 | `domain/admin/service/RejectAdminAlertService.java` | `application/admin/port/in/RejectAdminAlertUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 29 | `domain/admin/service/SignInAdminService.java` | `application/admin/port/in/SignInAdminUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 30 | `domain/admin/service/UpdateMemberRoleService.java` | `application/admin/port/in/UpdateMemberRoleUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 31 | `domain/admin/service/UpdateMemberStatusService.java` | `application/admin/port/in/UpdateMemberStatusUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 32 | `domain/admin/service/VerificationSignUpService.java` | `application/admin/port/in/VerifySignUpUseCase.java` | admin | service interface | application/admin/port/in (UseCase/Query) | PR11 | PR11 완료 |
+| 33 | `domain/admin/service/impl/AdjustGwangsanServiceImpl.java` | `application/admin/service/AdjustGwangsanService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 34 | `domain/admin/service/impl/ApproveTradeCancelServiceImpl.java` | `application/admin/service/ApproveTradeCancelService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 35 | `domain/admin/service/impl/CreateAdminAlertServiceImpl.java` | `application/admin/service/CreateAdminAlertService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 36 | `domain/admin/service/impl/DeleteAdminAlertServiceImpl.java` | `application/admin/service/DeleteAdminAlertService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 37 | `domain/admin/service/impl/DeleteAdminProductServiceImpl.java` | `application/admin/service/DeleteAdminProductService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 38 | `domain/admin/service/impl/FindAdminProductsServiceImpl.java` | `application/admin/service/FindAdminProductsService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 39 | `domain/admin/service/impl/FindAlertByAlertTypeAndPlaceServiceImpl.java` | `application/admin/service/FindAdminAlertsService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 40 | `domain/admin/service/impl/RejectAdminAlertServiceImpl.java` | `application/admin/service/RejectAdminAlertService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 41 | `domain/admin/service/impl/SignInAdminServiceImpl.java` | `application/admin/service/SignInAdminService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 42 | `domain/admin/service/impl/UpdateMemberRoleServiceImpl.java` | `application/admin/service/UpdateMemberRoleService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 43 | `domain/admin/service/impl/UpdateMemberStatusServiceImpl.java` | `application/admin/service/UpdateMemberStatusService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 44 | `domain/admin/service/impl/VerificationSignUpServiceImpl.java` | `application/admin/service/VerifySignUpService.java` | admin | service impl | application/admin/service (+ 필요한 output Port) | PR11 | PR11 완료 |
+| 45 | `domain/admin/util/ValidatePlaceUtil.java` | `domain/admin/policy/AdminPlaceScope.java` + `application/admin/service/AdminScopeResolver.java` | admin | util | domain/admin/policy (순수 인가 정책) | PR11 | PR11 완료 |
 | 46 | `domain/alert/entity/Alert.java` | `adapter/persistence/alert/AlertJpaEntity.java` + `domain/alert/model/Alert.java` | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 |
 | 47 | `domain/alert/entity/AlertReceipt.java` | `adapter/persistence/alert/AlertReceiptJpaEntity.java` | alert | jpa entity | adapter/persistence/alert (JpaEntity) + domain/alert/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 |
 | 48 | `domain/alert/entity/constant/AlertType.java` | `domain/alert/model/AlertType.java` | alert | enum | domain/alert/model | PR04 | PR04 완료 |
@@ -246,14 +246,14 @@
 | 224 | `domain/member/service/FindAllUserInfoService.java` | `application/member/port/in/FindAllUserInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
 | 225 | `domain/member/service/FindMyInfoService.java` | `application/member/port/in/FindMyInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
 | 226 | `domain/member/service/FindUserInfoService.java` | `application/member/port/in/FindUserInfoQuery.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
-| 227 | `domain/member/service/MemberDeletionService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
-| 228 | `domain/member/service/MemberWithdrawalService.java` | = | member | service interface | application/member/port/in (UseCase/Query) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 227 | `domain/member/service/MemberDeletionService.java` | 삭제 (`application/member/port/in/WithdrawMemberUseCase.java`) | member | service interface | application/member/port/in (UseCase/Query) | PR02 | PR11 완료 (PR02 태그였던 탈퇴·삭제 범위, 4개 클래스 삭제) |
+| 228 | `domain/member/service/MemberWithdrawalService.java` | `application/member/port/in/WithdrawMemberUseCase.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | PR11 완료 (PR02 태그였던 탈퇴·삭제 범위, 4개 클래스 삭제) |
 | 229 | `domain/member/service/UpdateMyInfoService.java` | `application/member/port/in/UpdateMyInfoUseCase.java` | member | service interface | application/member/port/in (UseCase/Query) | PR02 | 전환 (input Port) |
 | 230 | `domain/member/service/impl/FindAllUserInfoServiceImpl.java` | `application/member/service/FindAllUserInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
 | 231 | `domain/member/service/impl/FindMyInfoServiceImpl.java` | `application/member/service/FindMyInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
 | 232 | `domain/member/service/impl/FindUserInfoServiceImpl.java` | `application/member/service/FindUserInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
-| 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
-| 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
+| 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | `application/member/service/WithdrawMemberService.java` + `adapter/integration/member/*` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | PR11 완료 (PR02 태그였던 탈퇴·삭제 범위, 4개 클래스 삭제) |
+| 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | `application/member/service/WithdrawMemberService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | PR11 완료 (PR02 태그였던 탈퇴·삭제 범위, 4개 클래스 삭제) |
 | 235 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | `application/member/service/UpdateMyInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
 | 236 | `domain/notice/entity/Notice.java` | `adapter/persistence/notice/NoticeJpaEntity.java + domain/notice/model/Notice.java` | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | PR10 완료 |
 | 237 | `domain/notice/entity/NoticeImage.java` | `adapter/persistence/notice/NoticeImageJpaEntity.java` | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | PR10 완료 |
@@ -505,7 +505,7 @@
 | 483 | `global/config/RetryConfig.java` | `infrastructure/config/RetryConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 484 | `global/config/SchedulerConfig.java` | `infrastructure/config/SchedulerConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 485 | `global/event/ChatMessageMutationEvent.java` | `application/chat/data/ChatMessageMutationEvent.java` | chat | global/event | application/chat (기존 이벤트 경계 정리) | PR08 | PR08 완료 |
-| 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
+| 486 | `global/event/CreateAdminAlertEvent.java` | `application/admin/data/CreateAdminAlertEvent.java` | admin | global/event | application/admin (관리자 알림) | PR11 | PR11 완료 |
 | 487 | `global/event/CreateAlertEvent.java` | `adapter/event/alert/CreateAlertEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (비동기 경로 유지. OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 발행만 PR07 이 동기로 이동) |
 | 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 489 | `global/event/DeleteNotUsedImageEvent.java` | `adapter/event/image/DeleteNotUsedImageEvent.java` | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | PR06 완료: image listener 옆으로 이동, 소유 타입은 ImageOwnerType (AFTER_COMMIT 비동기 유지) |
@@ -514,7 +514,7 @@
 | 492 | `global/event/TradeStatusChangedEvent.java` | `adapter/event/trade/TradeStatusChangedEvent.java` | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | PR07 완료 |
 | 493 | `global/event/constant/ImageType.java` | `(삭제)` | image | global/event | domain/image/model | PR05 | PR06 완료: ImageOwnerType 으로 대체 |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | `adapter/event/chat/ChatMessageMutationEventListener.java` (+ `ChatMessageMutationEventPublisher`) | chat | global/event | adapter/event/chat | PR08 | PR08 완료 |
-| 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
+| 495 | `global/event/handler/CreateAdminAlertEventListener.java` | `adapter/event/admin/CreateAdminAlertEventListener.java` | admin | global/event | adapter/event/admin | PR11 | PR11 완료 |
 | 496 | `global/event/handler/CreateAlertEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (비동기 경로 유지) |
 | 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | `adapter/event/image/DeleteNotUsedImageEventListener.java (+ application/image/service/DeleteUnusedImagesService)` | image | global/event | adapter/event/image | PR05 | 전환 |
@@ -1067,18 +1067,18 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | PR03 완료: `adapter/integration/auth/SignUpLocationAdapter` → `DongQuery`·`PlaceQuery` | - |
 | PR02 bridge: `LegacyMemberKeywordAdapter` (RelatedKeyword·MemberRelatedKeyword Repository) | PR03 완료: `adapter/integration/member/MemberKeywordAdapter` → `FindMemberRelatedKeywordsQuery`·`MemberKeywordCommand` | - |
 | PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | PR04 교체 완료: `adapter/integration/auth/DeviceTokenAdapter` → notification `RegisterDeviceTokenUseCase` | 완료 (PR04) |
-| PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
-| PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |
+| PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 — **PR11 완료**: CreateAdminAlertEvent import → application.admin.data |
+| PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 — **PR11 완료**: `WithdrawMemberUseCase`(ActorContext), legacy 탈퇴·삭제 서비스 4개 삭제 |
 | PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) — **PR07 부분 완료**: 거래 잔액은 `ChangeGwangsanUseCase`, 회원 확인·별명은 `MemberAccountQuery`. 후기 `plusLight` 만 `ReviewMemberBridge` 에 남음(빛 공개 command 없음) |
 | PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR — **PR08 완료(chat)**: 회원 존재 확인은 `MemberAccountQuery`, `MemberJpaEntity` 는 chat persistence 연관(JPA)만 |
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
-| `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
+| `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) — **PR11 처리**: `AdminAuthBridge` 가 MemberAccountQuery + auth PasswordHashPort·TokenPort·RefreshTokenPort 사용(auth out Port 재사용 bridge, 공개 발급 Port 생기면 교체 → PR12) |
 | PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | (삭제) 예약 리마인더/취소가 SendPushUseCase 직접 호출 | PR06 완료 |
 | PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 — **PR08 완료(채팅)**: `ChatPushBridge` 가 `PushRequestedEvent`(회원 ID) 발행, chat 의 DeviceToken 사용 0 — **PR10 완료(공지)**: `NoticeNotificationAdapter` 가 `PushRequestedEvent` 발행, 남은 발행자 0 → `SendNotificationEvent`·`LegacySendNotificationEventBridge`·`LegacyDeviceTokens` 삭제 |
 | PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
 | PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 — **PR10 완료(공지)**: `noticeTitle` → notice 공개 `NoticeQuery.getTitle` |
 | PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 — **PR07 완료(철회)**: `productIdsByTradeCancel` → trade 공개 `TradeCancelQuery.findProductIds` — **PR10 완료(공지)**: `noticeImages` → notice 공개 `NoticeQuery.findImageLinks` (연결 행 ID 유지, 공지 id 필터) |
-| PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
+| PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) — **PR11 완료**: `MemberReferenceCleanupAdapter` 가 `AlertMemberCleanupUseCase` 사용 |
 | PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** — **PR08 완료(채팅 조회 제거)** |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) — **PR10 완료(공지)**: `noticeTitle` → notice 공개 `NoticeQuery.getTitle` |
 | `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 — **PR10 완료(notice)**: 이미지 존재 확인은 `ImageQuery.findAllByIds`, `NoticeImageJpaEntity` 의 Image 연관은 스키마 보존용 persistence 간 참조 |
@@ -1103,7 +1103,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR08 `adapter/integration/chat/ChatBlockBridge` | chat → block 공개 `BlockRelationQuery` | - (**PR09 완료**) |
 | PR09 `adapter/integration/report/ReportTargetBridgeAdapter`·`ReportImageBridgeAdapter`·`block/BlockTargetBridgeAdapter` | member `MemberAccountQuery.findById`, post `ProductSnapshotQuery.getActive`, image `ImageQuery.findAllByIds` 공개 Port 사용 | - (전환 완료, 연결 adapter) |
 | PR09 `adapter/integration/suspend/MemberStatusBridgeAdapter` | 회원 상태 공개 command 가 없어 `MemberJpaRepository`·`MemberJpaEntity.updateMemberStatus` 직접 사용(같은 트랜잭션 변경 감지) | PR02 후속/PR11 (회원 상태 command 제공 시) |
-| PR09 `adapter/integration/suspend/AdminAlertBridgeAdapter` | legacy `AdminAlertRepository.existsById` | PR11 |
+| PR09 `adapter/integration/suspend/AdminAlertBridgeAdapter` | legacy `AdminAlertRepository.existsById` | PR11 — **PR11 완료**: `AdminAlertExistenceQuery` |
 | PR09 공개 Port 제공 | `BlockRelationQuery`(Trade/Review/Chat/Post bridge), `ReportQuery`(PR04 `LegacyAlertSourceAdapter.report`·`LegacyAlertImageAdapter.reportImages`), `UnlinkReportImageUseCase`(PR05 cleanup REPORT), `SuspensionQuery`(PR04 `LegacyAlertSourceAdapter.suspendedDays`) | - |
 | report/suspend/block JpaRepository 직접 사용 (legacy) | admin `CreateAdminAlert`·`FindAlertByAlertTypeAndPlace`·`RejectAdminAlert`, member `MemberDeletionServiceImpl`(reassign/delete) | PR11 (필요 공개 Port 를 PR09 범위에 요청) |
 | PR08 chat 공개 Port 소비 | trade `TradeChatBridge`, post `PostChatBridgeAdapter` 가 `ChatRoomLookupQuery`·`SaveChatSystemMessageUseCase` 사용. post `ProductCustomRepository` 의 chat DTO 반환 메서드(`findRoomProductsWithImagesByIds`)는 삭제 | - |
@@ -1111,3 +1111,13 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR10 `adapter/integration/notice/NoticeMemberAdapter` | member 공개 Port 에 "회원 소속 지점·지점 회원 id" 조회가 없어 `MemberDetailJpaRepository`·legacy `PlaceRepository.getReferenceById` 직접 사용 | member 공개 query 추가 시 교체, 최종 PR12 |
 | PR10 공개 Port 제공 | `NoticeQuery`(PR04 `LegacyAlertSourceAdapter.noticeTitle`·`LegacyAlertImageAdapter.noticeImages`), `UnlinkNoticeImageUseCase`(PR05 `LegacyImageReferenceCleanupAdapter` NOTICE) | - |
 | notice JPA 직접 사용 (legacy/persistence) | member `MemberDeletionServiceImpl` 의 `NoticeJpaRepository.reassignMember`(import 만 갱신). image `OrphanImageQueryAdapter` 의 `QNoticeImageJpaEntity` join 은 persistence 간 참조(SQL 무변경) | PR11 (공개 command), 최종 PR12 |
+| PR11 `adapter/integration/admin/AdminMemberBridge` | 잔액 변경은 member 공개 `ChangeGwangsanUseCase`, 강제 탈퇴는 `WithdrawMemberUseCase`, 지점 존재는 place `PlaceQuery`. 역할·상태·지점 변경·승인 대기 확인·가입 기각 상세 삭제·탈퇴 기록 회수는 PR02 저장 모델 직접 사용 | member 관리자용 공개 command → PR12 |
+| PR11 `adapter/integration/admin/AdminAuthBridge` | MemberAccountQuery(공개) + auth out Port(PasswordHashPort·TokenPort·RefreshTokenPort) 재사용 | auth 공개 토큰 발급 Port → PR12 |
+| PR11 `adapter/integration/admin/AdminTradeCancelBridge` | 승인=trade `ApproveTradeCancelUseCase`(인가 콜백), 상품 ID=`TradeCancelQuery`, 잠금=post `ProductStatusUseCase.lockIncludingDeleted`. 기각 상태 변경·요청자 조회는 `TradeCancelJpaRepository` 직접 | trade 기각 command·요청자 query → PR12 |
+| PR11 `adapter/integration/admin/AdminReportBridge` | 신고자=`ReportQuery`(공개). 신고 종류(관리자 알림 제목)는 `ReportJpaRepository` 직접 | report 신고 종류 공개 query → PR12 |
+| PR11 `adapter/integration/admin/AdminAlertReadBridge` | 철회 대상 상품 값·이미지=post `ProductSnapshotQuery.findAll`·`ProductImageQuery.findImages`(이미지 ID). 신고·신고 이미지(이미지 ID)·철회·철회 이미지·가입 회원·지점명·작성자 projection 은 각 저장 모델 직접 | report/trade/member 공개 batch query → PR12 |
+| PR11 `adapter/integration/admin/AdminProductBridge` | 게시글=`ProductSnapshotQuery.findActivePage`, 이미지=`ProductImageQuery.findImages`, 삭제=`ProductStatusUseCase.deleteByAdmin`. 작성자 닉네임·지점·빛은 회원 저장 모델 left join 1쿼리(PR02 projection 은 inner join 이라 상세 없는 작성자 누락) | member 공개 batch query → PR12 |
+| PR11 `adapter/integration/admin/AdminNotificationBridge` | 관리자 처리 알림 3종(REPORT_REJECT·TRADE_CANCEL_REJECT·RECOMMENDER) `CreateAlertEvent` AFTER_COMMIT 비동기 유지(원자 저장 대상 아님) | alert 공개 비동기 생성 Port → PR12 |
+| PR11 `adapter/integration/member/MemberWithdrawalBridge` | 탈퇴 기록·추천인 재지정·상세/회원 삭제를 PR02 저장 모델로 수행 | member persistence adapter 로 이동 여부 PR12 |
+| PR11 `adapter/integration/member/MemberReferenceCleanupAdapter` | 공개 Port: post(작성자→직후 예약자), relatedkeyword(탈퇴 전용 bulk), alert(발신자·수신), admin(관리자 알림). 회원 정리 Port 가 없는 trade·review(PR07)·chat(PR08)·report·block·suspend(PR09)·notice(PR10)는 각 JpaRepository 의 기존 bulk 쿼리 직접 | 각 업무 회원 정리 공개 Port → PR12 |
+| PR11 수정한 타 PR 파일(최소) | `TradeAlertBridge`(관리자 알림 삭제→`RemoveAdminAlertUseCase`, 생성 이벤트 import), `AdminAlertBridgeAdapter`(→`AdminAlertExistenceQuery`), `SignUpAlertEventAdapter`·`ReportAlertEventAdapter`(event import), `LegacyAlertSourceAdapter`(`SignUpReward` 상수 import), `adapter/web/member/controller/MemberController`(DELETE), 테스트 `TradeAlertBridgeTest`·`ReportBlockSuspendBoundaryIntegrationTest`·`MemberControllerHttpContractTest`·`PendingApprovalHttpContractTest`·`TradeIntegrationWiring` | 각 소유 PR 수용, PR12 대조 |

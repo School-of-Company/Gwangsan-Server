@@ -19,7 +19,8 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.DuplicateMemberNicknameException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.member.service.MemberWithdrawalService;
+import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
+import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.support.FixedActorResolver;
 
@@ -41,7 +42,7 @@ class MemberControllerHttpContractTest {
     private UpdateMyInfoUseCase updateMyInfo;
     private FindUserInfoQuery findUserInfo;
     private FindAllUserInfoQuery findAllUserInfo;
-    private MemberWithdrawalService withdrawal;
+    private WithdrawMemberUseCase withdrawal;
 
     @BeforeEach
     void setUp() {
@@ -49,7 +50,7 @@ class MemberControllerHttpContractTest {
         updateMyInfo = mock(UpdateMyInfoUseCase.class);
         findUserInfo = mock(FindUserInfoQuery.class);
         findAllUserInfo = mock(FindAllUserInfoQuery.class);
-        withdrawal = mock(MemberWithdrawalService.class);
+        withdrawal = mock(WithdrawMemberUseCase.class);
         mvc = MockMvcBuilders.standaloneSetup(new MemberController(findMyInfo, updateMyInfo, findUserInfo,
                         findAllUserInfo, withdrawal))
                 .setCustomArgumentResolvers(new FixedActorResolver(ACTOR))
@@ -143,13 +144,13 @@ class MemberControllerHttpContractTest {
     class Describe_withdrawal {
 
         @Test
-        @DisplayName("it_legacy 탈퇴 서비스(bridge)를 호출하고 204 를 반환한다")
-        void it_calls_withdrawal_bridge() throws Exception {
+        @DisplayName("it_인증 실행자 ID 로 재가입 차단 없는 탈퇴 UseCase 를 호출하고 204 를 반환한다")
+        void it_calls_withdrawal_use_case() throws Exception {
             mvc.perform(delete("/api/member"))
                     .andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
-            verify(withdrawal).execute();
+            verify(withdrawal).execute(new WithdrawMemberCommand(ACTOR.memberId(), false));
         }
     }
 }

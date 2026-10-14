@@ -14,7 +14,7 @@ import team.startup.gwangsan.application.member.data.MemberAccount;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.application.post.data.ProductSnapshot;
 import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
-import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
+import team.startup.gwangsan.application.admin.port.in.RemoveAdminAlertUseCase;
 import team.startup.gwangsan.domain.alert.model.Alert;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -41,7 +41,7 @@ class TradeAlertBridgeTest {
     @Mock private RecordAlertUseCase recordAlertUseCase;
     @Mock private ProductSnapshotQuery productSnapshotQuery;
     @Mock private MemberAccountQuery memberAccountQuery;
-    @Mock private AdminAlertRepository adminAlertRepository;
+    @Mock private RemoveAdminAlertUseCase removeAdminAlertUseCase;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
 
     @Test

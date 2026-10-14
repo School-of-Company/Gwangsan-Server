@@ -17,9 +17,10 @@ import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebSe
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import team.startup.gwangsan.domain.admin.presentation.AdminController;
-import team.startup.gwangsan.domain.admin.service.*;
-import team.startup.gwangsan.domain.admin.service.impl.SignInAdminServiceImpl;
+import team.startup.gwangsan.adapter.integration.admin.AdminAuthBridge;
+import team.startup.gwangsan.adapter.web.admin.controller.AdminController;
+import team.startup.gwangsan.application.admin.port.in.*;
+import team.startup.gwangsan.application.admin.service.SignInAdminService;
 import team.startup.gwangsan.adapter.persistence.auth.RefreshToken;
 import team.startup.gwangsan.adapter.persistence.auth.RefreshTokenRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
@@ -102,11 +103,12 @@ class PendingApprovalHttpContractTest {
                 new ReissueTokenService(refreshTokenStore, tokens, accounts), mock(SignOutUseCase.class),
                 mock(CurrentMemberQuery.class), mock(ResetPasswordUseCase.class), mock(FindNicknameQuery.class)));
         context.registerBean(AdminController.class, () -> new AdminController(
-                mock(FindAlertByAlertTypeAndPlaceService.class), mock(UpdateMemberRoleService.class),
-                new SignInAdminServiceImpl(members, passwords, jwt, refreshTokens),
-                mock(UpdateMemberStatusService.class), mock(RejectAdminAlertService.class),
-                mock(VerificationSignUpService.class), mock(DeleteAdminAlertService.class),
-                mock(ApproveTradeCancelService.class), mock(AdjustGwangsanService.class)));
+                mock(FindAdminAlertsQuery.class), mock(UpdateMemberRoleUseCase.class),
+                new SignInAdminService(new AdminAuthBridge(new MemberAccountService(memberPersistence),
+                        new PasswordHashAdapter(passwords), tokens, refreshTokenStore)),
+                mock(UpdateMemberStatusUseCase.class), mock(RejectAdminAlertUseCase.class),
+                mock(VerifySignUpUseCase.class), mock(DeleteAdminAlertUseCase.class),
+                mock(ApproveTradeCancelUseCase.class), mock(AdjustGwangsanUseCase.class)));
         context.refresh();
         baseUrl = "http://127.0.0.1:" + context.getWebServer().getPort();
     }

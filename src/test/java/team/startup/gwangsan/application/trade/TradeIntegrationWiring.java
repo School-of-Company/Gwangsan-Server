@@ -48,6 +48,8 @@ import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
         CreateAlertService.class, AlertPersistenceAdapter.class, LegacyAlertSourceAdapter.class,
         NoticePublicQueryService.class, NoticePersistenceAdapter.class,
         BlockQueryService.class, MemberBlockPersistenceAdapter.class,
-        ReportQueryService.class, ReportPersistenceAdapter.class, SuspensionQueryService.class, SuspendPersistenceAdapter.class})
+        ReportQueryService.class, ReportPersistenceAdapter.class, SuspensionQueryService.class, SuspendPersistenceAdapter.class,
+        team.startup.gwangsan.application.admin.service.AdminAlertSupportService.class,
+        team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter.class})
 public class TradeIntegrationWiring {
 }
