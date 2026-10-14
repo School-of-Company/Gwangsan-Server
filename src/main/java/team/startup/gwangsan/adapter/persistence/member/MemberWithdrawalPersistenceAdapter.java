@@ -1,14 +1,8 @@
-package team.startup.gwangsan.adapter.integration.member;
+package team.startup.gwangsan.adapter.persistence.member;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
 import team.startup.gwangsan.application.member.data.WithdrawalTarget;
 import team.startup.gwangsan.application.member.port.out.MemberWithdrawalPort;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
@@ -17,12 +11,12 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import java.util.Optional;
 
 /**
- * 회원 업무 자기 저장(PR02 저장 모델)으로 탈퇴 기록·추천인 재지정·상세/회원 삭제를 수행한다.
- * 제거: PR02 member persistence adapter 로 이 Port 구현을 옮길지 PR12 에서 정리한다.
+ * 회원 탈퇴 저장(member 업무 자신의 저장 모델): 탈퇴 기록, dummy 조회, 추천인 재지정, 상세·회원 삭제.
+ * 기존 bulk 쿼리의 clearAutomatically 의미는 각 Repository 선언에 그대로 있다.
  */
 @Component
 @RequiredArgsConstructor
-public class MemberWithdrawalBridge implements MemberWithdrawalPort {
+public class MemberWithdrawalPersistenceAdapter implements MemberWithdrawalPort {
 
     private static final String WITHDRAWN_NICKNAME = "__withdrawn__";
 

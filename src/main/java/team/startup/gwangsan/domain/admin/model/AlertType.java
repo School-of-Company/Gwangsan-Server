@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.admin.entity.constant;
+package team.startup.gwangsan.domain.admin.model;
 
 public enum AlertType {
     REPORT,

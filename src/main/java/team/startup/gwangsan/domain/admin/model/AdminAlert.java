@@ -1,6 +1,6 @@
 package team.startup.gwangsan.domain.admin.model;
 
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 
 import java.time.LocalDateTime;
 

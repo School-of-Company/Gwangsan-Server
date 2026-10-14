@@ -52,13 +52,13 @@ public class TradeAlertBridge implements TradeAlertPort {
     @Override
     public void requestCancelReview(long tradeCancelId, long requesterId) {
         applicationEventPublisher.publishEvent(new CreateAdminAlertEvent(
-                team.startup.gwangsan.domain.admin.entity.constant.AlertType.TRADE_CANCEL, tradeCancelId, requesterId));
+                team.startup.gwangsan.domain.admin.model.AlertType.TRADE_CANCEL, tradeCancelId, requesterId));
     }
 
     @Override
     public void removeCancelReview(long tradeCancelId) {
         // sourceId 는 도메인마다 따로 매겨지므로 타입까지 좁혀야 다른 알림을 지우지 않는다.
         removeAdminAlertUseCase.removeBySource(
-                team.startup.gwangsan.domain.admin.entity.constant.AlertType.TRADE_CANCEL, tradeCancelId);
+                team.startup.gwangsan.domain.admin.model.AlertType.TRADE_CANCEL, tradeCancelId);
     }
 }

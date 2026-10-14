@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;

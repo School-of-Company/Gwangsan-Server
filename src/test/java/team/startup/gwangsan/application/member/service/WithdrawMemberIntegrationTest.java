@@ -20,7 +20,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.integration.member.MemberReferenceCleanupAdapter;
-import team.startup.gwangsan.adapter.integration.member.MemberWithdrawalBridge;
+import team.startup.gwangsan.adapter.persistence.member.MemberWithdrawalPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.admin.AdminAlertJpaEntity;
 import team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.alert.AlertJpaEntity;
@@ -54,7 +54,7 @@ import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
 import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
 import team.startup.gwangsan.application.post.service.PostReferenceCleanupService;
 import team.startup.gwangsan.application.relatedkeyword.service.DeleteAllMemberRelatedKeywordsService;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -83,11 +83,26 @@ import static org.mockito.Mockito.doThrow;
 @DataJpaTest(properties = "spring.flyway.enabled=false")
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QueryDslConfig.class, WithdrawMemberService.class, MemberWithdrawalBridge.class,
+@Import({QueryDslConfig.class, WithdrawMemberService.class, MemberWithdrawalPersistenceAdapter.class,
         MemberReferenceCleanupAdapter.class, AdminAlertSupportService.class, AdminAlertPersistenceAdapter.class,
         PostReferenceCleanupService.class, ProductPersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ProductImagePersistenceAdapter.class, DeleteAllMemberRelatedKeywordsService.class,
-        RelatedKeywordPersistenceAdapter.class, AlertMemberCleanupService.class, AlertPersistenceAdapter.class})
+        RelatedKeywordPersistenceAdapter.class, AlertMemberCleanupService.class, AlertPersistenceAdapter.class,
+        // 탈퇴 정리 provider 공개 command 의 실제 구현(cleanup-A)
+        team.startup.gwangsan.application.trade.service.TradeMemberReferenceCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.trade.TradeMemberReferencePersistenceAdapter.class,
+        team.startup.gwangsan.application.chat.service.ChatMemberCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.chat.ChatMemberCleanupPersistenceAdapter.class,
+        team.startup.gwangsan.application.review.service.ReviewMemberReferenceCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.review.ReviewPersistenceAdapter.class,
+        team.startup.gwangsan.application.report.service.ReportQueryService.class,
+        team.startup.gwangsan.adapter.persistence.report.ReportPersistenceAdapter.class,
+        team.startup.gwangsan.application.notice.service.ReassignNoticeAuthorService.class,
+        team.startup.gwangsan.adapter.persistence.notice.NoticePersistenceAdapter.class,
+        team.startup.gwangsan.application.suspend.service.DeleteMemberSuspensionsService.class,
+        team.startup.gwangsan.adapter.persistence.suspend.SuspendPersistenceAdapter.class,
+        team.startup.gwangsan.application.block.service.DeleteMemberBlocksService.class,
+        team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DisplayName("MariaDB 회원 탈퇴 통합 테스트")
 class WithdrawMemberIntegrationTest {

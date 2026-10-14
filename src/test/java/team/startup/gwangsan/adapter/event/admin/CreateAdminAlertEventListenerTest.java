@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.application.admin.data.CreateAdminAlertCommand;
 import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.application.admin.port.in.CreateAdminAlertUseCase;

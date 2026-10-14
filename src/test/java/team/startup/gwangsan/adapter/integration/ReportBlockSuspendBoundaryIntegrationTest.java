@@ -171,7 +171,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
                     .createQuery("select ri from ReportImageJpaEntity ri", ReportImageJpaEntity.class).getResultList();
             assertThat(images).extracting(ri -> ri.getImage().getId()).containsExactly(image.getId());
             assertThat(events.published).containsExactly(new CreateAdminAlertEvent(
-                    team.startup.gwangsan.domain.admin.entity.constant.AlertType.REPORT, saved.getId(), reporter.getId()));
+                    team.startup.gwangsan.domain.admin.model.AlertType.REPORT, saved.getId(), reporter.getId()));
         }
 
         @Test

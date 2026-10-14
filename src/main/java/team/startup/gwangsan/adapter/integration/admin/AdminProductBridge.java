@@ -1,15 +1,13 @@
 package team.startup.gwangsan.adapter.integration.admin;
 
-import com.querydsl.core.Tuple;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.application.admin.data.AdminImage;
 import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.data.AdminProductSearch;
 import team.startup.gwangsan.application.admin.port.out.AdminProductPort;
+import team.startup.gwangsan.application.member.data.MemberSummary;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
 import team.startup.gwangsan.application.post.data.ImageView;
 import team.startup.gwangsan.application.post.data.ProductSnapshot;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
@@ -21,27 +19,21 @@ import team.startup.gwangsan.domain.post.model.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import team.startup.gwangsan.adapter.persistence.place.QPlaceJpaEntity;
 
 
 /**
  * 관리자 상품 목록(3 쿼리)·논리 삭제.
  * 게시글·이미지는 post(PR06) 공개 Port 를 쓴다.
- * legacy bridge: 작성자 닉네임·지점·빛은 member(PR02) 공개 batch query 가 없어 회원 저장 모델 left join 1 쿼리로 읽는다
- * (PR02 projection 은 inner join 이라 상세 없는 작성자가 빠지므로 쓰지 않는다). 제거: member 공개 batch query → PR12.
+ * 작성자 닉네임·지점·빛은 member(PR02) 공개 요약 query(회원 기준 left join 1 쿼리)를 쓴다.
  */
 @Component
 @RequiredArgsConstructor
 public class AdminProductBridge implements AdminProductPort {
-    private static final QPlaceJpaEntity place = QPlaceJpaEntity.placeJpaEntity;
-
-    private static final QMemberJpaEntity MEMBER = QMemberJpaEntity.memberJpaEntity;
-    private static final QMemberDetailJpaEntity DETAIL = QMemberDetailJpaEntity.memberDetailJpaEntity;
 
     private final ProductSnapshotQuery productSnapshotQuery;
     private final ProductImageQuery productImageQuery;
     private final ProductStatusUseCase productStatusUseCase;
-    private final JPAQueryFactory queryFactory;
+    private final MemberSummaryQuery memberSummaryQuery;
 
     @Override
     public List<AdminProduct> findProducts(AdminProductSearch search) {
@@ -83,21 +75,13 @@ public class AdminProductBridge implements AdminProductPort {
         productStatusUseCase.deleteByAdmin(productId);
     }
 
-    // 기존 계약: 상세가 없으면 light=1·placeName=null, 지점이 없으면 placeName=null, 닉네임은 그대로.
+    // 기존 계약: 상세가 없으면 light=1·placeName=null, 닉네임은 그대로. 회원 기준 left join 요약 1 쿼리.
     private Map<Long, AdminProduct.Owner> loadOwners(List<Long> memberIds) {
-        List<Tuple> rows = queryFactory
-                .select(MEMBER.id, MEMBER.nickname, DETAIL.id, DETAIL.light, place.name)
-                .from(MEMBER)
-                .leftJoin(DETAIL).on(DETAIL.member.id.eq(MEMBER.id))
-                .leftJoin(DETAIL.place, place)
-                .where(MEMBER.id.in(memberIds))
-                .fetch();
         Map<Long, AdminProduct.Owner> owners = new HashMap<>();
-        for (Tuple row : rows) {
-            boolean hasDetail = row.get(DETAIL.id) != null;
-            int light = hasDetail ? Math.max(1, row.get(DETAIL.light) / 10) : 1;
-            owners.put(row.get(MEMBER.id), new AdminProduct.Owner(row.get(MEMBER.id), row.get(MEMBER.nickname),
-                    hasDetail ? row.get(place.name) : null, light));
+        for (MemberSummary member : memberSummaryQuery.findAllByIds(memberIds)) {
+            boolean hasDetail = member.hasDetail();
+            owners.put(member.memberId(), new AdminProduct.Owner(member.memberId(), member.nickname(),
+                    hasDetail ? member.placeName() : null, hasDetail ? Math.max(1, member.light() / 10) : 1));
         }
         return owners;
     }

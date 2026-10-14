@@ -1,7 +1,7 @@
 package team.startup.gwangsan.application.admin.port.out;
 
 import team.startup.gwangsan.application.admin.data.AdminAlertsResult;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 
 import java.util.List;
 

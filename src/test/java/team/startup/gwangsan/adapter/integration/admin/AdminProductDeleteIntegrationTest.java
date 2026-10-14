@@ -42,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest(properties = "spring.flyway.enabled=false")
 @Import({QueryDslConfig.class, DeleteAdminProductService.class, AdminProductBridge.class, ProductStatusService.class,
         ProductPublicQueryService.class, ProductImagePersistenceAdapter.class, DeleteProductService.class,
+        team.startup.gwangsan.application.member.service.MemberSummaryService.class,
+        team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter.class,
         ProductPersistenceAdapter.class})
 @DisplayName("관리자 상품 삭제 통합 테스트")
 class AdminProductDeleteIntegrationTest {

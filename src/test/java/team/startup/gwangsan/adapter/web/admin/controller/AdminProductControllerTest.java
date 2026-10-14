@@ -16,7 +16,7 @@ import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.data.AdminProductSearch;
 import team.startup.gwangsan.application.admin.port.in.FindAdminProductsQuery;
 import team.startup.gwangsan.application.admin.service.DeleteAdminProductService;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
 import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.application.post.port.in.ProductStatusUseCase;
@@ -47,7 +47,7 @@ class AdminProductControllerTest {
     @MockitoBean ProductSnapshotQuery productSnapshotQuery;
     @MockitoBean ProductImageQuery productImageQuery;
     @MockitoBean ProductStatusUseCase productRepository;
-    @MockitoBean JPAQueryFactory queryFactory;
+    @MockitoBean MemberSummaryQuery memberSummaryQuery;
     @MockitoBean JwtProvider jwtProvider;
     @MockitoBean TokenParser tokenParser;
     @MockitoBean MemberDetailsService memberDetailsService;

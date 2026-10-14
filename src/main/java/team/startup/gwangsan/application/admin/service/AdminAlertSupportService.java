@@ -7,7 +7,7 @@ import team.startup.gwangsan.application.admin.port.in.AdminAlertExistenceQuery;
 import team.startup.gwangsan.application.admin.port.in.ReassignAdminAlertMemberUseCase;
 import team.startup.gwangsan.application.admin.port.in.RemoveAdminAlertUseCase;
 import team.startup.gwangsan.application.admin.port.out.AdminAlertPort;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 
 /** 다른 업무에 공개하는 관리자 알림 능력. 모두 호출자 트랜잭션에 참여한다. */
 @Service

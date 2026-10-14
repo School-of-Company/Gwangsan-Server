@@ -36,7 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Import({QueryDslConfig.class, AdminProductBridge.class, ProductPublicQueryService.class, ProductStatusService.class,
-        ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class})
+        ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class,
+        team.startup.gwangsan.application.member.service.MemberSummaryService.class,
+        team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter.class})
 @DisplayName("관리자 상품 목록 영속성 통합 테스트")
 class AdminProductBridgeIntegrationTest {
     @Autowired private TestEntityManager em;
