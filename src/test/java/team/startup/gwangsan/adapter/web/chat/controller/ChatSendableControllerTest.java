@@ -16,7 +16,7 @@ import team.startup.gwangsan.domain.chat.model.ChatRoom;
 import team.startup.gwangsan.application.image.port.out.LoadImagePort;
 import team.startup.gwangsan.application.image.service.ImageQueryService;
 import team.startup.gwangsan.domain.image.model.Image;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.List;
 import java.util.Optional;

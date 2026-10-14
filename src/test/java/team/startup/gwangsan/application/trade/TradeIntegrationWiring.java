@@ -3,7 +3,9 @@ package team.startup.gwangsan.application.trade;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.adapter.event.trade.TradeStatusEventPublisher;
-import team.startup.gwangsan.adapter.integration.alert.LegacyAlertSourceAdapter;
+import team.startup.gwangsan.adapter.integration.alert.AlertSourceAdapter;
+import team.startup.gwangsan.adapter.persistence.review.ReviewPersistenceAdapter;
+import team.startup.gwangsan.application.review.service.ReviewSummaryService;
 import team.startup.gwangsan.adapter.integration.trade.*;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter;
@@ -24,6 +26,8 @@ import team.startup.gwangsan.application.post.service.PendingReservationService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.application.trade.service.*;
+import team.startup.gwangsan.application.image.service.ImageQueryService;
+import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.report.ReportPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.suspend.SuspendPersistenceAdapter;
@@ -42,10 +46,12 @@ import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
         TradePostAdapter.class, TradeChatBridge.class, ChatRoomLookupService.class, ChatRoomPersistenceAdapter.class,
         ChatMessagePersistenceAdapter.class, TradeMemberAdapter.class, TradeBlockBridge.class,
         TradeAlertBridge.class, TradePushAdapter.class, TradeStatusEventPublisher.class,
+        TradeImageAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class,
         ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ChangeGwangsanService.class, MemberAccountService.class, MemberPersistenceAdapter.class,
-        CreateAlertService.class, AlertPersistenceAdapter.class, LegacyAlertSourceAdapter.class,
+        CreateAlertService.class, AlertPersistenceAdapter.class, AlertSourceAdapter.class, TradeSummaryService.class,
+        ReviewSummaryService.class, ReviewPersistenceAdapter.class,
         NoticePublicQueryService.class, NoticePersistenceAdapter.class,
         BlockQueryService.class, MemberBlockPersistenceAdapter.class,
         ReportQueryService.class, ReportPersistenceAdapter.class, SuspensionQueryService.class, SuspendPersistenceAdapter.class,

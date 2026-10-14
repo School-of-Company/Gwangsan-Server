@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberDetail;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 @Entity(name = "MemberDetail")
 @Table(name = "tbl_member_detail")
@@ -32,7 +32,7 @@ public class MemberDetailJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
-    private Place place;
+    private PlaceJpaEntity place;
 
     @Column(name = "light", nullable = false)
     private Integer light;
@@ -41,7 +41,7 @@ public class MemberDetailJpaEntity {
     private String description;
 
     @Builder
-    public MemberDetailJpaEntity(MemberJpaEntity member, DongJpaEntity dong, Integer gwangsan, Place place, Integer light, String description) {
+    public MemberDetailJpaEntity(MemberJpaEntity member, DongJpaEntity dong, Integer gwangsan, PlaceJpaEntity place, Integer light, String description) {
         this.member = member;
         this.dong = dong;
         this.gwangsan = gwangsan;
@@ -78,7 +78,7 @@ public class MemberDetailJpaEntity {
         this.light = Math.min(100, Math.max(0, (this.light != null ? this.light : 0) + (light != null ? light : 0)));
     }
 
-    public void updatePlace(Place place) {
+    public void updatePlace(PlaceJpaEntity place) {
         this.place = place;
     }
 }

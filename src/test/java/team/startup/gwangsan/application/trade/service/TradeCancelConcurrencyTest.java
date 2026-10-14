@@ -24,8 +24,8 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
@@ -40,7 +40,7 @@ import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepositor
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.application.trade.TradeIntegrationWiring;
 import team.startup.gwangsan.application.trade.data.RequestTradeCancelCommand;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -167,9 +167,9 @@ class TradeCancelConcurrencyTest {
      */
     private Fixture persistCompletedTrade() {
         return new TransactionTemplate(transactionManager).execute(status -> {
-            Head head = new Head("본부");
+            HeadJpaEntity head = new HeadJpaEntity("본부");
             entityManager.persist(head);
-            Place place = Place.builder().name("지점").head(head).build();
+            PlaceJpaEntity place = PlaceJpaEntity.builder().name("지점").head(head).build();
             entityManager.persist(place);
             DongJpaEntity dong = DongJpaEntity.builder().name("공유동").build();
             entityManager.persist(dong);
@@ -209,7 +209,7 @@ class TradeCancelConcurrencyTest {
                 .build();
     }
 
-    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, DongJpaEntity dong, Place place) {
+    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, DongJpaEntity dong, PlaceJpaEntity place) {
         return MemberDetailJpaEntity.builder()
                 .member(member).dong(dong).gwangsan(GWANGSAN * 2)
                 .place(place).light(0).description("소개")

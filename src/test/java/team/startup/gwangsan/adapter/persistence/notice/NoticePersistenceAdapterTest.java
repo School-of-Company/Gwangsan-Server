@@ -26,15 +26,17 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlacePersistenceAdapter;
 import team.startup.gwangsan.application.image.service.ImageQueryService;
+import team.startup.gwangsan.application.member.service.MemberSummaryService;
+import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.place.service.PlaceQueryService;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.model.Notice;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryDslConfig.class, NoticePersistenceAdapter.class,
         NoticePlaceAdapter.class, NoticeMemberAdapter.class, NoticeImageAdapter.class,
-        PlaceQueryService.class, PlacePersistenceAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class})
+        PlaceQueryService.class, PlacePersistenceAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class,
+        MemberSummaryService.class, MemberPersistenceAdapter.class})
 @DisplayName("공지 persistence/bridge adapter MariaDB 통합 테스트")
 class NoticePersistenceAdapterTest {
 
@@ -62,6 +65,7 @@ class NoticePersistenceAdapterTest {
         registry.add("spring.datasource.driver-class-name", mariadb::getDriverClassName);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.flyway.enabled", () -> false);
+        registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> true);
     }
 
     @Autowired private TestEntityManager em;
@@ -71,19 +75,20 @@ class NoticePersistenceAdapterTest {
     @Autowired private NoticeImageAdapter imageAdapter;
     @Autowired private NoticeJpaRepository noticeJpaRepository;
     @Autowired private NoticeImageJpaRepository noticeImageJpaRepository;
+    @Autowired private jakarta.persistence.EntityManagerFactory entityManagerFactory;
 
-    private Head head;
-    private Place place;
-    private Place sibling;
-    private Place otherHeadPlace;
+    private HeadJpaEntity head;
+    private PlaceJpaEntity place;
+    private PlaceJpaEntity sibling;
+    private PlaceJpaEntity otherHeadPlace;
     private MemberJpaEntity author;
 
     @BeforeEach
     void setUp() {
-        head = em.persist(new Head("head"));
-        place = em.persist(Place.builder().name("광산구").head(head).build());
-        sibling = em.persist(Place.builder().name("수완동").head(head).build());
-        otherHeadPlace = em.persist(Place.builder().name("다른 본부").head(em.persist(new Head("other"))).build());
+        head = em.persist(new HeadJpaEntity("head"));
+        place = em.persist(PlaceJpaEntity.builder().name("광산구").head(head).build());
+        sibling = em.persist(PlaceJpaEntity.builder().name("수완동").head(head).build());
+        otherHeadPlace = em.persist(PlaceJpaEntity.builder().name("다른 본부").head(em.persist(new HeadJpaEntity("other"))).build());
         author = member("author", "01000000001");
         em.persist(MemberDetailJpaEntity.builder().member(author).dong(em.persist(new DongJpaEntity("신가동"))).place(place).gwangsan(0).light(1).description("").build());
         em.flush();
@@ -119,8 +124,8 @@ class NoticePersistenceAdapterTest {
         @Test
         @DisplayName("이미지 연결 추가·교체·삭제와 공지 삭제가 실제 행에 반영된다")
         void it_adds_replaces_and_deletes_images() {
-            Image first = image("first");
-            Image second = image("second");
+            ImageJpaEntity first = image("first");
+            ImageJpaEntity second = image("second");
             Notice notice = adapter.save(Notice.create("제목", "내용", place.getId(), author.getId()));
             adapter.addImages(notice.id(), List.of(first.getId(), second.getId()));
             em.flush();
@@ -175,10 +180,10 @@ class NoticePersistenceAdapterTest {
             Notice first = notice(place);
             Notice second = notice(place);
             Notice other = notice(place);
-            Image firstA = image("first-a");
-            Image firstB = image("first-b");
-            Image secondA = image("second-a");
-            Image otherA = image("other-a");
+            ImageJpaEntity firstA = image("first-a");
+            ImageJpaEntity firstB = image("first-b");
+            ImageJpaEntity secondA = image("second-a");
+            ImageJpaEntity otherA = image("other-a");
             adapter.addImages(first.id(), List.of(firstA.getId(), firstB.getId()));
             adapter.addImages(second.id(), List.of(secondA.getId()));
             adapter.addImages(other.id(), List.of(otherA.getId()));
@@ -233,11 +238,26 @@ class NoticePersistenceAdapterTest {
         }
 
         @Test
+        @DisplayName("공개 command 용 reassignAuthor 가 해당 회원 작성 공지만 dummy 로 바꾼다")
+        void it_reassigns_author_through_port() {
+            Notice mine = notice(place);
+            MemberJpaEntity other = member("other", "01000000003");
+            Notice others = adapter.save(Notice.create("제목", "내용", place.getId(), other.getId()));
+            MemberJpaEntity dummy = member("dummy2", "01000000004");
+            em.flush();
+
+            adapter.reassignAuthor(author.getId(), dummy.getId());
+
+            assertThat(adapter.findById(mine.id()).orElseThrow().authorId()).isEqualTo(dummy.getId());
+            assertThat(adapter.findById(others.id()).orElseThrow().authorId()).isEqualTo(other.getId());
+        }
+
+        @Test
         @DisplayName("이미지 정리용 unlinkImage 가 해당 연결만 지운다")
         void it_deletes_single_notice_image() {
             Notice notice = notice(place);
-            Image keep = image("keep");
-            Image drop = image("drop");
+            ImageJpaEntity keep = image("keep");
+            ImageJpaEntity drop = image("drop");
             adapter.addImages(notice.id(), List.of(keep.getId(), drop.getId()));
             em.flush();
 
@@ -254,9 +274,9 @@ class NoticePersistenceAdapterTest {
     class Describe_bridges {
 
         @Test
-        @DisplayName("지점·본부·소속 회원·존재 이미지를 legacy 저장소에서 읽는다")
+        @DisplayName("지점·본부·소속 회원·존재 이미지를 각 업무 공개 조회로 읽는다")
         void it_reads_from_legacy_repositories() {
-            Image image = image("exists");
+            ImageJpaEntity image = image("exists");
             em.flush();
             em.clear();
 
@@ -270,10 +290,31 @@ class NoticePersistenceAdapterTest {
         }
 
         @Test
+        @DisplayName("회원 bridge 는 상세 없는 회원을 empty 로 보고, 각 조회를 쿼리 1회로 끝낸다")
+        void it_reads_member_place_with_single_query() {
+            MemberJpaEntity noDetail = member("nodetail", "01000000005");
+            em.flush();
+            em.clear();
+            org.hibernate.stat.Statistics stats = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+
+            stats.clear();
+            assertThat(memberAdapter.findPlaceIdOf(author.getId())).contains(place.getId());
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+
+            stats.clear();
+            assertThat(memberAdapter.findPlaceIdOf(noDetail.getId())).isEmpty();
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+
+            stats.clear();
+            assertThat(memberAdapter.findMemberIdsInPlace(place.getId())).containsExactly(author.getId());
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+        }
+
+        @Test
         @DisplayName("본부가 없는 지점은 본부가 없는 지점끼리 같은 본부로 본다 (기존 findByHead(null) 의미)")
         void it_groups_places_without_head() {
-            Place lonely = em.persist(Place.builder().name("본부 없음").build());
-            Place lonely2 = em.persist(Place.builder().name("본부 없음2").build());
+            PlaceJpaEntity lonely = em.persist(PlaceJpaEntity.builder().name("본부 없음").build());
+            PlaceJpaEntity lonely2 = em.persist(PlaceJpaEntity.builder().name("본부 없음2").build());
             em.flush();
             em.clear();
 
@@ -282,12 +323,12 @@ class NoticePersistenceAdapterTest {
         }
     }
 
-    private Notice notice(Place target) {
+    private Notice notice(PlaceJpaEntity target) {
         return adapter.save(Notice.create("제목", "내용", target.getId(), author.getId()));
     }
 
-    private Image image(String name) {
-        return em.persist(Image.builder().imageUrl("https://test.local/" + name).build());
+    private ImageJpaEntity image(String name) {
+        return em.persist(ImageJpaEntity.builder().imageUrl("https://test.local/" + name).build());
     }
 
     private MemberJpaEntity member(String nickname, String phoneNumber) {

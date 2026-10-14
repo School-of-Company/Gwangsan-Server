@@ -2,204 +2,176 @@ package team.startup.gwangsan.adapter.integration.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.adapter.persistence.admin.AdminAlertJpaEntity;
 import team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter.AlertRow;
 import team.startup.gwangsan.application.admin.data.AdminAlertsResult;
 import team.startup.gwangsan.application.admin.data.AdminImage;
 import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.port.out.AdminAlertReadPort;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.adapter.persistence.post.Product;
-import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaEntity;
-import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaRepository;
-import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
-import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
-import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
-import team.startup.gwangsan.application.post.data.ImageView;
+import team.startup.gwangsan.application.member.data.MemberSummary;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
 import team.startup.gwangsan.application.post.data.ProductSnapshot;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
 import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
+import team.startup.gwangsan.application.report.data.ReportDetail;
+import team.startup.gwangsan.application.report.port.in.ReportQuery;
+import team.startup.gwangsan.application.trade.data.TradeCancelView;
+import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 관리자 알림 목록 조회 조합. 기존 FindAlertByAlertTypeAndPlaceServiceImpl 의 batch 조회·매핑을 그대로 옮겼다.
- * 철회 대상 상품의 값·이미지는 post(PR06) 공개 query(ProductSnapshotQuery·ProductImageQuery, 이미지 ID)를 쓴다.
- * legacy bridge: 신고 종류·신고 이미지 ID·신고 대상(PR09), 철회 요청·이미지(PR07), 가입 회원·지점명·작성자 정보(PR02)는
- * 필요한 값을 주는 공개 batch query 가 없어 각 저장 모델을 읽는다. 제거: 각 업무 공개 batch query → PR12.
+ * 관리자 알림 목록 조회 조합. 기존 FindAlertByAlertTypeAndPlaceServiceImpl 의 batch 조회·매핑 의미를 유지한다.
+ * 알림 행은 admin 저장 adapter(요청자 fetch join), 신고는 report(PR09) ReportQuery.findDetails(이미지 ID),
+ * 철회 요청·첨부는 trade(PR07) TradeCancelQuery, 철회 대상 상품 값·이미지는 post(PR06) 공개 query,
+ * 회원 지점명·가입 회원·작성자 정보는 member(PR02) MemberSummaryQuery 를 쓴다.
  */
 @Component
 @RequiredArgsConstructor
 public class AdminAlertReadBridge implements AdminAlertReadPort {
 
     private final AdminAlertPersistenceAdapter adminAlertPersistenceAdapter;
-    private final MemberDetailJpaRepository memberDetailRepository;
-    private final ReportJpaRepository reportRepository;
-    private final MemberJpaRepository memberRepository;
-    private final ReportImageJpaRepository reportImageRepository;
-    private final TradeCancelJpaRepository tradeCancelRepository;
-    private final TradeCancelImageJpaRepository tradeCancelImageRepository;
+    private final MemberSummaryQuery memberSummaryQuery;
+    private final ReportQuery reportQuery;
+    private final TradeCancelQuery tradeCancelQuery;
     private final ProductSnapshotQuery productSnapshotQuery;
     private final ProductImageQuery productImageQuery;
 
     @Override
     public AdminAlertsResult findAlerts(List<Integer> placeIds, AlertType type) {
-        List<AdminAlertJpaEntity> alerts = adminAlertPersistenceAdapter.findByPlacesAndType(placeIds, type);
+        List<AlertRow> alerts = adminAlertPersistenceAdapter.findByPlacesAndType(placeIds, type);
 
-        Set<Long> memberIds = alerts.stream()
-                .map(alert -> alert.getRequester().getId())
-                .collect(Collectors.toSet());
-        Map<Long, String> memberIdToPlaceName = memberDetailRepository.findPlaceNameMapByMemberIds(memberIds);
+        Set<Long> requesterIds = alerts.stream().map(row -> row.alert().requesterId()).collect(Collectors.toSet());
+        Map<Long, String> memberIdToPlaceName = new HashMap<>();
+        memberSummaryQuery.findAllByIds(requesterIds).stream()
+                .filter(MemberSummary::hasDetail)
+                .forEach(member -> memberIdToPlaceName.put(member.memberId(), member.placeName()));
 
-        List<AdminAlertJpaEntity> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
-        List<AdminAlertJpaEntity> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
-        List<AdminAlertJpaEntity> tradeCancelAlerts = filterAlertsByType(alerts, AlertType.TRADE_CANCEL);
+        List<AlertRow> reportAlerts = filterAlertsByType(alerts, AlertType.REPORT);
+        List<AlertRow> signUpAlerts = filterAlertsByType(alerts, AlertType.SIGN_UP);
+        List<AlertRow> tradeCancelAlerts = filterAlertsByType(alerts, AlertType.TRADE_CANCEL);
 
-        List<Long> reportIds = reportAlerts.stream().map(AdminAlertJpaEntity::getSourceId).toList();
-        List<ReportJpaEntity> reports = reportIds.isEmpty() ? List.of() : reportRepository.findAllByIdIn(reportIds);
-        List<ReportImageJpaEntity> reportImages = reports.isEmpty() ? List.of() : reportImageRepository.findAllByReportIdIn(reportIds);
-        List<AdminAlertsResult.ReportAlert> reportResults =
-                createReportAlerts(reportAlerts, reports, reportImages, memberIdToPlaceName);
+        List<Long> reportIds = sourceIds(reportAlerts);
+        Map<Long, ReportDetail> reports = reportIds.isEmpty() ? Map.of() : reportQuery.findDetails(reportIds);
+        List<AdminAlertsResult.ReportAlert> reportResults = createReportAlerts(reportAlerts, reports, memberIdToPlaceName);
 
-        List<Long> signUpMemberIds = signUpAlerts.stream().map(AdminAlertJpaEntity::getSourceId).toList();
-        List<MemberJpaEntity> members = signUpMemberIds.isEmpty() ? List.of() : memberRepository.findAllByIdIn(signUpMemberIds);
-        List<AdminAlertsResult.SignUpAlert> signUpResults =
-                createSignUpAlerts(signUpAlerts, members, memberIdToPlaceName);
+        List<Long> signUpMemberIds = sourceIds(signUpAlerts);
+        Map<Long, MemberSummary> signUpMembers = signUpMemberIds.isEmpty() ? Map.of()
+                : memberSummaryQuery.findAllByIds(signUpMemberIds).stream()
+                .collect(Collectors.toMap(MemberSummary::memberId, Function.identity()));
+        List<AdminAlertsResult.SignUpAlert> signUpResults = createSignUpAlerts(signUpAlerts, signUpMembers, memberIdToPlaceName);
 
-        List<Long> tradeCancelIds = tradeCancelAlerts.stream().map(AdminAlertJpaEntity::getSourceId).toList();
-        List<TradeCancelJpaEntity> tradeCancels = tradeCancelIds.isEmpty() ? List.of() : tradeCancelRepository.findAllByIdIn(tradeCancelIds);
-        List<TradeCancelImageJpaEntity> tradeCancelImages = tradeCancels.isEmpty() ? List.of() : tradeCancelImageRepository.findByTradeCancelIn(tradeCancelIds);
+        List<Long> tradeCancelIds = sourceIds(tradeCancelAlerts);
+        Map<Long, TradeCancelView> tradeCancels = tradeCancelIds.isEmpty() ? Map.of()
+                : tradeCancelQuery.findAll(tradeCancelIds).stream()
+                .collect(Collectors.toMap(TradeCancelView::tradeCancelId, Function.identity()));
+        Map<Long, List<AdminImage>> tradeCancelImages = new HashMap<>();
+        if (!tradeCancels.isEmpty()) {
+            tradeCancelQuery.findImages(tradeCancelIds).forEach((id, images) -> tradeCancelImages.put(id,
+                    images.stream().map(image -> new AdminImage(image.imageId(), image.imageUrl())).toList()));
+        }
 
-        Set<Long> productIds = tradeCancels.stream()
-                .map(tc -> tc.getTradeComplete().getProduct().getId())
-                .collect(Collectors.toSet());
+        Set<Long> productIds = tradeCancels.values().stream().map(TradeCancelView::productId).collect(Collectors.toSet());
         Map<Long, ProductSnapshot> productMap = productSnapshotQuery.findAll(productIds);
         Map<Long, List<AdminImage>> productImageMap = new HashMap<>();
         productImageQuery.findImages(productIds).forEach((productId, images) -> productImageMap.put(productId,
-                images.stream().map(AdminAlertReadBridge::toImage).toList()));
+                images.stream().map(image -> new AdminImage(image.imageId(), image.imageUrl())).toList()));
 
-        Set<Long> ownerMemberIds = productIds.stream()
-                .map(productMap::get)
-                .filter(Objects::nonNull)
-                .map(ProductSnapshot::authorId)
-                .collect(Collectors.toSet());
-        Map<Long, GetProductMemberResponse> ownerInfoByMemberId =
-                ownerMemberIds.isEmpty()
-                        ? Map.of()
-                        : memberRepository.findProductMemberResponsesByMemberIds(ownerMemberIds)
-                        .stream()
-                        .collect(Collectors.toMap(GetProductMemberResponse::memberId, it -> it));
+        Set<Long> ownerMemberIds = productMap.values().stream().map(ProductSnapshot::authorId).collect(Collectors.toSet());
+        // 기존 작성자 projection 은 상세 기준(inner join)이었다.
+        Map<Long, MemberSummary> ownerInfoByMemberId = ownerMemberIds.isEmpty() ? Map.of()
+                : memberSummaryQuery.findAllByIds(ownerMemberIds).stream()
+                .filter(MemberSummary::hasDetail)
+                .collect(Collectors.toMap(MemberSummary::memberId, Function.identity()));
 
-        List<AdminAlertsResult.TradeCancelAlert> tradeCancelResults = createTradeCancelAlerts(
-                tradeCancelAlerts, tradeCancels, tradeCancelImages, productMap, productImageMap, memberIdToPlaceName, ownerInfoByMemberId);
+        List<AdminAlertsResult.TradeCancelAlert> tradeCancelResults = createTradeCancelAlerts(tradeCancelAlerts,
+                tradeCancels, tradeCancelImages, productMap, productImageMap, memberIdToPlaceName, ownerInfoByMemberId);
 
         return new AdminAlertsResult(reportResults, signUpResults, tradeCancelResults);
     }
 
-    private List<AdminAlertJpaEntity> filterAlertsByType(List<AdminAlertJpaEntity> alerts, AlertType type) {
-        return alerts.stream().filter(a -> a.getType() == type).toList();
+    private static List<AlertRow> filterAlertsByType(List<AlertRow> alerts, AlertType type) {
+        return alerts.stream().filter(row -> row.alert().type() == type).toList();
+    }
+
+    private static List<Long> sourceIds(List<AlertRow> alerts) {
+        return alerts.stream().map(row -> row.alert().sourceId()).toList();
     }
 
     private List<AdminAlertsResult.ReportAlert> createReportAlerts(
-            List<AdminAlertJpaEntity> alerts,
-            List<ReportJpaEntity> reports,
-            List<ReportImageJpaEntity> images,
+            List<AlertRow> alerts,
+            Map<Long, ReportDetail> reports,
             Map<Long, String> memberIdToPlaceName
     ) {
-        Map<Long, ReportJpaEntity> reportMap = reports.stream().collect(Collectors.toMap(ReportJpaEntity::getId, r -> r));
-        Map<Long, List<AdminImage>> imageMap = images.stream()
-                .collect(Collectors.groupingBy(
-                        ri -> ri.getReport().getId(),
-                        Collectors.mapping(ri -> new AdminImage(ri.getImage().getId(), ri.getImage().getImageUrl()),
-                                Collectors.toList())
-                ));
-
         return alerts.stream()
-                .map(alert -> {
-                    ReportJpaEntity report = Optional.ofNullable(reportMap.get(alert.getSourceId()))
+                .map(row -> {
+                    ReportDetail report = Optional.ofNullable(reports.get(row.alert().sourceId()))
                             .orElseThrow(NotFoundReportException::new);
-                    MemberJpaEntity reported = report.getReported();
-                    Product reportedProduct = report.getProduct();
+                    boolean hasReported = report.reportedId() != null;
+                    boolean productTarget = report.productId() != null;
                     return new AdminAlertsResult.ReportAlert(
-                            alert.getId(),
-                            alert.getRequester().getNickname(),
-                            reported != null ? reported.getId() : null,
-                            reported != null ? reported.getNickname() : "알 수 없음",
-                            reportedProduct != null,
-                            reportedProduct != null ? reportedProduct.getId() : null,
-                            reportedProduct != null ? reportedProduct.getTitle() : null,
-                            alert.getTitle(),
-                            memberIdToPlaceName.get(alert.getRequester().getId()),
-                            alert.getCreatedAt(),
-                            report.getId(),
-                            nameOf(report.getReportType()),
-                            report.getContent(),
-                            imageMap.getOrDefault(report.getId(), List.of())
+                            row.alert().id(),
+                            row.requesterNickname(),
+                            hasReported ? report.reportedId() : null,
+                            hasReported ? report.reportedNickname() : "알 수 없음",
+                            productTarget,
+                            productTarget ? report.productId() : null,
+                            productTarget ? report.productTitle() : null,
+                            row.alert().title(),
+                            memberIdToPlaceName.get(row.alert().requesterId()),
+                            row.alert().createdAt(),
+                            report.reportId(),
+                            nameOf(report.reportType()),
+                            report.content(),
+                            report.images().stream().map(image -> new AdminImage(image.imageId(), image.imageUrl())).toList()
                     );
                 })
                 .toList();
     }
 
     private List<AdminAlertsResult.SignUpAlert> createSignUpAlerts(
-            List<AdminAlertJpaEntity> alerts,
-            List<MemberJpaEntity> members,
+            List<AlertRow> alerts,
+            Map<Long, MemberSummary> members,
             Map<Long, String> memberIdToPlaceName
     ) {
-        Map<Long, MemberJpaEntity> memberMap = members.stream().collect(Collectors.toMap(MemberJpaEntity::getId, m -> m));
-
         return alerts.stream()
-                .map(alert -> {
-                    MemberJpaEntity member = Optional.ofNullable(memberMap.get(alert.getRequester().getId()))
+                .map(row -> {
+                    MemberSummary member = Optional.ofNullable(members.get(row.alert().requesterId()))
                             .orElseThrow(NotFoundMemberException::new);
-                    String recommenderNickname =
-                            member.getRecommender() != null ? member.getRecommender().getNickname() : null;
                     return new AdminAlertsResult.SignUpAlert(
-                            alert.getId(),
-                            member.getId(),
-                            member.getNickname(),
-                            alert.getTitle(),
-                            memberIdToPlaceName.get(alert.getRequester().getId()),
-                            recommenderNickname,
-                            alert.getCreatedAt()
+                            row.alert().id(),
+                            member.memberId(),
+                            member.nickname(),
+                            row.alert().title(),
+                            memberIdToPlaceName.get(row.alert().requesterId()),
+                            member.recommenderNickname(),
+                            row.alert().createdAt()
                     );
                 })
                 .toList();
     }
 
     private List<AdminAlertsResult.TradeCancelAlert> createTradeCancelAlerts(
-            List<AdminAlertJpaEntity> alerts,
-            List<TradeCancelJpaEntity> tradeCancels,
-            List<TradeCancelImageJpaEntity> images,
+            List<AlertRow> alerts,
+            Map<Long, TradeCancelView> tradeCancels,
+            Map<Long, List<AdminImage>> tradeCancelImages,
             Map<Long, ProductSnapshot> productMap,
             Map<Long, List<AdminImage>> productImageMap,
             Map<Long, String> requesterPlaceNameMap,
-            Map<Long, GetProductMemberResponse> ownerInfoByMemberId
+            Map<Long, MemberSummary> ownerInfoByMemberId
     ) {
-        Map<Long, TradeCancelJpaEntity> tcMap = tradeCancels.stream().collect(Collectors.toMap(TradeCancelJpaEntity::getId, t -> t));
-        Map<Long, List<AdminImage>> tcImageMap = images.stream()
-                .collect(Collectors.groupingBy(
-                        tci -> tci.getTradeCancel().getId(),
-                        Collectors.mapping(tci -> new AdminImage(tci.getImage().getId(), tci.getImage().getImageUrl()),
-                                Collectors.toList())
-                ));
-
         return alerts.stream()
-                .map(alert -> {
-                    TradeCancelJpaEntity tc = Optional.ofNullable(tcMap.get(alert.getSourceId()))
+                .map(row -> {
+                    TradeCancelView tc = Optional.ofNullable(tradeCancels.get(row.alert().sourceId()))
                             .orElseThrow(NotFoundTradeCancelException::new);
-                    ProductSnapshot product = productMap.get(tc.getTradeComplete().getProduct().getId());
-                    GetProductMemberResponse ownerInfo = ownerInfoByMemberId.get(product.authorId());
+                    ProductSnapshot product = productMap.get(tc.productId());
+                    MemberSummary ownerInfo = ownerInfoByMemberId.get(product.authorId());
                     AdminProduct productResult = new AdminProduct(
                             product.id(),
                             product.title(),
@@ -214,13 +186,13 @@ public class AdminAlertReadBridge implements AdminAlertReadPort {
                             product.isReserved()
                     );
                     return new AdminAlertsResult.TradeCancelAlert(
-                            alert.getId(),
-                            alert.getRequester().getNickname(),
-                            alert.getTitle(),
-                            tc.getReason(),
-                            requesterPlaceNameMap.get(alert.getRequester().getId()),
-                            alert.getCreatedAt(),
-                            tcImageMap.getOrDefault(tc.getId(), List.of()),
+                            row.alert().id(),
+                            row.requesterNickname(),
+                            row.alert().title(),
+                            tc.reason(),
+                            requesterPlaceNameMap.get(row.alert().requesterId()),
+                            row.alert().createdAt(),
+                            tradeCancelImages.getOrDefault(tc.tradeCancelId(), List.of()),
                             productResult
                     );
                 })
@@ -229,9 +201,5 @@ public class AdminAlertReadBridge implements AdminAlertReadPort {
 
     private static String nameOf(Enum<?> value) {
         return value == null ? null : value.name();
-    }
-
-    private static AdminImage toImage(ImageView image) {
-        return new AdminImage(image.imageId(), image.imageUrl());
     }
 }

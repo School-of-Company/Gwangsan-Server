@@ -34,4 +34,7 @@ public interface NoticePort {
     Map<Long, List<NoticeImageLink>> findImageLinks(List<Long> noticeIds);
 
     void unlinkImage(Long noticeId, Long imageId);
+
+    // 벌크 UPDATE 후 영속성 컨텍스트를 비운다(기존 clearAutomatically 의미).
+    void reassignAuthor(Long memberId, Long dummyMemberId);
 }

@@ -43,15 +43,15 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -255,9 +255,9 @@ class TradeAlertAtomicityIntegrationTest {
     private Fixture fixture(Boolean completed) {
         return new TransactionTemplate(transactionManager).execute(status -> {
             String suffix = UUID.randomUUID().toString().substring(0, 8);
-            Head head = new Head("본부" + suffix);
+            HeadJpaEntity head = new HeadJpaEntity("본부" + suffix);
             em.persist(head);
-            Place place = Place.builder().name("지점" + suffix).head(head).build();
+            PlaceJpaEntity place = PlaceJpaEntity.builder().name("지점" + suffix).head(head).build();
             em.persist(place);
             DongJpaEntity dong = DongJpaEntity.builder().name("동" + suffix).build();
             em.persist(dong);

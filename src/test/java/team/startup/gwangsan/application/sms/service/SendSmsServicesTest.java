@@ -15,7 +15,7 @@ import team.startup.gwangsan.domain.sms.exception.AlreadyRegisteredPhoneNumberEx
 import team.startup.gwangsan.domain.sms.exception.NotRegisteredPhoneNumberException;
 import team.startup.gwangsan.domain.sms.exception.SmsSendFailedException;
 import team.startup.gwangsan.domain.sms.exception.TooManyRequestAuthCodeException;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

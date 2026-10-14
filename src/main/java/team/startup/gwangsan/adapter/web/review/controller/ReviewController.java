@@ -14,7 +14,7 @@ import team.startup.gwangsan.application.review.data.*;
 import team.startup.gwangsan.application.review.port.in.CreateReviewUseCase;
 import team.startup.gwangsan.application.review.port.in.ReviewQuery;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 
 import java.util.List;
 

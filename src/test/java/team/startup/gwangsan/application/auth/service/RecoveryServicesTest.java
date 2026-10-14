@@ -16,8 +16,8 @@ import team.startup.gwangsan.domain.auth.exception.NotFoundMemberAccountExceptio
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotCompletedException;
 import team.startup.gwangsan.domain.auth.exception.SmsAuthNotFoundException;
 import team.startup.gwangsan.domain.auth.model.AccountStatus;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.util.Optional;
 

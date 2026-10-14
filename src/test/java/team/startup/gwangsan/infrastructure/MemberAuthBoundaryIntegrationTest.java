@@ -25,9 +25,9 @@ import team.startup.gwangsan.application.sms.port.out.SmsSenderPort;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -84,11 +84,11 @@ class MemberAuthBoundaryIntegrationTest {
     @BeforeEach
     void seed() {
         placeId = transactionTemplate.execute(status -> {
-            Head head = new Head("광산구");
+            HeadJpaEntity head = new HeadJpaEntity("광산구");
             entityManager.persist(head);
             DongJpaEntity dong = new DongJpaEntity("수완동");
             entityManager.persist(dong);
-            Place place = new Place("수완지점", head);
+            PlaceJpaEntity place = new PlaceJpaEntity("수완지점", head);
             entityManager.persist(place);
             MemberJpaEntity recommender = MemberJpaEntity.builder().name("추천인").nickname("추천인").password("x")
                     .phoneNumber("01000000001").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();

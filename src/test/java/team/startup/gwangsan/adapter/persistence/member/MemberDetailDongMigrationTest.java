@@ -29,7 +29,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -130,7 +130,7 @@ class MemberDetailDongMigrationTest {
                 repository.saveAndFlush(MemberDetailJpaEntity.builder()
                         .member(entityManager.getReference(MemberJpaEntity.class, 3L))
                         .dong(entityManager.getReference(DongJpaEntity.class, 1))
-                        .place(entityManager.getReference(Place.class, 1))
+                        .place(entityManager.getReference(PlaceJpaEntity.class, 1))
                         .gwangsan(0).light(0).description("repository")
                         .build());
             });

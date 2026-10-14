@@ -8,7 +8,7 @@ import team.startup.gwangsan.application.chat.data.ChatRoomProduct;
 import team.startup.gwangsan.application.chat.data.ChatRoomSummary;
 import team.startup.gwangsan.application.chat.data.UpdatedChatMessage;
 import team.startup.gwangsan.domain.chat.model.ChatImage;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 
 import java.util.List;
 

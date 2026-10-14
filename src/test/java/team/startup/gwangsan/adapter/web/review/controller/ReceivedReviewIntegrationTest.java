@@ -32,7 +32,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -40,7 +40,8 @@ import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.*;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
-import team.startup.gwangsan.adapter.integration.review.ReviewMemberBridge;
+import team.startup.gwangsan.adapter.integration.review.ReviewMemberAdapter;
+import team.startup.gwangsan.application.member.service.AddMemberLightService;
 import team.startup.gwangsan.adapter.integration.review.ReviewPostAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
@@ -51,10 +52,10 @@ import team.startup.gwangsan.application.review.port.in.CreateReviewUseCase;
 import team.startup.gwangsan.application.review.service.ReviewQueryService;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
-import team.startup.gwangsan.global.redis.RedisConfig;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.RedisConfig;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
@@ -63,7 +64,6 @@ import team.startup.gwangsan.adapter.security.auth.JwtProperties;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
-import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -107,16 +107,17 @@ class ReceivedReviewIntegrationTest {
     @Configuration
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
-            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.post",
+            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
+            "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.image",
             "team.startup.gwangsan.adapter.persistence.review"})
     @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
             "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.review"})
     @EnableJpaAuditing
     @EnableConfigurationProperties(JwtProperties.class)
     @Import({ReviewController.class, ReviewQueryService.class, ReviewPersistenceAdapter.class, ReviewPostAdapter.class,
-            ReviewMemberBridge.class, ProductPublicQueryService.class, ProductPersistenceAdapter.class,
+            ReviewMemberAdapter.class, AddMemberLightService.class, ProductPublicQueryService.class, ProductPersistenceAdapter.class,
             ProductImagePersistenceAdapter.class, ActorContextArgumentResolver.class, WebMvcConfig.class,
-            QueryDslConfig.class, MemberUtil.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
+            QueryDslConfig.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
             MemberDetailsService.class, MemberAccountService.class, MemberPersistenceAdapter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class,
             GlobalExceptionHandler.class, RedisConfig.class, RedisUtil.class})
     static class Config {
@@ -350,7 +351,7 @@ class ReceivedReviewIntegrationTest {
                 if (i % 2 == 0) {
                     for (int image = 0; image < 3; image++) {
                         persist(ProductImage.builder().product(product)
-                                .image(persist(Image.builder().imageUrl("local/406/" + i + "/" + image).build())).build());
+                                .image(persist(ImageJpaEntity.builder().imageUrl("local/406/" + i + "/" + image).build())).build());
                     }
                 }
                 ids.add(persist(ReviewJpaEntity.builder().reviewer(other).reviewed(target).product(product)

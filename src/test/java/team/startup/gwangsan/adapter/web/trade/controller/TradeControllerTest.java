@@ -15,7 +15,7 @@ import team.startup.gwangsan.application.trade.port.in.TradeStatisticsQuery;
 import team.startup.gwangsan.application.trade.port.in.WithdrawTradeCancelUseCase;
 import team.startup.gwangsan.domain.trade.exception.TradeParticipantOnlyException;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

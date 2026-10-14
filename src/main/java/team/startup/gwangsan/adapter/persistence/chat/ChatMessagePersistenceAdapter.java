@@ -12,7 +12,7 @@ import team.startup.gwangsan.domain.chat.model.ChatImage;
 import team.startup.gwangsan.domain.chat.model.ChatMessage;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.chat.model.StoredChatMessage;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -53,7 +53,7 @@ public class ChatMessagePersistenceAdapter implements ChatMessagePort, ChatMessa
     @Override
     public List<ChatImage> linkImages(Long messageId, List<Long> imageIds) {
         // ID 목록 IN 조회라 없는 ID 는 빠지고 중복 ID 는 한 번만 나온다 (기존 findAllById 와 같은 의미).
-        List<Image> images = entityManager.createQuery("SELECT i FROM Image i WHERE i.id IN :ids", Image.class)
+        List<ImageJpaEntity> images = entityManager.createQuery("SELECT i FROM Image i WHERE i.id IN :ids", ImageJpaEntity.class)
                 .setParameter("ids", imageIds)
                 .getResultList();
         ChatMessageJpaEntity message = messages.getReferenceById(messageId);

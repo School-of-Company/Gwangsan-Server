@@ -16,7 +16,7 @@ import team.startup.gwangsan.application.auth.data.SignUpCommand;
 import team.startup.gwangsan.application.auth.data.TokenResult;
 import team.startup.gwangsan.application.auth.port.in.*;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.support.FixedActorResolver;
 
 import java.util.List;

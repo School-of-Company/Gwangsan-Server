@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.adapter.redis.sms.SmsCodeRedisAdapter;
 import team.startup.gwangsan.domain.sms.exception.NotFoundSmsAuthException;
 import team.startup.gwangsan.domain.sms.exception.NotMatchRandomCodeException;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -22,7 +22,7 @@ import team.startup.gwangsan.application.notice.port.in.NoticeDetailQuery;
 import team.startup.gwangsan.application.notice.port.in.NoticeListQuery;
 import team.startup.gwangsan.application.notice.port.in.UpdateNoticeUseCase;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 
 import java.util.List;
 

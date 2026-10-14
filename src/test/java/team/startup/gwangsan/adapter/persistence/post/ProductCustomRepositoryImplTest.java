@@ -14,12 +14,12 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 
@@ -68,8 +68,8 @@ class ProductCustomRepositoryImplTest {
     @Test
     @DisplayName("동네 목록은 type·mode·상태와 회원의 지점을 함께 필터링하고 null 선택 필터를 생략한다")
     void it_filters_products_by_member_place_and_optional_product_fields() {
-        Place targetPlace = place("대상");
-        Place otherPlace = place("다른");
+        PlaceJpaEntity targetPlace = place("대상");
+        PlaceJpaEntity otherPlace = place("다른");
         Product matching = product(memberWithDetail("matching", targetPlace), Type.SERVICE, Mode.GIVER, ProductStatus.ONGOING);
         Product differentMode = product(memberWithDetail("mode", targetPlace), Type.SERVICE, Mode.RECEIVER, ProductStatus.ONGOING);
         Product differentStatus = product(memberWithDetail("status", targetPlace), Type.SERVICE, Mode.GIVER, ProductStatus.COMPLETED);
@@ -119,7 +119,7 @@ class ProductCustomRepositoryImplTest {
                 .build());
     }
 
-    private MemberJpaEntity memberWithDetail(String suffix, Place place) {
+    private MemberJpaEntity memberWithDetail(String suffix, PlaceJpaEntity place) {
         MemberJpaEntity member = member(suffix);
         em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
@@ -132,9 +132,9 @@ class ProductCustomRepositoryImplTest {
         return member;
     }
 
-    private Place place(String suffix) {
-        Head head = em.persist(Head.builder().name("본부-" + suffix).build());
-        return em.persist(Place.builder().name("지점-" + suffix).head(head).build());
+    private PlaceJpaEntity place(String suffix) {
+        HeadJpaEntity head = em.persist(HeadJpaEntity.builder().name("본부-" + suffix).build());
+        return em.persist(PlaceJpaEntity.builder().name("지점-" + suffix).head(head).build());
     }
 
     private Product product(MemberJpaEntity member, Type type, Mode mode, ProductStatus status) {

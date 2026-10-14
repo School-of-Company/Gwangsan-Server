@@ -25,13 +25,13 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaRepository;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +79,7 @@ class MemberCommandServicesTest {
 
     private MemberDetailJpaEntity detail(MemberJpaEntity member, int gwangsan) {
         DongJpaEntity dong = mock(DongJpaEntity.class);
-        Place place = mock(Place.class);
+        PlaceJpaEntity place = mock(PlaceJpaEntity.class);
         MemberDetailJpaEntity detail = MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                 .gwangsan(gwangsan).light(1).description("기존 설명").build();
         ReflectionTestUtils.setField(detail, "id", member.getId());
@@ -215,10 +215,10 @@ class MemberCommandServicesTest {
         void it_registers_pending_member_with_initial_detail() {
             MemberJpaEntity recommender = member(9L, "추천인");
             DongJpaEntity dong = mock(DongJpaEntity.class);
-            Place place = mock(Place.class);
+            PlaceJpaEntity place = mock(PlaceJpaEntity.class);
             when(entityManager.getReference(MemberJpaEntity.class, 9L)).thenReturn(recommender);
             when(entityManager.getReference(DongJpaEntity.class, 3)).thenReturn(dong);
-            when(entityManager.getReference(Place.class, 1)).thenReturn(place);
+            when(entityManager.getReference(PlaceJpaEntity.class, 1)).thenReturn(place);
             MemberJpaEntity[] persisted = new MemberJpaEntity[1];
             when(memberJpaRepository.save(any(MemberJpaEntity.class))).thenAnswer(i -> {
                 persisted[0] = i.getArgument(0);

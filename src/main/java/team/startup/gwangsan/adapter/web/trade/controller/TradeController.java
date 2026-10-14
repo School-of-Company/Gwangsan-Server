@@ -12,7 +12,7 @@ import team.startup.gwangsan.application.trade.port.in.TradeHistoryQuery;
 import team.startup.gwangsan.application.trade.port.in.TradeStatisticsQuery;
 import team.startup.gwangsan.application.trade.port.in.WithdrawTradeCancelUseCase;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.image.dto.GetImageResponse;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
 
 import java.time.LocalDate;

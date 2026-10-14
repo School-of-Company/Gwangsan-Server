@@ -1,36 +1,35 @@
 package team.startup.gwangsan.adapter.integration.admin;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.test.util.ReflectionTestUtils;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.application.admin.port.out.AdminTradeCancelPort;
 import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
+import team.startup.gwangsan.application.admin.data.AdminPlace;
+import team.startup.gwangsan.application.admin.data.SignUpTarget;
+import team.startup.gwangsan.application.member.data.MemberAccount;
+import team.startup.gwangsan.application.member.data.MemberSummary;
 import team.startup.gwangsan.application.member.port.in.ChangeGwangsanUseCase;
+import team.startup.gwangsan.application.member.port.in.ManageMemberUseCase;
+import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
 import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
 import team.startup.gwangsan.application.place.port.in.PlaceQuery;
 import team.startup.gwangsan.application.post.port.in.ProductStatusUseCase;
 import team.startup.gwangsan.application.trade.data.ApproveTradeCancelCommand;
 import team.startup.gwangsan.application.trade.port.in.ApproveTradeCancelUseCase;
+import team.startup.gwangsan.application.trade.port.in.RejectTradeCancelUseCase;
 import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.admin.model.AccountStatus;
 import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -48,29 +47,51 @@ class AdminLegacyBridgesTest {
     @Nested
     @DisplayName("AdminMemberBridge 는")
     class Describe_member_bridge {
-        private final MemberJpaRepository memberRepository = mock(MemberJpaRepository.class);
-        private final MemberDetailJpaRepository memberDetailRepository = mock(MemberDetailJpaRepository.class);
-        private final WithdrawalRecordJpaRepository withdrawalRecordRepository = mock(WithdrawalRecordJpaRepository.class);
+        private final MemberAccountQuery memberAccountQuery = mock(MemberAccountQuery.class);
+        private final MemberSummaryQuery memberSummaryQuery = mock(MemberSummaryQuery.class);
         private final ChangeGwangsanUseCase changeGwangsanUseCase = mock(ChangeGwangsanUseCase.class);
+        private final ManageMemberUseCase manageMemberUseCase = mock(ManageMemberUseCase.class);
         private final WithdrawMemberUseCase withdrawMemberUseCase = mock(WithdrawMemberUseCase.class);
         private final PlaceQuery placeQuery = mock(PlaceQuery.class);
-        private final AdminMemberBridge bridge = new AdminMemberBridge(memberRepository, memberDetailRepository,
-                withdrawalRecordRepository, changeGwangsanUseCase, withdrawMemberUseCase, placeQuery, mock(EntityManager.class));
+        private final AdminMemberBridge bridge = new AdminMemberBridge(memberAccountQuery, memberSummaryQuery,
+                changeGwangsanUseCase, manageMemberUseCase, withdrawMemberUseCase, placeQuery);
 
-        @Test
-        @DisplayName("it_광산 조정 대상 상세가 없으면 기존처럼 NotFoundMember 다")
-        void it_keeps_adjust_not_found_member() {
-            when(memberDetailRepository.findById(5L)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> bridge.loadAdjustTargetPlaceId(5L)).isInstanceOf(NotFoundMemberException.class);
+        private MemberSummary summary(Long id, Long recommenderId, boolean hasDetail) {
+            return new MemberSummary(id, "회원" + id, "010" + id, recommenderId, null,
+                    hasDetail ? 3 : null, hasDetail ? 10 : null, hasDetail ? "지점" : null, hasDetail ? 40 : null);
         }
 
         @Test
-        @DisplayName("it_일반 지점 조회는 상세가 없으면 NotFoundMemberDetail 이다")
-        void it_throws_not_found_member_detail() {
-            when(memberDetailRepository.findById(5L)).thenReturn(Optional.empty());
+        @DisplayName("it_광산 조정 대상 상세가 없으면 기존처럼 NotFoundMember, 일반 지점 조회는 NotFoundMemberDetail 이다")
+        void it_keeps_not_found_distinction() {
+            when(memberSummaryQuery.findById(5L)).thenReturn(Optional.of(summary(5L, null, false)));
+            when(memberSummaryQuery.findById(6L)).thenReturn(Optional.empty());
 
+            assertThatThrownBy(() -> bridge.loadAdjustTargetPlaceId(5L)).isInstanceOf(NotFoundMemberException.class);
             assertThatThrownBy(() -> bridge.loadPlace(5L)).isInstanceOf(NotFoundMemberDetailException.class);
+            assertThatThrownBy(() -> bridge.loadPlace(6L)).isInstanceOf(NotFoundMemberDetailException.class);
+            assertThatThrownBy(() -> bridge.loadViewerPlace(5L)).isInstanceOf(NotFoundMemberException.class);
+        }
+
+        @Test
+        @DisplayName("it_상세가 있으면 지점·본부 ID 를 돌려준다")
+        void it_loads_place_and_head() {
+            when(memberSummaryQuery.findById(5L)).thenReturn(Optional.of(summary(5L, null, true)));
+
+            assertThat(bridge.loadPlace(5L)).isEqualTo(new AdminPlace(3, 10));
+            assertThat(bridge.loadAdjustTargetPlaceId(5L)).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("it_회원 존재·승인 대기 확인은 member 계정 공개 query 를 쓴다")
+        void it_uses_account_query() {
+            when(memberAccountQuery.findById(5L)).thenReturn(Optional.of(new MemberAccount(5L, "n", "010", "h",
+                    MemberRole.ROLE_USER, MemberStatus.PENDING)));
+            when(memberAccountQuery.findById(6L)).thenReturn(Optional.empty());
+
+            assertThat(bridge.isPendingMember(5L)).isTrue();
+            assertThat(bridge.isPendingMember(6L)).isFalse();
+            assertThatThrownBy(() -> bridge.requireMember(6L)).isInstanceOf(NotFoundMemberException.class);
         }
 
         @Test
@@ -86,45 +107,54 @@ class AdminLegacyBridgesTest {
         @Test
         @DisplayName("it_역할 변경 시 지점이 없으면 PlaceNotFound 이고 역할을 바꾸지 않는다")
         void it_does_not_change_role_when_place_missing() {
-            MemberJpaEntity member = MemberJpaEntity.builder().nickname("m").role(MemberRole.ROLE_USER).build();
-            when(memberRepository.findById(5L)).thenReturn(Optional.of(member));
             when(placeQuery.findById(3)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> bridge.changeRole(5L, ActorContext.Role.ROLE_PLACE_ADMIN, 3))
                     .isInstanceOf(PlaceNotFoundException.class);
-            assertThat(member.getRole()).isEqualTo(MemberRole.ROLE_USER);
+            verifyNoInteractions(manageMemberUseCase);
         }
 
         @Test
-        @DisplayName("it_역할만 바꿀 때는 지점을 조회하지 않는다")
+        @DisplayName("it_역할만 바꿀 때는 지점을 조회하지 않고 member 관리 command 로 위임한다")
         void it_updates_role_only() {
-            MemberJpaEntity member = MemberJpaEntity.builder().nickname("m").role(MemberRole.ROLE_USER).build();
-            when(memberRepository.findById(5L)).thenReturn(Optional.of(member));
-
             bridge.changeRole(5L, ActorContext.Role.ROLE_HEAD_ADMIN, null);
 
-            assertThat(member.getRole()).isEqualTo(MemberRole.ROLE_HEAD_ADMIN);
+            verify(manageMemberUseCase).changeRole(5L, MemberRole.ROLE_HEAD_ADMIN, null);
             verifyNoInteractions(placeQuery);
         }
 
         @Test
-        @DisplayName("it_탈퇴 기록이 있으면 지우고 남긴 광산을 돌려준다")
-        void it_takes_withdrawn_gwangsan() {
-            WithdrawalRecordJpaEntity record = WithdrawalRecordJpaEntity.builder()
-                    .phoneNumber("010").gwangsan(3200).banned(false).build();
-            when(withdrawalRecordRepository.findByPhoneNumber("010")).thenReturn(Optional.of(record));
+        @DisplayName("it_상태 변경·활성화·가입 기각·탈퇴 기록 회수는 member 관리 command 로 위임한다")
+        void it_delegates_member_management() {
+            when(manageMemberUseCase.takeWithdrawnGwangsan("010")).thenReturn(Optional.of(3200));
+
+            bridge.changeStatus(5L, AccountStatus.SUSPENDED);
+            bridge.activate(6L);
+            bridge.rejectSignUp(7L);
 
             assertThat(bridge.takeWithdrawnGwangsan("010")).contains(3200);
-            verify(withdrawalRecordRepository).delete(record);
+            verify(manageMemberUseCase).changeStatus(5L, MemberStatus.SUSPENDED);
+            verify(manageMemberUseCase).changeStatus(6L, MemberStatus.ACTIVE);
+            verify(manageMemberUseCase).rejectSignUp(7L);
         }
 
         @Test
-        @DisplayName("it_추천인 상세를 확인한 뒤 보상하고 상세 ID 를 돌려준다(상세가 없으면 보상하지 않는다)")
+        @DisplayName("it_가입 대상은 상세가 있어야 하고 추천인이 없으면 기존처럼 NPE 다")
+        void it_loads_sign_up_target() {
+            when(memberSummaryQuery.findById(20L)).thenReturn(Optional.of(summary(20L, 4L, true)));
+            when(memberSummaryQuery.findById(21L)).thenReturn(Optional.of(summary(21L, null, true)));
+            when(memberSummaryQuery.findById(22L)).thenReturn(Optional.of(summary(22L, 4L, false)));
+
+            assertThat(bridge.loadSignUpTarget(20L)).isEqualTo(new SignUpTarget(20L, "01020", 3, 4L));
+            assertThatThrownBy(() -> bridge.loadSignUpTarget(21L)).isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> bridge.loadSignUpTarget(22L)).isInstanceOf(NotFoundMemberDetailException.class);
+        }
+
+        @Test
+        @DisplayName("it_추천인 상세를 확인한 뒤 보상하고 상세 ID(=회원 ID)를 돌려준다(상세가 없으면 보상하지 않는다)")
         void it_rewards_recommender() {
-            MemberDetailJpaEntity detail = MemberDetailJpaEntity.builder().gwangsan(100).build();
-            ReflectionTestUtils.setField(detail, "id", 44L);
-            when(memberDetailRepository.findById(44L)).thenReturn(Optional.of(detail));
-            when(memberDetailRepository.findById(45L)).thenReturn(Optional.empty());
+            when(memberSummaryQuery.findById(44L)).thenReturn(Optional.of(summary(44L, null, true)));
+            when(memberSummaryQuery.findById(45L)).thenReturn(Optional.of(summary(45L, null, false)));
 
             assertThat(bridge.rewardRecommender(44L, 5000)).isEqualTo(44L);
             verify(changeGwangsanUseCase).plus(44L, 5000);
@@ -147,9 +177,9 @@ class AdminLegacyBridgesTest {
         private final TradeCancelQuery tradeCancelQuery = mock(TradeCancelQuery.class);
         private final ProductStatusUseCase productStatusUseCase = mock(ProductStatusUseCase.class);
         private final ApproveTradeCancelUseCase approveTradeCancelUseCase = mock(ApproveTradeCancelUseCase.class);
-        private final TradeCancelJpaRepository tradeCancelRepository = mock(TradeCancelJpaRepository.class);
+        private final RejectTradeCancelUseCase rejectTradeCancelUseCase = mock(RejectTradeCancelUseCase.class);
         private final AdminTradeCancelBridge bridge = new AdminTradeCancelBridge(tradeCancelQuery, productStatusUseCase,
-                approveTradeCancelUseCase, tradeCancelRepository);
+                approveTradeCancelUseCase, rejectTradeCancelUseCase);
 
         @Test
         @DisplayName("it_상품 ID 는 trade 공개 스칼라 조회, 잠금은 post 공개 command(삭제 포함 잠금)다")
@@ -161,7 +191,7 @@ class AdminLegacyBridgesTest {
             assertThatThrownBy(() -> bridge.productIdOf(41L)).isInstanceOf(NotFoundTradeCancelException.class);
             bridge.lockProduct(300L);
             verify(productStatusUseCase).lockIncludingDeleted(300L);
-            verifyNoInteractions(tradeCancelRepository);
+            verifyNoInteractions(rejectTradeCancelUseCase);
         }
 
         @Test
@@ -179,21 +209,18 @@ class AdminLegacyBridgesTest {
         }
 
         @Test
-        @DisplayName("it_PENDING 철회만 REJECTED 로 바꾼다")
-        void it_rejects_only_pending() {
-            MemberJpaEntity requester = MemberJpaEntity.builder().nickname("r").build();
-            ReflectionTestUtils.setField(requester, "id", 7L);
-            TradeCancelJpaEntity pending = TradeCancelJpaEntity.builder().member(requester).status(TradeCancelStatus.PENDING).build();
-            TradeCancelJpaEntity approved = TradeCancelJpaEntity.builder().member(requester).status(TradeCancelStatus.APPROVED).build();
-            when(tradeCancelRepository.findById(40L)).thenReturn(Optional.of(pending));
-            when(tradeCancelRepository.findById(41L)).thenReturn(Optional.of(approved));
+        @DisplayName("it_기각과 요청자 조회는 trade 공개 Port 로 위임하고, 요청자가 없으면 NotFoundTradeCancel 이다")
+        void it_delegates_reject_and_requester() {
+            when(rejectTradeCancelUseCase.reject(40L)).thenReturn(7L);
+            when(rejectTradeCancelUseCase.reject(41L)).thenThrow(new CannotPendingTradeCancelException());
+            when(tradeCancelQuery.findRequesterId(40L)).thenReturn(Optional.of(7L));
+            when(tradeCancelQuery.findRequesterId(42L)).thenReturn(Optional.empty());
 
             assertThat(bridge.rejectPending(40L)).isEqualTo(7L);
-            assertThat(pending.getStatus()).isEqualTo(TradeCancelStatus.REJECTED);
             assertThatThrownBy(() -> bridge.rejectPending(41L)).isInstanceOf(CannotPendingTradeCancelException.class);
-            assertThat(approved.getStatus()).isEqualTo(TradeCancelStatus.APPROVED);
+            assertThat(bridge.requesterIdOf(40L)).isEqualTo(7L);
+            assertThatThrownBy(() -> bridge.requesterIdOf(42L)).isInstanceOf(NotFoundTradeCancelException.class);
             verifyNoInteractions(approveTradeCancelUseCase);
         }
     }
-
 }

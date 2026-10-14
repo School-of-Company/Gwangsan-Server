@@ -16,12 +16,14 @@ import java.util.stream.Collectors;
 
 import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
-import static team.startup.gwangsan.domain.place.entity.QHead.head;
-import static team.startup.gwangsan.domain.place.entity.QPlace.place;
+import team.startup.gwangsan.adapter.persistence.place.QPlaceJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.QHeadJpaEntity;
 
 @Repository
 @RequiredArgsConstructor
 public class TradeCompleteCustomRepositoryImpl implements TradeCompleteCustomRepository {
+    private static final QHeadJpaEntity head = QHeadJpaEntity.headJpaEntity;
+    private static final QPlaceJpaEntity place = QPlaceJpaEntity.placeJpaEntity;
 
     private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
     private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;

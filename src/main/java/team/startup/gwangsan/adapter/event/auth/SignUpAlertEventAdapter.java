@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.auth.port.out.SignUpAlertPort;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 

@@ -17,8 +17,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import team.startup.gwangsan.GwangsanApplication;
 import team.startup.gwangsan.adapter.security.auth.ActorContextArgumentResolver;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 
 import java.io.BufferedReader;
@@ -40,13 +40,11 @@ class HexagonalArchitectureTest {
 
     private static final String ROOT = "team.startup.gwangsan";
     private static final String LEGACY_LIST = "architecture/legacy-classes.txt";
-    // 순수 JDK 타입인 기존 공통 예외. 업무 PR 들이 같은 예외 규칙을 쓰도록 허용하고 PR12 에서 domain/common 으로 옮긴다.
-    private static final Set<String> SHARED_KERNEL = Set.of(GlobalException.class.getName(), ErrorCode.class.getName());
+    // 공통 예외(ErrorCode/GlobalException)는 PR12 에서 domain.common.exception 순수 타입으로 옮겨 예외 목록이 비었다.
+    private static final Set<String> SHARED_KERNEL = Set.of();
 
     private static final Map<String, String> LEGACY = loadLegacy();
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages(ROOT);
+    private static final JavaClasses PRODUCTION = ProductionClasses.ALL;
     private static final HexagonalRules PRODUCTION_RULES = new HexagonalRules(ROOT, LEGACY.keySet(), SHARED_KERNEL);
 
     @Nested
@@ -77,7 +75,7 @@ class HexagonalArchitectureTest {
         void it_keeps_shared_kernel_pure() {
             classes().that().haveFullyQualifiedName(GlobalException.class.getName())
                     .or().haveFullyQualifiedName(ErrorCode.class.getName())
-                    .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "lombok..", "team.startup.gwangsan.global.exception..")
+                    .should().onlyDependOnClassesThat().resideInAnyPackage("java..", "lombok..", "team.startup.gwangsan.domain.common.exception..")
                     .check(PRODUCTION);
         }
     }
@@ -87,9 +85,10 @@ class HexagonalArchitectureTest {
     class Describe_legacy_list {
 
         @Test
-        @DisplayName("it_모든 항목이 제거 담당 PR 을 가진다")
+        @DisplayName("it_전환 완료 후 비어 있다 (남은 항목은 제거 담당 PR 을 가진다)")
         void it_has_removal_pr() {
-            assertThat(LEGACY).isNotEmpty();
+            // PR12 최종 상태: 0 줄. 비어 있지 않다면 남은 항목마다 제거 담당 PR 태그가 있어야 한다.
+            assertThat(LEGACY).as("legacy-classes.txt").isEmpty();
             assertThat(LEGACY.values()).allMatch(pr -> pr.matches("PR(0[2-9]|1[0-2])"));
         }
 

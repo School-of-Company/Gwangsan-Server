@@ -2,24 +2,20 @@ package team.startup.gwangsan.adapter.integration.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.application.admin.port.out.AdminTradeCancelPort;
 import team.startup.gwangsan.application.post.port.in.ProductStatusUseCase;
 import team.startup.gwangsan.application.trade.data.ApproveTradeCancelCommand;
 import team.startup.gwangsan.application.trade.port.in.ApproveTradeCancelUseCase;
+import team.startup.gwangsan.application.trade.port.in.RejectTradeCancelUseCase;
 import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
-import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * 관리자 철회 처리. 승인은 trade(PR07) 공개 command, 상품 ID·잠금은 trade/post(PR06) 공개 Port 를 쓴다.
- * legacy bridge: trade 에 기각·요청자 조회 공개 Port 가 없어 기각 상태 변경과 요청자 조회는 trade 저장 모델을 쓴다.
- * 제거: trade 기각 command·철회 요청자 query → PR12.
+ * 관리자 철회 처리. trade(PR07) 공개 Port(승인·기각 command, 상품 ID·요청자 query)와 post(PR06) 잠금 command 를 쓴다.
+ * 승인 잠금 순서(상품 ID 스칼라 → 상품 잠금 → 철회 최초 로드)는 trade 승인 command 가, 기각은 호출자가 잠근 뒤 reject 를 부른다.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,7 +24,7 @@ public class AdminTradeCancelBridge implements AdminTradeCancelPort {
     private final TradeCancelQuery tradeCancelQuery;
     private final ProductStatusUseCase productStatusUseCase;
     private final ApproveTradeCancelUseCase approveTradeCancelUseCase;
-    private final TradeCancelJpaRepository tradeCancelRepository;
+    private final RejectTradeCancelUseCase rejectTradeCancelUseCase;
 
     @Override
     public Long productIdOf(Long tradeCancelId) {
@@ -49,19 +45,11 @@ public class AdminTradeCancelBridge implements AdminTradeCancelPort {
 
     @Override
     public Long rejectPending(Long tradeCancelId) {
-        TradeCancelJpaEntity tradeCancel = tradeCancelRepository.findById(tradeCancelId)
-                .orElseThrow(NotFoundTradeCancelException::new);
-        if (tradeCancel.getStatus() != TradeCancelStatus.PENDING) {
-            throw new CannotPendingTradeCancelException();
-        }
-        tradeCancel.updateStatus(TradeCancelStatus.REJECTED);
-        return tradeCancel.getMember().getId();
+        return rejectTradeCancelUseCase.reject(tradeCancelId);
     }
 
     @Override
     public Long requesterIdOf(Long tradeCancelId) {
-        return tradeCancelRepository.findByIdWithMember(tradeCancelId)
-                .orElseThrow(NotFoundTradeCancelException::new)
-                .getMember().getId();
+        return tradeCancelQuery.findRequesterId(tradeCancelId).orElseThrow(NotFoundTradeCancelException::new);
     }
 }

@@ -1,0 +1,295 @@
+table tbl_admin_alert
+  column admin_alert_id bigint not-null identity
+  column alert_type enum ('REPORT','SIGN_UP','TRADE_CANCEL') not-null
+  column created_at datetime(6) not-null
+  column other_member_id bigint null
+  column requester_id bigint null
+  column source_id bigint not-null
+  column title varchar(255) not-null
+  pk (admin_alert_id)
+  fk (other_member_id) -> tbl_member
+  fk (requester_id) -> tbl_member
+  unique (alert_type,source_id)
+table tbl_alert
+  column alert_id bigint not-null identity
+  column alert_type enum ('NOTICE','OTHER_MEMBER_TRADE_COMPLETE','RECOMMENDER','REPORT','REPORT_REJECT','REVIEW','TRADE_CANCEL','TRADE_CANCEL_REJECT','TRADE_COMPLETE','TRADE_COMPLETE_REJECT') not-null
+  column content varchar(255) not-null
+  column created_at datetime(6) not-null
+  column send_member_id bigint null
+  column source_id bigint not-null
+  column title varchar(255) not-null
+  pk (alert_id)
+  fk (send_member_id) -> tbl_member
+table tbl_alert_receipt
+  column alert_id bigint not-null
+  column alert_receipt_id bigint not-null identity
+  column checked bit not-null
+  column checked_at datetime(6) null
+  column member_id bigint not-null
+  pk (alert_receipt_id)
+  fk (alert_id) -> tbl_alert
+  fk (member_id) -> tbl_member
+  unique (alert_id,member_id)
+table tbl_app_version
+  column latest_version varchar(32) not-null
+  column minimum_version varchar(32) not-null
+  column platform varchar(7) not-null
+  pk (platform)
+table tbl_chat_message
+  column checked bit not-null
+  column content TEXT null
+  column created_at datetime(6) not-null
+  column deleted_at datetime(6) null
+  column edited_at datetime(6) null
+  column message_id bigint not-null
+  column message_type enum ('IMAGE','SYSTEM','TEXT') not-null
+  column original_content TEXT null
+  column room_id bigint not-null
+  column sender_id bigint null
+  pk (message_id)
+  fk (room_id) -> tbl_chat_room
+  fk (sender_id) -> tbl_member
+table tbl_chat_message_image
+  column id bigint not-null identity
+  column image_id bigint not-null
+  column message_id bigint not-null
+  pk (id)
+  fk (image_id) -> tbl_image
+  fk (message_id) -> tbl_chat_message
+table tbl_chat_room
+  column buyer_id bigint null
+  column created_at datetime(6) not-null
+  column hidden_by_buyer_at datetime(6) null
+  column hidden_by_seller_at datetime(6) null
+  column is_active bit not-null
+  column product_id bigint null
+  column room_id bigint not-null identity
+  column seller_id bigint null
+  pk (room_id)
+  fk (buyer_id) -> tbl_member
+  fk (product_id) -> tbl_product
+  fk (seller_id) -> tbl_member
+table tbl_dong
+  column dong_id integer not-null identity
+  column name varchar(255) not-null unique
+  pk (dong_id)
+table tbl_head_place
+  column head_id integer not-null identity
+  column name varchar(255) not-null unique
+  pk (head_id)
+table tbl_image
+  column created_at datetime(6) not-null
+  column image_id bigint not-null identity
+  column image_url varchar(255) not-null
+  pk (image_id)
+table tbl_member
+  column joined_at datetime(6) not-null
+  column member_id bigint not-null identity
+  column member_status enum ('ACTIVE','PENDING','SUSPENDED','WITHDRAWN') not-null
+  column name varchar(255) not-null
+  column nickname varchar(255) not-null unique
+  column password varchar(255) not-null
+  column phone_number varchar(255) not-null unique
+  column recommender_id bigint null
+  column role enum ('ROLE_HEAD_ADMIN','ROLE_PLACE_ADMIN','ROLE_USER') not-null
+  pk (member_id)
+  fk (recommender_id) -> tbl_member
+table tbl_member_block
+  column block_id bigint not-null identity
+  column blocked_id bigint not-null
+  column blocker_id bigint not-null
+  column created_at datetime(6) not-null
+  pk (block_id)
+  fk (blocked_id) -> tbl_member
+  fk (blocker_id) -> tbl_member
+  unique (blocker_id,blocked_id)
+table tbl_member_detail
+  column description varchar(255) not-null
+  column dong_id integer not-null
+  column gwangsan integer not-null
+  column light integer not-null
+  column member_id bigint not-null
+  column place_id integer not-null
+  pk (member_id)
+  fk (dong_id) -> tbl_dong
+  fk (member_id) -> tbl_member
+  fk (place_id) -> tbl_place
+table tbl_member_related_keyword
+  column keyword_id bigint not-null
+  column member_id bigint not-null
+  column member_related_keyword_id bigint not-null identity
+  pk (member_related_keyword_id)
+  fk (keyword_id) -> tbl_related_keyword
+  fk (member_id) -> tbl_member
+table tbl_notice
+  column content varchar(255) not-null
+  column created_at datetime(6) not-null
+  column member_id bigint null
+  column notice_id bigint not-null identity
+  column place_id integer not-null
+  column title varchar(255) not-null
+  pk (notice_id)
+  fk (member_id) -> tbl_member
+  fk (place_id) -> tbl_place
+table tbl_notice_image
+  column image_id bigint not-null
+  column notice_id bigint not-null
+  column notice_image_id bigint not-null identity
+  pk (notice_image_id)
+  fk (image_id) -> tbl_image
+  fk (notice_id) -> tbl_notice
+table tbl_place
+  column head_id integer null
+  column name varchar(255) not-null unique
+  column place_id integer not-null identity
+  pk (place_id)
+  fk (head_id) -> tbl_head_place
+table tbl_product
+  column created_at datetime(6) null
+  column description varchar(255) not-null
+  column gwangsan integer not-null
+  column member_id bigint not-null
+  column mode enum ('GIVER','RECEIVER') not-null
+  column product_id bigint not-null identity
+  column status enum ('COMPLETED','DELETED','ONGOING','RESERVATION') not-null
+  column title varchar(255) not-null
+  column type enum ('OBJECT','SERVICE') not-null
+  column updated_at datetime(6) null
+  pk (product_id)
+  fk (member_id) -> tbl_member
+table tbl_product_image
+  column image_id bigint not-null
+  column product_id bigint not-null
+  column product_image_id bigint not-null identity
+  pk (product_image_id)
+  fk (image_id) -> tbl_image
+  fk (product_id) -> tbl_product
+table tbl_product_reservation
+  column address varchar(255) null
+  column cancelled_at datetime(6) null
+  column created_at datetime(6) null
+  column latitude float(53) null
+  column longitude float(53) null
+  column place_name varchar(100) null
+  column product_id bigint null
+  column product_reservation_id bigint not-null identity
+  column reminder_30_sent_at datetime(6) null
+  column reminder_at_sent_at datetime(6) null
+  column reserver_id bigint null
+  column scheduled_at datetime(6) null
+  column status enum ('CANCELLED','COMPLETED','PENDING') not-null
+  pk (product_reservation_id)
+  fk (product_id) -> tbl_product
+  fk (reserver_id) -> tbl_member
+  index idx_product_reservation_product_status (product_id,status)
+table tbl_related_keyword
+  column keyword_id bigint not-null identity
+  column name varchar(255) not-null unique
+  pk (keyword_id)
+table tbl_report
+  column content varchar(255) not-null
+  column product_id bigint null
+  column report_id bigint not-null identity
+  column report_type enum ('ABUSE_HATE_HARASSMENT','ETC','IMPERSONATION','SELF_HARM_DANGER','SEXUAL','SPAM_AD') not-null
+  column reported_id bigint null
+  column reporter_id bigint null
+  pk (report_id)
+  fk (product_id) -> tbl_product
+  fk (reported_id) -> tbl_member
+  fk (reporter_id) -> tbl_member
+table tbl_report_image
+  column image_id bigint not-null
+  column report_id bigint not-null
+  column report_image_id bigint not-null identity
+  pk (report_image_id)
+  fk (image_id) -> tbl_image
+  fk (report_id) -> tbl_report
+table tbl_review
+  column content varchar(255) not-null
+  column light integer not-null
+  column product_id bigint not-null
+  column review_id bigint not-null identity
+  column reviewed_id bigint not-null
+  column reviewer_id bigint null
+  pk (review_id)
+  fk (product_id) -> tbl_product
+  fk (reviewed_id) -> tbl_member
+  fk (reviewer_id) -> tbl_member
+table tbl_suspend
+  column created_at datetime(6) not-null
+  column member_id bigint not-null
+  column suspend_id bigint not-null identity
+  column suspended_at datetime(6) not-null
+  column suspended_days integer not-null
+  column suspended_until datetime(6) not-null
+  pk (suspend_id)
+  fk (member_id) -> tbl_member
+table tbl_trade_cancel
+  column created_at datetime(6) not-null
+  column member_id bigint not-null
+  column reason varchar(255) not-null
+  column status enum ('APPROVED','PENDING','REJECTED','WITHDRAWN') not-null
+  column trade_cancel_id bigint not-null identity
+  column trade_id bigint not-null
+  pk (trade_cancel_id)
+  fk (member_id) -> tbl_member
+  fk (trade_id) -> tbl_trade_complete
+table tbl_trade_cancel_image
+  column image_id bigint not-null
+  column trade_cancel_id bigint not-null
+  column trade_cancel_image_id bigint not-null identity
+  pk (trade_cancel_image_id)
+  fk (image_id) -> tbl_image
+  fk (trade_cancel_id) -> tbl_trade_cancel
+table tbl_trade_complete
+  column buyer_id bigint not-null
+  column completed_at datetime(6) null
+  column created_at datetime(6) not-null
+  column product_id bigint not-null
+  column requested_by_seller bit not-null
+  column seller_id bigint not-null
+  column status enum ('CANCELLED','COMPLETED','PENDING','ROLLED_BACK') not-null
+  column trade_id bigint not-null identity
+  pk (trade_id)
+  fk (buyer_id) -> tbl_member
+  fk (product_id) -> tbl_product
+  fk (seller_id) -> tbl_member
+  unique (product_id,buyer_id,seller_id,status)
+table tbl_withdrawal_record
+  column banned bit not-null
+  column gwangsan integer not-null
+  column phone_number varchar(255) not-null
+  column withdrawal_at datetime(6) not-null
+  column withdrawal_record_id bigint not-null identity
+  pk (withdrawal_record_id)
+
+# entity -> table (클래스 이름은 비교하지 않고 테이블 존재만 확인)
+mapped tbl_admin_alert
+mapped tbl_alert
+mapped tbl_alert_receipt
+mapped tbl_app_version
+mapped tbl_chat_message
+mapped tbl_chat_message_image
+mapped tbl_chat_room
+mapped tbl_dong
+mapped tbl_head_place
+mapped tbl_image
+mapped tbl_member
+mapped tbl_member_block
+mapped tbl_member_detail
+mapped tbl_member_related_keyword
+mapped tbl_notice
+mapped tbl_notice_image
+mapped tbl_place
+mapped tbl_product
+mapped tbl_product_image
+mapped tbl_product_reservation
+mapped tbl_related_keyword
+mapped tbl_report
+mapped tbl_report_image
+mapped tbl_review
+mapped tbl_suspend
+mapped tbl_trade_cancel
+mapped tbl_trade_cancel_image
+mapped tbl_trade_complete
+mapped tbl_withdrawal_record

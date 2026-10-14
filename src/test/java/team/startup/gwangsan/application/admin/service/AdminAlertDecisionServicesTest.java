@@ -8,7 +8,7 @@ import team.startup.gwangsan.application.admin.data.AdminAlertCommand;
 import team.startup.gwangsan.application.admin.data.MemberAlertKind;
 import team.startup.gwangsan.application.admin.data.SignUpTarget;
 import team.startup.gwangsan.application.admin.port.out.*;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.admin.exception.AdminPlaceMismatchException;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.model.AdminAlert;

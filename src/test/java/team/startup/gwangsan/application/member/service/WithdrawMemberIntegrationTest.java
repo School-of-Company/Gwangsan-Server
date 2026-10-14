@@ -20,7 +20,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.integration.member.MemberReferenceCleanupAdapter;
-import team.startup.gwangsan.adapter.integration.member.MemberWithdrawalBridge;
+import team.startup.gwangsan.adapter.persistence.member.MemberWithdrawalPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.admin.AdminAlertJpaEntity;
 import team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.alert.AlertJpaEntity;
@@ -54,11 +54,11 @@ import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
 import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
 import team.startup.gwangsan.application.post.service.PostReferenceCleanupService;
 import team.startup.gwangsan.application.relatedkeyword.service.DeleteAllMemberRelatedKeywordsService;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.ReservationStatus;
@@ -66,7 +66,7 @@ import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,11 +83,26 @@ import static org.mockito.Mockito.doThrow;
 @DataJpaTest(properties = "spring.flyway.enabled=false")
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QueryDslConfig.class, WithdrawMemberService.class, MemberWithdrawalBridge.class,
+@Import({QueryDslConfig.class, WithdrawMemberService.class, MemberWithdrawalPersistenceAdapter.class,
         MemberReferenceCleanupAdapter.class, AdminAlertSupportService.class, AdminAlertPersistenceAdapter.class,
         PostReferenceCleanupService.class, ProductPersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ProductImagePersistenceAdapter.class, DeleteAllMemberRelatedKeywordsService.class,
-        RelatedKeywordPersistenceAdapter.class, AlertMemberCleanupService.class, AlertPersistenceAdapter.class})
+        RelatedKeywordPersistenceAdapter.class, AlertMemberCleanupService.class, AlertPersistenceAdapter.class,
+        // 탈퇴 정리 provider 공개 command 의 실제 구현(cleanup-A)
+        team.startup.gwangsan.application.trade.service.TradeMemberReferenceCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.trade.TradeMemberReferencePersistenceAdapter.class,
+        team.startup.gwangsan.application.chat.service.ChatMemberCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.chat.ChatMemberCleanupPersistenceAdapter.class,
+        team.startup.gwangsan.application.review.service.ReviewMemberReferenceCleanupService.class,
+        team.startup.gwangsan.adapter.persistence.review.ReviewPersistenceAdapter.class,
+        team.startup.gwangsan.application.report.service.ReportQueryService.class,
+        team.startup.gwangsan.adapter.persistence.report.ReportPersistenceAdapter.class,
+        team.startup.gwangsan.application.notice.service.ReassignNoticeAuthorService.class,
+        team.startup.gwangsan.adapter.persistence.notice.NoticePersistenceAdapter.class,
+        team.startup.gwangsan.application.suspend.service.DeleteMemberSuspensionsService.class,
+        team.startup.gwangsan.adapter.persistence.suspend.SuspendPersistenceAdapter.class,
+        team.startup.gwangsan.application.block.service.DeleteMemberBlocksService.class,
+        team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DisplayName("MariaDB 회원 탈퇴 통합 테스트")
 class WithdrawMemberIntegrationTest {
@@ -230,7 +245,7 @@ class WithdrawMemberIntegrationTest {
 
     private Ids givenMember(boolean everyReference, boolean withKeyword, boolean withReservation) {
         DongJpaEntity dong = persist(DongJpaEntity.builder().name("동").build());
-        Place place = persist(Place.builder().name("지점").build());
+        PlaceJpaEntity place = persist(PlaceJpaEntity.builder().name("지점").build());
         MemberJpaEntity dummy = persistMember("__withdrawn__", "01099999999", null);
         MemberJpaEntity member = persistMember("탈퇴자", "01000000001", null);
         MemberJpaEntity other = persistMember("상대", "01000000002", member);

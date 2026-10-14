@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.member.data.AdminScope;
 import team.startup.gwangsan.application.member.data.MemberProfile;
+import team.startup.gwangsan.application.member.data.MemberSummary;
 import team.startup.gwangsan.application.member.port.out.LoadMemberPort;
 import team.startup.gwangsan.application.member.port.out.MemberProfileQueryPort;
 import team.startup.gwangsan.application.member.port.out.SaveMemberPort;
@@ -13,14 +14,16 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.Member;
 import team.startup.gwangsan.domain.member.model.MemberDetail;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
  * 회원 저장 adapter. 저장 메서드는 호출 트랜잭션의 managed 엔티티를 다시 찾아 순수 모델 값을 명시적으로 반영한다.
- * DongJpaEntity/Place 는 기존 DB association 유지를 위한 저장 모델 참조다(업무 core 에 노출하지 않음).
+ * DongJpaEntity/PlaceJpaEntity 는 기존 DB association 유지를 위한 저장 모델 참조다(업무 core 에 노출하지 않음).
  */
 @Component
 @RequiredArgsConstructor
@@ -82,7 +85,7 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
         memberDetailJpaRepository.save(MemberDetailJpaEntity.builder()
                 .member(entity)
                 .dong(entityManager.getReference(DongJpaEntity.class, detail.getDongId()))
-                .place(entityManager.getReference(Place.class, detail.getPlaceId()))
+                .place(entityManager.getReference(PlaceJpaEntity.class, detail.getPlaceId()))
                 .gwangsan(detail.getGwangsan())
                 .light(detail.getLight())
                 .description(detail.getDescription())
@@ -95,13 +98,45 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
         MemberJpaEntity entity = memberJpaRepository.findById(member.getId()).orElseThrow(NotFoundMemberException::new);
         entity.updateNickname(member.getNickname());
         entity.changePassword(member.getPasswordHash());
+        entity.updateMemberRole(member.getRole());
+        entity.updateMemberStatus(member.getStatus());
     }
 
     @Override
     public void saveDetail(MemberDetail detail) {
-        memberDetailJpaRepository.findById(detail.getMemberId())
-                .orElseThrow(NotFoundMemberDetailException::new)
-                .apply(detail);
+        MemberDetailJpaEntity entity = memberDetailJpaRepository.findById(detail.getMemberId())
+                .orElseThrow(NotFoundMemberDetailException::new);
+        entity.apply(detail);
+        if (!Objects.equals(entity.getPlace().getId(), detail.getPlaceId())) {
+            entity.updatePlace(entityManager.getReference(PlaceJpaEntity.class, detail.getPlaceId()));
+        }
+    }
+
+    @Override
+    public void deleteDetail(Long memberId) {
+        memberDetailJpaRepository.findById(memberId).ifPresent(memberDetailJpaRepository::delete);
+    }
+
+    @Override
+    public Optional<Integer> removeWithdrawalRecord(String phoneNumber) {
+        Optional<WithdrawalRecordJpaEntity> record = withdrawalRecordJpaRepository.findByPhoneNumber(phoneNumber);
+        record.ifPresent(withdrawalRecordJpaRepository::delete);
+        return record.map(WithdrawalRecordJpaEntity::getGwangsan);
+    }
+
+    @Override
+    public List<Long> findExistingIds(Collection<Long> memberIds) {
+        return memberJpaRepository.findExistingIds(memberIds);
+    }
+
+    @Override
+    public List<MemberSummary> findSummaries(Collection<Long> memberIds) {
+        return memberJpaRepository.findSummaries(memberIds);
+    }
+
+    @Override
+    public List<Long> findMemberIdsInPlace(Integer placeId) {
+        return memberDetailJpaRepository.findIdsByPlaceId(placeId);
     }
 
     @Override

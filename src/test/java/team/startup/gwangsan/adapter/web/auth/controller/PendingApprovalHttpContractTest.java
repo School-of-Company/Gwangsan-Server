@@ -41,11 +41,12 @@ import team.startup.gwangsan.adapter.security.auth.JwtTokenAdapter;
 import team.startup.gwangsan.adapter.security.auth.PasswordHashAdapter;
 import team.startup.gwangsan.application.auth.port.in.*;
 import team.startup.gwangsan.application.auth.service.ReissueTokenService;
+import team.startup.gwangsan.application.auth.service.AccountTokenService;
 import team.startup.gwangsan.application.auth.service.SignInService;
 import team.startup.gwangsan.application.member.port.in.ChangePasswordUseCase;
 import team.startup.gwangsan.application.member.port.in.RegisterMemberUseCase;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 
 import java.net.InetAddress;
@@ -102,10 +103,11 @@ class PendingApprovalHttpContractTest {
                         new DeviceTokenAdapter(new RegisterDeviceTokenService(new DeviceTokenPersistenceAdapter(devices)))),
                 new ReissueTokenService(refreshTokenStore, tokens, accounts), mock(SignOutUseCase.class),
                 mock(CurrentMemberQuery.class), mock(ResetPasswordUseCase.class), mock(FindNicknameQuery.class)));
+        AccountTokenService adminAccountTokens = new AccountTokenService(new PasswordHashAdapter(passwords), tokens, refreshTokenStore);
         context.registerBean(AdminController.class, () -> new AdminController(
                 mock(FindAdminAlertsQuery.class), mock(UpdateMemberRoleUseCase.class),
                 new SignInAdminService(new AdminAuthBridge(new MemberAccountService(memberPersistence),
-                        new PasswordHashAdapter(passwords), tokens, refreshTokenStore)),
+                        adminAccountTokens, adminAccountTokens)),
                 mock(UpdateMemberStatusUseCase.class), mock(RejectAdminAlertUseCase.class),
                 mock(VerifySignUpUseCase.class), mock(DeleteAdminAlertUseCase.class),
                 mock(ApproveTradeCancelUseCase.class), mock(AdjustGwangsanUseCase.class)));

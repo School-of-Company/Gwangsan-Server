@@ -21,9 +21,9 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -59,7 +59,7 @@ class MemberDetailRepositoryTest {
     @DisplayName("같은 동을 사용하는 두 회원 상세 정보를 저장하고 다시 읽는다")
     void savesAndReloadsTwoDetailsWithOneDong() {
         inTransaction(() -> {
-            Place place = place("공유");
+            PlaceJpaEntity place = place("공유");
             DongJpaEntity dong = persist(DongJpaEntity.builder().name("공유동").build());
             MemberJpaEntity first = member("첫회원", "010-0000-0001");
             MemberJpaEntity second = member("둘회원", "010-0000-0002");
@@ -85,7 +85,7 @@ class MemberDetailRepositoryTest {
     @DisplayName("서로 다른 동을 사용하는 회원 상세 정보도 저장한다")
     void savesDetailsWithDistinctDongs() {
         inTransaction(() -> {
-            Place place = place("서로다름");
+            PlaceJpaEntity place = place("서로다름");
             MemberJpaEntity first = member("셋회원", "010-0000-0003");
             MemberJpaEntity second = member("넷회원", "010-0000-0004");
 
@@ -107,7 +107,7 @@ class MemberDetailRepositoryTest {
     @DisplayName("fresh schema는 member_id 기본 키와 Dong FK 및 NOT NULL을 유지하고 Dong 단독 유니크를 만들지 않는다")
     void retainsRequiredConstraintsWithoutDongOnlyUnique() {
         ConstraintFixture fixture = inTransaction(() -> {
-            Place place = place("제약");
+            PlaceJpaEntity place = place("제약");
             MemberJpaEntity danglingMember = member("다섯회원", "010-0000-0005");
             MemberJpaEntity nullDongMember = member("여섯회원", "010-0000-0006");
             entityManager.flush();
@@ -146,9 +146,9 @@ class MemberDetailRepositoryTest {
         return new TransactionTemplate(transactionManager).execute(status -> action.get());
     }
 
-    private Place place(String suffix) {
-        Head head = persist(new Head("본부-" + suffix));
-        return persist(Place.builder().name("지점-" + suffix).head(head).build());
+    private PlaceJpaEntity place(String suffix) {
+        HeadJpaEntity head = persist(new HeadJpaEntity("본부-" + suffix));
+        return persist(PlaceJpaEntity.builder().name("지점-" + suffix).head(head).build());
     }
 
     private MemberJpaEntity member(String name, String phoneNumber) {

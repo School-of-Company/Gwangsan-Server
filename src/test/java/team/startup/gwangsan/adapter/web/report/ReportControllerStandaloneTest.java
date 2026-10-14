@@ -13,7 +13,7 @@ import team.startup.gwangsan.application.report.port.in.CreateReportUseCase;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
 import team.startup.gwangsan.domain.report.model.ReportTargetType;
 import team.startup.gwangsan.domain.report.model.ReportType;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.List;
 

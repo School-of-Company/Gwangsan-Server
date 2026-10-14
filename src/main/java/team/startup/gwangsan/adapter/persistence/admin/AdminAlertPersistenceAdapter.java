@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.admin.port.out.AdminAlertPort;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.admin.model.AdminAlert;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
@@ -81,8 +81,12 @@ public class AdminAlertPersistenceAdapter implements AdminAlertPort {
         adminAlertJpaRepository.reassignRequester(target, dummy);
     }
 
+    /** 관리자 알림 목록 행: 알림과 fetch join 한 요청자 닉네임. */
+    public record AlertRow(AdminAlert alert, String requesterNickname) {
+    }
+
     /** 관리자 알림 목록. 요청자·회원 상세를 fetch join 해 지점으로 거른다(기존 쿼리 유지). */
-    public List<AdminAlertJpaEntity> findByPlacesAndType(List<Integer> placeIds, AlertType type) {
+    public List<AlertRow> findByPlacesAndType(List<Integer> placeIds, AlertType type) {
         return queryFactory
                 .selectFrom(adminAlertJpaEntity).distinct()
                 .join(adminAlertJpaEntity.requester, member).fetchJoin()
@@ -91,7 +95,10 @@ public class AdminAlertPersistenceAdapter implements AdminAlertPort {
                         memberDetail.place.id.in(placeIds),
                         typeEq(type)
                 )
-                .fetch();
+                .fetch()
+                .stream()
+                .map(entity -> new AlertRow(toDomain(entity), entity.getRequester().getNickname()))
+                .toList();
     }
 
     private static BooleanExpression typeEq(AlertType type) {

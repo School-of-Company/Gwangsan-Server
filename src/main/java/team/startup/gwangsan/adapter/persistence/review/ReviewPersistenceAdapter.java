@@ -3,6 +3,7 @@ package team.startup.gwangsan.adapter.persistence.review;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.application.review.data.ReviewAuthor;
 import team.startup.gwangsan.application.review.data.ReviewDetail;
 import team.startup.gwangsan.application.review.data.ReviewPage;
 import team.startup.gwangsan.application.review.data.ReviewRow;
@@ -36,6 +37,22 @@ public class ReviewPersistenceAdapter implements ReviewPort {
                         .light(review.light())
                         .build())
                 .getId();
+    }
+
+    @Override
+    public Optional<ReviewAuthor> findAuthor(long reviewId) {
+        return reviewJpaRepository.findById(reviewId)
+                .map(r -> new ReviewAuthor(r.getId(), r.getReviewer().getId(), r.getReviewer().getNickname()));
+    }
+
+    @Override
+    public void reassignReviewer(Long memberId, Long dummyMemberId) {
+        reviewJpaRepository.reassignReviewer(member(memberId), member(dummyMemberId));
+    }
+
+    @Override
+    public void reassignReviewed(Long memberId, Long dummyMemberId) {
+        reviewJpaRepository.reassignReviewed(member(memberId), member(dummyMemberId));
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import team.startup.gwangsan.domain.chat.exception.InvalidChatImageIdsException;
-import team.startup.gwangsan.global.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
 
 import java.util.Arrays;
 import java.util.List;

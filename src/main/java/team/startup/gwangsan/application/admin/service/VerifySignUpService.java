@@ -10,7 +10,7 @@ import team.startup.gwangsan.application.admin.port.in.VerifySignUpUseCase;
 import team.startup.gwangsan.application.admin.port.out.AdminAlertPort;
 import team.startup.gwangsan.application.admin.port.out.AdminMemberPort;
 import team.startup.gwangsan.application.admin.port.out.AdminNotificationPort;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.model.AdminAlert;
 import team.startup.gwangsan.domain.admin.policy.AdminPlaceScope;

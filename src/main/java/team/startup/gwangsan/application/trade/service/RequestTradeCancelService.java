@@ -10,6 +10,7 @@ import team.startup.gwangsan.application.trade.port.in.RequestTradeCancelUseCase
 import team.startup.gwangsan.application.trade.port.out.TradeAlertPort;
 import team.startup.gwangsan.application.trade.port.out.TradeCancelPort;
 import team.startup.gwangsan.application.trade.port.out.TradeCompletePort;
+import team.startup.gwangsan.application.trade.port.out.TradeImagePort;
 import team.startup.gwangsan.application.trade.port.out.TradeProductPort;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException;
 import team.startup.gwangsan.domain.trade.exception.TradeParticipantOnlyException;
@@ -27,6 +28,7 @@ public class RequestTradeCancelService implements RequestTradeCancelUseCase {
     private final TradeCancelPort tradeCancelPort;
     private final TradeCancelApplier tradeCancelApplier;
     private final TradeAlertPort tradeAlertPort;
+    private final TradeImagePort tradeImagePort;
 
     /**
      * READ_COMMITTED 를 쓰는 이유: 기본값인 REPEATABLE READ 에서는 첫 SELECT 시점에 read view 가
@@ -58,8 +60,9 @@ public class RequestTradeCancelService implements RequestTradeCancelUseCase {
             return new TradeCancelResult(true);
         }
 
-        TradeCancel created = tradeCancelPort.create(
-                TradeCancel.request(tradeComplete.id(), actorId, command.reason()), command.imageIds());
+        TradeCancel created = tradeCancelPort.create(TradeCancel.request(tradeComplete.id(), actorId, command.reason()));
+        // 기존 순서: 철회 저장 → 존재하는 이미지만 조회 → 연결 저장.
+        tradeCancelPort.attachImages(created.id(), tradeImagePort.findExistingImageIds(command.imageIds()));
         tradeAlertPort.requestCancelReview(created.id(), actorId);
         return new TradeCancelResult(false);
     }

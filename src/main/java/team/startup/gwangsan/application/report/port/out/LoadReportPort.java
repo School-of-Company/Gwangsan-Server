@@ -1,6 +1,7 @@
 package team.startup.gwangsan.application.report.port.out;
 
 import team.startup.gwangsan.application.report.data.ReportAlertSource;
+import team.startup.gwangsan.application.report.data.ReportDetail;
 import team.startup.gwangsan.application.report.data.ReportImageLink;
 import team.startup.gwangsan.domain.report.model.ReportType;
 
@@ -20,4 +21,9 @@ public interface LoadReportPort {
     Optional<ReportAlertSource> findAlertSource(Long reportId);
 
     Map<Long, List<ReportImageLink>> findImageLinks(Collection<Long> reportIds);
+
+    Optional<ReportType> findReportType(Long reportId);
+
+    /** 조회 순서대로. 신고가 하나도 없으면 이미지는 조회하지 않는다. */
+    List<ReportDetail> findDetails(Collection<Long> reportIds);
 }

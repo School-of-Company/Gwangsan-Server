@@ -29,12 +29,12 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.*;
@@ -47,9 +47,9 @@ import team.startup.gwangsan.application.post.service.ProductListQueryService;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
 import team.startup.gwangsan.application.block.port.in.BlockRelationQuery;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
@@ -58,6 +58,7 @@ import team.startup.gwangsan.adapter.security.auth.JwtProperties;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
+import team.startup.gwangsan.application.member.service.MemberSummaryService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -90,7 +91,8 @@ class SalesListIntegrationTest {
     @Configuration
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
-            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.post"})
+            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
+            "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.image"})
     @EnableJpaAuditing
     @EnableJpaRepositories(basePackages = {"team.startup.gwangsan.adapter.persistence.post",
             "team.startup.gwangsan.adapter.persistence.member"})
@@ -99,7 +101,7 @@ class SalesListIntegrationTest {
             ProductImagePersistenceAdapter.class, PostMemberBridgeAdapter.class,
             WebMvcConfig.class, ActorContextArgumentResolver.class, QueryDslConfig.class,
             SecurityConfig.class, JwtProvider.class, TokenParser.class, MemberDetailsService.class,
-            MemberAccountService.class, MemberPersistenceAdapter.class,
+            MemberAccountService.class, MemberSummaryService.class, MemberPersistenceAdapter.class,
             JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class, GlobalExceptionHandler.class})
     static class Config { }
 
@@ -274,8 +276,9 @@ class SalesListIntegrationTest {
                             assertThat(rows).isEqualTo(suffix.isEmpty() ? count : Math.min(count, 20));
                             // DTO enrichment cannot load products/images outside the requested page.
                             assertThat(statistics.getEntityStatistics(Product.class.getName()).getLoadCount()).isEqualTo(rows);
-                            assertThat(statistics.getEntityStatistics(Image.class.getName()).getLoadCount()).isEqualTo(rows * 2L);
-                            assertThat(queries).isEqualTo(7);
+                            assertThat(statistics.getEntityStatistics(ImageJpaEntity.class.getName()).getLoadCount()).isEqualTo(rows * 2L);
+                            // 작성자 프로필은 회원 요약 join 1회(기존 상세 1 + 회원·지점 지연 로딩 2 → 1). 행 수와 무관하게 고정.
+                            assertThat(queries).isEqualTo(5);
                         }
                         times.sort(Double::compareTo);
                         System.out.printf("SALES_BENCH count=%d path=%s mode=%s rows=%d queries=%d bytes=%d median_ms=%.3f%n",
@@ -310,7 +313,7 @@ class SalesListIntegrationTest {
                     .password("unused").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
             em.persist(member);
             DongJpaEntity dong = DongJpaEntity.builder().name("dong" + id).build();
-            Place place = Place.builder().name("place" + id).build();
+            PlaceJpaEntity place = PlaceJpaEntity.builder().name("place" + id).build();
             em.persist(dong);
             em.persist(place);
             em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
@@ -328,7 +331,7 @@ class SalesListIntegrationTest {
                 .description("설명".repeat(100)).gwangsan(5000).type(type).mode(mode).status(state).build();
         em.persist(product);
         for (int i = 0; i < images; i++) {
-            Image image = Image.builder().imageUrl("https://example.invalid/image/" + product.getId() + "/" + i).build();
+            ImageJpaEntity image = ImageJpaEntity.builder().imageUrl("https://example.invalid/image/" + product.getId() + "/" + i).build();
             em.persist(image);
             em.persist(ProductImage.builder().product(product).image(image).build());
         }

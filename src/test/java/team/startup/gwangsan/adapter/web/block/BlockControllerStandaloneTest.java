@@ -15,7 +15,7 @@ import team.startup.gwangsan.application.block.port.in.UnblockMemberUseCase;
 import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.NotFoundBlockException;
 import team.startup.gwangsan.domain.block.exception.SelfBlockNotAllowedException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.List;
 

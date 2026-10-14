@@ -42,7 +42,7 @@ import team.startup.gwangsan.application.suspend.service.SuspendMemberService;
 import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.block.exception.NotFoundBlockException;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -58,7 +58,7 @@ import team.startup.gwangsan.domain.report.model.ReportTargetType;
 import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
@@ -67,6 +67,13 @@ import team.startup.gwangsan.application.image.service.ImageQueryService;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.report.data.ReportAlertSource;
+import team.startup.gwangsan.application.report.data.ReportDetail;
+import team.startup.gwangsan.application.block.service.DeleteMemberBlocksService;
+import team.startup.gwangsan.application.suspend.service.DeleteMemberSuspensionsService;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import team.startup.gwangsan.application.report.data.ReportImageLink;
 import team.startup.gwangsan.application.report.service.ReportQueryService;
 import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
@@ -86,7 +93,7 @@ import static org.mockito.Mockito.doAnswer;
  * 신고·차단·정지 유스케이스를 실제 JPA Adapter·legacy bridge 와 H2 로 실행한다.
  * 이벤트는 ApplicationEvents 대신 기록용 listener 로 확인한다(AFTER_COMMIT listener 는 슬라이스에 없음).
  */
-@DataJpaTest
+@DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Import({QueryDslConfig.class,
         CreateReportService.class, ReportPersistenceAdapter.class, ReportTargetBridgeAdapter.class,
         ReportImageBridgeAdapter.class, ReportAlertEventAdapter.class,
@@ -96,9 +103,9 @@ import static org.mockito.Mockito.doAnswer;
         MemberStatusBridgeAdapter.class, AdminAlertBridgeAdapter.class, SuspensionAlertEventAdapter.class,
         team.startup.gwangsan.application.admin.service.AdminAlertSupportService.class,
         team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter.class,
-        ReportQueryService.class, SuspensionQueryService.class,
+        ReportQueryService.class, SuspensionQueryService.class, DeleteMemberBlocksService.class, DeleteMemberSuspensionsService.class,
         // 선행 업무 공개 Port 실제 구현(bridge 연결 대상): member·post·image
-        MemberAccountService.class, MemberPersistenceAdapter.class,
+        MemberAccountService.class, team.startup.gwangsan.application.member.service.ManageMemberService.class, MemberPersistenceAdapter.class,
         ProductPublicQueryService.class, ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class,
         ImageQueryService.class, ImagePersistenceAdapter.class,
         ReportBlockSuspendBoundaryIntegrationTest.RecordedEvents.class})
@@ -115,6 +122,10 @@ class ReportBlockSuspendBoundaryIntegrationTest {
     @Autowired private RecordedEvents events;
     @Autowired private ReportQueryService reportQueryService;
     @Autowired private SuspensionQueryService suspensionQueryService;
+    @Autowired private DeleteMemberBlocksService deleteMemberBlocksService;
+    @Autowired private DeleteMemberSuspensionsService deleteMemberSuspensionsService;
+    @Autowired private ReportJpaRepository reportJpaRepository;
+    @Autowired private ReportImageJpaRepository reportImageJpaRepository;
 
     @org.junit.jupiter.api.BeforeEach
     void clearEvents() {
@@ -144,7 +155,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
         void it_saves_member_report_with_existing_images() {
             MemberJpaEntity reporter = member("신고자");
             MemberJpaEntity reported = member("피신고자");
-            Image image = em.persist(Image.builder().imageUrl("https://img/1").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/1").build());
 
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reported.getId(),
                     ReportType.SPAM_AD, "스팸", List.of(image.getId(), 999_999L)));
@@ -160,7 +171,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
                     .createQuery("select ri from ReportImageJpaEntity ri", ReportImageJpaEntity.class).getResultList();
             assertThat(images).extracting(ri -> ri.getImage().getId()).containsExactly(image.getId());
             assertThat(events.published).containsExactly(new CreateAdminAlertEvent(
-                    team.startup.gwangsan.domain.admin.entity.constant.AlertType.REPORT, saved.getId(), reporter.getId()));
+                    team.startup.gwangsan.domain.admin.model.AlertType.REPORT, saved.getId(), reporter.getId()));
         }
 
         @Test
@@ -360,11 +371,96 @@ class ReportBlockSuspendBoundaryIntegrationTest {
     class Describe_public_ports {
 
         @Test
+        @DisplayName("it_관리자 신고 상세는 기존 관리자 조회와 같은 값·순서를 같은 SQL 수로 돌려준다")
+        void it_serves_admin_report_details_with_same_query_count() {
+            MemberJpaEntity reporter = member("상세신고자");
+            MemberJpaEntity reportedA = member("상세피신고A");
+            MemberJpaEntity reportedB = member("상세피신고B");
+            Product product = product(reportedB, ProductStatus.ONGOING);
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/d").build());
+            createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reportedA.getId(),
+                    ReportType.SPAM_AD, "회원", List.of(image.getId())));
+            createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.PRODUCT, product.getId(),
+                    ReportType.ETC, "게시글", null));
+            em.flush();
+            em.clear();
+            List<Long> ids = em.getEntityManager().createQuery("select r.id from ReportJpaEntity r order by r.id", Long.class)
+                    .getResultList();
+            List<Long> requested = List.of(ids.get(1), ids.get(0), 999_999L);
+            Statistics stats = em.getEntityManager().getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
+
+            // 기존 AdminAlertReadBridge 경로: findAllByIdIn → findAllByReportIdIn → 피신고자 닉네임 지연 로딩
+            em.clear();
+            stats.clear();
+            List<String> legacyNicknames = reportJpaRepository.findAllByIdIn(requested).stream()
+                    .map(r -> r.getReported().getNickname()).toList();
+            reportImageJpaRepository.findAllByReportIdIn(requested).forEach(ri -> ri.getImage().getImageUrl());
+            long legacyStatements = stats.getPrepareStatementCount();
+
+            em.clear();
+            stats.clear();
+            java.util.Map<Long, ReportDetail> details = reportQueryService.findDetails(requested);
+            long portStatements = stats.getPrepareStatementCount();
+
+            assertThat(portStatements).isEqualTo(legacyStatements);
+            assertThat(details.values()).extracting(ReportDetail::reportedNickname).containsExactlyElementsOf(legacyNicknames);
+            assertThat(details).containsOnlyKeys(ids.get(0), ids.get(1));
+            assertThat(details.get(ids.get(0))).isEqualTo(new ReportDetail(ids.get(0), ReportType.SPAM_AD, "회원",
+                    reportedA.getId(), reportedA.getNickname(), null, null,
+                    List.of(new ReportDetail.ReportImageRef(image.getId(), "https://img/d"))));
+            assertThat(details.get(ids.get(1))).isEqualTo(new ReportDetail(ids.get(1), ReportType.ETC, "게시글",
+                    reportedB.getId(), reportedB.getNickname(), product.getId(), "제목", List.of()));
+            assertThat(reportQueryService.getReportType(ids.get(1))).isEqualTo(ReportType.ETC);
+            assertThatThrownBy(() -> reportQueryService.getReportType(999_999L)).isInstanceOf(NotFoundReportException.class);
+
+            stats.clear();
+            assertThat(reportQueryService.findDetails(List.of())).isEmpty();
+            assertThat(reportQueryService.findDetails(List.of(999_999L))).isEmpty();
+            assertThat(stats.getPrepareStatementCount()).as("빈 입력 0회 + 없는 ID 1회(이미지 조회 없음)").isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("it_회원 탈퇴 정리는 신고자·피신고자를 대체 회원으로 바꾸고 그 회원의 차단·정지만 지운다")
+        void it_cleans_up_member_references() {
+            MemberJpaEntity leaving = member("탈퇴자");
+            MemberJpaEntity dummy = member("대체회원");
+            MemberJpaEntity other = member("다른회원");
+            MemberJpaEntity third = member("제삼회원");
+            createReportService.execute(new CreateReportCommand(leaving.getId(), ReportTargetType.MEMBER, other.getId(),
+                    ReportType.ETC, "탈퇴자가 신고", null));
+            createReportService.execute(new CreateReportCommand(other.getId(), ReportTargetType.MEMBER, leaving.getId(),
+                    ReportType.ETC, "탈퇴자를 신고", null));
+            blockMemberService.execute(new MemberBlockCommand(leaving.getId(), other.getId()));
+            blockMemberService.execute(new MemberBlockCommand(other.getId(), leaving.getId()));
+            blockMemberService.execute(new MemberBlockCommand(other.getId(), third.getId()));
+            suspendMemberService.execute(new SuspendMemberCommand(leaving.getId(), 3, null));
+            suspendMemberService.execute(new SuspendMemberCommand(other.getId(), 3, null));
+            em.flush();
+            em.clear();
+
+            reportQueryService.reassign(leaving.getId(), dummy.getId());
+            deleteMemberSuspensionsService.deleteAllOf(leaving.getId());
+            deleteMemberBlocksService.deleteAllOf(leaving.getId());
+            em.flush();
+            em.clear();
+
+            List<ReportJpaEntity> reports = em.getEntityManager()
+                    .createQuery("select r from ReportJpaEntity r order by r.id", ReportJpaEntity.class).getResultList();
+            assertThat(reports).extracting(r -> r.getReporter().getId()).containsExactly(dummy.getId(), other.getId());
+            assertThat(reports).extracting(r -> r.getReported().getId()).containsExactly(other.getId(), dummy.getId());
+            assertThat(em.getEntityManager().createQuery("select b from MemberBlockJpaEntity b", MemberBlockJpaEntity.class)
+                    .getResultList()).extracting(b -> b.getBlocker().getId(), b -> b.getBlocked().getId())
+                    .containsExactly(org.assertj.core.groups.Tuple.tuple(other.getId(), third.getId()));
+            assertThat(em.getEntityManager().createQuery("select s from SuspendJpaEntity s", SuspendJpaEntity.class)
+                    .getResultList()).extracting(su -> su.getMember().getId()).containsExactly(other.getId());
+        }
+
+        @Test
         @DisplayName("it_신고 알림 원천·이미지 연결 행 ID·연결 삭제·정지 일수를 기존 의미로 제공한다")
         void it_serves_report_and_suspension_queries() {
             MemberJpaEntity reporter = member("공개신고자");
             MemberJpaEntity reported = member("공개피신고자");
-            Image image = em.persist(Image.builder().imageUrl("https://img/p").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/p").build());
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reported.getId(),
                     ReportType.ETC, "공개", List.of(image.getId())));
             suspendMemberService.execute(new SuspendMemberCommand(reported.getId(), 5, null));
@@ -391,12 +487,12 @@ class ReportBlockSuspendBoundaryIntegrationTest {
             em.clear();
             assertThat(em.getEntityManager().createQuery("select count(ri) from ReportImageJpaEntity ri", Long.class)
                     .getSingleResult()).isZero();
-            assertThat(em.find(Image.class, image.getId())).isNotNull();
+            assertThat(em.find(ImageJpaEntity.class, image.getId())).isNotNull();
         }
     }
 
     @Nested
-    @DisplayName("정지 해제 트랜잭션은")
+    @DisplayName("정지·해제 트랜잭션은")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     class Describe_release_rollback {
 
@@ -405,6 +501,37 @@ class ReportBlockSuspendBoundaryIntegrationTest {
         @Autowired private SuspendJpaRepository suspendJpaRepository;
         @Autowired private PlatformTransactionManager transactionManager;
         @Autowired private ReleaseExpiredSuspensionsService releaseService;
+        @Autowired private SuspendMemberService suspendService;
+
+        @Test
+        @DisplayName("it_정지는 member 공개 command 를 거쳐 정지 이력과 SUSPENDED 를 함께 커밋한다")
+        void it_commits_suspension_with_status() {
+            Long memberId = new TransactionTemplate(transactionManager)
+                    .execute(status -> memberRepository.save(newMember("커밋", MemberStatus.ACTIVE)).getId());
+
+            suspendService.execute(new SuspendMemberCommand(memberId, 3, null));
+
+            assertThat(memberRepository.findById(memberId)).get().extracting(MemberJpaEntity::getStatus)
+                    .isEqualTo(MemberStatus.SUSPENDED);
+            assertThat(suspendJpaRepository.count()).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("it_정지 이력 저장 뒤 상태 변경이 실패하면 정지 이력까지 rollback 한다")
+        void it_rolls_back_suspension_when_status_change_fails() {
+            Long memberId = new TransactionTemplate(transactionManager)
+                    .execute(status -> memberRepository.save(newMember("정지롤백", MemberStatus.ACTIVE)).getId());
+            doAnswer(invocation -> {
+                throw new IllegalStateException("상태 변경 실패");
+            }).when(memberStatusBridgeAdapter).suspend(any());
+
+            assertThatThrownBy(() -> suspendService.execute(new SuspendMemberCommand(memberId, 3, null)))
+                    .isInstanceOf(IllegalStateException.class);
+
+            assertThat(suspendJpaRepository.count()).isZero();
+            assertThat(memberRepository.findById(memberId)).get().extracting(MemberJpaEntity::getStatus)
+                    .isEqualTo(MemberStatus.ACTIVE);
+        }
 
         @AfterEach
         void cleanUp() {

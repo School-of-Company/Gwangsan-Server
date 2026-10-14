@@ -46,6 +46,7 @@ class TradeCancelServicesTest {
     @Mock private TradeStateQuery tradeStateQuery;
     @Mock private TradeStatusPort tradeStatusPort;
     @Mock private TradeCancelApplier mockedApplier;
+    @Mock private TradeImagePort tradeImagePort;
 
     private TradeComplete completed() {
         return new TradeComplete(TRADE, PRODUCT, BUYER, SELLER, TradeStatus.COMPLETED, true,
@@ -66,7 +67,7 @@ class TradeCancelServicesTest {
     class Describe_request {
 
         private RequestTradeCancelService service() {
-            return new RequestTradeCancelService(tradeProductPort, tradeCompletePort, tradeCancelPort, mockedApplier, tradeAlertPort);
+            return new RequestTradeCancelService(tradeProductPort, tradeCompletePort, tradeCancelPort, mockedApplier, tradeAlertPort, tradeImagePort);
         }
 
         private TradeCancelResult execute(long actorId) {
@@ -78,18 +79,21 @@ class TradeCancelServicesTest {
         void it_creates_request() {
             when(tradeCompletePort.findCompleted(PRODUCT)).thenReturn(Optional.of(completed()));
             when(tradeCancelPort.findPendingByTrade(TRADE)).thenReturn(Optional.empty());
-            when(tradeCancelPort.create(any(), eq(List.of(5L)))).thenAnswer(inv -> {
+            when(tradeImagePort.findExistingImageIds(List.of(5L))).thenReturn(List.of(5L));
+            when(tradeCancelPort.create(any())).thenAnswer(inv -> {
                 TradeCancel c = inv.getArgument(0);
                 return new TradeCancel(CANCEL, c.tradeCompleteId(), c.requesterId(), c.reason(), c.status());
             });
 
             assertThat(execute(BUYER).cancelled()).isFalse();
 
-            InOrder order = inOrder(tradeProductPort, tradeCompletePort, tradeCancelPort, tradeAlertPort);
+            InOrder order = inOrder(tradeProductPort, tradeCompletePort, tradeCancelPort, tradeImagePort, tradeAlertPort);
             order.verify(tradeProductPort).lockIncludingDeleted(PRODUCT);
             order.verify(tradeCompletePort).findCompleted(PRODUCT);
             ArgumentCaptor<TradeCancel> created = ArgumentCaptor.forClass(TradeCancel.class);
-            order.verify(tradeCancelPort).create(created.capture(), eq(List.of(5L)));
+            order.verify(tradeCancelPort).create(created.capture());
+            order.verify(tradeImagePort).findExistingImageIds(List.of(5L));
+            order.verify(tradeCancelPort).attachImages(CANCEL, List.of(5L));
             order.verify(tradeAlertPort).requestCancelReview(CANCEL, BUYER);
             assertThat(created.getValue().status()).isEqualTo(TradeCancelStatus.PENDING);
             assertThat(created.getValue().requesterId()).isEqualTo(BUYER);
@@ -107,7 +111,8 @@ class TradeCancelServicesTest {
             assertThat(execute(BUYER).cancelled()).isTrue();
 
             verify(mockedApplier).apply(requested, trade);
-            verify(tradeCancelPort, never()).create(any(), any());
+            verify(tradeCancelPort, never()).create(any());
+            verifyNoInteractions(tradeImagePort);
             verifyNoInteractions(tradeAlertPort);
         }
 

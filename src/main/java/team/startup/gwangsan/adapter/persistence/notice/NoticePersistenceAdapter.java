@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.notice.data.NoticeImageResult;
 import team.startup.gwangsan.application.notice.port.out.NoticePort;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.model.Notice;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class NoticePersistenceAdapter implements NoticePort {
             NoticeJpaEntity saved = noticeJpaRepository.save(NoticeJpaEntity.builder()
                     .title(notice.title())
                     .content(notice.content())
-                    .place(entityManager.getReference(Place.class, notice.placeId()))
+                    .place(entityManager.getReference(PlaceJpaEntity.class, notice.placeId()))
                     .member(notice.authorId() == null ? null : entityManager.getReference(MemberJpaEntity.class, notice.authorId()))
                     .build());
             return toModel(saved);
@@ -69,7 +69,7 @@ public class NoticePersistenceAdapter implements NoticePort {
         noticeImageJpaRepository.saveAll(imageIds.stream()
                 .map(imageId -> NoticeImageJpaEntity.builder()
                         .notice(notice)
-                        .image(entityManager.getReference(Image.class, imageId))
+                        .image(entityManager.getReference(ImageJpaEntity.class, imageId))
                         .build())
                 .toList());
     }
@@ -98,6 +98,12 @@ public class NoticePersistenceAdapter implements NoticePort {
     @Override
     public void unlinkImage(Long noticeId, Long imageId) {
         noticeImageJpaRepository.deleteByNoticeIdAndImageId(noticeId, imageId);
+    }
+
+    @Override
+    public void reassignAuthor(Long memberId, Long dummyMemberId) {
+        noticeJpaRepository.reassignMember(entityManager.getReference(MemberJpaEntity.class, memberId),
+                entityManager.getReference(MemberJpaEntity.class, dummyMemberId));
     }
 
     // 연관 엔티티는 프록시의 id 만 읽어 추가 조회를 만들지 않는다.

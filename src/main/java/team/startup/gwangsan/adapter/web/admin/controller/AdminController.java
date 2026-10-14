@@ -13,7 +13,7 @@ import team.startup.gwangsan.adapter.web.admin.dto.response.GetAdminAlertRespons
 import team.startup.gwangsan.adapter.web.admin.dto.response.SignInAdminResponse;
 import team.startup.gwangsan.application.admin.data.*;
 import team.startup.gwangsan.application.admin.port.in.*;
-import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
+import team.startup.gwangsan.domain.admin.model.AlertType;
 import team.startup.gwangsan.domain.admin.model.AccountStatus;
 import team.startup.gwangsan.domain.common.ActorContext;
 

@@ -22,8 +22,8 @@ import team.startup.gwangsan.domain.member.exception.NotAllowedUserAccessExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
@@ -82,7 +82,7 @@ class MemberQueryServicesTest {
         return member;
     }
 
-    private MemberDetailJpaEntity detail(MemberJpaEntity member, Place place, int light, int gwangsan, String description) {
+    private MemberDetailJpaEntity detail(MemberJpaEntity member, PlaceJpaEntity place, int light, int gwangsan, String description) {
         MemberDetailJpaEntity detail = mock(MemberDetailJpaEntity.class);
         lenient().when(detail.getMember()).thenReturn(member);
         lenient().when(detail.getPlace()).thenReturn(place);
@@ -92,8 +92,8 @@ class MemberQueryServicesTest {
         return detail;
     }
 
-    private Place place(Integer id, String name, Head head) {
-        Place place = mock(Place.class);
+    private PlaceJpaEntity place(Integer id, String name, HeadJpaEntity head) {
+        PlaceJpaEntity place = mock(PlaceJpaEntity.class);
         lenient().when(place.getId()).thenReturn(id);
         lenient().when(place.getName()).thenReturn(name);
         lenient().when(place.getHead()).thenReturn(head);
@@ -115,7 +115,7 @@ class MemberQueryServicesTest {
         @Test
         @DisplayName("지점·본부·동을 조인한 경로로 내 정보를 반환한다")
         void it_returns_my_info() {
-            Head head = mock(Head.class);
+            HeadJpaEntity head = mock(HeadJpaEntity.class);
             when(head.getName()).thenReturn("광산구");
             DongJpaEntity dong = mock(DongJpaEntity.class);
             when(dong.getName()).thenReturn("수완동");
@@ -174,7 +174,7 @@ class MemberQueryServicesTest {
     class Describe_find_all_user_info {
 
         private void adminScope(Integer placeId, Integer headId) {
-            Head head = mock(Head.class);
+            HeadJpaEntity head = mock(HeadJpaEntity.class);
             when(head.getId()).thenReturn(headId);
             MemberDetailJpaEntity adminDetail = detail(member(1L, "관리자"), place(placeId, "지점", head), 1, 0, "");
             when(memberDetailJpaRepository.findById(1L)).thenReturn(Optional.of(adminDetail));

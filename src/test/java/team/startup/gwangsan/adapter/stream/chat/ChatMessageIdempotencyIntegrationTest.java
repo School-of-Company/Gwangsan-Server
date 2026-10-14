@@ -50,7 +50,7 @@ import team.startup.gwangsan.application.chat.service.ChatMessageMutationService
 import team.startup.gwangsan.application.chat.service.SaveChatMessageService;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -58,10 +58,10 @@ import team.startup.gwangsan.adapter.persistence.notification.DeviceToken;
 import team.startup.gwangsan.domain.notification.model.OsType;
 import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.adapter.event.notification.PushRequestedEvent;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
 import team.startup.gwangsan.application.block.service.BlockQueryService;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -155,7 +155,7 @@ class ChatMessageIdempotencyIntegrationTest {
             ChatRoomJpaEntity room = ChatRoomJpaEntity.builder().buyer(buyer).seller(seller)
                     .createdAt(LocalDateTime.now()).isActive(true).build();
             entityManager.persist(room);
-            Image image = Image.builder().imageUrl("https://example.test/image").build();
+            ImageJpaEntity image = ImageJpaEntity.builder().imageUrl("https://example.test/image").build();
             entityManager.persist(image);
             return new Fixture(buyer.getId(), seller.getId(), room.getId(), image.getId());
         });

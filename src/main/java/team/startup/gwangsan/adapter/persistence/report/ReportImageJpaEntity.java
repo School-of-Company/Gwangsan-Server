@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 
 @Entity
 @Getter
@@ -19,14 +19,14 @@ public class ReportImageJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", nullable = false)
-    private Image image;
+    private ImageJpaEntity image;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
     private ReportJpaEntity report;
 
     @Builder
-    public ReportImageJpaEntity(Image image, ReportJpaEntity report) {
+    public ReportImageJpaEntity(ImageJpaEntity image, ReportJpaEntity report) {
         this.image = image;
         this.report = report;
     }

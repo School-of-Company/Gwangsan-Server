@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.image.model.Image;
 import java.util.List;
 
 import static team.startup.gwangsan.adapter.persistence.chat.QChatMessageImageJpaEntity.chatMessageImageJpaEntity;
-import static team.startup.gwangsan.domain.image.entity.QImage.image;
+import static team.startup.gwangsan.adapter.persistence.image.QImageJpaEntity.imageJpaEntity;
 import static team.startup.gwangsan.adapter.persistence.notice.QNoticeImageJpaEntity.noticeImageJpaEntity;
 import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
 import static team.startup.gwangsan.adapter.persistence.report.QReportImageJpaEntity.reportImageJpaEntity;
@@ -30,12 +30,12 @@ public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
     @Override
     public List<Image> findOrphanCandidates(int limit) {
         return queryFactory
-                .selectFrom(image)
-                .leftJoin(productImage).on(productImage.image.eq(image))
-                .leftJoin(noticeImageJpaEntity).on(noticeImageJpaEntity.image.eq(image))
-                .leftJoin(reportImageJpaEntity).on(reportImageJpaEntity.image.eq(image))
-                .leftJoin(chatMessageImageJpaEntity).on(chatMessageImageJpaEntity.image.eq(image))
-                .leftJoin(tradeCancelImage).on(tradeCancelImage.image.eq(image))
+                .selectFrom(imageJpaEntity)
+                .leftJoin(productImage).on(productImage.image.eq(imageJpaEntity))
+                .leftJoin(noticeImageJpaEntity).on(noticeImageJpaEntity.image.eq(imageJpaEntity))
+                .leftJoin(reportImageJpaEntity).on(reportImageJpaEntity.image.eq(imageJpaEntity))
+                .leftJoin(chatMessageImageJpaEntity).on(chatMessageImageJpaEntity.image.eq(imageJpaEntity))
+                .leftJoin(tradeCancelImage).on(tradeCancelImage.image.eq(imageJpaEntity))
                 .where(
                         productImage.id.isNull(),
                         noticeImageJpaEntity.id.isNull(),
@@ -43,7 +43,7 @@ public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
                         chatMessageImageJpaEntity.id.isNull(),
                         tradeCancelImage.id.isNull()
                 )
-                .orderBy(image.createdAt.asc(), image.id.asc())
+                .orderBy(imageJpaEntity.createdAt.asc(), imageJpaEntity.id.asc())
                 .limit(limit)
                 .fetch()
                 .stream()

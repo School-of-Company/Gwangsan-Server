@@ -8,6 +8,8 @@ import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.application.member.port.out.LoadMemberPort;
 import team.startup.gwangsan.domain.member.model.Member;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -45,6 +47,11 @@ public class MemberAccountService implements MemberAccountQuery {
     @Override
     public boolean isBannedPhoneNumber(String phoneNumber) {
         return loadMemberPort.isBannedPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public List<Long> findExistingIds(Collection<Long> memberIds) {
+        return memberIds.isEmpty() ? List.of() : loadMemberPort.findExistingIds(memberIds);
     }
 
     private static MemberAccount toAccount(Member member) {

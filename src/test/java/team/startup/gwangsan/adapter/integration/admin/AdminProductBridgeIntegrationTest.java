@@ -21,14 +21,14 @@ import team.startup.gwangsan.application.admin.data.AdminProduct;
 import team.startup.gwangsan.application.admin.data.AdminProductSearch;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 
@@ -36,7 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Import({QueryDslConfig.class, AdminProductBridge.class, ProductPublicQueryService.class, ProductStatusService.class,
-        ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class})
+        ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class,
+        team.startup.gwangsan.application.member.service.MemberSummaryService.class,
+        team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter.class})
 @DisplayName("관리자 상품 목록 영속성 통합 테스트")
 class AdminProductBridgeIntegrationTest {
     @Autowired private TestEntityManager em;
@@ -57,11 +59,11 @@ class AdminProductBridgeIntegrationTest {
         void it_lists_different_places_without_n_plus_one() {
             for (int i = 0; i < 3; i++) {
                 MemberJpaEntity member = member("회원" + i);
-                Place place = em.persist(Place.builder().name("지점" + i).build());
+                PlaceJpaEntity place = em.persist(PlaceJpaEntity.builder().name("지점" + i).build());
                 detail(member, place, 30);
                 Product product = product(member, "게시글" + i, ProductStatus.ONGOING);
                 for (int imageIndex = 0; imageIndex < 2; imageIndex++) {
-                    Image image = em.persist(Image.builder().imageUrl("test/" + i + "/" + imageIndex).build());
+                    ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("test/" + i + "/" + imageIndex).build());
                     em.persist(ProductImage.builder().product(product).image(image).build());
                 }
             }
@@ -100,7 +102,7 @@ class AdminProductBridgeIntegrationTest {
         @DisplayName("it_빛이 10 미만인 작성자의 예약 상품은 light=1 과 예약 상태로 반환한다 (상세 place_id 는 NOT NULL)")
         void it_maps_reservation_with_minimum_light() {
             MemberJpaEntity member = member("빛낮음");
-            detail(member, em.persist(Place.builder().name("지점").build()), 5);
+            detail(member, em.persist(PlaceJpaEntity.builder().name("지점").build()), 5);
             product(member, "예약", ProductStatus.RESERVATION);
             clearAndStatistics();
 
@@ -127,7 +129,7 @@ class AdminProductBridgeIntegrationTest {
                 .password("password").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
     }
 
-    private void detail(MemberJpaEntity member, Place place, int light) {
+    private void detail(MemberJpaEntity member, PlaceJpaEntity place, int light) {
         em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                 .gwangsan(10000).light(light).description("소개").build());
     }

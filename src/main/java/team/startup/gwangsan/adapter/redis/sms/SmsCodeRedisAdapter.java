@@ -3,7 +3,7 @@ package team.startup.gwangsan.adapter.redis.sms;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.sms.port.out.SmsCodeStorePort;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import java.time.Duration;
 import java.util.Optional;

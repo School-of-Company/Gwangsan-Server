@@ -14,11 +14,11 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
 import team.startup.gwangsan.domain.report.model.ReportType;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 
@@ -49,8 +49,8 @@ class ReportCustomRepositoryImplTest {
         @Test
         @DisplayName("신고자의 회원 상세 지점이 요청 지점에 있는 신고만 반환한다")
         void it_selects_reports_by_the_reporter_member_detail_place() {
-            Place targetPlace = place("대상");
-            Place otherPlace = place("다른");
+            PlaceJpaEntity targetPlace = place("대상");
+            PlaceJpaEntity otherPlace = place("다른");
             MemberJpaEntity targetReporter = memberAtPlace("대상신고자", targetPlace);
             MemberJpaEntity otherReporter = memberAtPlace("다른신고자", otherPlace);
             MemberJpaEntity targetPlaceReported = memberAtPlace("대상지점피신고자", targetPlace);
@@ -68,12 +68,12 @@ class ReportCustomRepositoryImplTest {
         }
     }
 
-    private Place place(String suffix) {
-        Head head = em.persist(Head.builder().name("본부-" + suffix).build());
-        return em.persist(Place.builder().name("지점-" + suffix).head(head).build());
+    private PlaceJpaEntity place(String suffix) {
+        HeadJpaEntity head = em.persist(HeadJpaEntity.builder().name("본부-" + suffix).build());
+        return em.persist(PlaceJpaEntity.builder().name("지점-" + suffix).head(head).build());
     }
 
-    private MemberJpaEntity memberAtPlace(String suffix, Place place) {
+    private MemberJpaEntity memberAtPlace(String suffix, PlaceJpaEntity place) {
         MemberJpaEntity member = em.persist(MemberJpaEntity.builder()
                 .name("이름-" + suffix)
                 .nickname("회원-" + suffix)
