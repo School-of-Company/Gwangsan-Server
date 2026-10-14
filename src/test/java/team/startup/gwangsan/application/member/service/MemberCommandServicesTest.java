@@ -10,23 +10,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import team.startup.gwangsan.adapter.integration.member.LegacyMemberKeywordAdapter;
+import team.startup.gwangsan.adapter.integration.member.MemberKeywordAdapter;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.*;
 import team.startup.gwangsan.application.member.data.MemberAccount;
 import team.startup.gwangsan.application.member.data.RegisterMemberCommand;
 import team.startup.gwangsan.application.member.data.UpdateMyInfoCommand;
+import team.startup.gwangsan.application.relatedkeyword.service.FindMemberRelatedKeywordsService;
+import team.startup.gwangsan.application.relatedkeyword.service.MemberKeywordCommandService;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.exception.DuplicateMemberNicknameException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
-import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaRepository;
 import team.startup.gwangsan.global.exception.ErrorCode;
 import team.startup.gwangsan.global.exception.GlobalException;
 
@@ -50,18 +53,21 @@ class MemberCommandServicesTest {
     @Mock private MemberJpaRepository memberJpaRepository;
     @Mock private MemberDetailJpaRepository memberDetailJpaRepository;
     @Mock private WithdrawalRecordJpaRepository withdrawalRecordJpaRepository;
-    @Mock private RelatedKeywordRepository relatedKeywordRepository;
-    @Mock private MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    @Mock private RelatedKeywordJpaRepository relatedKeywordRepository;
+    @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private EntityManager entityManager;
 
     private MemberPersistenceAdapter persistence;
-    private LegacyMemberKeywordAdapter keywords;
+    private MemberKeywordAdapter keywords;
 
     @BeforeEach
     void setUp() {
         persistence = new MemberPersistenceAdapter(memberJpaRepository, memberDetailJpaRepository,
                 withdrawalRecordJpaRepository, entityManager);
-        keywords = new LegacyMemberKeywordAdapter(relatedKeywordRepository, memberRelatedKeywordRepository, entityManager);
+        RelatedKeywordPersistenceAdapter keywordPersistence = new RelatedKeywordPersistenceAdapter(
+                relatedKeywordRepository, memberRelatedKeywordRepository, entityManager);
+        keywords = new MemberKeywordAdapter(
+                new FindMemberRelatedKeywordsService(keywordPersistence), new MemberKeywordCommandService(keywordPersistence));
     }
 
     private MemberJpaEntity member(Long id, String nickname) {
@@ -72,7 +78,7 @@ class MemberCommandServicesTest {
     }
 
     private MemberDetailJpaEntity detail(MemberJpaEntity member, int gwangsan) {
-        Dong dong = mock(Dong.class);
+        DongJpaEntity dong = mock(DongJpaEntity.class);
         Place place = mock(Place.class);
         MemberDetailJpaEntity detail = MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                 .gwangsan(gwangsan).light(1).description("기존 설명").build();
@@ -101,7 +107,7 @@ class MemberCommandServicesTest {
         void it_updates_without_duplicate_check() {
             MemberJpaEntity member = member(1L, "테스터일");
             MemberDetailJpaEntity detail = stubMember(member);
-            RelatedKeyword java = RelatedKeyword.builder().name("Java").build();
+            RelatedKeywordJpaEntity java = RelatedKeywordJpaEntity.builder().name("Java").build();
             when(relatedKeywordRepository.findByName("Java")).thenReturn(Optional.of(java));
 
             service().execute(new UpdateMyInfoCommand(ACTOR, "테스터일", "새 설명", List.of("Java")));
@@ -111,9 +117,9 @@ class MemberCommandServicesTest {
             assertThat(detail.getDescription()).isEqualTo("새 설명");
             verify(memberRelatedKeywordRepository).deleteAllByMember(member);
             @SuppressWarnings("unchecked")
-            ArgumentCaptor<List<MemberRelatedKeyword>> saved = ArgumentCaptor.forClass(List.class);
+            ArgumentCaptor<List<MemberRelatedKeywordJpaEntity>> saved = ArgumentCaptor.forClass(List.class);
             verify(memberRelatedKeywordRepository).saveAll(saved.capture());
-            assertThat(saved.getValue()).extracting(MemberRelatedKeyword::getRelatedKeyword).containsExactly(java);
+            assertThat(saved.getValue()).extracting(MemberRelatedKeywordJpaEntity::getRelatedKeyword).containsExactly(java);
         }
 
         @Test
@@ -121,11 +127,11 @@ class MemberCommandServicesTest {
         void it_creates_missing_keyword() {
             stubMember(member(1L, "테스터일"));
             when(relatedKeywordRepository.findByName("NewSkill")).thenReturn(Optional.empty());
-            when(relatedKeywordRepository.save(any(RelatedKeyword.class))).thenAnswer(i -> i.getArgument(0));
+            when(relatedKeywordRepository.save(any(RelatedKeywordJpaEntity.class))).thenAnswer(i -> i.getArgument(0));
 
             service().execute(new UpdateMyInfoCommand(ACTOR, "테스터일", "새 설명", List.of("NewSkill")));
 
-            ArgumentCaptor<RelatedKeyword> created = ArgumentCaptor.forClass(RelatedKeyword.class);
+            ArgumentCaptor<RelatedKeywordJpaEntity> created = ArgumentCaptor.forClass(RelatedKeywordJpaEntity.class);
             verify(relatedKeywordRepository).save(created.capture());
             assertThat(created.getValue().getName()).isEqualTo("NewSkill");
             verify(memberRelatedKeywordRepository).saveAll(any());
@@ -208,10 +214,10 @@ class MemberCommandServicesTest {
         @DisplayName("승인 대기 일반 회원과 초기 상세(광산 0, 빛 1)를 저장하고 특기를 순서대로 연결한다")
         void it_registers_pending_member_with_initial_detail() {
             MemberJpaEntity recommender = member(9L, "추천인");
-            Dong dong = mock(Dong.class);
+            DongJpaEntity dong = mock(DongJpaEntity.class);
             Place place = mock(Place.class);
             when(entityManager.getReference(MemberJpaEntity.class, 9L)).thenReturn(recommender);
-            when(entityManager.getReference(Dong.class, 3)).thenReturn(dong);
+            when(entityManager.getReference(DongJpaEntity.class, 3)).thenReturn(dong);
             when(entityManager.getReference(Place.class, 1)).thenReturn(place);
             MemberJpaEntity[] persisted = new MemberJpaEntity[1];
             when(memberJpaRepository.save(any(MemberJpaEntity.class))).thenAnswer(i -> {
@@ -219,10 +225,10 @@ class MemberCommandServicesTest {
                 ReflectionTestUtils.setField(persisted[0], "id", 10L);
                 return persisted[0];
             });
-            RelatedKeyword java = RelatedKeyword.builder().name("Java").build();
+            RelatedKeywordJpaEntity java = RelatedKeywordJpaEntity.builder().name("Java").build();
             when(relatedKeywordRepository.findByName("Java")).thenReturn(Optional.of(java));
             when(relatedKeywordRepository.findByName("Spring")).thenReturn(Optional.empty());
-            when(relatedKeywordRepository.save(any(RelatedKeyword.class))).thenAnswer(i -> i.getArgument(0));
+            when(relatedKeywordRepository.save(any(RelatedKeywordJpaEntity.class))).thenAnswer(i -> i.getArgument(0));
             when(entityManager.getReference(MemberJpaEntity.class, 10L)).thenAnswer(i -> persisted[0]);
 
             Long id = new RegisterMemberService(persistence, keywords).execute(new RegisterMemberCommand("홍길동",
@@ -241,7 +247,7 @@ class MemberCommandServicesTest {
             assertThat(savedDetail.getValue().getPlace()).isSameAs(place);
             assertThat(savedDetail.getValue().getGwangsan()).isZero();
             assertThat(savedDetail.getValue().getLight()).isEqualTo(1);
-            ArgumentCaptor<MemberRelatedKeyword> mappings = ArgumentCaptor.forClass(MemberRelatedKeyword.class);
+            ArgumentCaptor<MemberRelatedKeywordJpaEntity> mappings = ArgumentCaptor.forClass(MemberRelatedKeywordJpaEntity.class);
             verify(memberRelatedKeywordRepository, times(2)).save(mappings.capture());
             assertThat(mappings.getAllValues()).extracting(m -> m.getRelatedKeyword().getName())
                     .containsExactly("Java", "Spring");

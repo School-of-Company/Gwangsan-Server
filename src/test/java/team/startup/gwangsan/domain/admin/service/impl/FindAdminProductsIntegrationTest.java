@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
@@ -38,7 +38,7 @@ class FindAdminProductsIntegrationTest {
         @Test
         @DisplayName("다른 지점의 게시글과 여러 이미지를 3개 쿼리로 조회한다")
         void it_lists_different_places_without_n_plus_one() {
-            Dong dong = em.persist(Dong.builder().name("테스트동").build());
+            DongJpaEntity dong = em.persist(DongJpaEntity.builder().name("테스트동").build());
             for (int i = 0; i < 3; i++) {
                 MemberJpaEntity member = em.persist(MemberJpaEntity.builder().name("회원" + i).nickname("회원" + i)
                         .phoneNumber("0100000000" + i).password("password")

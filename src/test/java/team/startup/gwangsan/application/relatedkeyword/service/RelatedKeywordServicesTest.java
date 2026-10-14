@@ -109,4 +109,29 @@ class RelatedKeywordServicesTest {
             verifyNoMoreInteractions(port);
         }
     }
+
+    @Nested
+    @DisplayName("MemberKeywordCommandService 는")
+    class Describe_member_keyword_command {
+
+        private final MemberKeywordCommandService service = new MemberKeywordCommandService(port);
+
+        @Test
+        @DisplayName("add 는 키워드 추가 Port 로 위임한다")
+        void it_adds_member_keywords() {
+            service.add(7L, List.of("요리"));
+
+            verify(port).addMemberKeywords(7L, List.of("요리"));
+            verifyNoMoreInteractions(port);
+        }
+
+        @Test
+        @DisplayName("replace 는 파생 삭제 교체 Port 로 위임하고 bulk 삭제는 쓰지 않는다")
+        void it_replaces_member_keywords() {
+            service.replace(7L, List.of("청소"));
+
+            verify(port).replaceMemberKeywords(7L, List.of("청소"));
+            verify(port, never()).bulkDeleteAllByMemberId(anyLong());
+        }
+    }
 }

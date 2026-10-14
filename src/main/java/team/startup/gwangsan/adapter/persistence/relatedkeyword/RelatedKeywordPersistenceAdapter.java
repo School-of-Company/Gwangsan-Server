@@ -1,27 +1,23 @@
 package team.startup.gwangsan.adapter.persistence.relatedkeyword;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.application.relatedkeyword.data.RelatedKeywordResult;
 import team.startup.gwangsan.application.relatedkeyword.port.out.RelatedKeywordPort;
-import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.model.MemberKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
-import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ponytail: JPA 모델은 아직 legacy(domain.relatedkeyword.entity/repository)다. auth/member(PR02)가 같은 Entity 를
- * 직접 쓰므로 Entity 이동은 해당 호출자가 전환된 뒤 수행한다(.omo/evidence/hex-pr03.md bridge 표).
- */
 @Component
 @RequiredArgsConstructor
 public class RelatedKeywordPersistenceAdapter implements RelatedKeywordPort {
 
-    private final RelatedKeywordRepository relatedKeywordRepository;
-    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    private final RelatedKeywordJpaRepository relatedKeywordRepository;
+    private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
+    private final EntityManager entityManager;
 
     @Override
     public List<RelatedKeywordResult> findAll() {
@@ -49,11 +45,40 @@ public class RelatedKeywordPersistenceAdapter implements RelatedKeywordPort {
     }
 
     @Override
+    public void addMemberKeywords(Long memberId, List<String> names) {
+        MemberJpaEntity member = member(memberId);
+        for (String name : names) {
+            memberRelatedKeywordRepository.save(MemberRelatedKeywordJpaEntity.builder()
+                    .member(member)
+                    .relatedKeyword(findOrCreate(name))
+                    .build());
+        }
+    }
+
+    @Override
+    public void replaceMemberKeywords(Long memberId, List<String> names) {
+        MemberJpaEntity member = member(memberId);
+        memberRelatedKeywordRepository.deleteAllByMember(member);
+        memberRelatedKeywordRepository.saveAll(names.stream()
+                .map(name -> new MemberRelatedKeywordJpaEntity(findOrCreate(name), member))
+                .toList());
+    }
+
+    @Override
     public void bulkDeleteAllByMemberId(Long memberId) {
         memberRelatedKeywordRepository.bulkDeleteAllByMemberId(memberId);
     }
 
-    private MemberKeyword toModel(MemberRelatedKeyword entity) {
+    private RelatedKeywordJpaEntity findOrCreate(String name) {
+        return relatedKeywordRepository.findByName(name)
+                .orElseGet(() -> relatedKeywordRepository.save(new RelatedKeywordJpaEntity(name)));
+    }
+
+    private MemberJpaEntity member(Long memberId) {
+        return entityManager.getReference(MemberJpaEntity.class, memberId);
+    }
+
+    private MemberKeyword toModel(MemberRelatedKeywordJpaEntity entity) {
         // LAZY member 프록시의 id 접근은 회원 행을 추가 조회하지 않는다.
         return new MemberKeyword(entity.getId(), entity.getMember().getId());
     }

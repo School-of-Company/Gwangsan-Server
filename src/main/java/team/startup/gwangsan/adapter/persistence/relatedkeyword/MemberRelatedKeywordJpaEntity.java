@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.relatedkeyword.entity;
+package team.startup.gwangsan.adapter.persistence.relatedkeyword;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_member_related_keyword")
-public class MemberRelatedKeyword {
+public class MemberRelatedKeywordJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +19,14 @@ public class MemberRelatedKeyword {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "keyword_id", nullable = false)
-    private RelatedKeyword relatedKeyword;
+    private RelatedKeywordJpaEntity relatedKeyword;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private MemberJpaEntity member;
 
     @Builder
-    public MemberRelatedKeyword(RelatedKeyword relatedKeyword, MemberJpaEntity member) {
+    public MemberRelatedKeywordJpaEntity(RelatedKeywordJpaEntity relatedKeyword, MemberJpaEntity member) {
         this.relatedKeyword = relatedKeyword;
         this.member = member;
     }

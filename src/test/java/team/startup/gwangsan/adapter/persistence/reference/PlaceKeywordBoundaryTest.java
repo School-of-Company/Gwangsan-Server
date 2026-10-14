@@ -20,14 +20,14 @@ import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordPe
 import team.startup.gwangsan.application.dong.data.DongResult;
 import team.startup.gwangsan.application.place.data.PlaceResult;
 import team.startup.gwangsan.application.relatedkeyword.data.RelatedKeywordResult;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.model.MemberKeyword;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
@@ -113,7 +113,7 @@ class PlaceKeywordBoundaryTest {
     class Describe_dong {
         @Test
         void it_finds_dong_by_exact_name() {
-            Dong dong = persist(new Dong("우산동"));
+            DongJpaEntity dong = persist(new DongJpaEntity("우산동"));
             em.flush();
 
             assertThat(dongs.findByName("우산동")).contains(new DongResult(dong.getId(), "우산동"));
@@ -128,10 +128,10 @@ class PlaceKeywordBoundaryTest {
         void it_reads_keywords_and_member_mapping_and_deletes_only_target() {
             MemberJpaEntity owner = persist(member("010-1111-1111", "owner"));
             MemberJpaEntity other = persist(member("010-2222-2222", "other"));
-            RelatedKeyword cooking = persist(new RelatedKeyword("요리"));
-            RelatedKeyword cleaning = persist(new RelatedKeyword("청소"));
-            MemberRelatedKeyword ownerCooking = persist(new MemberRelatedKeyword(cooking, owner));
-            MemberRelatedKeyword otherCleaning = persist(new MemberRelatedKeyword(cleaning, other));
+            RelatedKeywordJpaEntity cooking = persist(new RelatedKeywordJpaEntity("요리"));
+            RelatedKeywordJpaEntity cleaning = persist(new RelatedKeywordJpaEntity("청소"));
+            MemberRelatedKeywordJpaEntity ownerCooking = persist(new MemberRelatedKeywordJpaEntity(cooking, owner));
+            MemberRelatedKeywordJpaEntity otherCleaning = persist(new MemberRelatedKeywordJpaEntity(cleaning, other));
             em.flush();
             em.clear();
 
@@ -157,9 +157,9 @@ class PlaceKeywordBoundaryTest {
         void it_bulk_deletes_only_target_member_mappings_and_clears_context() {
             MemberJpaEntity owner = persist(member("010-1111-1111", "owner"));
             MemberJpaEntity other = persist(member("010-2222-2222", "other"));
-            RelatedKeyword cooking = persist(new RelatedKeyword("요리"));
-            persist(new MemberRelatedKeyword(cooking, owner));
-            MemberRelatedKeyword otherCooking = persist(new MemberRelatedKeyword(cooking, other));
+            RelatedKeywordJpaEntity cooking = persist(new RelatedKeywordJpaEntity("요리"));
+            persist(new MemberRelatedKeywordJpaEntity(cooking, owner));
+            MemberRelatedKeywordJpaEntity otherCooking = persist(new MemberRelatedKeywordJpaEntity(cooking, other));
             em.flush();
 
             keywords.bulkDeleteAllByMemberId(owner.getId());

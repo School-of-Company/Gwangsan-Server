@@ -199,8 +199,8 @@
 | 177 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
 | 178 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
 | 179 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 180 | `domain/dong/entity/Dong.java` | = | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | legacy 유지 — PR03 DongQuery/DongPersistenceAdapter가 사용, MemberDetail association(PR02) 전환 후 이동 |
-| 181 | `domain/dong/repository/DongRepository.java` | = | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | legacy 유지 — DongPersistenceAdapter 내부 사용, SignUp(PR02) 직접 사용 |
+| 180 | `domain/dong/entity/Dong.java` | `adapter/persistence/dong/DongJpaEntity.java` | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
+| 181 | `domain/dong/repository/DongRepository.java` | `adapter/persistence/dong/DongJpaRepository.java` (+ application/dong/port/out/LoadDongPort.java) | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | PR03 완료 |
 | 182 | `domain/health/presentation/HealthController.java` | `adapter/web/health/controller/HealthController.java` | health | controller | adapter/web/health/controller | PR03 | PR03 완료 |
 | 183 | `domain/image/entity/Image.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
 | 184 | `domain/image/entity/dto/DeleteResult.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
@@ -286,11 +286,11 @@
 | 264 | `domain/notification/repository/DeviceTokenRepository.java` | = | notification | repository | adapter/persistence/notification (JpaRepository) + application/notification/port/out | PR04 | legacy |
 | 265 | `domain/notification/service/SendNotificationService.java` | = | notification | service interface | application/notification/port/in (UseCase/Query) | PR04 | legacy |
 | 266 | `domain/notification/service/impl/SendNotificationServiceImpl.java` | = | notification | service impl | application/notification/service (+ 필요한 output Port) | PR04 | legacy |
-| 267 | `domain/place/entity/Head.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR03 | legacy 유지 — Place/QueryDSL 호출자(PR02·06·07·09·10·11) 전환 후 이동 |
-| 268 | `domain/place/entity/Place.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR03 | legacy 유지 — PlaceQuery/PlacePersistenceAdapter가 사용, association·QueryDSL 호출자 전환 후 이동 |
+| 267 | `domain/place/entity/Head.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — Place association·QueryDSL 호출자(PR02·06·07·09·10·11) 전환 후 PR12 최종 단계에서 PR03 이 이동(legacy 태그 PR12) |
+| 268 | `domain/place/entity/Place.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — 위와 같음, PlaceQuery/PlacePersistenceAdapter 가 내부 사용(legacy 태그 PR12) |
 | 269 | `domain/place/exception/PlaceMismatchException.java` | = (위치 유지) | place | exception | domain/place/exception | PR03 | PR03 완료 |
-| 270 | `domain/place/presentation/dto/PlaceDto.java` | = | place | web dto | adapter/web/place/dto | PR03 | legacy 유지 — trade 응답 전용 DTO, PR07이 trade web DTO로 흡수 |
-| 271 | `domain/place/repository/PlaceRepository.java` | = | place | repository | adapter/persistence/place (JpaRepository) + application/place/port/out | PR03 | legacy 유지 — PlacePersistenceAdapter 내부 사용(+findAllByHeadId), 호출자 7곳(PR02·07·10·11) |
+| 270 | `domain/place/presentation/dto/PlaceDto.java` | = | place | web dto | adapter/web/place/dto | PR07 | legacy 유지 — trade 응답 전용 DTO, PR07 이 trade web DTO 로 흡수하며 제거(legacy 태그 PR07) |
+| 271 | `domain/place/repository/PlaceRepository.java` | = | place | repository | adapter/persistence/place (JpaRepository) + application/place/port/out | PR12 | legacy 유지 — PlacePersistenceAdapter 내부 사용(+findAllByHeadId), 호출자(PR07·10·11) 전환 후 PR12 최종 단계에서 이동(legacy 태그 PR12) |
 | 272 | `domain/post/entity/Product.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
 | 273 | `domain/post/entity/ProductImage.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
 | 274 | `domain/post/entity/ProductReservation.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
@@ -348,14 +348,14 @@
 | 326 | `domain/post/service/impl/ReservationReminderSender.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
 | 327 | `domain/post/service/impl/UpdateProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
 | 328 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
-| 329 | `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | = | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | legacy 유지 — RelatedKeywordPersistenceAdapter가 사용, auth/member 호출자(PR02) 전환 후 이동 |
-| 330 | `domain/relatedkeyword/entity/RelatedKeyword.java` | = | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | legacy 유지 — 위와 같음 |
+| 329 | `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
+| 330 | `domain/relatedkeyword/entity/RelatedKeyword.java` | `adapter/persistence/relatedkeyword/RelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 331 | `domain/relatedkeyword/exception/MemberRelatedKeywordForbiddenException.java` | = (위치 유지) | relatedkeyword | exception | domain/relatedkeyword/exception | PR03 | PR03 완료 |
 | 332 | `domain/relatedkeyword/exception/MemberRelatedKeywordNotFoundException.java` | = (위치 유지) | relatedkeyword | exception | domain/relatedkeyword/exception | PR03 | PR03 완료 |
 | 333 | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | relatedkeyword | controller | adapter/web/relatedkeyword/controller | PR03 | PR03 완료 |
 | 334 | `domain/relatedkeyword/presentation/dto/response/RelatedKeywordResponse.java` | `adapter/web/relatedkeyword/dto/RelatedKeywordResponse.java` | relatedkeyword | web dto | adapter/web/relatedkeyword/dto | PR03 | PR03 완료 |
-| 335 | `domain/relatedkeyword/repository/MemberRelatedKeywordRepository.java` | = | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | legacy 유지 — adapter 내부 사용(+findAllByMemberId), PR02 호출자 5곳 |
-| 336 | `domain/relatedkeyword/repository/RelatedKeywordRepository.java` | = | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | legacy 유지 — adapter 내부 사용, PR02 호출자 2곳 |
+| 335 | `domain/relatedkeyword/repository/MemberRelatedKeywordRepository.java` | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaRepository.java` (+ application/relatedkeyword/port/out/RelatedKeywordPort.java) | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | PR03 완료 |
+| 336 | `domain/relatedkeyword/repository/RelatedKeywordRepository.java` | `adapter/persistence/relatedkeyword/RelatedKeywordJpaRepository.java` | relatedkeyword | repository | adapter/persistence/relatedkeyword (JpaRepository) + application/relatedkeyword/port/out | PR03 | PR03 완료 |
 | 337 | `domain/relatedkeyword/service/DeleteMemberRelatedKeywordService.java` | `application/relatedkeyword/port/in/DeleteMemberRelatedKeywordUseCase.java` | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | PR03 완료 |
 | 338 | `domain/relatedkeyword/service/FindMyRelatedKeywordService.java` | `application/relatedkeyword/port/in/FindMemberRelatedKeywordsQuery.java` | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | PR03 완료 |
 | 339 | `domain/relatedkeyword/service/FindRelatedKeywordService.java` | `application/relatedkeyword/port/in/FindRelatedKeywordsQuery.java` | relatedkeyword | service interface | application/relatedkeyword/port/in (UseCase/Query) | PR03 | PR03 완료 |
@@ -991,7 +991,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatMessage.java` | Entity | tbl_chat_message | ManyToOne room:ChatRoom (fetch = FetchType.LAZY); ManyToOne sender:Member (fetch = FetchType.LAZY) | EnumType.STRING | - |
 | `domain/chat/entity/ChatMessageImage.java` | Entity | tbl_chat_message_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne chatMessage:ChatMessage (fetch = FetchType.LAZY) | - | - |
 | `domain/chat/entity/ChatRoom.java` | Entity | tbl_chat_room | ManyToOne buyer:Member (fetch = FetchType.LAZY); ManyToOne seller:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | Y |
-| `domain/dong/entity/Dong.java` | Entity | tbl_dong | - | - | - |
+| `adapter/persistence/dong/DongJpaEntity.java` (PR03) | Entity | tbl_dong | - | - | - |
 | `domain/image/entity/Image.java` | Entity | tbl_image | - | - | Y |
 | `adapter/persistence/member/MemberJpaEntity.java` (entity name `Member`) | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` (entity name `MemberDetail`) | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
@@ -1003,8 +1003,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/post/entity/Product.java` | Entity | tbl_product | ManyToOne member:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `domain/post/entity/ProductImage.java` | Entity | tbl_product_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | - |
 | `domain/post/entity/ProductReservation.java` | Entity | tbl_product_reservation | ManyToOne product:Product (fetch = FetchType.LAZY); ManyToOne reserver:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
-| `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | Entity | tbl_member_related_keyword | ManyToOne relatedKeyword:RelatedKeyword (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | - | - |
-| `domain/relatedkeyword/entity/RelatedKeyword.java` | Entity | tbl_related_keyword | - | - | - |
+| `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` (PR03) | Entity | tbl_member_related_keyword | ManyToOne relatedKeyword:RelatedKeywordJpaEntity (fetch = FetchType.LAZY); ManyToOne member:MemberJpaEntity (fetch = FetchType.LAZY) | - | - |
+| `adapter/persistence/relatedkeyword/RelatedKeywordJpaEntity.java` (PR03) | Entity | tbl_related_keyword | - | - | - |
 | `domain/report/entity/Report.java` | Entity | tbl_report | ManyToOne reported:Member (fetch = FetchType.LAZY); ManyToOne reporter:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | EnumType.STRING | - |
 | `domain/report/entity/ReportImage.java` | Entity | tbl_report_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne report:Report (fetch = FetchType.LAZY) | - | - |
 | `domain/review/entity/Review.java` | Entity | tbl_review | ManyToOne reviewer:Member (fetch = FetchType.LAZY); ManyToOne reviewed:Member (fetch = FetchType.LAZY); ManyToOne product:Product (fetch = FetchType.LAZY) | - | - |
@@ -1028,7 +1028,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatRoom.java` | buyer | member.Member | ManyToOne |
 | `domain/chat/entity/ChatRoom.java` | product | post.Product | ManyToOne |
 | `domain/chat/entity/ChatRoom.java` | seller | member.Member | ManyToOne |
-| `adapter/persistence/member/MemberDetailJpaEntity.java` | dong | dong.Dong | ManyToOne |
+| `adapter/persistence/member/MemberDetailJpaEntity.java` | dong | dong.DongJpaEntity (PR03) | ManyToOne |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` | place | place.Place | ManyToOne |
 | `domain/notice/entity/Notice.java` | member | member.Member | ManyToOne |
 | `domain/notice/entity/Notice.java` | place | place.Place | ManyToOne |
@@ -1036,7 +1036,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/post/entity/Product.java` | member | member.Member | ManyToOne |
 | `domain/post/entity/ProductImage.java` | image | image.Image | ManyToOne |
 | `domain/post/entity/ProductReservation.java` | reserver | member.Member | ManyToOne |
-| `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | member | member.Member | ManyToOne |
+| `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` (PR03) | member | member.MemberJpaEntity | ManyToOne |
 | `domain/report/entity/Report.java` | product | post.Product | ManyToOne |
 | `domain/report/entity/Report.java` | reported | member.Member | ManyToOne |
 | `domain/report/entity/Report.java` | reporter | member.Member | ManyToOne |
@@ -1064,8 +1064,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config |
 | `JwtProvider`/`JwtProperties`/security exception | PR02 완료: adapter/security/auth(+/exception) | - |
 | `MemberDetails`/`MemberDetailsService` | PR02 완료: member 공개 `MemberAccountQuery`·`MemberAccount` 사용 | - |
-| PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | adapter/integration/auth | PR03 (dong/place 공개 query) |
-| PR02 bridge: `LegacyMemberKeywordAdapter` (RelatedKeyword·MemberRelatedKeyword Repository) | adapter/integration/member | PR03 (relatedkeyword 공개 command/query) |
+| PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | PR03 완료: `adapter/integration/auth/SignUpLocationAdapter` → `DongQuery`·`PlaceQuery` | - |
+| PR02 bridge: `LegacyMemberKeywordAdapter` (RelatedKeyword·MemberRelatedKeyword Repository) | PR03 완료: `adapter/integration/member/MemberKeywordAdapter` → `FindMemberRelatedKeywordsQuery`·`MemberKeywordCommand` | - |
 | PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | adapter/integration/auth | PR04 (notification 기기 등록 command) |
 | PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
 | PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |

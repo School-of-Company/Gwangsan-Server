@@ -20,7 +20,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepositor
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
-import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
@@ -49,7 +49,7 @@ class MemberDeletionServiceImplTest {
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private AlertRepository alertRepository;
     @Mock private NoticeRepository noticeRepository;
-    @Mock private MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private SuspendRepository suspendRepository;
     @Mock private MemberBlockRepository memberBlockRepository;
     @Mock private AlertReceiptRepository alertReceiptRepository;

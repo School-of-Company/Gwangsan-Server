@@ -22,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.application.sms.port.out.SmsSenderPort;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
@@ -86,7 +86,7 @@ class MemberAuthBoundaryIntegrationTest {
         placeId = transactionTemplate.execute(status -> {
             Head head = new Head("광산구");
             entityManager.persist(head);
-            Dong dong = new Dong("수완동");
+            DongJpaEntity dong = new DongJpaEntity("수완동");
             entityManager.persist(dong);
             Place place = new Place("수완지점", head);
             entityManager.persist(place);

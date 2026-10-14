@@ -28,7 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
@@ -85,7 +85,8 @@ class SalesListIntegrationTest {
 
     @Configuration
     @EnableAutoConfiguration
-    @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member"})
+    @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
+            "team.startup.gwangsan.adapter.persistence.dong"})
     @EnableJpaAuditing
     @EnableJpaRepositories(basePackages = {"team.startup.gwangsan.domain.post.repository",
             "team.startup.gwangsan.adapter.persistence.member"})
@@ -304,7 +305,7 @@ class SalesListIntegrationTest {
             MemberJpaEntity member = MemberJpaEntity.builder().name("test" + id).nickname("test" + id).phoneNumber("test" + id)
                     .password("unused").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
             em.persist(member);
-            Dong dong = Dong.builder().name("dong" + id).build();
+            DongJpaEntity dong = DongJpaEntity.builder().name("dong" + id).build();
             Place place = Place.builder().name("place" + id).build();
             em.persist(dong);
             em.persist(place);

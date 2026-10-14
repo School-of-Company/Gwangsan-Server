@@ -26,7 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.place.entity.Place;
@@ -129,7 +129,7 @@ class MemberDetailDongMigrationTest {
                         .getTransactionalEntityManager(entityManagerFactory);
                 repository.saveAndFlush(MemberDetailJpaEntity.builder()
                         .member(entityManager.getReference(MemberJpaEntity.class, 3L))
-                        .dong(entityManager.getReference(Dong.class, 1))
+                        .dong(entityManager.getReference(DongJpaEntity.class, 1))
                         .place(entityManager.getReference(Place.class, 1))
                         .gwangsan(0).light(0).description("repository")
                         .build());

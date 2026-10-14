@@ -95,7 +95,7 @@ class CreateReviewServiceImplTest {
     private MemberDetailJpaEntity detail(MemberJpaEntity member) {
         return MemberDetailJpaEntity.builder()
                 .member(member)
-                .dong(mock(team.startup.gwangsan.domain.dong.entity.Dong.class))
+                .dong(mock(team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity.class))
                 .place(mock(team.startup.gwangsan.domain.place.entity.Place.class))
                 .gwangsan(0)
                 .light(1)

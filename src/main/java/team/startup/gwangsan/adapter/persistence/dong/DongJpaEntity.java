@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.relatedkeyword.entity;
+package team.startup.gwangsan.adapter.persistence.dong;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -7,20 +7,20 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "tbl_related_keyword")
+@Table(name = "tbl_dong")
 @NoArgsConstructor
-public class RelatedKeyword {
+public class DongJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "keyword_id")
-    private Long id;
+    @Column(name = "dong_id")
+    private Integer id;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Builder
-    public RelatedKeyword(String name) {
+    public DongJpaEntity(String name) {
         this.name = name;
     }
 }

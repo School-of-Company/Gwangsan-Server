@@ -8,7 +8,7 @@ import team.startup.gwangsan.application.member.data.MemberProfile;
 import team.startup.gwangsan.application.member.port.out.LoadMemberPort;
 import team.startup.gwangsan.application.member.port.out.MemberProfileQueryPort;
 import team.startup.gwangsan.application.member.port.out.SaveMemberPort;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.Member;
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 /**
  * 회원 저장 adapter. 저장 메서드는 호출 트랜잭션의 managed 엔티티를 다시 찾아 순수 모델 값을 명시적으로 반영한다.
- * Dong/Place 는 기존 DB association 유지를 위한 저장 모델 참조다(업무 core 에 노출하지 않음).
+ * DongJpaEntity/Place 는 기존 DB association 유지를 위한 저장 모델 참조다(업무 core 에 노출하지 않음).
  */
 @Component
 @RequiredArgsConstructor
@@ -81,7 +81,7 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
                 .build());
         memberDetailJpaRepository.save(MemberDetailJpaEntity.builder()
                 .member(entity)
-                .dong(entityManager.getReference(Dong.class, detail.getDongId()))
+                .dong(entityManager.getReference(DongJpaEntity.class, detail.getDongId()))
                 .place(entityManager.getReference(Place.class, detail.getPlaceId()))
                 .gwangsan(detail.getGwangsan())
                 .light(detail.getLight())

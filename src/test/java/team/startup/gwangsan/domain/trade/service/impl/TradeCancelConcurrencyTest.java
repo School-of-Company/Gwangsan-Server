@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -178,7 +178,7 @@ class TradeCancelConcurrencyTest {
             entityManager.persist(head);
             Place place = Place.builder().name("지점").head(head).build();
             entityManager.persist(place);
-            Dong dong = Dong.builder().name("공유동").build();
+            DongJpaEntity dong = DongJpaEntity.builder().name("공유동").build();
             entityManager.persist(dong);
 
             MemberJpaEntity buyer = member("구매자", "010-0000-0001");
@@ -216,7 +216,7 @@ class TradeCancelConcurrencyTest {
                 .build();
     }
 
-    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, Dong dong, Place place) {
+    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, DongJpaEntity dong, Place place) {
         return MemberDetailJpaEntity.builder()
                 .member(member).dong(dong).gwangsan(GWANGSAN * 2)
                 .place(place).light(0).description("소개")

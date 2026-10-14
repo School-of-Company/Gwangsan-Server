@@ -17,7 +17,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.member.service.MemberDeletionService;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
-import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
@@ -42,7 +42,7 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     private final TradeCancelRepository tradeCancelRepository;
     private final AlertRepository alertRepository;
     private final NoticeRepository noticeRepository;
-    private final MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     private final SuspendRepository suspendRepository;
     private final MemberBlockRepository memberBlockRepository;
     private final AlertReceiptRepository alertReceiptRepository;
