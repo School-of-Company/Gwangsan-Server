@@ -1,6 +1,6 @@
 # 헥사고날 전환 inventory
 
-기준 commit `474a2cde24025e828e6c96fd5f29865bfa2a3fd0` (develop). 생성: PR01 inventory 생성기(명령은 `.omo/evidence/hex-pr01.md`). 이 문서는 PR별 전환의 소유·bridge 제거 책임 기준이다.
+기준 commit `474a2cde24025e828e6c96fd5f29865bfa2a3fd0` (develop). 생성: PR01 inventory 생성기(저장소 밖 로컬 도구라 재생성하지 않고 각 PR 이 행을 직접 갱신했다). 이 문서는 PR별 전환의 소유·bridge 제거 책임 기준이다.
 
 ## 사용 규칙
 
@@ -521,17 +521,17 @@
 | 499 | `global/event/handler/ReservationCancelledEventListener.java` | `adapter/integration/post/ReservationCancelledEventListener.java` | post | global/event | adapter/integration/post (커밋 후 비동기 푸시·채팅 HTTP. notification PR04·채팅 HTTP PR08 bridge) | PR06 | PR06 완료 |
 | 500 | `global/event/handler/SendNotificationEventListener.java` | 삭제 (`LegacySendNotificationEventBridge`·`LegacyDeviceTokens` PR10 삭제) | notification | global/event | adapter/event/notification | PR04 | PR10 삭제 |
 | 501 | `global/event/handler/TradeStatusChangedEventListener.java` | `adapter/event/trade/TradeStatusChangedEventListener.java` | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | PR07 완료 |
-| 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
-| 503 | `global/exception/ErrorResponse.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
-| 504 | `global/exception/GlobalException.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
-| 505 | `global/exception/GlobalExceptionHandler.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
+| 502 | `global/exception/ErrorCode.java` | `domain/common/exception/ErrorCode.java` | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | PR12 완료 |
+| 503 | `global/exception/ErrorResponse.java` | `infrastructure/web/ErrorResponse.java` | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | PR12 완료 |
+| 504 | `global/exception/GlobalException.java` | `domain/common/exception/GlobalException.java` | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | PR12 완료 |
+| 505 | `global/exception/GlobalExceptionHandler.java` | `infrastructure/web/GlobalExceptionHandler.java` | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | PR12 완료 |
 | 506 | `global/filter/ExceptionFilter.java` | `infrastructure/web/ExceptionFilter.java` | infrastructure | global/filter | infrastructure/web | PR01 | PR01 완료 |
 | 507 | `global/filter/JwtAuthenticationFilter.java` | `adapter/security/auth/JwtAuthenticationFilter.java` | auth | global/filter | adapter/security/auth | PR01 | PR01 완료 |
 | 508 | `global/filter/JwtFilter.java` | `adapter/security/auth/JwtFilter.java` | auth | global/filter | adapter/security/auth | PR01 | PR01 완료 |
 | 509 | `global/filter/RequestLogFilter.java` | `infrastructure/web/RequestLogFilter.java` | infrastructure | global/filter | infrastructure/web | PR01 | PR01 완료 |
-| 510 | `global/querydsl/QueryDslConfig.java` | = | infrastructure | global/querydsl | infrastructure/config | PR12 | legacy |
-| 511 | `global/redis/RedisConfig.java` | = | infrastructure | global/redis | infrastructure/config | PR12 | legacy |
-| 512 | `global/redis/RedisUtil.java` | = | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | legacy |
+| 510 | `global/querydsl/QueryDslConfig.java` | `infrastructure/config/QueryDslConfig.java` | infrastructure | global/querydsl | infrastructure/config | PR12 | PR12 완료 |
+| 511 | `global/redis/RedisConfig.java` | `infrastructure/config/RedisConfig.java` | infrastructure | global/redis | infrastructure/config | PR12 | PR12 완료 |
+| 512 | `global/redis/RedisUtil.java` | `adapter/redis/RedisUtil.java` | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | PR12 완료 (SMS·blacklist Redis adapter 내부 전용, 값 바이트 호환 테스트) |
 | 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | `adapter/scheduler/image/DeleteOrphanImageScheduler.java (+ application/image/service/CleanupOrphanImagesService)` | image | global/scheduler | adapter/scheduler/image | PR05 | 전환 |
 | 514 | `global/scheduler/ReservationReminderScheduler.java` | `adapter/scheduler/post/ReservationReminderScheduler.java` | post | global/scheduler | adapter/scheduler/post | PR06 | PR06 완료 |
 | 515 | `global/scheduler/SuspendReleaseScheduler.java` | `adapter/scheduler/suspend/SuspendReleaseScheduler.java + application/suspend/service/ReleaseExpiredSuspensionsService.java` | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | PR09 완료 |
@@ -558,7 +558,7 @@
 | 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
 | 537 | `global/util/BlockValidator.java` | 삭제 (호출처 0: 각 consumer bridge 가 BlockRelationQuery 직접 사용) | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | PR09 완료 |
 | 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | 삭제 (PR08: chat `ChatImageBridge` → `ImageQuery.getAllByIds`) |
-| 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
+| 539 | `global/util/MemberUtil.java` | 삭제 | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | PR12 삭제 (production 호출자 0, ActorContext 전환 완료) |
 
 ## 3. HTTP API (Controller 매핑)
 
@@ -1055,13 +1055,13 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 
 | 항목 | 현재 상태 | 제거/교체 PR |
 | --- | --- | --- |
-| `legacy-classes.txt` 항목 | 전환 전 클래스 목록, PR별 태그 | 각 태그 PR (최종 0건은 PR12) |
-| `MemberUtil` | 5절 호출처가 사용 | 호출처: 각 업무 PR, 클래스: PR12 |
+| `legacy-classes.txt` 항목 | 전환 전 클래스 목록, PR별 태그 | 각 태그 PR (최종 0건은 PR12) — **PR12 완료: 0건**, HexagonalArchitectureTest·HexagonalFinalGateTest 가 0 을 강제 |
+| `MemberUtil` | 5절 호출처가 사용 | 호출처: 각 업무 PR, 클래스: PR12 — **PR12 삭제**(production 호출자 0) |
 | `@CheckBlocked`/`BlockAspect` | PR07에서 삭제. 거래 완료 요청은 `TradeBlockPort` → `adapter/integration/trade/TradeBlockBridge` → `BlockRelationQuery` | 완료 (PR09 bridge 교체 완료) |
 | `BlockValidator` | **PR09 완료: 삭제**. 호출처 Trade/Review/Chat/Post bridge 가 block 공개 `BlockRelationQuery` 직접 사용 | - |
-| `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 |
-| `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web |
-| `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config |
+| `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 — **PR12 완료**: `domain.common.exception`, SHARED_KERNEL 예외 0 |
+| `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web — **PR12 완료** |
+| `QueryDslConfig`/`RedisConfig` | global, 다수 테스트가 @Import | PR12 → infrastructure/config — **PR12 완료** (RedisUtil 은 adapter/redis) |
 | `JwtProvider`/`JwtProperties`/security exception | PR02 완료: adapter/security/auth(+/exception) | - |
 | `MemberDetails`/`MemberDetailsService` | PR02 완료: member 공개 `MemberAccountQuery`·`MemberAccount` 사용 | - |
 | PR02 bridge: `LegacySignUpLocationAdapter` (DongRepository·PlaceRepository) | PR03 완료: `adapter/integration/auth/SignUpLocationAdapter` → `DongQuery`·`PlaceQuery` | - |
@@ -1112,7 +1112,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR10 공개 Port 제공 | `NoticeQuery`(PR04 `LegacyAlertSourceAdapter.noticeTitle`·`LegacyAlertImageAdapter.noticeImages`), `UnlinkNoticeImageUseCase`(PR05 `ImageReferenceCleanupAdapter` NOTICE), `ReassignNoticeAuthorUseCase`(정리 라운드 A: 회원 탈퇴 공지 작성자 재지정, 같은 JPQL·clearAutomatically) | - |
 | notice JPA 직접 사용 (legacy/persistence) | member `MemberReferenceCleanupAdapter` 의 `NoticeJpaRepository.reassignMember`(provider `ReassignNoticeAuthorUseCase` 제공 완료, 소비자 교체 대기). image `OrphanImageQueryAdapter` 의 `QNoticeImageJpaEntity` join 은 persistence 간 참조(SQL 무변경) | 소비자 교체: 정리 라운드 B, 최종 PR12 |
 | PR11 `adapter/integration/admin/AdminMemberBridge` | **cleanup-B 완료**: member 공개 Port(MemberAccountQuery·MemberSummaryQuery·ChangeGwangsanUseCase·ManageMemberUseCase)·WithdrawMemberUseCase·PlaceQuery 만 사용. 저장 모델 직접 사용 0 | 없음 |
-| PR11 `adapter/integration/admin/AdminAuthBridge` | MemberAccountQuery(공개) + auth out Port(PasswordHashPort·TokenPort·RefreshTokenPort) 재사용 | auth 공개 토큰 발급 Port → PR12 |
+| PR11 `adapter/integration/admin/AdminAuthBridge` | MemberAccountQuery(공개) + auth out Port(PasswordHashPort·TokenPort·RefreshTokenPort) 재사용 | auth 공개 토큰 발급 Port → PR12 — **PR12 완료**: auth `IssueAccountTokenUseCase`·`PasswordMatchQuery`(AccountTokenService) 사용, auth out Port 직접 사용 0 |
 | PR11 `adapter/integration/admin/AdminTradeCancelBridge` | **cleanup-B 완료**: trade ApproveTradeCancelUseCase(인가 콜백)·RejectTradeCancelUseCase·TradeCancelQuery(상품 ID·요청자), post ProductStatusUseCase.lockIncludingDeleted | 없음 |
 | PR11 `adapter/integration/admin/AdminReportBridge` | **cleanup-B 완료**: report ReportQuery(getReportType·getAlertSource) | 없음 |
 | PR11 `adapter/integration/admin/AdminAlertReadBridge` | **cleanup-B 완료**: 알림 행은 admin 저장 adapter(AlertRow), 신고 ReportQuery.findDetails, 철회 TradeCancelQuery.findAll/findImages, 상품 ProductSnapshotQuery·ProductImageQuery, 회원 MemberSummaryQuery | 없음 |
@@ -1121,3 +1121,11 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR11 `adapter/persistence/member/MemberWithdrawalPersistenceAdapter`(구 integration/member/MemberWithdrawalBridge) | **cleanup-B**: member 업무 자신의 탈퇴 저장(탈퇴 기록·dummy 조회·추천인 재지정·상세/회원 삭제)이라 member 저장 adapter 로 이동 | 없음 |
 | PR11 `adapter/integration/member/MemberReferenceCleanupAdapter` | **cleanup-B 완료**: post·trade·chat·review·report·admin·alert·notice·relatedkeyword·suspend·block 탈퇴 정리 공개 command 만 사용(순서·bulk/clearAutomatically·전체 rollback 유지) | 없음 |
 | PR11 수정한 타 PR 파일(최소) | `TradeAlertBridge`(관리자 알림 삭제→`RemoveAdminAlertUseCase`, 생성 이벤트 import), `AdminAlertBridgeAdapter`(→`AdminAlertExistenceQuery`), `SignUpAlertEventAdapter`·`ReportAlertEventAdapter`(event import), `LegacyAlertSourceAdapter`(`SignUpReward` 상수 import), `adapter/web/member/controller/MemberController`(DELETE), 테스트 `TradeAlertBridgeTest`·`ReportBlockSuspendBoundaryIntegrationTest`·`MemberControllerHttpContractTest`·`PendingApprovalHttpContractTest`·`TradeIntegrationWiring` | 각 소유 PR 수용, PR12 대조 |
+
+## 10. PR12 최종 상태
+
+- legacy-classes.txt 0건, `global` 패키지 0 파일, `domain/<업무>/{service,repository,entity,presentation}` 0 파일, ArchUnit shared kernel 예외 0 — `HexagonalArchitectureTest`·`HexagonalFinalGateTest`(skip 없이 항상 실행).
+- `adapter/integration` 에서 다른 업무의 JpaRepository/JpaEntity 를 직접 쓰는 곳 0 — 소비자 output Port 구현은 제공 업무의 `application/<업무>/port/in` 만 호출한다(정리 라운드 A·B·C).
+- 저장 모델 간 JPA association(예: `ProductJpaEntity.member`)은 스키마·cascade 보존용 persistence 내부 예외로 남는다(8절).
+- 호환 고정: `JpaSchemaCompatibilityTest`·`RedisHashCompatibilityTest`·`RedisValueCompatibilityTest`·`ErrorContractCompatibilityTest`·`AlertPublisherCompatibilityTest`.
+- 구조·흐름 설명은 `docs/hexagonal-architecture.md`.
