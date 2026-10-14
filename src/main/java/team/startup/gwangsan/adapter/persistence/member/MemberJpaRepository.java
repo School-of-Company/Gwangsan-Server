@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberJpaRepository extends JpaRepository<MemberJpaEntity, Long>, MemberCustomRepository {
+public interface MemberJpaRepository extends JpaRepository<MemberJpaEntity, Long> {
     Optional<MemberJpaEntity> findByPhoneNumber(String phoneNumber);
 
     boolean existsByPhoneNumber(String phoneNumber);
