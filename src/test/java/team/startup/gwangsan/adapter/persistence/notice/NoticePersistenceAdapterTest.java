@@ -32,8 +32,8 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.model.Notice;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import java.util.List;
@@ -72,18 +72,18 @@ class NoticePersistenceAdapterTest {
     @Autowired private NoticeJpaRepository noticeJpaRepository;
     @Autowired private NoticeImageJpaRepository noticeImageJpaRepository;
 
-    private Head head;
-    private Place place;
-    private Place sibling;
-    private Place otherHeadPlace;
+    private HeadJpaEntity head;
+    private PlaceJpaEntity place;
+    private PlaceJpaEntity sibling;
+    private PlaceJpaEntity otherHeadPlace;
     private MemberJpaEntity author;
 
     @BeforeEach
     void setUp() {
-        head = em.persist(new Head("head"));
-        place = em.persist(Place.builder().name("광산구").head(head).build());
-        sibling = em.persist(Place.builder().name("수완동").head(head).build());
-        otherHeadPlace = em.persist(Place.builder().name("다른 본부").head(em.persist(new Head("other"))).build());
+        head = em.persist(new HeadJpaEntity("head"));
+        place = em.persist(PlaceJpaEntity.builder().name("광산구").head(head).build());
+        sibling = em.persist(PlaceJpaEntity.builder().name("수완동").head(head).build());
+        otherHeadPlace = em.persist(PlaceJpaEntity.builder().name("다른 본부").head(em.persist(new HeadJpaEntity("other"))).build());
         author = member("author", "01000000001");
         em.persist(MemberDetailJpaEntity.builder().member(author).dong(em.persist(new DongJpaEntity("신가동"))).place(place).gwangsan(0).light(1).description("").build());
         em.flush();
@@ -287,8 +287,8 @@ class NoticePersistenceAdapterTest {
         @Test
         @DisplayName("본부가 없는 지점은 본부가 없는 지점끼리 같은 본부로 본다 (기존 findByHead(null) 의미)")
         void it_groups_places_without_head() {
-            Place lonely = em.persist(Place.builder().name("본부 없음").build());
-            Place lonely2 = em.persist(Place.builder().name("본부 없음2").build());
+            PlaceJpaEntity lonely = em.persist(PlaceJpaEntity.builder().name("본부 없음").build());
+            PlaceJpaEntity lonely2 = em.persist(PlaceJpaEntity.builder().name("본부 없음2").build());
             em.flush();
             em.clear();
 
@@ -297,7 +297,7 @@ class NoticePersistenceAdapterTest {
         }
     }
 
-    private Notice notice(Place target) {
+    private Notice notice(PlaceJpaEntity target) {
         return adapter.save(Notice.create("제목", "내용", target.getId(), author.getId()));
     }
 

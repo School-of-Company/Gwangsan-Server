@@ -24,7 +24,7 @@ import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
@@ -57,7 +57,7 @@ class AdminProductBridgeIntegrationTest {
         void it_lists_different_places_without_n_plus_one() {
             for (int i = 0; i < 3; i++) {
                 MemberJpaEntity member = member("회원" + i);
-                Place place = em.persist(Place.builder().name("지점" + i).build());
+                PlaceJpaEntity place = em.persist(PlaceJpaEntity.builder().name("지점" + i).build());
                 detail(member, place, 30);
                 Product product = product(member, "게시글" + i, ProductStatus.ONGOING);
                 for (int imageIndex = 0; imageIndex < 2; imageIndex++) {
@@ -100,7 +100,7 @@ class AdminProductBridgeIntegrationTest {
         @DisplayName("it_빛이 10 미만인 작성자의 예약 상품은 light=1 과 예약 상태로 반환한다 (상세 place_id 는 NOT NULL)")
         void it_maps_reservation_with_minimum_light() {
             MemberJpaEntity member = member("빛낮음");
-            detail(member, em.persist(Place.builder().name("지점").build()), 5);
+            detail(member, em.persist(PlaceJpaEntity.builder().name("지점").build()), 5);
             product(member, "예약", ProductStatus.RESERVATION);
             clearAndStatistics();
 
@@ -127,7 +127,7 @@ class AdminProductBridgeIntegrationTest {
                 .password("password").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
     }
 
-    private void detail(MemberJpaEntity member, Place place, int light) {
+    private void detail(MemberJpaEntity member, PlaceJpaEntity place, int light) {
         em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                 .gwangsan(10000).light(light).description("소개").build());
     }

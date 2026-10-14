@@ -11,11 +11,13 @@ import java.util.List;
 
 import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
-import static team.startup.gwangsan.domain.place.entity.QPlace.place;
+import team.startup.gwangsan.adapter.persistence.place.QPlaceJpaEntity;
 
 @Repository
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
+    private static final QPlaceJpaEntity place = QPlaceJpaEntity.placeJpaEntity;
+
     private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
     private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
 

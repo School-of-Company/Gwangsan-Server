@@ -14,8 +14,8 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
@@ -55,9 +55,9 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("시작 시각은 포함하고 종료 시각과 다른 상태 및 지점의 거래는 제외한다")
         void it_counts_only_completed_trades_in_the_requested_half_open_range() {
-            Head head = createHead("본부-범위");
-            Place targetPlace = createPlace(head, "지점-범위");
-            Place otherPlace = createPlace(head, "지점-다른범위");
+            HeadJpaEntity head = createHead("본부-범위");
+            PlaceJpaEntity targetPlace = createPlace(head, "지점-범위");
+            PlaceJpaEntity otherPlace = createPlace(head, "지점-다른범위");
             MemberJpaEntity buyer = createMember("buyer-range", "010-1000-0001");
             MemberJpaEntity targetSeller = createMemberAtPlace(targetPlace, "seller-range", "010-1000-0002");
             MemberJpaEntity otherSeller = createMemberAtPlace(otherPlace, "seller-other", "010-1000-0003");
@@ -79,8 +79,8 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("period는 기준일 자정부터 오늘 다음 날 자정 전까지의 완료 거래를 센다")
         void it_uses_calendar_day_boundaries_for_period_counts() {
-            Head head = createHead("본부-기간");
-            Place place = createPlace(head, "지점-기간");
+            HeadJpaEntity head = createHead("본부-기간");
+            PlaceJpaEntity place = createPlace(head, "지점-기간");
             MemberJpaEntity buyer = createMember("buyer-period", "010-2000-0001");
             MemberJpaEntity seller = createMemberAtPlace(place, "seller-period", "010-2000-0002");
             LocalDateTime now = LocalDateTime.of(2024, 1, 10, 12, 0);
@@ -103,9 +103,9 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("거래가 없는 지점도 0으로 포함해 지점 ID 순서의 결과를 반환한다")
         void it_includes_places_without_completed_trades() {
-            Head head = createHead("본부-집계");
-            Place countedPlace = createPlace(head, "지점-집계-1");
-            Place emptyPlace = createPlace(head, "지점-집계-2");
+            HeadJpaEntity head = createHead("본부-집계");
+            PlaceJpaEntity countedPlace = createPlace(head, "지점-집계-1");
+            PlaceJpaEntity emptyPlace = createPlace(head, "지점-집계-2");
             MemberJpaEntity buyer = createMember("buyer-head", "010-3000-0001");
             MemberJpaEntity seller = createMemberAtPlace(countedPlace, "seller-head", "010-3000-0002");
             LocalDateTime start = LocalDateTime.of(2024, 2, 1, 0, 0);
@@ -126,8 +126,8 @@ class TradeCompleteCustomRepositoryImplTest {
         @Test
         @DisplayName("period는 본부 산하 지점의 기준일 포함 기간 완료 거래만 센다")
         void it_uses_calendar_day_boundaries_for_head_period_counts() {
-            Head head = createHead("본부-기간");
-            Place place = createPlace(head, "지점-본부기간");
+            HeadJpaEntity head = createHead("본부-기간");
+            PlaceJpaEntity place = createPlace(head, "지점-본부기간");
             MemberJpaEntity buyer = createMember("buyer-head-period", "010-4000-0001");
             MemberJpaEntity seller = createMemberAtPlace(place, "seller-head-period", "010-4000-0002");
             LocalDateTime now = LocalDateTime.of(2024, 1, 10, 12, 0);
@@ -258,12 +258,12 @@ class TradeCompleteCustomRepositoryImplTest {
         }
     }
 
-    private Head createHead(String name) {
-        return em.persist(Head.builder().name(name).build());
+    private HeadJpaEntity createHead(String name) {
+        return em.persist(HeadJpaEntity.builder().name(name).build());
     }
 
-    private Place createPlace(Head head, String name) {
-        return em.persist(Place.builder().name(name).head(head).build());
+    private PlaceJpaEntity createPlace(HeadJpaEntity head, String name) {
+        return em.persist(PlaceJpaEntity.builder().name(name).head(head).build());
     }
 
     private MemberJpaEntity createMember(String nickname, String phone) {
@@ -277,7 +277,7 @@ class TradeCompleteCustomRepositoryImplTest {
                 .build());
     }
 
-    private MemberJpaEntity createMemberAtPlace(Place place, String nickname, String phone) {
+    private MemberJpaEntity createMemberAtPlace(PlaceJpaEntity place, String nickname, String phone) {
         MemberJpaEntity member = createMember(nickname, phone);
         em.persist(MemberDetailJpaEntity.builder()
                 .member(member)

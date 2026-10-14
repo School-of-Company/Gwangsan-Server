@@ -23,7 +23,7 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.Optional;
 
@@ -86,7 +86,7 @@ public class AdminMemberBridge implements AdminMemberPort {
     public void changeRole(Long memberId, ActorContext.Role role, Integer placeId) {
         if (placeId != null) {
             Integer existing = placeQuery.findById(placeId).orElseThrow(PlaceNotFoundException::new).id();
-            detail(memberId).updatePlace(entityManager.getReference(Place.class, existing));
+            detail(memberId).updatePlace(entityManager.getReference(PlaceJpaEntity.class, existing));
         }
         member(memberId).updateMemberRole(MemberRole.valueOf(role.name()));
     }
@@ -143,7 +143,7 @@ public class AdminMemberBridge implements AdminMemberPort {
         return memberDetailRepository.findById(memberId).orElseThrow(NotFoundMemberDetailException::new);
     }
 
-    private static AdminPlace toPlace(Place place) {
+    private static AdminPlace toPlace(PlaceJpaEntity place) {
         if (place == null) {
             return new AdminPlace(null, null);
         }

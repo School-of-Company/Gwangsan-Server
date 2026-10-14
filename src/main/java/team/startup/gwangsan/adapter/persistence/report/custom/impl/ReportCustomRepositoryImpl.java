@@ -7,7 +7,7 @@ import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
 import team.startup.gwangsan.adapter.persistence.report.custom.ReportCustomRepository;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class ReportCustomRepositoryImpl implements ReportCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ReportJpaEntity> findByPlaces(List<Place> places) {
+    public List<ReportJpaEntity> findByPlaces(List<PlaceJpaEntity> places) {
         QMemberJpaEntity reporter = new QMemberJpaEntity("reporter");
         QMemberJpaEntity reported = new QMemberJpaEntity("reported");
 

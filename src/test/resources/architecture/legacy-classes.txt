@@ -1,9 +1,6 @@
 # 헥사고날 전환 전(legacy) 클래스와 제거 담당 PR. HexagonalArchitectureTest 가 사용한다.
 # 클래스를 새 계층으로 옮기거나 삭제한 PR 은 해당 줄을 지운다. 남은 항목이 존재하지 않으면 테스트가 실패한다.
 # 새 클래스를 이 목록에 추가하지 않는다. PR12 종료 시 비어 있어야 한다.
-team.startup.gwangsan.domain.place.entity.Head PR12
-team.startup.gwangsan.domain.place.entity.Place PR12
-team.startup.gwangsan.domain.place.repository.PlaceRepository PR12
 # PR05 잔여 8건: 타 업무 legacy 가 직접 쓰는 공유 타입이라 PR05 에서 옮기지 않았다(bridge). 실제 제거 PR 은 docs/hexagonal-migration-inventory.md 9절.
 team.startup.gwangsan.domain.image.entity.Image PR05
 team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse PR05

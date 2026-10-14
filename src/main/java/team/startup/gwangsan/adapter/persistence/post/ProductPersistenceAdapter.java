@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.post.port.out.ProductPort;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
@@ -89,7 +89,7 @@ public class ProductPersistenceAdapter implements ProductPort {
     @Override
     public List<Product> findOngoingInPlace(Type type, Mode mode, Integer placeId) {
         return productRepository.findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(
-                        type, mode, entityManager.getReference(Place.class, placeId), ProductStatus.ONGOING)
+                        type, mode, entityManager.getReference(PlaceJpaEntity.class, placeId), ProductStatus.ONGOING)
                 .stream().map(ProductPersistenceAdapter::toDomain).toList();
     }
 

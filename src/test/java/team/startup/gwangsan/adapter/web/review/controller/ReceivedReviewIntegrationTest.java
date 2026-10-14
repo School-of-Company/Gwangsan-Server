@@ -107,7 +107,8 @@ class ReceivedReviewIntegrationTest {
     @Configuration
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
-            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.post",
+            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
+            "team.startup.gwangsan.adapter.persistence.post",
             "team.startup.gwangsan.adapter.persistence.review"})
     @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
             "team.startup.gwangsan.adapter.persistence.post", "team.startup.gwangsan.adapter.persistence.review"})

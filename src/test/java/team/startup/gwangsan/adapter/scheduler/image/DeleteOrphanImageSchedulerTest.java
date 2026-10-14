@@ -40,8 +40,8 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.notice.NoticeJpaEntity;
 import team.startup.gwangsan.adapter.persistence.notice.NoticeImageJpaEntity;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.Mode;
@@ -287,8 +287,8 @@ class DeleteOrphanImageSchedulerTest {
         MemberJpaEntity seller = member("seller", "010-1000-0002");
         Product product = persist(Product.builder().title("product").description("description").gwangsan(5_000)
                 .member(seller).type(Type.SERVICE).mode(Mode.GIVER).status(ProductStatus.ONGOING).build());
-        Head head = persist(new Head("head"));
-        Place place = persist(Place.builder().name("place").head(head).build());
+        HeadJpaEntity head = persist(new HeadJpaEntity("head"));
+        PlaceJpaEntity place = persist(PlaceJpaEntity.builder().name("place").head(head).build());
         NoticeJpaEntity notice = persist(NoticeJpaEntity.builder().title("notice").content("content").place(place).member(seller).build());
         ReportJpaEntity report = persist(ReportJpaEntity.builder().reportType(ReportType.ETC).content("content").reported(seller).reporter(buyer).build());
         TradeCompleteJpaEntity complete = persist(TradeCompleteJpaEntity.builder().product(product).buyer(buyer).seller(seller)

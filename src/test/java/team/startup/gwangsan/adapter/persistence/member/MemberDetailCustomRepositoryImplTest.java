@@ -14,8 +14,8 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import java.util.Map;
@@ -45,8 +45,8 @@ class MemberDetailCustomRepositoryImplTest {
     @Test
     @DisplayName("회원 ID로 지점을 찾고 요청한 회원만 지점명 맵에 담는다")
     void it_finds_a_place_and_maps_only_requested_member_ids() {
-        Place firstPlace = place("첫", "A");
-        Place secondPlace = place("둘", "B");
+        PlaceJpaEntity firstPlace = place("첫", "A");
+        PlaceJpaEntity secondPlace = place("둘", "B");
         MemberJpaEntity memberWithoutDetail = member("상세없음");
         MemberDetailJpaEntity first = detail("첫회원", firstPlace);
         MemberDetailJpaEntity second = detail("둘회원", secondPlace);
@@ -65,10 +65,10 @@ class MemberDetailCustomRepositoryImplTest {
     @Test
     @DisplayName("회원 목록은 place ID를 head ID보다 우선하고 별명과 지점명을 함께 제한한다")
     void it_scopes_members_by_place_head_nickname_and_place_name() {
-        Head firstHead = head("A");
-        Place firstPlace = place("첫", firstHead);
-        Place secondPlace = place("둘", firstHead);
-        Place thirdPlace = place("셋", head("B"));
+        HeadJpaEntity firstHead = head("A");
+        PlaceJpaEntity firstPlace = place("첫", firstHead);
+        PlaceJpaEntity secondPlace = place("둘", firstHead);
+        PlaceJpaEntity thirdPlace = place("셋", head("B"));
         MemberDetailJpaEntity first = detail("첫회원", firstPlace);
         MemberDetailJpaEntity second = detail("둘회원", secondPlace);
         MemberDetailJpaEntity third = detail("셋회원", thirdPlace);
@@ -88,7 +88,7 @@ class MemberDetailCustomRepositoryImplTest {
     @Test
     @DisplayName("상세 단건 조회는 요청한 관계를 fetch join으로 초기화한다")
     void it_fetches_requested_member_place_head_and_dong_associations() {
-        Place place = place("대상", "본부");
+        PlaceJpaEntity place = place("대상", "본부");
         MemberDetailJpaEntity persisted = detail("대상회원", place);
         Long memberId = persisted.getMember().getId();
         String phoneNumber = persisted.getMember().getPhoneNumber();
@@ -120,7 +120,7 @@ class MemberDetailCustomRepositoryImplTest {
         assertThat(repository.findByMemberIdWithMemberAndPlace(999L)).isEmpty();
     }
 
-    private MemberDetailJpaEntity detail(String suffix, Place place) {
+    private MemberDetailJpaEntity detail(String suffix, PlaceJpaEntity place) {
         MemberJpaEntity member = member(suffix);
         return em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
@@ -143,16 +143,16 @@ class MemberDetailCustomRepositoryImplTest {
                 .build());
     }
 
-    private Place place(String suffix, String headSuffix) {
+    private PlaceJpaEntity place(String suffix, String headSuffix) {
         return place(suffix, head(headSuffix));
     }
 
-    private Head head(String suffix) {
-        return em.persist(Head.builder().name("본부-" + suffix).build());
+    private HeadJpaEntity head(String suffix) {
+        return em.persist(HeadJpaEntity.builder().name("본부-" + suffix).build());
     }
 
-    private Place place(String suffix, Head head) {
-        return em.persist(Place.builder().name("지점-" + suffix).head(head).build());
+    private PlaceJpaEntity place(String suffix, HeadJpaEntity head) {
+        return em.persist(PlaceJpaEntity.builder().name("지점-" + suffix).head(head).build());
     }
 
     private boolean isLoaded(Object association) {

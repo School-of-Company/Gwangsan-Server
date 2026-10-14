@@ -34,7 +34,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.*;
@@ -90,7 +90,8 @@ class SalesListIntegrationTest {
     @Configuration
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
-            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.post"})
+            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.place",
+            "team.startup.gwangsan.adapter.persistence.post"})
     @EnableJpaAuditing
     @EnableJpaRepositories(basePackages = {"team.startup.gwangsan.adapter.persistence.post",
             "team.startup.gwangsan.adapter.persistence.member"})
@@ -310,7 +311,7 @@ class SalesListIntegrationTest {
                     .password("unused").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
             em.persist(member);
             DongJpaEntity dong = DongJpaEntity.builder().name("dong" + id).build();
-            Place place = Place.builder().name("place" + id).build();
+            PlaceJpaEntity place = PlaceJpaEntity.builder().name("place" + id).build();
             em.persist(dong);
             em.persist(place);
             em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)

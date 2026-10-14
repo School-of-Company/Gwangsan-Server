@@ -11,7 +11,7 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.model.Notice;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class NoticePersistenceAdapter implements NoticePort {
             NoticeJpaEntity saved = noticeJpaRepository.save(NoticeJpaEntity.builder()
                     .title(notice.title())
                     .content(notice.content())
-                    .place(entityManager.getReference(Place.class, notice.placeId()))
+                    .place(entityManager.getReference(PlaceJpaEntity.class, notice.placeId()))
                     .member(notice.authorId() == null ? null : entityManager.getReference(MemberJpaEntity.class, notice.authorId()))
                     .build());
             return toModel(saved);

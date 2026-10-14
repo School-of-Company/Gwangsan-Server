@@ -21,8 +21,8 @@ import team.startup.gwangsan.domain.post.model.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import team.startup.gwangsan.adapter.persistence.place.QPlaceJpaEntity;
 
-import static team.startup.gwangsan.domain.place.entity.QPlace.place;
 
 /**
  * 관리자 상품 목록(3 쿼리)·논리 삭제.
@@ -33,6 +33,7 @@ import static team.startup.gwangsan.domain.place.entity.QPlace.place;
 @Component
 @RequiredArgsConstructor
 public class AdminProductBridge implements AdminProductPort {
+    private static final QPlaceJpaEntity place = QPlaceJpaEntity.placeJpaEntity;
 
     private static final QMemberJpaEntity MEMBER = QMemberJpaEntity.memberJpaEntity;
     private static final QMemberDetailJpaEntity DETAIL = QMemberDetailJpaEntity.memberDetailJpaEntity;

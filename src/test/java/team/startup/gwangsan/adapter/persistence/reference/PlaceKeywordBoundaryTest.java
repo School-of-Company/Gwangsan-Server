@@ -24,8 +24,8 @@ import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.model.MemberKeyword;
@@ -61,21 +61,21 @@ class PlaceKeywordBoundaryTest {
     @Autowired DongPersistenceAdapter dongs;
     @Autowired RelatedKeywordPersistenceAdapter keywords;
 
-    private Head head;
-    private Head otherHead;
-    private Place first;
-    private Place second;
-    private Place otherBranch;
-    private Place headless;
+    private HeadJpaEntity head;
+    private HeadJpaEntity otherHead;
+    private PlaceJpaEntity first;
+    private PlaceJpaEntity second;
+    private PlaceJpaEntity otherBranch;
+    private PlaceJpaEntity headless;
 
     @BeforeEach
     void seed() {
-        head = persist(new Head("본점"));
-        otherHead = persist(new Head("다른본점"));
-        first = persist(new Place("첫지점", head));
-        second = persist(new Place("둘째지점", head));
-        otherBranch = persist(new Place("다른지점", otherHead));
-        headless = persist(new Place("본점없음", null));
+        head = persist(new HeadJpaEntity("본점"));
+        otherHead = persist(new HeadJpaEntity("다른본점"));
+        first = persist(new PlaceJpaEntity("첫지점", head));
+        second = persist(new PlaceJpaEntity("둘째지점", head));
+        otherBranch = persist(new PlaceJpaEntity("다른지점", otherHead));
+        headless = persist(new PlaceJpaEntity("본점없음", null));
         em.flush();
         em.clear();
     }

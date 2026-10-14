@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.place.entity;
+package team.startup.gwangsan.adapter.persistence.place;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_head_place")
-public class Head {
+public class HeadJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class Head {
     private String name;
 
     @Builder
-    public Head(String name) {
+    public HeadJpaEntity(String name) {
         this.name = name;
     }
 }

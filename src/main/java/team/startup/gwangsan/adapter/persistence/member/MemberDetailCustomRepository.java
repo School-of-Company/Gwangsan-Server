@@ -1,6 +1,6 @@
 package team.startup.gwangsan.adapter.persistence.member;
 
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface MemberDetailCustomRepository {
-    Place findPlaceByMemberId(Long id);
+    PlaceJpaEntity findPlaceByMemberId(Long id);
 
     Map<Long, String> findPlaceNameMapByMemberIds(Set<Long> memberIds);
 

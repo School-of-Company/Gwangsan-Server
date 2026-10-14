@@ -6,7 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -16,19 +16,22 @@ import java.util.stream.Collectors;
 
 import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
-import static team.startup.gwangsan.domain.place.entity.QHead.head;
-import static team.startup.gwangsan.domain.place.entity.QPlace.place;
+import team.startup.gwangsan.adapter.persistence.place.QHeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.QPlaceJpaEntity;
 
 @Repository
 @RequiredArgsConstructor
 public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepository {
+    private static final QHeadJpaEntity head = QHeadJpaEntity.headJpaEntity;
+    private static final QPlaceJpaEntity place = QPlaceJpaEntity.placeJpaEntity;
+
     private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
     private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
 
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Place findPlaceByMemberId(Long id) {
+    public PlaceJpaEntity findPlaceByMemberId(Long id) {
         return Optional.ofNullable(
                 queryFactory
                         .select(memberDetail.place)

@@ -1,4 +1,4 @@
-package team.startup.gwangsan.domain.place.entity;
+package team.startup.gwangsan.adapter.persistence.place;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "tbl_place")
-public class Place {
+public class PlaceJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,15 +21,11 @@ public class Place {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "head_id")
-    private Head head;
+    private HeadJpaEntity head;
 
     @Builder
-    public Place(String name, Head head) {
+    public PlaceJpaEntity(String name, HeadJpaEntity head) {
         this.name = name;
         this.head = head;
-    }
-
-    public boolean isSamePlace(Place other) {
-        return other != null && this.id.equals(other.id);
     }
 }

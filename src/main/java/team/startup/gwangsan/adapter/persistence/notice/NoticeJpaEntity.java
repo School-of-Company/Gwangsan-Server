@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -36,14 +36,14 @@ public class NoticeJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
-    private Place place;
+    private PlaceJpaEntity place;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private MemberJpaEntity member;
 
     @Builder
-    public NoticeJpaEntity(String title, String content, Place place, MemberJpaEntity member) {
+    public NoticeJpaEntity(String title, String content, PlaceJpaEntity place, MemberJpaEntity member) {
         this.title = title;
         this.content = content;
         this.place = place;

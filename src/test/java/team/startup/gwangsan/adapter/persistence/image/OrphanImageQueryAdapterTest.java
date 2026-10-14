@@ -25,8 +25,8 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.notice.NoticeJpaEntity;
 import team.startup.gwangsan.adapter.persistence.notice.NoticeImageJpaEntity;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.Mode;
@@ -200,8 +200,8 @@ class OrphanImageQueryAdapterTest {
                 .mode(Mode.GIVER)
                 .status(ProductStatus.ONGOING)
                 .build());
-        Head head = em.persist(new Head("head-" + suffix));
-        Place place = em.persist(Place.builder().name("place-" + suffix).head(head).build());
+        HeadJpaEntity head = em.persist(new HeadJpaEntity("head-" + suffix));
+        PlaceJpaEntity place = em.persist(PlaceJpaEntity.builder().name("place-" + suffix).head(head).build());
         NoticeJpaEntity notice = em.persist(NoticeJpaEntity.builder().title("notice").content("content").place(place).member(seller).build());
         ReportJpaEntity report = em.persist(ReportJpaEntity.builder()
                 .reportType(ReportType.ETC)

@@ -58,7 +58,7 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.ReservationStatus;
@@ -230,7 +230,7 @@ class WithdrawMemberIntegrationTest {
 
     private Ids givenMember(boolean everyReference, boolean withKeyword, boolean withReservation) {
         DongJpaEntity dong = persist(DongJpaEntity.builder().name("동").build());
-        Place place = persist(Place.builder().name("지점").build());
+        PlaceJpaEntity place = persist(PlaceJpaEntity.builder().name("지점").build());
         MemberJpaEntity dummy = persistMember("__withdrawn__", "01099999999", null);
         MemberJpaEntity member = persistMember("탈퇴자", "01000000001", null);
         MemberJpaEntity other = persistMember("상대", "01000000002", member);

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.application.notice.port.out.NoticeMemberPort;
-import team.startup.gwangsan.domain.place.repository.PlaceRepository;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
 public class NoticeMemberAdapter implements NoticeMemberPort {
 
     private final MemberDetailJpaRepository memberDetailRepository;
-    private final PlaceRepository placeRepository;
+    private final PlaceJpaRepository placeRepository;
 
     // MemberDetail 의 id 는 member_id(@MapsId)다.
     @Override
