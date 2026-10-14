@@ -102,7 +102,9 @@ class NoticePersistenceAdapterTest {
 
             assertThat(saved.id()).isNotNull();
             assertThat(saved.createdAt()).isNotNull();
-            assertThat(adapter.findById(saved.id())).contains(saved);
+            Notice reloaded = adapter.findById(saved.id()).orElseThrow();
+            assertThat(reloaded).isEqualTo(new Notice(saved.id(), saved.title(), saved.content(),
+                    saved.placeId(), saved.authorId(), saved.createdAt().truncatedTo(java.time.temporal.ChronoUnit.MICROS)));
 
             adapter.save(new Notice(saved.id(), "새 제목", "새 내용", saved.placeId(), saved.authorId(), saved.createdAt()));
             em.flush();
