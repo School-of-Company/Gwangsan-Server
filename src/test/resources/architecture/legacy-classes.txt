@@ -1,0 +1,3 @@
+# 헥사고날 전환 전(legacy) 클래스와 제거 담당 PR. HexagonalArchitectureTest 가 사용한다.
+# 클래스를 새 계층으로 옮기거나 삭제한 PR 은 해당 줄을 지운다. 남은 항목이 존재하지 않으면 테스트가 실패한다.
+# 새 클래스를 이 목록에 추가하지 않는다. PR12 에서 비웠다(항목 0, HexagonalArchitectureTest·HexagonalFinalGateTest 가 0 을 강제).

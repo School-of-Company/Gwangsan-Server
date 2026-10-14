@@ -72,6 +72,8 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:mariadb'
 	testRuntimeOnly 'com.h2database:h2'
+	// 헥사고날 계층 경계 검사 (HexagonalArchitectureTest)
+	testImplementation 'com.tngtech.archunit:archunit:1.4.2'
 
 	// cloud
 	implementation 'software.amazon.awssdk:s3:2.29.49'
@@ -101,14 +103,15 @@ jacocoTestReport {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
 				'**/GwangsanApplication*',
-				'**/global/config/**',
-				'**/global/security/config/**',
-				'**/global/querydsl/**',
-				'**/global/sms/**',
+				// 헥사고날 전환으로 옮긴 기존 제외 대상: global/config·querydsl → infrastructure/config,
+				// global/security/config → infrastructure/security/SecurityConfig, global/sms → adapter/sms, entity → *JpaEntity
+				'**/infrastructure/config/**',
+				'**/infrastructure/security/SecurityConfig*',
+				'**/adapter/sms/**',
 				'**/*Exception*',
 				'**/*Properties*',
 				'**/dto/**',
-				'**/entity/**',
+				'**/*JpaEntity*',
 				'**/projection/**',
 				'**/constant/**',
 			])
@@ -142,5 +145,7 @@ tasks.named('test') {
 	environment 'DOCKER_API_VERSION', '1.41'
 	environment 'TESTCONTAINERS_API_VERSION', '1.41'
 	systemProperty 'api.version', '1.41'
+	// 전환 후 테스트 수·Spring context 캐시·ArchUnit import 로 기본 512m 에서 OOM 이 났다(PR12 최종 suite).
+	maxHeapSize = '1g'
 	finalizedBy jacocoTestReport
 }

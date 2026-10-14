@@ -1,0 +1,127 @@
+package team.startup.gwangsan.adapter.persistence.trade;
+
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import team.startup.gwangsan.application.trade.port.out.TradeCancelPort;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
+import team.startup.gwangsan.domain.trade.model.TradeCancel;
+import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
+
+import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
+import team.startup.gwangsan.application.trade.data.TradeCancelParties;
+import team.startup.gwangsan.application.trade.data.TradeCancelView;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
+public class TradeCancelPersistenceAdapter implements TradeCancelPort {
+
+    private final TradeCancelJpaRepository tradeCancelJpaRepository;
+    private final TradeCancelImageJpaRepository tradeCancelImageJpaRepository;
+    private final EntityManager entityManager;
+
+    @Override
+    public Optional<TradeCancel> findPendingByTrade(long tradeCompleteId) {
+        return tradeCancelJpaRepository.findByTradeCompleteIdAndStatus(tradeCompleteId, TradeCancelStatus.PENDING)
+                .map(TradeCancelPersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public Optional<Long> findProductId(long tradeCancelId) {
+        return tradeCancelJpaRepository.findProductIdById(tradeCancelId);
+    }
+
+    @Override
+    public Optional<TradeCancel> findById(long tradeCancelId) {
+        return tradeCancelJpaRepository.findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(tradeCancelId)
+                .map(TradeCancelPersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public Optional<TradeCancel> findBasicById(long tradeCancelId) {
+        return tradeCancelJpaRepository.findById(tradeCancelId).map(TradeCancelPersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public List<TradeCancelView> findViews(Collection<Long> tradeCancelIds) {
+        return tradeCancelJpaRepository.findAllByIdIn(List.copyOf(tradeCancelIds)).stream()
+                .map(tc -> new TradeCancelView(tc.getId(), tc.getTradeComplete().getProduct().getId(),
+                        tc.getMember().getId(), tc.getReason(), tc.getStatus()))
+                .toList();
+    }
+
+    @Override
+    public Map<Long, List<TradeCancelImageView>> findImageViews(Collection<Long> tradeCancelIds) {
+        return tradeCancelImageJpaRepository.findByTradeCancelIn(List.copyOf(tradeCancelIds)).stream()
+                .collect(Collectors.groupingBy(
+                        tci -> tci.getTradeCancel().getId(),
+                        LinkedHashMap::new,
+                        Collectors.mapping(tci -> new TradeCancelImageView(tci.getImage().getId(), tci.getImage().getImageUrl()),
+                                Collectors.toList())));
+    }
+
+    @Override
+    public Optional<Long> findRequesterId(long tradeCancelId) {
+        return tradeCancelJpaRepository.findByIdWithMember(tradeCancelId).map(tc -> tc.getMember().getId());
+    }
+
+    @Override
+    public Optional<TradeCancelParties> findParties(long tradeCancelId) {
+        return tradeCancelJpaRepository.findByIdWithTradeCompleteAndMember(tradeCancelId)
+                .map(tc -> new TradeCancelParties(tc.getId(), tc.getMember().getId(),
+                        tc.getTradeComplete().getBuyer().getId(), tc.getTradeComplete().getSeller().getId()));
+    }
+
+    @Override
+    public Map<Long, Long> findProductIds(Collection<Long> tradeCancelIds) {
+        return tradeCancelJpaRepository.findProductIdsByIdIn(tradeCancelIds).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+    }
+
+    @Override
+    public TradeCancel create(TradeCancel tradeCancel) {
+        return toDomain(tradeCancelJpaRepository.save(TradeCancelJpaEntity.builder()
+                .tradeComplete(entityManager.getReference(TradeCompleteJpaEntity.class, tradeCancel.tradeCompleteId()))
+                .member(entityManager.getReference(MemberJpaEntity.class, tradeCancel.requesterId()))
+                .reason(tradeCancel.reason())
+                .status(tradeCancel.status())
+                .build()));
+    }
+
+    /** 이미지 Entity 는 FK 연관 저장에만 getReference 로 쓴다(존재 확인은 image 공개 query 가 이미 했다). */
+    @Override
+    public void attachImages(long tradeCancelId, List<Long> imageIds) {
+        TradeCancelJpaEntity tradeCancel = entityManager.getReference(TradeCancelJpaEntity.class, tradeCancelId);
+        tradeCancelImageJpaRepository.saveAll(imageIds.stream()
+                .map(imageId -> TradeCancelImageJpaEntity.builder()
+                        .tradeCancel(tradeCancel)
+                        .image(entityManager.getReference(ImageJpaEntity.class, imageId))
+                        .build())
+                .toList());
+    }
+
+    @Override
+    public void update(TradeCancel tradeCancel) {
+        tradeCancelJpaRepository.findById(tradeCancel.id())
+                .orElseThrow(NotFoundTradeCancelException::new)
+                .updateStatus(tradeCancel.status());
+    }
+
+    @Override
+    public void deleteImages(long tradeCancelId) {
+        tradeCancelImageJpaRepository.deleteByTradeCancelId(tradeCancelId);
+    }
+
+    private static TradeCancel toDomain(TradeCancelJpaEntity e) {
+        return new TradeCancel(e.getId(), e.getTradeComplete().getId(), e.getMember().getId(), e.getReason(), e.getStatus());
+    }
+}
