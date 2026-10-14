@@ -28,7 +28,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;

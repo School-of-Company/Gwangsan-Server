@@ -19,7 +19,7 @@ import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntit
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;

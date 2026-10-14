@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
-import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
-import team.startup.gwangsan.domain.alert.repository.AlertRepository;
+import team.startup.gwangsan.adapter.persistence.alert.AlertReceiptJpaRepository;
+import team.startup.gwangsan.adapter.persistence.alert.AlertJpaRepository;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
@@ -47,12 +47,12 @@ class MemberDeletionServiceImplTest {
     @Mock private ReviewRepository reviewRepository;
     @Mock private ReportRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
-    @Mock private AlertRepository alertRepository;
+    @Mock private AlertJpaRepository alertRepository;
     @Mock private NoticeRepository noticeRepository;
     @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private SuspendRepository suspendRepository;
     @Mock private MemberBlockRepository memberBlockRepository;
-    @Mock private AlertReceiptRepository alertReceiptRepository;
+    @Mock private AlertReceiptJpaRepository alertReceiptRepository;
     @Mock private MemberDetailJpaRepository memberDetailRepository;
 
     @Nested

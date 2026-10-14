@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import team.startup.gwangsan.domain.notification.NotificationPort;
-import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.domain.notification.model.NotificationType;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.global.chat.notification.ChattingServerSystemMessageNotifier;
 import team.startup.gwangsan.global.event.ReservationCancelledEvent;
 

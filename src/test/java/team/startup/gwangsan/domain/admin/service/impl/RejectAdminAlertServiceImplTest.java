@@ -24,7 +24,7 @@ import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;

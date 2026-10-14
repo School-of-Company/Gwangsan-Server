@@ -23,9 +23,9 @@ import team.startup.gwangsan.domain.image.repository.ImageRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.notification.entity.DeviceToken;
-import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
-import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceToken;
+import team.startup.gwangsan.domain.notification.model.NotificationType;
+import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.global.event.SendNotificationEvent;
 import team.startup.gwangsan.global.util.BlockValidator;
 

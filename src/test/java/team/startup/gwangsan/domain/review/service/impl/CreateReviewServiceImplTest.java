@@ -32,7 +32,7 @@ import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.MemberUtil;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 
 import java.util.Optional;
 

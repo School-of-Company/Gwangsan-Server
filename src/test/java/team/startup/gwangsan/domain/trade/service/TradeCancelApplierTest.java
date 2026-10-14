@@ -28,7 +28,7 @@ import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
-import team.startup.gwangsan.global.event.CreateAlertEvent;
+import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
 
 import java.util.Optional;
@@ -153,7 +153,7 @@ class TradeCancelApplierTest {
                 assertThat(event.sourceId()).isEqualTo(TRADE_CANCEL_ID);
                 assertThat(event.memberId()).isEqualTo(REQUESTER_ID);
                 assertThat(event.alertType())
-                        .isEqualTo(team.startup.gwangsan.domain.alert.entity.constant.AlertType.TRADE_CANCEL);
+                        .isEqualTo(team.startup.gwangsan.domain.alert.model.AlertType.TRADE_CANCEL);
             }
 
             @Test
