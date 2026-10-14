@@ -1,0 +1,168 @@
+package team.startup.gwangsan.adapter.persistence.post;
+
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
+import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
+import com.querydsl.core.types.dsl.BooleanExpression;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static team.startup.gwangsan.domain.image.entity.QImage.image;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
+import static team.startup.gwangsan.adapter.persistence.post.QProduct.product;
+import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
+
+@Repository
+@RequiredArgsConstructor
+public class ProductCustomRepositoryImpl implements ProductCustomRepository {
+    private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
+    private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
+
+    private final JPAQueryFactory queryFactory;
+
+    @Override
+    public List<Product> findMemberProducts(Long memberId, Type type, Mode mode, Long lastId, int size, Boolean completed) {
+        List<ProductStatus> statuses = completed == null
+                ? List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION, ProductStatus.COMPLETED)
+                : completed ? List.of(ProductStatus.COMPLETED)
+                : List.of(ProductStatus.ONGOING, ProductStatus.RESERVATION);
+        return queryFactory.selectFrom(product)
+                .where(
+                        product.member.id.eq(memberId),
+                        typeEq(type),
+                        modeEq(mode),
+                        product.status.in(statuses),
+                        lastId != null ? product.id.lt(lastId) : null
+                )
+                .orderBy(product.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public List<Product> findAdminProducts(Type type, Mode mode, Long lastId, int size) {
+        return queryFactory.selectFrom(product)
+                .join(product.member, member).fetchJoin()
+                .where(
+                        typeEq(type),
+                        modeEq(mode),
+                        product.status.ne(ProductStatus.DELETED),
+                        lastId != null ? product.id.lt(lastId) : null
+                )
+                .orderBy(product.id.desc())
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public List<Product> findProductsByTypeAndModeAndMemberDetailPlaceAndStatus(Type type, Mode mode, Place place, ProductStatus status) {
+        return queryFactory
+                .selectFrom(product).distinct()
+                .join(product.member, member).fetchJoin()
+                .join(memberDetail).on(memberDetail.member.id.eq(member.id)).fetchJoin()
+                .where(
+                        typeEq(type),
+                        modeEq(mode),
+                        memberDetail.place.eq(place),
+                        statusEq(status)
+                )
+                .fetch()
+                .stream()
+                .toList();
+    }
+
+    @Override
+    public List<Product> findProductByMemberAndTypeAndModeAndStatusIn(MemberJpaEntity member, Type type, Mode mode, Collection<ProductStatus> statuses) {
+        return queryFactory
+                .selectFrom(product).distinct()
+                .where(
+                        product.member.id.eq(member.getId()),
+                        typeEq(type),
+                        modeEq(mode),
+                        statusIn(statuses)
+                )
+                .fetch()
+                .stream()
+                .toList();
+    }
+
+    @Override
+    public List<GetRoomProductDto> findRoomProductsWithImagesByIds(Collection<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Tuple> rows = queryFactory
+                .select(
+                        product.id,
+                        product.title,
+                        product.status,
+                        image.id,
+                        image.imageUrl
+                )
+                .from(product)
+                .leftJoin(productImage).on(productImage.product.eq(product))
+                .leftJoin(image).on(productImage.image.eq(image))
+                .where(product.id.in(productIds))
+                .fetch();
+
+        Map<Long, GetRoomProductDto> resultMap = new LinkedHashMap<>();
+
+        for (Tuple row : rows) {
+            Long productId = row.get(product.id);
+            String title = row.get(product.title);
+            ProductStatus status = row.get(product.status);
+            Long imageId = row.get(image.id);
+            String imageUrl = row.get(image.imageUrl);
+
+            // 상태 값은 TradeStateReader.read()가 반환하는 completed()/reserved()와 같아야 한다.
+            // 일괄 조회를 유지하기 위해 엔티티 기반 TradeStateReader 대신 조회한 상태로 계산한다.
+            GetRoomProductDto dto = resultMap.computeIfAbsent(
+                    productId,
+                    id -> new GetRoomProductDto(
+                            id,
+                            title,
+                            status == ProductStatus.COMPLETED,
+                            status == ProductStatus.RESERVATION,
+                            status == ProductStatus.DELETED,
+                            new ArrayList<>()
+                    )
+            );
+
+            if (imageId != null) {
+                dto.images().add(new GetImageResponse(imageId, imageUrl));
+            }
+        }
+
+        return new ArrayList<>(resultMap.values());
+    }
+
+    private BooleanExpression typeEq(Type type) {
+        return type != null ? product.type.eq(type) : null;
+    }
+
+    private BooleanExpression modeEq(Mode mode) {
+        return mode != null ? product.mode.eq(mode) : null;
+    }
+
+    private BooleanExpression statusEq(ProductStatus status) {
+        return status != null ? product.status.eq(status) : null;
+    }
+
+    private BooleanExpression statusIn(Collection<ProductStatus> statuses) {
+        return (statuses == null || statuses.isEmpty()) ? null : product.status.in(statuses);
+    }
+}

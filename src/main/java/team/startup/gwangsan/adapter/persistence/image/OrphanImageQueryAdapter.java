@@ -11,7 +11,7 @@ import java.util.List;
 import static team.startup.gwangsan.domain.chat.entity.QChatMessageImage.chatMessageImage;
 import static team.startup.gwangsan.domain.image.entity.QImage.image;
 import static team.startup.gwangsan.domain.notice.entity.QNoticeImage.noticeImage;
-import static team.startup.gwangsan.domain.post.entity.QProductImage.productImage;
+import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
 import static team.startup.gwangsan.domain.report.entity.QReportImage.reportImage;
 import static team.startup.gwangsan.domain.trade.entity.QTradeCancelImage.tradeCancelImage;
 

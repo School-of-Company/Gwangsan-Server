@@ -1,8 +1,8 @@
 package team.startup.gwangsan.domain.admin.service;
 
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.Type;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
 
 import java.util.List;
 

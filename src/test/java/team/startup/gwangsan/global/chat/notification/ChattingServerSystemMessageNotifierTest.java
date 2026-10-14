@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
-import team.startup.gwangsan.global.event.ReservationCancelledEvent;
+import team.startup.gwangsan.adapter.integration.post.ReservationCancelledEvent;
 
 import java.time.LocalDateTime;
 

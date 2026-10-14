@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;

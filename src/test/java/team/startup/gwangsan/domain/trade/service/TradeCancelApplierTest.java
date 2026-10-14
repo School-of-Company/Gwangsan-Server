@@ -21,8 +21,8 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
@@ -284,8 +284,8 @@ class TradeCancelApplierTest {
 
         product = Product.builder()
                 .title("상품").description("설명").gwangsan(GWANGSAN).member(seller)
-                .type(team.startup.gwangsan.domain.post.entity.constant.Type.SERVICE)
-                .mode(team.startup.gwangsan.domain.post.entity.constant.Mode.GIVER)
+                .type(team.startup.gwangsan.domain.post.model.Type.SERVICE)
+                .mode(team.startup.gwangsan.domain.post.model.Mode.GIVER)
                 .status(ProductStatus.COMPLETED)
                 .build();
         ReflectionTestUtils.setField(product, "id", PRODUCT_ID);

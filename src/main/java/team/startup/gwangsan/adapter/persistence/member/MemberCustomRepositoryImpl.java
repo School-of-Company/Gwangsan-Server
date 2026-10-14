@@ -4,7 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
 
 import java.util.Collection;
 import java.util.List;

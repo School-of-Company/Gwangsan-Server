@@ -11,12 +11,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 
 import java.util.Optional;
 

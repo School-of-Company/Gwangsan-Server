@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 
 import java.time.LocalDateTime;

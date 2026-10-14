@@ -21,10 +21,10 @@ import team.startup.gwangsan.domain.chat.repository.projection.LatestMessageDto;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
 
 import java.time.LocalDateTime;
 import java.util.List;

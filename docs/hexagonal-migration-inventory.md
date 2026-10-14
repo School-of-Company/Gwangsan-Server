@@ -279,7 +279,7 @@
 | 257 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
 | 258 | `domain/notice/service/impl/FindNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
 | 259 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 260 | `domain/notification/NotificationPort.java` | = | notification | port | application/notification/port/out | PR04 | PR04 bridge (구현 LegacyNotificationPortBridge, 제거 PR06) |
+| 260 | `domain/notification/NotificationPort.java` | `(삭제)` | notification | port | application/notification/port/out | PR04 | PR06 완료: 예약 알림이 SendPushUseCase 직접 호출, LegacyNotificationPortBridge 와 함께 삭제 |
 | 261 | `domain/notification/entity/DeviceToken.java` | `adapter/persistence/notification/DeviceToken.java` | notification | jpa entity | adapter/persistence/notification (JpaEntity) + domain/notification/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 (@TypeAlias 로 _class 유지) |
 | 262 | `domain/notification/entity/constant/NotificationType.java` | `domain/notification/model/NotificationType.java` | notification | enum | domain/notification/model | PR04 | PR04 완료 |
 | 263 | `domain/notification/entity/constant/OsType.java` | `domain/notification/model/OsType.java` | notification | enum | domain/notification/model | PR04 | PR04 완료 |
@@ -291,62 +291,62 @@
 | 269 | `domain/place/exception/PlaceMismatchException.java` | = (위치 유지) | place | exception | domain/place/exception | PR03 | PR03 완료 |
 | 270 | `domain/place/presentation/dto/PlaceDto.java` | = | place | web dto | adapter/web/place/dto | PR07 | legacy 유지 — trade 응답 전용 DTO, PR07 이 trade web DTO 로 흡수하며 제거(legacy 태그 PR07) |
 | 271 | `domain/place/repository/PlaceRepository.java` | = | place | repository | adapter/persistence/place (JpaRepository) + application/place/port/out | PR12 | legacy 유지 — PlacePersistenceAdapter 내부 사용(+findAllByHeadId), 호출자(PR07·10·11) 전환 후 PR12 최종 단계에서 이동(legacy 태그 PR12) |
-| 272 | `domain/post/entity/Product.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
-| 273 | `domain/post/entity/ProductImage.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
-| 274 | `domain/post/entity/ProductReservation.java` | = | post | jpa entity | adapter/persistence/post (JpaEntity) + domain/post/model (순수 모델, 규칙 있을 때) | PR06 | legacy |
-| 275 | `domain/post/entity/constant/Mode.java` | = | post | enum | domain/post/model | PR06 | legacy |
-| 276 | `domain/post/entity/constant/ProductStatus.java` | = | post | enum | domain/post/model | PR06 | legacy |
-| 277 | `domain/post/entity/constant/ReservationStatus.java` | = | post | enum | domain/post/model | PR06 | legacy |
-| 278 | `domain/post/entity/constant/Type.java` | = | post | enum | domain/post/model | PR06 | legacy |
-| 279 | `domain/post/exception/ForbiddenProductException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 280 | `domain/post/exception/InappropriateContentException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 281 | `domain/post/exception/NotFoundProductException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 282 | `domain/post/exception/ObjectRequiredImageException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 283 | `domain/post/exception/ProductAlreadyReservationException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 284 | `domain/post/exception/ProductNotOngoingException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 285 | `domain/post/exception/ProductNotReservationException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 286 | `domain/post/exception/ReservationParticipantOnlyException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 287 | `domain/post/exception/ReservedProductDeletionException.java` | = | post | exception | domain/post/exception | PR06 | legacy |
-| 288 | `domain/post/presentation/PostController.java` | = | post | controller | adapter/web/post/controller | PR06 | legacy |
-| 289 | `domain/post/presentation/dto/request/CreateProductRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
-| 290 | `domain/post/presentation/dto/request/PatchProductRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 272 | `domain/post/entity/Product.java` | `adapter/persistence/post/Product.java` | post | jpa entity | adapter/persistence/post/ (저장 모델, 이름 유지) + domain/post/model/Product (순수 모델) | PR06 | PR06 완료 (타 업무 legacy 호출자는 import만 갱신) |
+| 273 | `domain/post/entity/ProductImage.java` | `adapter/persistence/post/ProductImage.java` | post | jpa entity | adapter/persistence/post/ (저장 모델) | PR06 | PR06 완료 (타 업무 legacy 호출자는 import만 갱신) |
+| 274 | `domain/post/entity/ProductReservation.java` | `adapter/persistence/post/ProductReservation.java` | post | jpa entity | adapter/persistence/post/ (저장 모델) + domain/post/model/ProductReservation (순수 모델) | PR06 | PR06 완료 (타 업무 legacy 호출자는 import만 갱신) |
+| 275 | `domain/post/entity/constant/Mode.java` | `domain/post/model/Mode.java` | post | enum | domain/post/model | PR06 | PR06 완료 |
+| 276 | `domain/post/entity/constant/ProductStatus.java` | `domain/post/model/ProductStatus.java` | post | enum | domain/post/model | PR06 | PR06 완료 |
+| 277 | `domain/post/entity/constant/ReservationStatus.java` | `domain/post/model/ReservationStatus.java` | post | enum | domain/post/model | PR06 | PR06 완료 |
+| 278 | `domain/post/entity/constant/Type.java` | `domain/post/model/Type.java` | post | enum | domain/post/model | PR06 | PR06 완료 |
+| 279 | `domain/post/exception/ForbiddenProductException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 280 | `domain/post/exception/InappropriateContentException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 281 | `domain/post/exception/NotFoundProductException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 282 | `domain/post/exception/ObjectRequiredImageException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 283 | `domain/post/exception/ProductAlreadyReservationException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 284 | `domain/post/exception/ProductNotOngoingException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 285 | `domain/post/exception/ProductNotReservationException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 286 | `domain/post/exception/ReservationParticipantOnlyException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 287 | `domain/post/exception/ReservedProductDeletionException.java` | = | post | exception | domain/post/exception | PR06 | PR06 완료 (목표 위치와 같음) |
+| 288 | `domain/post/presentation/PostController.java` | `adapter/web/post/controller/PostController.java` | post | controller | adapter/web/post/controller | PR06 | PR06 완료 (`/trade` 2개는 PR07 bridge) |
+| 289 | `domain/post/presentation/dto/request/CreateProductRequest.java` | `adapter/web/post/dto/CreateProductRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
+| 290 | `domain/post/presentation/dto/request/PatchProductRequest.java` | `adapter/web/post/dto/PatchProductRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
 | 291 | `domain/post/presentation/dto/request/RequestTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
-| 292 | `domain/post/presentation/dto/request/ReservationRequest.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
+| 292 | `domain/post/presentation/dto/request/ReservationRequest.java` | `adapter/web/post/dto/ReservationRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
 | 293 | `domain/post/presentation/dto/request/WithdrawTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
-| 294 | `domain/post/presentation/dto/response/GetProductByIdResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
-| 295 | `domain/post/presentation/dto/response/GetProductMemberResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
-| 296 | `domain/post/presentation/dto/response/GetProductResponse.java` | = | post | web dto | adapter/web/post/dto | PR06 | legacy |
-| 297 | `domain/post/repository/ProductImageRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
-| 298 | `domain/post/repository/ProductRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
-| 299 | `domain/post/repository/ProductReservationRepository.java` | = | post | repository | adapter/persistence/post (JpaRepository) + application/post/port/out | PR06 | legacy |
-| 300 | `domain/post/repository/custom/ProductCustomRepository.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
-| 301 | `domain/post/repository/custom/ProductImageCustomRepository.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
-| 302 | `domain/post/repository/custom/impl/ProductCustomRepositoryImpl.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
-| 303 | `domain/post/repository/custom/impl/ProductImageCustomRepositoryImpl.java` | = | post | querydsl | adapter/persistence/post (QueryPort 구현) | PR06 | legacy |
-| 304 | `domain/post/service/CreateProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 305 | `domain/post/service/DeleteProductByIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 306 | `domain/post/service/DeleteReservationProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 307 | `domain/post/service/FindProductByCurrentUserAndTypeAndModeService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 308 | `domain/post/service/FindProductByIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 309 | `domain/post/service/FindProductsByMemberIdService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 310 | `domain/post/service/FindProductsByTypeAndModeService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 311 | `domain/post/service/ProductContentValidationService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 294 | `domain/post/presentation/dto/response/GetProductByIdResponse.java` | `adapter/web/post/dto/GetProductByIdResponse.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
+| 295 | `domain/post/presentation/dto/response/GetProductMemberResponse.java` | `adapter/web/post/dto/GetProductMemberResponse.java` | post | web dto | adapter/web/post/dto (legacy 사본 삭제, member QueryDSL projection·admin 호출자 import 갱신) | PR06 | PR06 완료 |
+| 296 | `domain/post/presentation/dto/response/GetProductResponse.java` | `adapter/web/post/dto/GetProductResponse.java` | post | web dto | adapter/web/post/dto (legacy 사본 삭제, admin 호출자는 이미지 원소 타입만 ProductImageResponse 로 갱신) | PR06 | PR06 완료 |
+| 297 | `domain/post/repository/ProductImageRepository.java` | `adapter/persistence/post/ProductImageRepository.java` | post | repository | adapter/persistence/post/ + application/post/port/out/ProductImagePort | PR06 | PR06 완료 |
+| 298 | `domain/post/repository/ProductRepository.java` | `adapter/persistence/post/ProductRepository.java` | post | repository | adapter/persistence/post/ + application/post/port/out/ProductPort | PR06 | PR06 완료 |
+| 299 | `domain/post/repository/ProductReservationRepository.java` | `adapter/persistence/post/ProductReservationRepository.java` | post | repository | adapter/persistence/post/ + application/post/port/out/ReservationPort (예약자 dummy 재지정 추가) | PR06 | PR06 완료 |
+| 300 | `domain/post/repository/custom/ProductCustomRepository.java` | `adapter/persistence/post/ProductCustomRepository.java` | post | querydsl | adapter/persistence/post/ | PR06 | PR06 완료 (`findRoomProductsWithImagesByIds` 의 chat DTO 반환은 PR08 bridge 교체 시 삭제) |
+| 301 | `domain/post/repository/custom/ProductImageCustomRepository.java` | `adapter/persistence/post/ProductImageCustomRepository.java` | post | querydsl | adapter/persistence/post/ | PR06 | PR06 완료 |
+| 302 | `domain/post/repository/custom/impl/ProductCustomRepositoryImpl.java` | `adapter/persistence/post/ProductCustomRepositoryImpl.java` | post | querydsl | adapter/persistence/post/ | PR06 | PR06 완료 |
+| 303 | `domain/post/repository/custom/impl/ProductImageCustomRepositoryImpl.java` | `adapter/persistence/post/ProductImageCustomRepositoryImpl.java` | post | querydsl | adapter/persistence/post/ | PR06 | PR06 완료 |
+| 304 | `domain/post/service/CreateProductService.java` | `(삭제)` | post | service interface | application/post/port/in/CreateProductUseCase | PR06 | PR06 완료 |
+| 305 | `domain/post/service/DeleteProductByIdService.java` | `(삭제)` | post | service interface | application/post/port/in/DeleteProductUseCase | PR06 | PR06 완료 |
+| 306 | `domain/post/service/DeleteReservationProductService.java` | `(삭제)` | post | service interface | application/post/port/in/CancelReservationUseCase | PR06 | PR06 완료 |
+| 307 | `domain/post/service/FindProductByCurrentUserAndTypeAndModeService.java` | `(삭제)` | post | service interface | application/post/port/in/MemberProductsQuery | PR06 | PR06 완료 |
+| 308 | `domain/post/service/FindProductByIdService.java` | `(삭제)` | post | service interface | application/post/port/in/ProductDetailQuery | PR06 | PR06 완료 |
+| 309 | `domain/post/service/FindProductsByMemberIdService.java` | `(삭제)` | post | service interface | application/post/port/in/MemberProductsQuery | PR06 | PR06 완료 |
+| 310 | `domain/post/service/FindProductsByTypeAndModeService.java` | `(삭제)` | post | service interface | application/post/port/in/PlaceProductsQuery | PR06 | PR06 완료 |
+| 311 | `domain/post/service/ProductContentValidationService.java` | `(삭제)` | post | service interface | application/post/port/in/ValidateProductContentUseCase | PR06 | PR06 완료 |
 | 312 | `domain/post/service/RequestTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
-| 313 | `domain/post/service/ReservationProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
-| 314 | `domain/post/service/UpdateProductService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR06 | legacy |
+| 313 | `domain/post/service/ReservationProductService.java` | `(삭제)` | post | service interface | application/post/port/in/ReserveProductUseCase | PR06 | PR06 완료 |
+| 314 | `domain/post/service/UpdateProductService.java` | `(삭제)` | post | service interface | application/post/port/in/UpdateProductUseCase | PR06 | PR06 완료 |
 | 315 | `domain/post/service/WithdrawTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
-| 316 | `domain/post/service/impl/CreateProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 317 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 318 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 319 | `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 320 | `domain/post/service/impl/FindProductByIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 321 | `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 322 | `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 323 | `domain/post/service/impl/ProductContentValidationServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 316 | `domain/post/service/impl/CreateProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/CreateProductService | PR06 | PR06 완료 |
+| 317 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/DeleteProductService | PR06 | PR06 완료 |
+| 318 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/CancelReservationService | PR06 | PR06 완료 |
+| 319 | `domain/post/service/impl/FindProductByCurrentUserAndTypeAndModeServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductListQueryService | PR06 | PR06 완료 |
+| 320 | `domain/post/service/impl/FindProductByIdServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductDetailQueryService | PR06 | PR06 완료 |
+| 321 | `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductListQueryService | PR06 | PR06 완료 |
+| 322 | `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductListQueryService | PR06 | PR06 완료 |
+| 323 | `domain/post/service/impl/ProductContentValidationServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ValidateProductContentService | PR06 | PR06 완료 |
 | 324 | `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
-| 325 | `domain/post/service/impl/ReservationProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 326 | `domain/post/service/impl/ReservationReminderSender.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
-| 327 | `domain/post/service/impl/UpdateProductServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR06 | legacy |
+| 325 | `domain/post/service/impl/ReservationProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ReserveProductService | PR06 | PR06 완료 |
+| 326 | `domain/post/service/impl/ReservationReminderSender.java` | `(삭제)` | post | service impl | application/post/service/ReservationReminderService | PR06 | PR06 완료 |
+| 327 | `domain/post/service/impl/UpdateProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/UpdateProductService | PR06 | PR06 완료 |
 | 328 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
 | 329 | `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 330 | `domain/relatedkeyword/entity/RelatedKeyword.java` | `adapter/persistence/relatedkeyword/RelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
@@ -508,17 +508,17 @@
 | 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
 | 487 | `global/event/CreateAlertEvent.java` | `adapter/event/alert/CreateAlertEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (비동기 경로 유지. OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 발행만 PR07 이 동기로 이동) |
 | 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
-| 489 | `global/event/DeleteNotUsedImageEvent.java` | = | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | legacy 유지(bridge→PR06): 발행자 post 가 import |
-| 490 | `global/event/ReservationCancelledEvent.java` | = | post | global/event | application/post (기존 이벤트 경계 정리) | PR06 | legacy |
+| 489 | `global/event/DeleteNotUsedImageEvent.java` | `adapter/event/image/DeleteNotUsedImageEvent.java` | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | PR06 완료: image listener 옆으로 이동, 소유 타입은 ImageOwnerType (AFTER_COMMIT 비동기 유지) |
+| 490 | `global/event/ReservationCancelledEvent.java` | `adapter/integration/post/ReservationCancelledEvent.java` | post | global/event | adapter/integration/post (커밋 후 알림 bridge 내부 이벤트) | PR06 | PR06 완료 |
 | 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
 | 492 | `global/event/TradeStatusChangedEvent.java` | = | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | legacy |
-| 493 | `global/event/constant/ImageType.java` | = | image | global/event | domain/image/model | PR05 | legacy 유지(bridge→PR06): 발행자 post 가 import, listener 가 ImageOwnerType 으로 변환 |
+| 493 | `global/event/constant/ImageType.java` | `(삭제)` | image | global/event | domain/image/model | PR05 | PR06 완료: ImageOwnerType 으로 대체 |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
 | 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
 | 496 | `global/event/handler/CreateAlertEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (비동기 경로 유지) |
 | 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | `adapter/event/image/DeleteNotUsedImageEventListener.java (+ application/image/service/DeleteUnusedImagesService)` | image | global/event | adapter/event/image | PR05 | 전환 |
-| 499 | `global/event/handler/ReservationCancelledEventListener.java` | = | post | global/event | adapter/event/post | PR06 | legacy |
+| 499 | `global/event/handler/ReservationCancelledEventListener.java` | `adapter/integration/post/ReservationCancelledEventListener.java` | post | global/event | adapter/integration/post (커밋 후 비동기 푸시·채팅 HTTP. notification PR04·채팅 HTTP PR08 bridge) | PR06 | PR06 완료 |
 | 500 | `global/event/handler/SendNotificationEventListener.java` | `adapter/integration/notification/LegacySendNotificationEventBridge.java` | notification | global/event | adapter/event/notification | PR04 | PR04 완료 (bridge, 제거 PR10) |
 | 501 | `global/event/handler/TradeStatusChangedEventListener.java` | = | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | legacy |
 | 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
@@ -533,7 +533,7 @@
 | 511 | `global/redis/RedisConfig.java` | = | infrastructure | global/redis | infrastructure/config | PR12 | legacy |
 | 512 | `global/redis/RedisUtil.java` | = | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | legacy |
 | 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | `adapter/scheduler/image/DeleteOrphanImageScheduler.java (+ application/image/service/CleanupOrphanImagesService)` | image | global/scheduler | adapter/scheduler/image | PR05 | 전환 |
-| 514 | `global/scheduler/ReservationReminderScheduler.java` | = | post | global/scheduler | adapter/scheduler/post | PR06 | legacy |
+| 514 | `global/scheduler/ReservationReminderScheduler.java` | `adapter/scheduler/post/ReservationReminderScheduler.java` | post | global/scheduler | adapter/scheduler/post | PR06 | PR06 완료 |
 | 515 | `global/scheduler/SuspendReleaseScheduler.java` | = | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | legacy |
 | 516 | `global/security/config/JwtSecurityConfig.java` | `(삭제)` | infrastructure | global/security | 삭제 (어디서도 적용되지 않는 dead code) | PR01 | PR01 완료 |
 | 517 | `global/security/config/SecurityConfig.java` | `infrastructure/security/SecurityConfig.java` | infrastructure | global/security | infrastructure/security · infrastructure/config | PR01 | PR01 완료 |
@@ -550,14 +550,14 @@
 | 528 | `global/sms/SmsDemoAccount.java` | `domain/sms/policy/SmsDemoAccount.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
 | 529 | `global/sms/SmsProperties.java` | `adapter/sms/SmsProperties.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
 | 530 | `global/sms/SmsSendHelper.java` | `adapter/sms/CoolSmsSenderAdapter.java` | sms | global/sms | adapter/sms | PR02 | 전환 (SmsSenderPort 구현) |
-| 531 | `global/thirdparty/ai/AiModerationClient.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy 유지(bridge→PR06): post 텍스트 검사 공유. isNsfw 를 (byte[], fileName) 로 변경, AiImageModerationAdapter 가 위임 |
-| 532 | `global/thirdparty/ai/AiModerationProperties.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy 유지(bridge→PR06): AiModerationClient 와 함께 이동 |
+| 531 | `global/thirdparty/ai/AiModerationClient.java` | `adapter/http/ai/AiModerationClient.java` | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | PR06 완료: post 텍스트 검사·AiImageModerationAdapter 공유 |
+| 532 | `global/thirdparty/ai/AiModerationProperties.java` | `adapter/http/ai/AiModerationProperties.java` | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | PR06 완료 |
 | 533 | `global/thirdparty/aws/s3/config/S3Config.java` | `infrastructure/config/S3Config.java` | image | global/thirdparty | adapter/s3/image | PR05 | 이동 |
 | 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | `adapter/s3/image/S3ImageStorageAdapter.java (병합)` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | `adapter/s3/image/S3ImageStorageAdapter.java` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
 | 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
-| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy 유지(bridge→PR06/PR08): post·chat 호출. 대체 계약 application/image/port/in/ImageQuery.getAllByIds |
+| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy 유지(bridge→PR08): post 는 ImageQuery.getAllByIds 로 교체 완료(PR06), 남은 호출자 chat ValidateChatSendable |
 | 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
 
 ## 3. HTTP API (Controller 매핑)
@@ -1073,17 +1073,24 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR |
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
 | `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
-| PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | 예약 리마인더/취소가 DeviceToken 목록으로 호출, 회원 ID 로 변환해 SendPushUseCase 호출 | PR06 |
+| PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | (삭제) 예약 리마인더/취소가 SendPushUseCase 직접 호출 | PR06 완료 |
 | PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) |
 | PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
-| PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
-| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 |
+| PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
+| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 |
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
-| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지·예약 리마인더·예약 취소(조회). 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR06·07·08·10 |
+| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |
 | `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 |
 | `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
-| `ImageValidateUtil` (PR05 잔여) | post Create/UpdateProduct, chat ValidateChatSendable | PR06/PR08 에서 `ImageQuery.getAllByIds` 로 교체 후 삭제 |
-| `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | 발행자 post UpdateProductServiceImpl 이 import | PR06 (발행 Port 정리 시 이동) |
-| `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | post 텍스트 검사 + AiImageModerationAdapter(위임) | PR06 에서 adapter/http 로 이동, AiImageModerationAdapter import 갱신 |
-| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | Product/Notice/ReportImageRepository 직접 사용 | post=PR06, report=PR09, notice=PR10 공개 command 로 교체 |
+| `ImageValidateUtil` (PR05 잔여) | chat ValidateChatSendable (post 는 PR06 에서 `ImageQuery.getAllByIds` 로 교체 완료) | PR08 에서 교체 후 삭제 |
+| `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | PR06 완료: 이벤트는 `adapter/event/image` 로 이동(ImageOwnerType 사용), ImageType 삭제 | - |
+| `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | PR06 완료: `adapter/http/ai` 로 이동, AiImageModerationAdapter·PostImageBridgeAdapter 가 사용 | - |
+| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | Notice/ReportImageRepository 직접 사용 (post 는 UnlinkProductImageUseCase 로 교체 완료) | post=PR06 완료, report=PR09, notice=PR10 공개 command 로 교체 |
+| PR06 `PostImageBridgeAdapter` (adapter/integration/post) | image 공개 ImageQuery 사용. 미사용 이미지 정리는 adapter/event/image 이벤트, 텍스트 검열은 adapter/http/ai 클라이언트 | - (전환 완료, 연결 adapter) |
+| PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 BlockValidator | 프로필 공개 query PR11/PR12, 차단 PR09 |
+| PR06 `PostChatBridgeAdapter` (adapter/integration/post) | ChatRoomRepository·ChatMessageRepository(방 조회, 예약 취소 시스템 메시지 저장 — 호출자 트랜잭션 참여) | PR08 |
+| PR06 `PostTradeStatusBridgeAdapter` (adapter/integration/post) | TradeStateReader + legacy TradeStatusChangedEvent 발행 | PR07 |
+| PR06 `ReservationNotificationBridgeAdapter`·`ReservationCancelledEventListener`·`ReservationCancelledEvent` (adapter/integration/post) | SendPushUseCase(공개, reminder 최종 실패 시 예외)·ChattingServerSystemMessageNotifier | 채팅 서버 HTTP PR08 (푸시는 PR06 에서 공개 Port 로 교체 완료) |
+| PR06 `PostController` `/api/post/trade` POST·DELETE | legacy RequestTradeCompleteService/WithdrawTradeCompleteService 직접 주입 | PR07 (trade input Port로 교체) |
+| PR06 공개 Port 소비 전 타 업무 legacy 호출자(trade·review·chat·report·alert·admin·member·image 의 post Entity/Repository 직접 사용) | `adapter/persistence/post` 의 Entity·Repository 를 import 만 바꿔 계속 사용 | 각 호출자 PR(PR02·PR04·PR05·PR07·PR08·PR09·PR11)이 `.omo/evidence/hex-pr06-handoff.md` 의 post 공개 Port 로 교체 |

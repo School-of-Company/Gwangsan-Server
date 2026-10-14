@@ -19,7 +19,7 @@ import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberExceptio
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;

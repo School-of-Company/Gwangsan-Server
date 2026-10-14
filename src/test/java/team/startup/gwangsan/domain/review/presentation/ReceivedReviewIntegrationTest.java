@@ -36,9 +36,9 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.entity.constant.*;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.adapter.persistence.post.ProductImage;
+import team.startup.gwangsan.domain.post.model.*;
 import team.startup.gwangsan.domain.review.entity.Review;
 import team.startup.gwangsan.domain.review.service.CreateReviewService;
 import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
@@ -102,8 +102,9 @@ class ReceivedReviewIntegrationTest {
     @Configuration
     @EnableAutoConfiguration
     @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
-            "team.startup.gwangsan.adapter.persistence.dong"})
-    @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member"})
+            "team.startup.gwangsan.adapter.persistence.dong", "team.startup.gwangsan.adapter.persistence.post"})
+    @EnableJpaRepositories({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member",
+            "team.startup.gwangsan.adapter.persistence.post"})
     @EnableJpaAuditing
     @EnableConfigurationProperties(JwtProperties.class)
     @Import({ReviewController.class, GetReceivedReviewListServiceImpl.class, GetReviewByMemberServiceImpl.class,

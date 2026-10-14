@@ -15,12 +15,12 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.domain.review.exception.AlreadyReviewedException;
 import team.startup.gwangsan.domain.review.exception.CannotReviewBeforeTradeException;
 import team.startup.gwangsan.domain.review.exception.CannotReviewSelfException;

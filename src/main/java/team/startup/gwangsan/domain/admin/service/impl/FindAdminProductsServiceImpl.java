@@ -4,18 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.service.FindAdminProductsService;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+import team.startup.gwangsan.adapter.web.post.dto.ProductImageResponse;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
-import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
+import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -50,12 +50,12 @@ public class FindAdminProductsServiceImpl implements FindAdminProductsService {
                 .map(Product::getId)
                 .toList();
 
-        Map<Long, List<GetImageResponse>> imageMap = productImageRepository
+        Map<Long, List<ProductImageResponse>> imageMap = productImageRepository
                 .findAllByProductIdIn(productIds).stream()
                 .collect(Collectors.groupingBy(
                         pi -> pi.getProduct().getId(),
                         Collectors.mapping(
-                                pi -> new GetImageResponse(
+                                pi -> new ProductImageResponse(
                                         pi.getImage().getId(),
                                         pi.getImage().getImageUrl()
                                 ),
