@@ -11,7 +11,7 @@ import team.startup.gwangsan.application.trade.data.TradeCompletionCommand;
 import team.startup.gwangsan.application.trade.port.in.RequestTradeCompletionUseCase;
 import team.startup.gwangsan.application.trade.port.in.WithdrawTradeCompletionUseCase;
 import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteRequestException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

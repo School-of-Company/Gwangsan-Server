@@ -19,7 +19,7 @@ import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 

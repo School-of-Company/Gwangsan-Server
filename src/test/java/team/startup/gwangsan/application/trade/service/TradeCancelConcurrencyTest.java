@@ -40,7 +40,7 @@ import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepositor
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.application.trade.TradeIntegrationWiring;
 import team.startup.gwangsan.application.trade.data.RequestTradeCancelCommand;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;

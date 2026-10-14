@@ -26,7 +26,7 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 

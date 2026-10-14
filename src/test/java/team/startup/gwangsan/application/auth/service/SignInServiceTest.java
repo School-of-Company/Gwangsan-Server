@@ -17,7 +17,7 @@ import team.startup.gwangsan.domain.auth.exception.NotFoundUserException;
 import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
 import team.startup.gwangsan.domain.auth.model.AccountStatus;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

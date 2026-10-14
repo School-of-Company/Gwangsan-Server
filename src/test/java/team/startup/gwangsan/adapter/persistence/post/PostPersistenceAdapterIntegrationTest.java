@@ -24,7 +24,7 @@ import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.model.Product;
 import team.startup.gwangsan.domain.post.model.ProductReservation;
 import team.startup.gwangsan.application.post.data.ImageView;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -46,7 +46,7 @@ import team.startup.gwangsan.application.post.service.PendingReservationService;
 import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
 import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.application.trade.service.TradeStateService;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.integration.post.PostChatBridgeAdapter;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter;

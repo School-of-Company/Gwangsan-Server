@@ -1,4 +1,4 @@
-package team.startup.gwangsan.global.redis;
+package team.startup.gwangsan.adapter.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -58,7 +58,7 @@ import team.startup.gwangsan.domain.report.model.ReportTargetType;
 import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;

@@ -8,7 +8,6 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -71,8 +70,7 @@ class AlertPublisherCompatibilityTest {
     class Describe_after_pr07 {
 
         @Test
-        @EnabledIfEnvironmentVariable(named = "HEXAGONAL_FINAL_GATE", matches = "true")
-        @DisplayName("it_원자 저장 대상 두 종류를 비동기로 다시 발행하지 않는다 (중복 저장 방지, 최종 gate)")
+        @DisplayName("it_원자 저장 대상 두 종류를 비동기로 다시 발행하지 않는다 (중복 저장 방지)")
         void it_does_not_publish_atomic_types_async() {
             assertThat(publishedTypes("CreateAlertEvent")).doesNotContainKeys(ATOMIC.toArray(String[]::new));
         }

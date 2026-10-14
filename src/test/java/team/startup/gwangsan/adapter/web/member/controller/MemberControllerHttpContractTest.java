@@ -21,7 +21,7 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
 import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.support.FixedActorResolver;
 
 import java.time.LocalDateTime;

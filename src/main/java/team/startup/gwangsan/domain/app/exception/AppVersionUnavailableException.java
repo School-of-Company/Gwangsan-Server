@@ -1,7 +1,7 @@
 package team.startup.gwangsan.domain.app.exception;
 
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 public class AppVersionUnavailableException extends GlobalException {
     public AppVersionUnavailableException() {

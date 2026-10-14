@@ -5,7 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.domain.member.model.MemberRole;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 import team.startup.gwangsan.adapter.security.auth.exception.ExpiredTokenException;
 import team.startup.gwangsan.adapter.security.auth.exception.InvalidTokenException;
 

@@ -1,4 +1,4 @@
-package team.startup.gwangsan.global.redis;
+package team.startup.gwangsan.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;

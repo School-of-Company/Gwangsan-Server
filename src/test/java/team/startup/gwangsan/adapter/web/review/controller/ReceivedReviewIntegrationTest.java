@@ -52,10 +52,10 @@ import team.startup.gwangsan.application.review.port.in.CreateReviewUseCase;
 import team.startup.gwangsan.application.review.service.ReviewQueryService;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
-import team.startup.gwangsan.global.redis.RedisConfig;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.RedisConfig;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
@@ -64,7 +64,6 @@ import team.startup.gwangsan.adapter.security.auth.JwtProperties;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
-import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -118,7 +117,7 @@ class ReceivedReviewIntegrationTest {
     @Import({ReviewController.class, ReviewQueryService.class, ReviewPersistenceAdapter.class, ReviewPostAdapter.class,
             ReviewMemberAdapter.class, AddMemberLightService.class, ProductPublicQueryService.class, ProductPersistenceAdapter.class,
             ProductImagePersistenceAdapter.class, ActorContextArgumentResolver.class, WebMvcConfig.class,
-            QueryDslConfig.class, MemberUtil.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
+            QueryDslConfig.class, SecurityConfig.class, JwtProvider.class, TokenParser.class,
             MemberDetailsService.class, MemberAccountService.class, MemberPersistenceAdapter.class, JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class,
             GlobalExceptionHandler.class, RedisConfig.class, RedisUtil.class})
     static class Config {

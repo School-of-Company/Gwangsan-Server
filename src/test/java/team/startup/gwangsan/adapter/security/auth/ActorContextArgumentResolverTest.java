@@ -21,7 +21,7 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.support.MemberAccounts;
 
 import java.util.Map;

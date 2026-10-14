@@ -27,7 +27,7 @@ import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;

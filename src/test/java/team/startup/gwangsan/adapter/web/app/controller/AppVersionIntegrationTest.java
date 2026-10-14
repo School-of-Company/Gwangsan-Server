@@ -28,7 +28,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.app.AppVersionPersistenceAdapter;
 import team.startup.gwangsan.application.app.service.FindAppVersionService;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;

@@ -30,8 +30,8 @@ import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKey
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaRepository;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.util.List;
 import java.util.Optional;

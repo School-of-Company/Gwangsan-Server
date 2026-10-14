@@ -1,4 +1,4 @@
-package team.startup.gwangsan.global.exception;
+package team.startup.gwangsan.infrastructure.web;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

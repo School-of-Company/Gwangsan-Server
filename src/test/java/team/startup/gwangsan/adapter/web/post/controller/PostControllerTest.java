@@ -34,7 +34,7 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;

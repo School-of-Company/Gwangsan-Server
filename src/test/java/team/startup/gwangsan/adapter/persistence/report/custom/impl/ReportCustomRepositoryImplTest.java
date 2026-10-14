@@ -18,7 +18,7 @@ import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
 import team.startup.gwangsan.domain.report.model.ReportType;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 

@@ -29,7 +29,7 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.notice.exception.NoticeForbiddenException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.exception.UnauthorizedNoticeAccessException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -34,7 +34,7 @@ import team.startup.gwangsan.application.post.service.DeleteProductService;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -58,10 +58,10 @@ import team.startup.gwangsan.adapter.persistence.notification.DeviceToken;
 import team.startup.gwangsan.domain.notification.model.OsType;
 import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.adapter.event.notification.PushRequestedEvent;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
 import team.startup.gwangsan.application.block.service.BlockQueryService;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

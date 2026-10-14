@@ -1,4 +1,4 @@
-package team.startup.gwangsan.global.querydsl;
+package team.startup.gwangsan.infrastructure.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

@@ -12,7 +12,7 @@ import team.startup.gwangsan.application.sms.port.in.SendFindNicknameSmsUseCase;
 import team.startup.gwangsan.application.sms.port.in.SendResetPasswordSmsUseCase;
 import team.startup.gwangsan.application.sms.port.in.SendSmsUseCase;
 import team.startup.gwangsan.application.sms.port.in.VerifyCodeUseCase;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

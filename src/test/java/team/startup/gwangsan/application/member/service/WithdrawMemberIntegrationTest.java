@@ -66,7 +66,7 @@ import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.model.TradeStatus;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;

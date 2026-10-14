@@ -35,9 +35,9 @@ import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.model.ChatImage;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;

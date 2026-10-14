@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
 import team.startup.gwangsan.domain.chat.model.MessageType;

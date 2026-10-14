@@ -29,7 +29,7 @@ import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.model.MemberKeyword;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 

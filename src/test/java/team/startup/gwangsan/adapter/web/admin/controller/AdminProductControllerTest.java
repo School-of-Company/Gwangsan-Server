@@ -22,7 +22,7 @@ import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.application.post.port.in.ProductStatusUseCase;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;

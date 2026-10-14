@@ -13,7 +13,7 @@ import team.startup.gwangsan.application.image.port.in.DeleteImageUseCase;
 import team.startup.gwangsan.application.image.port.in.UploadImageUseCase;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.exception.InappropriateImageException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.Arrays;
 

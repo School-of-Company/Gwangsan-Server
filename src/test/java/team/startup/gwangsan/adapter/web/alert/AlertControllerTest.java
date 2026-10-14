@@ -22,7 +22,7 @@ import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.application.member.data.MemberAccount;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;

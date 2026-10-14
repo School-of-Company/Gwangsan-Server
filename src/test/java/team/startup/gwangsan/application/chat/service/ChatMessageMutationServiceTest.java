@@ -16,8 +16,8 @@ import team.startup.gwangsan.domain.chat.exception.NotFoundChatMessageException;
 import team.startup.gwangsan.domain.chat.model.ChatMessage;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

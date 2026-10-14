@@ -36,7 +36,7 @@ import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.model.Notice;
 import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.util.List;
 import java.util.Map;

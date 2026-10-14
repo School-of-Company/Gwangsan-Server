@@ -1,4 +1,4 @@
-package team.startup.gwangsan.global.exception;
+package team.startup.gwangsan.domain.common.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

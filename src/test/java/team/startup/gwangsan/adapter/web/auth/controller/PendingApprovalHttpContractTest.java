@@ -45,7 +45,7 @@ import team.startup.gwangsan.application.auth.service.SignInService;
 import team.startup.gwangsan.application.member.port.in.ChangePasswordUseCase;
 import team.startup.gwangsan.application.member.port.in.RegisterMemberUseCase;
 import team.startup.gwangsan.application.member.service.MemberAccountService;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 
 import java.net.InetAddress;

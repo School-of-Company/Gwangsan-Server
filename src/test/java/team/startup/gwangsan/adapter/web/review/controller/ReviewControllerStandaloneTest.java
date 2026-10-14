@@ -12,7 +12,7 @@ import team.startup.gwangsan.application.review.data.*;
 import team.startup.gwangsan.application.review.port.in.CreateReviewUseCase;
 import team.startup.gwangsan.application.review.port.in.ReviewQuery;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.List;
 

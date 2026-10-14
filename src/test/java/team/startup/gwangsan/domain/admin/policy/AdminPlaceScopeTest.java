@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import team.startup.gwangsan.domain.admin.exception.AdminPlaceMismatchException;
-import team.startup.gwangsan.global.exception.ErrorCode;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
 
 import java.util.List;
 

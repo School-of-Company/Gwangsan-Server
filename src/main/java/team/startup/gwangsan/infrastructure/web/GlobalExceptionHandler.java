@@ -1,4 +1,8 @@
-package team.startup.gwangsan.global.exception;
+package team.startup.gwangsan.infrastructure.web;
+
+import team.startup.gwangsan.domain.common.exception.GlobalException;
+
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

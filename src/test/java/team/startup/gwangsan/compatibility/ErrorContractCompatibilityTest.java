@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.ErrorResponse;
-import team.startup.gwangsan.global.exception.GlobalException;
-import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.infrastructure.web.ErrorResponse;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
+import team.startup.gwangsan.infrastructure.web.GlobalExceptionHandler;
 
 import java.util.Arrays;
 import java.util.Comparator;

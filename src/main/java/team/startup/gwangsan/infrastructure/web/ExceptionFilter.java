@@ -8,9 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
-import team.startup.gwangsan.global.exception.ErrorCode;
-import team.startup.gwangsan.global.exception.ErrorResponse;
-import team.startup.gwangsan.global.exception.GlobalException;
+import team.startup.gwangsan.domain.common.exception.ErrorCode;
+import team.startup.gwangsan.infrastructure.web.ErrorResponse;
+import team.startup.gwangsan.domain.common.exception.GlobalException;
 
 import java.io.IOException;
 

@@ -40,7 +40,7 @@ import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteExceptio
 import team.startup.gwangsan.domain.trade.exception.TradeAlreadyCompleteRequestException;
 import team.startup.gwangsan.application.trade.TradeIntegrationWiring;
 import team.startup.gwangsan.application.trade.data.TradeCompletionCommand;
-import team.startup.gwangsan.global.querydsl.QueryDslConfig;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import java.sql.DriverManager;
 import java.time.LocalDateTime;

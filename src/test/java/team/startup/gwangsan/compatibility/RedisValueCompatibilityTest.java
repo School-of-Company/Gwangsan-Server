@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import team.startup.gwangsan.global.redis.RedisUtil;
+import team.startup.gwangsan.adapter.redis.RedisUtil;
 
 import java.nio.charset.StandardCharsets;
 

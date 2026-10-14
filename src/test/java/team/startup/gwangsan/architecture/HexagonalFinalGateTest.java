@@ -7,7 +7,6 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,10 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * PR12 최종 gate: 전면 전환이 끝났을 때만 통과한다 (계획 작업 15·F1, IS-1/IS-6).
- * PR02~PR11 이 끝나기 전에는 반드시 실패하므로 HEXAGONAL_FINAL_GATE=true 일 때만 실행한다.
- * ponytail: PR12 최종 단계에서 @EnabledIfEnvironmentVariable 를 지워 항상 실행되게 한다 (skip 0 조건).
+ * 전환 기간에는 env 조건으로 대기했고, PR12 최종 단계에서 조건을 지워 항상 실행한다.
  */
-@EnabledIfEnvironmentVariable(named = "HEXAGONAL_FINAL_GATE", matches = "true")
 @DisplayName("헥사고날 전면 전환 최종 gate")
 class HexagonalFinalGateTest {
 
