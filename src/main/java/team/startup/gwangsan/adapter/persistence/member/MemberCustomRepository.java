@@ -1,6 +1,6 @@
 package team.startup.gwangsan.adapter.persistence.member;
 
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
 
 import java.util.Collection;
 import java.util.List;

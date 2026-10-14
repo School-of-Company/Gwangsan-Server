@@ -12,8 +12,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import team.startup.gwangsan.application.image.data.DeleteUnusedImagesCommand;
 import team.startup.gwangsan.application.image.data.ImageOwnerType;
 import team.startup.gwangsan.application.image.port.in.DeleteUnusedImagesUseCase;
-import team.startup.gwangsan.global.event.DeleteNotUsedImageEvent;
-import team.startup.gwangsan.global.event.constant.ImageType;
 
 import java.util.Set;
 
@@ -28,13 +26,12 @@ class DeleteNotUsedImageEventListenerTest {
     @Mock private DeleteUnusedImagesUseCase deleteUnusedImagesUseCase;
 
     @Test
-    @DisplayName("이벤트의 각 ImageType 을 같은 이름의 소유 타입 command 로 넘긴다")
+    @DisplayName("이벤트의 각 소유 타입을 그대로 command 로 넘긴다")
     void it_maps_event_to_command() {
-        for (ImageType type : ImageType.values()) {
+        for (ImageOwnerType type : ImageOwnerType.values()) {
             listener.handleDeleteNotUsedImageEvent(new DeleteNotUsedImageEvent(10L, Set.of(20L), type));
 
-            verify(deleteUnusedImagesUseCase).execute(
-                    new DeleteUnusedImagesCommand(10L, Set.of(20L), ImageOwnerType.valueOf(type.name())));
+            verify(deleteUnusedImagesUseCase).execute(new DeleteUnusedImagesCommand(10L, Set.of(20L), type));
         }
     }
 

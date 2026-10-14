@@ -15,12 +15,12 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.adapter.persistence.post.ProductImage;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.Type;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;

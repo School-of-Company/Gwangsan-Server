@@ -16,10 +16,11 @@ import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
+import team.startup.gwangsan.application.post.data.ProductImageLinkView;
+import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
+import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
@@ -53,7 +54,7 @@ class LegacyAlertBridgeTest {
         private final MemberAccountQuery members = mock(MemberAccountQuery.class);
         private final MemberJpaRepository memberJpaRepository = mock(MemberJpaRepository.class);
         private final TradeCompleteRepository trades = mock(TradeCompleteRepository.class);
-        private final ProductRepository products = mock(ProductRepository.class);
+        private final ProductSnapshotQuery products = mock(ProductSnapshotQuery.class);
         private final ReviewRepository reviews = mock(ReviewRepository.class);
         private final ReportRepository reports = mock(ReportRepository.class);
         private final SuspendRepository suspends = mock(SuspendRepository.class);
@@ -67,7 +68,7 @@ class LegacyAlertBridgeTest {
         void it_keeps_existing_not_found_exceptions() {
             when(members.findById(any())).thenReturn(Optional.empty());
             when(trades.findById(any())).thenReturn(Optional.empty());
-            when(products.findActiveById(any())).thenReturn(Optional.empty());
+            when(products.getActive(any())).thenThrow(new NotFoundProductException());
             when(reviews.findById(any())).thenReturn(Optional.empty());
             when(reports.findById(any())).thenReturn(Optional.empty());
             when(suspends.findById(any())).thenReturn(Optional.empty());
@@ -117,8 +118,9 @@ class LegacyAlertBridgeTest {
 
         private final NoticeImageRepository noticeImages = mock(NoticeImageRepository.class);
         private final TradeCancelRepository cancels = mock(TradeCancelRepository.class);
+        private final ProductImageQuery productImages = mock(ProductImageQuery.class);
         private final LegacyAlertImageAdapter adapter = new LegacyAlertImageAdapter(
-                noticeImages, mock(ProductImageRepository.class), mock(ReportImageRepository.class), cancels);
+                noticeImages, productImages, mock(ReportImageRepository.class), cancels);
 
         @Test
         @DisplayName("기존 응답처럼 imageId 에 연결 행 ID 를 넣는다")
@@ -132,6 +134,15 @@ class LegacyAlertBridgeTest {
             when(noticeImages.findAllByNoticeIdIn(List.of(100L))).thenReturn(List.of(link));
 
             assertThat(adapter.noticeImages(List.of(100L))).isEqualTo(Map.of(100L, List.of(new AlertImage(11L, "https://n"))));
+        }
+
+        @Test
+        @DisplayName("상품 이미지도 imageId 에 이미지 ID 가 아닌 연결 행 ID 를 넣는다")
+        void it_uses_product_link_row_id() {
+            when(productImages.findImageLinks(List.of(5L)))
+                    .thenReturn(Map.of(5L, List.of(new ProductImageLinkView(31L, 900L, "https://p"))));
+
+            assertThat(adapter.productImages(List.of(5L))).isEqualTo(Map.of(5L, List.of(new AlertImage(31L, "https://p"))));
         }
 
         @Test

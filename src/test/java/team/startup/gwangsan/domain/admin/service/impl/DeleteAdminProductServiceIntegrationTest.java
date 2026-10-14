@@ -10,35 +10,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.entity.ProductReservation;
-import team.startup.gwangsan.domain.post.entity.constant.Mode;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.entity.constant.ReservationStatus;
-import team.startup.gwangsan.domain.post.entity.constant.Type;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.adapter.persistence.post.ProductImage;
+import team.startup.gwangsan.adapter.persistence.post.ProductReservation;
+import team.startup.gwangsan.domain.post.model.Mode;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.domain.post.model.ReservationStatus;
+import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.domain.post.repository.ProductRepository;
-import team.startup.gwangsan.domain.post.service.impl.DeleteProductByIdServiceImpl;
+import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
+import team.startup.gwangsan.application.post.service.DeleteProductService;
 import team.startup.gwangsan.domain.review.entity.Review;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
-import team.startup.gwangsan.global.util.MemberUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 @DataJpaTest(properties = "spring.flyway.enabled=false")
-@Import({QueryDslConfig.class, DeleteAdminProductServiceImpl.class, DeleteProductByIdServiceImpl.class})
+@Import({QueryDslConfig.class, DeleteAdminProductServiceImpl.class, DeleteProductService.class,
+        ProductPersistenceAdapter.class})
 @DisplayName("관리자 상품 삭제 통합 테스트")
 class DeleteAdminProductServiceIntegrationTest {
 
@@ -47,11 +46,9 @@ class DeleteAdminProductServiceIntegrationTest {
     @Autowired
     private DeleteAdminProductServiceImpl adminService;
     @Autowired
-    private DeleteProductByIdServiceImpl userService;
+    private DeleteProductService userService;
     @Autowired
     private ProductRepository productRepository;
-    @MockitoBean
-    private MemberUtil memberUtil;
 
     private MemberJpaEntity author;
 
@@ -133,9 +130,7 @@ class DeleteAdminProductServiceIntegrationTest {
         @DisplayName("작성자는 기존 경로로 논리 삭제할 수 있다")
         void it_allows_author_soft_delete() {
             Product product = persistProduct(ProductStatus.ONGOING);
-            when(memberUtil.getCurrentMember()).thenReturn(author);
-
-            userService.execute(product.getId());
+            userService.execute(author.getId(), product.getId());
             em.flush();
             em.clear();
 
@@ -148,9 +143,7 @@ class DeleteAdminProductServiceIntegrationTest {
         void it_rejects_every_non_author_role(MemberRole role) {
             Product product = persistProduct(ProductStatus.ONGOING);
             MemberJpaEntity other = persistMember("other", role);
-            when(memberUtil.getCurrentMember()).thenReturn(other);
-
-            assertThatThrownBy(() -> userService.execute(product.getId()))
+            assertThatThrownBy(() -> userService.execute(other.getId(), product.getId()))
                     .isInstanceOf(ForbiddenProductException.class);
             em.flush();
             em.clear();
@@ -162,9 +155,7 @@ class DeleteAdminProductServiceIntegrationTest {
         @DisplayName("작성자도 이미 삭제된 상품을 삭제할 수 없다")
         void it_rejects_deleted_product() {
             Product product = persistProduct(ProductStatus.DELETED);
-            when(memberUtil.getCurrentMember()).thenReturn(author);
-
-            assertThatThrownBy(() -> userService.execute(product.getId()))
+            assertThatThrownBy(() -> userService.execute(author.getId(), product.getId()))
                     .isInstanceOf(NotFoundProductException.class);
         }
 

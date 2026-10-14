@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.domain.post.entity.Product;
+import team.startup.gwangsan.adapter.persistence.post.Product;
 
 @Entity
 @Getter

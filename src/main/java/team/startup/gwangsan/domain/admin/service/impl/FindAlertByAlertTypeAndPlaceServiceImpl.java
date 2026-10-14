@@ -20,12 +20,13 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepositor
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
-import team.startup.gwangsan.domain.post.entity.Product;
-import team.startup.gwangsan.domain.post.entity.ProductImage;
-import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductMemberResponse;
-import team.startup.gwangsan.domain.post.presentation.dto.response.GetProductResponse;
-import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.adapter.persistence.post.Product;
+import team.startup.gwangsan.adapter.persistence.post.ProductImage;
+import team.startup.gwangsan.domain.post.model.ProductStatus;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
+import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
+import team.startup.gwangsan.adapter.web.post.dto.ProductImageResponse;
+import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.ReportImage;
 import team.startup.gwangsan.domain.report.entity.constant.ReportTargetType;
@@ -103,11 +104,11 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 ? List.of()
                 : productImageRepository.findAllByProductIdIn(productIds);
 
-        Map<Long, List<GetImageResponse>> productImageMap = productImages.stream()
+        Map<Long, List<ProductImageResponse>> productImageMap = productImages.stream()
                 .collect(Collectors.groupingBy(
                         pi -> pi.getProduct().getId(),
                         Collectors.mapping(
-                                pi -> new GetImageResponse(pi.getImage().getId(), pi.getImage().getImageUrl()),
+                                pi -> new ProductImageResponse(pi.getImage().getId(), pi.getImage().getImageUrl()),
                                 Collectors.toList()
                         )
                 ));
@@ -237,7 +238,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
             List<AdminAlert> alerts,
             List<TradeCancel> tradeCancels,
             List<TradeCancelImage> images,
-            Map<Long, List<GetImageResponse>> productImageMap,
+            Map<Long, List<ProductImageResponse>> productImageMap,
             Map<Long, String> requesterPlaceNameMap,
             Map<Long, GetProductMemberResponse> ownerInfoByMemberId
     ) {
@@ -263,7 +264,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                     Long ownerId = owner.getId();
 
                     List<GetImageResponse> cancelImages = tcImageMap.getOrDefault(tc.getId(), List.of());
-                    List<GetImageResponse> pImages = productImageMap.getOrDefault(product.getId(), List.of());
+                    List<ProductImageResponse> pImages = productImageMap.getOrDefault(product.getId(), List.of());
 
                     String requesterPlace = requesterPlaceNameMap.get(alert.getRequester().getId());
 
@@ -289,7 +290,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private GetProductResponse buildProductResponse(
             Product product,
-            List<GetImageResponse> images,
+            List<ProductImageResponse> images,
             String ownerPlaceName,
             Integer ownerLight
     ) {

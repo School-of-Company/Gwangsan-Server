@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
+import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
 import team.startup.gwangsan.domain.review.entity.Review;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewDetailResponse;
