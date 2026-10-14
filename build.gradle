@@ -72,6 +72,8 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:mariadb'
 	testRuntimeOnly 'com.h2database:h2'
+	// 헥사고날 계층 경계 검사 (HexagonalArchitectureTest)
+	testImplementation 'com.tngtech.archunit:archunit:1.4.2'
 
 	// cloud
 	implementation 'software.amazon.awssdk:s3:2.29.49'

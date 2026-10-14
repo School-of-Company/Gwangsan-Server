@@ -45,14 +45,15 @@ import team.startup.gwangsan.domain.review.service.GetMyReviewListService;
 import team.startup.gwangsan.domain.review.service.GetReviewDetailService;
 import team.startup.gwangsan.domain.review.service.impl.GetReceivedReviewListServiceImpl;
 import team.startup.gwangsan.domain.review.service.impl.GetReviewByMemberServiceImpl;
-import team.startup.gwangsan.global.auth.MemberDetailsService;
+import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.global.redis.RedisConfig;
 import team.startup.gwangsan.global.redis.RedisUtil;
-import team.startup.gwangsan.global.security.config.SecurityConfig;
-import team.startup.gwangsan.global.security.handler.JwtAccessDeniedHandler;
-import team.startup.gwangsan.global.security.handler.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.infrastructure.security.SecurityConfig;
+import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
+import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
+import team.startup.gwangsan.adapter.security.auth.TokenParser;
 import team.startup.gwangsan.global.security.jwt.*;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -76,7 +77,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=create", "spring.jpa.open-in-view=false",
         "spring.jpa.show-sql=false", "spring.jpa.properties.hibernate.generate_statistics=true",
         "logging.level.org.hibernate.stat=OFF", "logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=OFF",
-        "logging.level.team.startup.gwangsan.global.filter.RequestLogFilter=OFF",
+        "logging.level.team.startup.gwangsan.infrastructure.web.RequestLogFilter=OFF",
         "jwt.access-secret=issue406-local-test-key-01234567890123456789",
         "jwt.refresh-secret=issue406-local-refresh-01234567890123456789"})
 @Testcontainers

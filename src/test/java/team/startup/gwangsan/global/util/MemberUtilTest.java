@@ -14,7 +14,7 @@ import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
 import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.repository.MemberRepository;
-import team.startup.gwangsan.global.auth.MemberDetails;
+import team.startup.gwangsan.adapter.security.auth.MemberDetails;
 import team.startup.gwangsan.global.security.exception.InvalidMemberPrincipalException;
 
 import java.util.Optional;
