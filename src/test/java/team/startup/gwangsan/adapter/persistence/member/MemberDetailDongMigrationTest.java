@@ -434,7 +434,7 @@ class MemberDetailDongMigrationTest {
                 DataSource dataSource, org.springframework.core.env.Environment environment) {
             LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
             factory.setDataSource(dataSource);
-            factory.setPackagesToScan("team.startup.gwangsan.domain");
+            factory.setPackagesToScan("team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence");
             factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
             factory.setJpaPropertyMap(Map.of(
                     "hibernate.hbm2ddl.auto", environment.getRequiredProperty("migration.ddl-auto"),

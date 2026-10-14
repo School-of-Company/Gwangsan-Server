@@ -45,7 +45,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = ApplicationContextStartupIntegrationTest.ProductionScan.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {"spring.docker.compose.enabled=false", "spring.flyway.enabled=false",
-                "spring.jpa.hibernate.ddl-auto=create"})
+                "spring.jpa.hibernate.ddl-auto=create",
+                "jwt.access-secret=pr02-boundary-local-only-access-secret-32-bytes",
+                "jwt.refresh-secret=pr02-boundary-local-only-refresh-secret-32-bytes"})
 @ActiveProfiles("test")
 @Testcontainers
 @DisplayName("회원·인증·SMS 경계 통합")
