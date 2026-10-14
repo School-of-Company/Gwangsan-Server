@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @DataJpaTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @Import({QueryDslConfig.class, TradeCancelPersistenceAdapter.class, TradeMemberReferencePersistenceAdapter.class,
+        TradeCompletePersistenceAdapter.class,
         ReviewPersistenceAdapter.class, TradeImageAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class})
 @DisplayName("trade/review provider 공개 Port 저장소 경로")
 class TradeProviderPortPersistenceTest {
@@ -52,6 +53,10 @@ class TradeProviderPortPersistenceTest {
     @Autowired private TradeMemberReferencePersistenceAdapter memberReferenceAdapter;
     @Autowired private ReviewPersistenceAdapter reviewAdapter;
     @Autowired private TradeImageAdapter tradeImageAdapter;
+    @Autowired private TradeCompletePersistenceAdapter tradeCompleteAdapter;
+    @Autowired private TradeCompleteJpaRepository tradeCompleteJpaRepository;
+    @Autowired private TradeCancelJpaRepository tradeCancelJpaRepository;
+    @Autowired private team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository reviewJpaRepository;
 
     private MemberJpaEntity buyer;
     private MemberJpaEntity seller;
@@ -122,6 +127,69 @@ class TradeProviderPortPersistenceTest {
             assertThat(tradeCancelAdapter.findRequesterId(withImages.getId())).contains(buyer.getId());
             assertThat(statistics().getPrepareStatementCount()).isEqualTo(1);
             assertThat(tradeCancelAdapter.findRequesterId(9999L)).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("알림 원천 요약 query 는 기존 저장 모델 탐색과 같은 값·같은 쿼리 수다")
+    class Describe_summaries {
+
+        @Test
+        @DisplayName("거래 요약: 거래 1회 + 상품·구매자 지연 로딩(기존 tradeCompleteRepository.findById 경로와 같은 수)")
+        void it_summarizes_trade_complete() {
+            long tradeId = em.find(TradeCancelJpaEntity.class, withImages.getId()).getTradeComplete().getId();
+            em.clear();
+            statistics().clear();
+            TradeCompleteJpaEntity legacy = tradeCompleteJpaRepository.findById(tradeId).orElseThrow();
+            String legacyTitle = legacy.getProduct().getTitle();
+            String legacyNickname = legacy.getBuyer().getNickname();
+            long legacyCount = statistics().getPrepareStatementCount();
+            em.clear();
+            statistics().clear();
+
+            var summary = tradeCompleteAdapter.findSummary(tradeId).orElseThrow();
+
+            assertThat(statistics().getPrepareStatementCount()).isEqualTo(legacyCount);
+            assertThat(summary.productId()).isEqualTo(product.getId());
+            assertThat(summary.productTitle()).isEqualTo(legacyTitle).isEqualTo("상품");
+            assertThat(summary.buyerId()).isEqualTo(buyer.getId());
+            assertThat(summary.buyerNickname()).isEqualTo(legacyNickname).isEqualTo("buyer");
+            assertThat(summary.sellerId()).isEqualTo(seller.getId());
+            assertThat(tradeCompleteAdapter.findSummary(99999L)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("철회 당사자: fetch join 1회로 요청자·구매자·판매자")
+        void it_finds_cancel_parties() {
+            var parties = tradeCancelAdapter.findParties(withoutImages.getId()).orElseThrow();
+
+            assertThat(statistics().getPrepareStatementCount()).isEqualTo(1);
+            assertThat(parties.requesterId()).isEqualTo(seller.getId());
+            assertThat(parties.buyerId()).isEqualTo(buyer.getId());
+            assertThat(parties.sellerId()).isEqualTo(seller.getId());
+            assertThat(tradeCancelAdapter.findParties(99999L)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("후기 작성자: 후기 1회 + 작성자 지연 로딩(기존 reviewRepository.findById 경로와 같은 수)")
+        void it_finds_review_author() {
+            ReviewJpaEntity review = em.persist(ReviewJpaEntity.builder().product(em.find(Product.class, product.getId()))
+                    .reviewer(em.find(MemberJpaEntity.class, buyer.getId())).reviewed(em.find(MemberJpaEntity.class, seller.getId()))
+                    .content("후기").light(10).build());
+            em.flush();
+            em.clear();
+            statistics().clear();
+            String legacyNickname = reviewJpaRepository.findById(review.getId()).orElseThrow().getReviewer().getNickname();
+            long legacyCount = statistics().getPrepareStatementCount();
+            em.clear();
+            statistics().clear();
+
+            var author = reviewAdapter.findAuthor(review.getId()).orElseThrow();
+
+            assertThat(statistics().getPrepareStatementCount()).isEqualTo(legacyCount);
+            assertThat(author.reviewerId()).isEqualTo(buyer.getId());
+            assertThat(author.reviewerNickname()).isEqualTo(legacyNickname).isEqualTo("buyer");
+            assertThat(reviewAdapter.findAuthor(99999L)).isEmpty();
         }
     }
 

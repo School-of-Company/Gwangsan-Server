@@ -35,6 +35,7 @@ class TradeProviderPortServicesTest {
     @Mock private TradeCancelPort tradeCancelPort;
     @Mock private TradeMemberReferencePort tradeMemberReferencePort;
     @Mock private ReviewPort reviewPort;
+    @Mock private team.startup.gwangsan.application.trade.port.out.TradeCompletePort tradeCompletePort;
 
     @Nested
     @DisplayName("RejectTradeCancelService 는")
@@ -96,6 +97,40 @@ class TradeProviderPortServicesTest {
         InOrder order = inOrder(reviewPort);
         order.verify(reviewPort).reassignReviewer(1L, 99L);
         order.verify(reviewPort).reassignReviewed(1L, 99L);
+    }
+
+    @Nested
+    @DisplayName("알림 원천 요약 query 는")
+    class Describe_summaries {
+
+        @Test
+        @DisplayName("거래·철회 요약을 돌려주고 없으면 거래 업무의 기존 NotFound 예외를 던진다")
+        void it_returns_trade_summaries_or_not_found() {
+            TradeSummaryService service = new TradeSummaryService(tradeCompletePort, tradeCancelPort);
+            var summary = new team.startup.gwangsan.application.trade.data.TradeCompleteSummary(10L, 100L, "상품", 2L, "구매자", 1L);
+            var parties = new team.startup.gwangsan.application.trade.data.TradeCancelParties(20L, 2L, 2L, 1L);
+            when(tradeCompletePort.findSummary(10L)).thenReturn(Optional.of(summary));
+            when(tradeCompletePort.findSummary(11L)).thenReturn(Optional.empty());
+            when(tradeCancelPort.findParties(20L)).thenReturn(Optional.of(parties));
+            when(tradeCancelPort.findParties(21L)).thenReturn(Optional.empty());
+
+            assertThat(service.getTradeComplete(10L)).isEqualTo(summary);
+            assertThat(service.getCancelParties(20L)).isEqualTo(parties);
+            assertThatThrownBy(() -> service.getTradeComplete(11L)).isInstanceOf(team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException.class);
+            assertThatThrownBy(() -> service.getCancelParties(21L)).isInstanceOf(NotFoundTradeCancelException.class);
+        }
+
+        @Test
+        @DisplayName("후기 작성자를 돌려주고 없으면 NotFoundReviewException 을 던진다")
+        void it_returns_review_author_or_not_found() {
+            var service = new team.startup.gwangsan.application.review.service.ReviewSummaryService(reviewPort);
+            var author = new team.startup.gwangsan.application.review.data.ReviewAuthor(5L, 2L, "작성자");
+            when(reviewPort.findAuthor(5L)).thenReturn(Optional.of(author));
+            when(reviewPort.findAuthor(6L)).thenReturn(Optional.empty());
+
+            assertThat(service.getAuthor(5L)).isEqualTo(author);
+            assertThatThrownBy(() -> service.getAuthor(6L)).isInstanceOf(team.startup.gwangsan.domain.review.exception.NotFoundReviewException.class);
+        }
     }
 
     @Nested

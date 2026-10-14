@@ -11,6 +11,7 @@ import team.startup.gwangsan.domain.trade.model.TradeCancel;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 
 import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
+import team.startup.gwangsan.application.trade.data.TradeCancelParties;
 import team.startup.gwangsan.application.trade.data.TradeCancelView;
 
 import java.util.Collection;
@@ -71,6 +72,13 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
     @Override
     public Optional<Long> findRequesterId(long tradeCancelId) {
         return tradeCancelJpaRepository.findByIdWithMember(tradeCancelId).map(tc -> tc.getMember().getId());
+    }
+
+    @Override
+    public Optional<TradeCancelParties> findParties(long tradeCancelId) {
+        return tradeCancelJpaRepository.findByIdWithTradeCompleteAndMember(tradeCancelId)
+                .map(tc -> new TradeCancelParties(tc.getId(), tc.getMember().getId(),
+                        tc.getTradeComplete().getBuyer().getId(), tc.getTradeComplete().getSeller().getId()));
     }
 
     @Override

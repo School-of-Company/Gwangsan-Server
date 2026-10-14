@@ -1,6 +1,7 @@
 package team.startup.gwangsan.application.trade.port.out;
 
 import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
+import team.startup.gwangsan.application.trade.data.TradeCancelParties;
 import team.startup.gwangsan.application.trade.data.TradeCancelView;
 import team.startup.gwangsan.domain.trade.model.TradeCancel;
 
@@ -25,6 +26,9 @@ public interface TradeCancelPort {
     Map<Long, List<TradeCancelImageView>> findImageViews(Collection<Long> tradeCancelIds);
 
     Optional<Long> findRequesterId(long tradeCancelId);
+
+    /** 거래·구매자·판매자 fetch join 1회. */
+    Optional<TradeCancelParties> findParties(long tradeCancelId);
 
     /** 철회 요청 ID → 상품 ID (1 쿼리). */
     Map<Long, Long> findProductIds(Collection<Long> tradeCancelIds);

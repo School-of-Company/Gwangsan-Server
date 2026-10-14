@@ -3,6 +3,7 @@ package team.startup.gwangsan.adapter.persistence.trade;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.application.trade.data.TradeCompleteSummary;
 import team.startup.gwangsan.application.trade.port.out.TradeCompletePort;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.post.Product;
@@ -28,6 +29,13 @@ public class TradeCompletePersistenceAdapter implements TradeCompletePort {
     @Override
     public Optional<TradeComplete> findById(long tradeId) {
         return tradeCompleteJpaRepository.findById(tradeId).map(TradeCompletePersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public Optional<TradeCompleteSummary> findSummary(long tradeId) {
+        return tradeCompleteJpaRepository.findById(tradeId)
+                .map(t -> new TradeCompleteSummary(t.getId(), t.getProduct().getId(), t.getProduct().getTitle(),
+                        t.getBuyer().getId(), t.getBuyer().getNickname(), t.getSeller().getId()));
     }
 
     @Override

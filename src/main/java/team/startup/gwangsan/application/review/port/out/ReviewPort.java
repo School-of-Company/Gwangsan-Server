@@ -1,5 +1,6 @@
 package team.startup.gwangsan.application.review.port.out;
 
+import team.startup.gwangsan.application.review.data.ReviewAuthor;
 import team.startup.gwangsan.application.review.data.ReviewDetail;
 import team.startup.gwangsan.application.review.data.ReviewPage;
 import team.startup.gwangsan.application.review.data.ReviewRow;
@@ -12,6 +13,9 @@ public interface ReviewPort {
     boolean exists(long productId, long reviewerId);
 
     long save(Review review);
+
+    /** 후기 1회 조회 후 작성자 별명을 지연 로딩으로 읽는다. */
+    Optional<ReviewAuthor> findAuthor(long reviewId);
 
     /** bulk 재지정, 실행 뒤 영속성 컨텍스트를 비운다. */
     void reassignReviewer(Long memberId, Long dummyMemberId);

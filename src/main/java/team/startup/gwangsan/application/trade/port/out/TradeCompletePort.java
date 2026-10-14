@@ -1,5 +1,6 @@
 package team.startup.gwangsan.application.trade.port.out;
 
+import team.startup.gwangsan.application.trade.data.TradeCompleteSummary;
 import team.startup.gwangsan.domain.trade.model.TradeComplete;
 import team.startup.gwangsan.domain.trade.model.TradeRequestState;
 
@@ -9,6 +10,9 @@ import java.util.Optional;
 /** 거래 완료 요청 저장. 변경은 update/delete 로 명시해 같은 트랜잭션의 관리 엔티티에 반영한다. */
 public interface TradeCompletePort {
     Optional<TradeComplete> findById(long tradeId);
+
+    /** 거래 1회 조회 후 상품 제목·구매자 별명을 지연 로딩으로 읽는다(기존 알림 원천 조회와 같음). */
+    Optional<TradeCompleteSummary> findSummary(long tradeId);
 
     Optional<TradeComplete> findPending(long productId, long buyerId, long sellerId);
 
