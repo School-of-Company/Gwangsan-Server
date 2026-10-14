@@ -57,7 +57,7 @@ class AiModerationClientTest {
 
     @Test
     @DisplayName("NSFW 모델의 is_nsfw 응답을 매핑한다")
-    void it_maps_snake_case_nsfw_response() {
+    void it_maps_snake_case_nsfw_response() throws Exception {
         server.expect(once(), requestTo("http://ai-server/nsfw"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("""
@@ -71,7 +71,7 @@ class AiModerationClientTest {
                 new byte[]{1, 2, 3}
         );
 
-        assertThat(client.isNsfw(file)).isTrue();
+        assertThat(client.isNsfw(file.getBytes(), file.getOriginalFilename())).isTrue();
         server.verify();
     }
 
@@ -123,7 +123,7 @@ class AiModerationClientTest {
 
         @Test
         @DisplayName("false 응답은 false로 매핑한다")
-        void it_returns_false_for_non_nsfw_response() {
+        void it_returns_false_for_non_nsfw_response() throws Exception {
             server.expect(once(), requestTo("http://ai-server/nsfw"))
                     .andExpect(method(HttpMethod.POST))
                     .andRespond(withSuccess("""
@@ -134,13 +134,13 @@ class AiModerationClientTest {
                     "file", "safe.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1}
             );
 
-            assertThat(client.isNsfw(file)).isFalse();
+            assertThat(client.isNsfw(file.getBytes(), file.getOriginalFilename())).isFalse();
             server.verify();
         }
 
         @Test
         @DisplayName("AI 서버 오류는 이미지를 안전한 것으로 처리한다")
-        void it_returns_false_when_nsfw_server_returns_error() {
+        void it_returns_false_when_nsfw_server_returns_error() throws Exception {
             server.expect(once(), requestTo("http://ai-server/nsfw"))
                     .andRespond(withStatus(HttpStatus.BAD_GATEWAY));
 
@@ -148,7 +148,15 @@ class AiModerationClientTest {
                     "file", "unavailable.png", MediaType.IMAGE_PNG_VALUE, new byte[]{1}
             );
 
-            assertThat(client.isNsfw(file)).isFalse();
+            assertThat(client.isNsfw(file.getBytes(), file.getOriginalFilename())).isFalse();
+            server.verify();
+        }
+
+        @Test
+        @DisplayName("빈 이미지는 원격 요청 없이 false 를 반환한다")
+        void it_skips_empty_content() {
+            assertThat(client.isNsfw(new byte[0], "empty.png")).isFalse();
+            assertThat(client.isNsfw(null, "null.png")).isFalse();
             server.verify();
         }
     }

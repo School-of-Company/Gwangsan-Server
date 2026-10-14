@@ -10,9 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 
 @Slf4j
 @Component
@@ -57,14 +55,14 @@ RestClient.Builder builder = restClientBuilder.clone().baseUrl(properties.url())
         }
     }
 
-    public boolean isNsfw(MultipartFile file) {
-        if (restClient == null || file == null || file.isEmpty()) {
+    public boolean isNsfw(byte[] content, String fileName) {
+        if (restClient == null || content == null || content.length == 0) {
             return false;
         }
 
         try {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new NamedByteArrayResource(file.getBytes(), file.getOriginalFilename()));
+            body.add("file", new NamedByteArrayResource(content, fileName));
 
             NsfwResponse response = restClient.post()
                     .uri("/nsfw")
@@ -73,7 +71,7 @@ RestClient.Builder builder = restClientBuilder.clone().baseUrl(properties.url())
                     .retrieve()
                     .body(NsfwResponse.class);
             return response != null && response.isNsfw();
-        } catch (IOException | RestClientException exception) {
+        } catch (RestClientException exception) {
             log.warn("AI 이미지 검사에 실패하여 검사를 건너뜁니다.", exception);
             return false;
         }
