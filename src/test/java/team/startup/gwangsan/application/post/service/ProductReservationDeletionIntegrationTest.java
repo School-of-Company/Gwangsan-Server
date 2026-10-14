@@ -20,7 +20,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -48,6 +48,10 @@ import team.startup.gwangsan.application.post.service.ProductStatusService;
 import team.startup.gwangsan.application.trade.service.TradeStateService;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.adapter.integration.post.PostChatBridgeAdapter;
+import team.startup.gwangsan.adapter.persistence.chat.ChatMessagePersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter;
+import team.startup.gwangsan.application.chat.service.ChatRoomLookupService;
+import team.startup.gwangsan.application.chat.service.SaveChatSystemMessageService;
 import team.startup.gwangsan.adapter.integration.post.PostTradeStatusAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ReservationPersistenceAdapter;
@@ -70,6 +74,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryDslConfig.class, DeleteProductService.class, ReserveProductService.class,
         ProductPersistenceAdapter.class, ReservationPersistenceAdapter.class, PostChatBridgeAdapter.class,
+        ChatRoomLookupService.class, SaveChatSystemMessageService.class, ChatRoomPersistenceAdapter.class, ChatMessagePersistenceAdapter.class,
         PostTradeStatusAdapter.class, TradeStateService.class, TradeCompletePersistenceAdapter.class, TradePostAdapter.class,
         ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
         ProductImagePersistenceAdapter.class})
@@ -148,7 +153,7 @@ class ProductReservationDeletionIntegrationTest {
         void it_rejects_non_author_before_reservation_validation() {
             Fixture fixture = fixture(ProductStatus.RESERVATION);
             MemberJpaEntity buyer = new TransactionTemplate(transactionManager).execute(status ->
-                    em.find(ChatRoom.class, fixture.roomId()).getBuyer());
+                    em.find(ChatRoomJpaEntity.class, fixture.roomId()).getBuyer());
             Long actor = buyer.getId();
             var before = snapshot(fixture);
 
@@ -190,7 +195,7 @@ class ProductReservationDeletionIntegrationTest {
             Long actor = fixture.author().getId();
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
                 Product product = em.find(Product.class, fixture.productId());
-                MemberJpaEntity buyer = em.find(ChatRoom.class, fixture.roomId()).getBuyer();
+                MemberJpaEntity buyer = em.find(ChatRoomJpaEntity.class, fixture.roomId()).getBuyer();
                 Image image = Image.builder().imageUrl("https://example.com/image.jpg").build();
                 em.persist(image);
                 ProductImage link = ProductImage.builder().product(product).image(image).build();
@@ -317,7 +322,7 @@ class ProductReservationDeletionIntegrationTest {
     private void assertState(Fixture fixture, ProductStatus expected, long reservations) {
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
             assertThat(em.find(Product.class, fixture.productId()).getStatus()).isEqualTo(expected);
-            assertThat(em.find(ChatRoom.class, fixture.roomId()).getIsActive()).isTrue();
+            assertThat(em.find(ChatRoomJpaEntity.class, fixture.roomId()).getIsActive()).isTrue();
             assertThat(em.createQuery("select count(r) from ProductReservation r where r.product.id = :id", Long.class)
                     .setParameter("id", fixture.productId()).getSingleResult()).isEqualTo(reservations);
         });
@@ -333,7 +338,7 @@ class ProductReservationDeletionIntegrationTest {
             Product product = Product.builder().title("상품").description("설명").gwangsan(100)
                     .member(author).status(productStatus).type(Type.OBJECT).mode(Mode.GIVER).build();
             em.persist(product);
-            ChatRoom room = ChatRoom.builder().product(product).buyer(buyer).seller(author).isActive(true).build();
+            ChatRoomJpaEntity room = ChatRoomJpaEntity.builder().product(product).buyer(buyer).seller(author).isActive(true).build();
             em.persist(room);
             em.flush();
             return new Fixture(author, product.getId(), room.getId());

@@ -8,7 +8,7 @@ import team.startup.gwangsan.domain.image.model.Image;
 
 import java.util.List;
 
-import static team.startup.gwangsan.domain.chat.entity.QChatMessageImage.chatMessageImage;
+import static team.startup.gwangsan.adapter.persistence.chat.QChatMessageImageJpaEntity.chatMessageImageJpaEntity;
 import static team.startup.gwangsan.domain.image.entity.QImage.image;
 import static team.startup.gwangsan.domain.notice.entity.QNoticeImage.noticeImage;
 import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
@@ -34,13 +34,13 @@ public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
                 .leftJoin(productImage).on(productImage.image.eq(image))
                 .leftJoin(noticeImage).on(noticeImage.image.eq(image))
                 .leftJoin(reportImage).on(reportImage.image.eq(image))
-                .leftJoin(chatMessageImage).on(chatMessageImage.image.eq(image))
+                .leftJoin(chatMessageImageJpaEntity).on(chatMessageImageJpaEntity.image.eq(image))
                 .leftJoin(tradeCancelImage).on(tradeCancelImage.image.eq(image))
                 .where(
                         productImage.id.isNull(),
                         noticeImage.id.isNull(),
                         reportImage.id.isNull(),
-                        chatMessageImage.id.isNull(),
+                        chatMessageImageJpaEntity.id.isNull(),
                         tradeCancelImage.id.isNull()
                 )
                 .orderBy(image.createdAt.asc(), image.id.asc())

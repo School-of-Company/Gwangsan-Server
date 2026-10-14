@@ -2,7 +2,7 @@ package team.startup.gwangsan.adapter.event.trade;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import team.startup.gwangsan.global.chat.notification.ChattingServerTradeStatusNotifier;
+import team.startup.gwangsan.adapter.http.chat.ChattingServerTradeStatusNotifier;
 
 import java.time.LocalDateTime;
 

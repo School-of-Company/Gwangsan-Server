@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.chat.entity.ChatRoom;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -69,7 +69,7 @@ class DeleteAdminProductServiceIntegrationTest {
             MemberJpaEntity buyer = persistMember("buyer", MemberRole.ROLE_USER);
             Image image = em.persist(Image.builder().imageUrl("https://example.com/product.jpg").build());
             ProductImage link = em.persist(ProductImage.builder().product(product).image(image).build());
-            ChatRoom room = em.persist(ChatRoom.builder().product(product).buyer(buyer).seller(author)
+            ChatRoomJpaEntity room = em.persist(ChatRoomJpaEntity.builder().product(product).buyer(buyer).seller(author)
                     .isActive(true).build());
             TradeCompleteJpaEntity trade = em.persist(TradeCompleteJpaEntity.builder().product(product).buyer(buyer)
                     .seller(author).status(TradeStatus.COMPLETED).build());
@@ -90,7 +90,7 @@ class DeleteAdminProductServiceIntegrationTest {
             ProductImage storedLink = em.find(ProductImage.class, link.getId());
             assertThat(storedLink.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedLink.getImage().getId()).isEqualTo(image.getId());
-            ChatRoom storedRoom = em.find(ChatRoom.class, room.getId());
+            ChatRoomJpaEntity storedRoom = em.find(ChatRoomJpaEntity.class, room.getId());
             assertThat(storedRoom.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedRoom.getIsActive()).isTrue();
             TradeCompleteJpaEntity storedTrade = em.find(TradeCompleteJpaEntity.class, trade.getId());

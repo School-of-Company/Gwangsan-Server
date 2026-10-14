@@ -108,23 +108,6 @@ class ProductCustomRepositoryImplTest {
                 .extracting(Product::getId).containsExactlyInAnyOrder(ongoing.getId(), reservation.getId());
     }
 
-    @Nested
-    @DisplayName("채팅방 상품 이미지 일괄 조회는")
-    class Describe_findRoomProductsWithImagesByIds {
-
-        @Test
-        @DisplayName("상품 ID가 null이면 빈 목록을 반환한다")
-        void it_returns_empty_when_product_ids_are_null() {
-            assertThat(repository.findRoomProductsWithImagesByIds(null)).isEmpty();
-        }
-
-        @Test
-        @DisplayName("상품 ID가 비어 있으면 빈 목록을 반환한다")
-        void it_returns_empty_when_product_ids_are_empty() {
-            assertThat(repository.findRoomProductsWithImagesByIds(List.of())).isEmpty();
-        }
-    }
-
     private MemberJpaEntity member(String suffix) {
         return em.persist(MemberJpaEntity.builder()
                 .name("회원-" + suffix)

@@ -10,7 +10,7 @@ import team.startup.gwangsan.application.notification.data.SendPushCommand;
 import team.startup.gwangsan.application.notification.port.in.SendPushUseCase;
 import team.startup.gwangsan.domain.notification.model.NotificationType;
 import team.startup.gwangsan.domain.notification.model.PushMessage;
-import team.startup.gwangsan.global.chat.notification.ChattingServerSystemMessageNotifier;
+import team.startup.gwangsan.adapter.http.chat.ChattingServerSystemMessageNotifier;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -15,10 +15,10 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.chat.entity.ChatMessage;
-import team.startup.gwangsan.domain.chat.entity.ChatMessageImage;
-import team.startup.gwangsan.domain.chat.entity.ChatRoom;
-import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.chat.ChatMessageImageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
+import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -103,7 +103,7 @@ class OrphanImageQueryAdapterTest {
         Relationships relationships = persistRelationships("chat-trade");
         Image chatOnly = image("chat-only");
         Image tradeCancelOnly = image("trade-cancel-only");
-        em.persist(ChatMessageImage.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
+        em.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.tradeCancel()).image(tradeCancelOnly).build());
         em.flush();
         em.clear();
@@ -159,7 +159,7 @@ class OrphanImageQueryAdapterTest {
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
         em.persist(NoticeImage.builder().notice(relationships.notice()).image(noticeOnly).build());
         em.persist(ReportImage.builder().report(relationships.report()).image(reportOnly).build());
-        em.persist(ChatMessageImage.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
+        em.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.tradeCancel()).image(tradeCancelOnly).build());
         em.persist(ProductImage.builder().product(relationships.product()).image(multipleReferences).build());
         em.persist(ProductImage.builder().product(relationships.product()).image(multipleReferences).build());
@@ -222,8 +222,8 @@ class OrphanImageQueryAdapterTest {
                 .reason("reason")
                 .status(TradeCancelStatus.PENDING)
                 .build());
-        ChatRoom chatRoom = em.persist(ChatRoom.builder().buyer(buyer).seller(seller).product(product).isActive(true).build());
-        ChatMessage chatMessage = em.persist(ChatMessage.builder()
+        ChatRoomJpaEntity chatRoom = em.persist(ChatRoomJpaEntity.builder().buyer(buyer).seller(seller).product(product).isActive(true).build());
+        ChatMessageJpaEntity chatMessage = em.persist(ChatMessageJpaEntity.builder()
                 .id((long) suffix.hashCode())
                 .content("image")
                 .messageType(MessageType.IMAGE)
@@ -261,6 +261,6 @@ class OrphanImageQueryAdapterTest {
                 .executeUpdate();
     }
 
-    private record Relationships(Product product, Notice notice, Report report, ChatMessage chatMessage, TradeCancelJpaEntity tradeCancel) {
+    private record Relationships(Product product, Notice notice, Report report, ChatMessageJpaEntity chatMessage, TradeCancelJpaEntity tradeCancel) {
     }
 }

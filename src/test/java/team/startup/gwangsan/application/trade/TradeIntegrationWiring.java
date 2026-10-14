@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.adapter.event.trade.TradeStatusEventPublisher;
 import team.startup.gwangsan.adapter.integration.alert.LegacyAlertSourceAdapter;
 import team.startup.gwangsan.adapter.integration.trade.*;
+import team.startup.gwangsan.adapter.persistence.chat.ChatMessagePersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter;
+import team.startup.gwangsan.application.chat.service.ChatRoomLookupService;
 import team.startup.gwangsan.adapter.persistence.alert.AlertPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
@@ -29,7 +32,8 @@ import team.startup.gwangsan.global.util.BlockValidator;
 @Import({RequestTradeCompletionService.class, WithdrawTradeCompletionService.class, RequestTradeCancelService.class,
         WithdrawTradeCancelService.class, ApproveTradeCancelService.class, TradeCancelApplier.class, TradeStateService.class,
         TradeCancelQueryService.class, TradeCompletePersistenceAdapter.class, TradeCancelPersistenceAdapter.class,
-        TradePostAdapter.class, TradeChatBridge.class, TradeMemberAdapter.class, TradeBlockBridge.class,
+        TradePostAdapter.class, TradeChatBridge.class, ChatRoomLookupService.class, ChatRoomPersistenceAdapter.class,
+        ChatMessagePersistenceAdapter.class, TradeMemberAdapter.class, TradeBlockBridge.class,
         TradeAlertBridge.class, TradePushAdapter.class, TradeStatusEventPublisher.class,
         ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,

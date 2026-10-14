@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import team.startup.gwangsan.global.chat.notification.ChattingServerTradeStatusNotifier;
+import team.startup.gwangsan.adapter.http.chat.ChattingServerTradeStatusNotifier;
 
 @Slf4j
 @Component
