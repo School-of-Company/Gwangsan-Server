@@ -24,7 +24,7 @@ import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepositor
 
 import java.util.List;
 
-import static team.startup.gwangsan.domain.admin.service.impl.VerificationSignUpServiceImpl.RECOMMENDER_GWANGSAN_REWARD;
+import static team.startup.gwangsan.domain.admin.policy.SignUpReward.RECOMMENDER_GWANGSAN_REWARD;
 
 /**
  * 임시 bridge: 기존 CreateAlertServiceImpl 이 하던 원천 조회를 legacy Repository 로 그대로 수행한다.

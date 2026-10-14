@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.auth.port.out.SignUpAlertPort;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
-import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
+import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 
 // 가입 알림은 원자 저장 대상이 아니다(계획 "1차 구현 검토 확정: 알림 저장 범위"). 기존 AFTER_COMMIT·async 이벤트를 유지한다.

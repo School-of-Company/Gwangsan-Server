@@ -56,7 +56,7 @@ import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.report.exception.AlreadyReportedException;
 import team.startup.gwangsan.domain.report.model.ReportTargetType;
 import team.startup.gwangsan.domain.report.model.ReportType;
-import team.startup.gwangsan.global.event.CreateAdminAlertEvent;
+import team.startup.gwangsan.application.admin.data.CreateAdminAlertEvent;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.adapter.persistence.image.ImagePersistenceAdapter;
@@ -94,6 +94,8 @@ import static org.mockito.Mockito.doAnswer;
         MemberBlockPersistenceAdapter.class, MemberBlockCustomRepositoryImpl.class, BlockTargetBridgeAdapter.class,
         SuspendMemberService.class, ReleaseExpiredSuspensionsService.class, SuspendPersistenceAdapter.class,
         MemberStatusBridgeAdapter.class, AdminAlertBridgeAdapter.class, SuspensionAlertEventAdapter.class,
+        team.startup.gwangsan.application.admin.service.AdminAlertSupportService.class,
+        team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter.class,
         ReportQueryService.class, SuspensionQueryService.class,
         // 선행 업무 공개 Port 실제 구현(bridge 연결 대상): member·post·image
         MemberAccountService.class, MemberPersistenceAdapter.class,
