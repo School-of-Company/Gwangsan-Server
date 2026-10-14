@@ -377,7 +377,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
             MemberJpaEntity reportedA = member("상세피신고A");
             MemberJpaEntity reportedB = member("상세피신고B");
             Product product = product(reportedB, ProductStatus.ONGOING);
-            Image image = em.persist(Image.builder().imageUrl("https://img/d").build());
+            ImageJpaEntity image = em.persist(ImageJpaEntity.builder().imageUrl("https://img/d").build());
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.MEMBER, reportedA.getId(),
                     ReportType.SPAM_AD, "회원", List.of(image.getId())));
             createReportService.execute(new CreateReportCommand(reporter.getId(), ReportTargetType.PRODUCT, product.getId(),

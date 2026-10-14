@@ -108,7 +108,7 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
                 .orElseThrow(NotFoundMemberDetailException::new);
         entity.apply(detail);
         if (!Objects.equals(entity.getPlace().getId(), detail.getPlaceId())) {
-            entity.updatePlace(entityManager.getReference(Place.class, detail.getPlaceId()));
+            entity.updatePlace(entityManager.getReference(PlaceJpaEntity.class, detail.getPlaceId()));
         }
     }
 

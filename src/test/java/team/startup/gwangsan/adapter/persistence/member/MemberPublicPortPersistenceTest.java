@@ -24,8 +24,8 @@ import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailExcepti
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.place.entity.Head;
-import team.startup.gwangsan.domain.place.entity.Place;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import java.util.List;
@@ -48,15 +48,15 @@ class MemberPublicPortPersistenceTest {
     @Autowired private AddMemberLightUseCase addMemberLightUseCase;
 
     private DongJpaEntity dong;
-    private Place place;
-    private Place otherPlace;
+    private PlaceJpaEntity place;
+    private PlaceJpaEntity otherPlace;
 
     @BeforeEach
     void setUp() {
         dong = em.persist(DongJpaEntity.builder().name("테스트동").build());
-        Head head = em.persist(new Head("본부"));
-        place = em.persist(Place.builder().name("지점").head(head).build());
-        otherPlace = em.persist(Place.builder().name("다른지점").head(head).build());
+        HeadJpaEntity head = em.persist(new HeadJpaEntity("본부"));
+        place = em.persist(PlaceJpaEntity.builder().name("지점").head(head).build());
+        otherPlace = em.persist(PlaceJpaEntity.builder().name("다른지점").head(head).build());
     }
 
     @Nested
@@ -215,7 +215,7 @@ class MemberPublicPortPersistenceTest {
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
     }
 
-    private void detail(MemberJpaEntity member, Place place, int light) {
+    private void detail(MemberJpaEntity member, PlaceJpaEntity place, int light) {
         em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                 .gwangsan(0).light(light).description("소개").build());
     }

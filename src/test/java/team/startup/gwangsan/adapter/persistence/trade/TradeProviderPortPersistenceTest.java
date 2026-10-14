@@ -17,7 +17,7 @@ import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
 import team.startup.gwangsan.adapter.persistence.review.ReviewPersistenceAdapter;
 import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
 import team.startup.gwangsan.application.trade.data.TradeCancelView;
-import team.startup.gwangsan.domain.image.entity.Image;
+import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.model.Mode;
@@ -56,8 +56,8 @@ class TradeProviderPortPersistenceTest {
     private Product otherProduct;
     private TradeCancelJpaEntity withImages;
     private TradeCancelJpaEntity withoutImages;
-    private Image first;
-    private Image second;
+    private ImageJpaEntity first;
+    private ImageJpaEntity second;
 
     @BeforeEach
     void setUp() {
@@ -76,8 +76,8 @@ class TradeProviderPortPersistenceTest {
                 .status(TradeCancelStatus.PENDING).build());
         withoutImages = em.persist(TradeCancelJpaEntity.builder().tradeComplete(otherTrade).member(seller).reason("사유2")
                 .status(TradeCancelStatus.APPROVED).build());
-        first = em.persist(Image.builder().imageUrl("https://img/1").build());
-        second = em.persist(Image.builder().imageUrl("https://img/2").build());
+        first = em.persist(ImageJpaEntity.builder().imageUrl("https://img/1").build());
+        second = em.persist(ImageJpaEntity.builder().imageUrl("https://img/2").build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(withImages).image(first).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(withImages).image(second).build());
         em.flush();
