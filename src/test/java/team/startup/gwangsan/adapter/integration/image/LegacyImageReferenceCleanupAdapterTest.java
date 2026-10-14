@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.application.image.data.ImageOwnerType;
-import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
+import team.startup.gwangsan.application.notice.port.in.UnlinkNoticeImageUseCase;
 import team.startup.gwangsan.application.post.port.in.UnlinkProductImageUseCase;
 import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase;
 
@@ -19,7 +19,7 @@ class LegacyImageReferenceCleanupAdapterTest {
 
     @InjectMocks private LegacyImageReferenceCleanupAdapter adapter;
     @Mock private UnlinkProductImageUseCase unlinkProductImageUseCase;
-    @Mock private NoticeImageRepository noticeImageRepository;
+    @Mock private UnlinkNoticeImageUseCase unlinkNoticeImageUseCase;
     @Mock private UnlinkReportImageUseCase unlinkReportImageUseCase;
 
     @Test
@@ -28,7 +28,7 @@ class LegacyImageReferenceCleanupAdapterTest {
         adapter.unlink(ImageOwnerType.REPORT, 10L, 20L);
 
         verify(unlinkReportImageUseCase).unlink(10L, 20L);
-        verifyNoInteractions(unlinkProductImageUseCase, noticeImageRepository);
+        verifyNoInteractions(unlinkProductImageUseCase, unlinkNoticeImageUseCase);
     }
 
     @Test
@@ -36,7 +36,7 @@ class LegacyImageReferenceCleanupAdapterTest {
     void it_unlinks_notice_image() {
         adapter.unlink(ImageOwnerType.NOTICE, 10L, 20L);
 
-        verify(noticeImageRepository).deleteByNoticeIdAndImageId(10L, 20L);
+        verify(unlinkNoticeImageUseCase).unlink(10L, 20L);
         verifyNoInteractions(unlinkProductImageUseCase, unlinkReportImageUseCase);
     }
 
@@ -46,6 +46,6 @@ class LegacyImageReferenceCleanupAdapterTest {
         adapter.unlink(ImageOwnerType.PRODUCT, 10L, 20L);
 
         verify(unlinkProductImageUseCase).unlink(10L, 20L);
-        verifyNoInteractions(noticeImageRepository, unlinkReportImageUseCase);
+        verifyNoInteractions(unlinkNoticeImageUseCase, unlinkReportImageUseCase);
     }
 }

@@ -15,7 +15,7 @@ import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberExceptio
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.member.service.MemberDeletionService;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
+import team.startup.gwangsan.adapter.persistence.notice.NoticeJpaRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
@@ -41,7 +41,7 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     private final AdminAlertRepository adminAlertRepository;
     private final TradeCancelJpaRepository tradeCancelRepository;
     private final AlertJpaRepository alertRepository;
-    private final NoticeRepository noticeRepository;
+    private final NoticeJpaRepository noticeRepository;
     private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     private final SuspendJpaRepository suspendRepository;
     private final MemberBlockJpaRepository memberBlockRepository;

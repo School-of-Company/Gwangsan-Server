@@ -255,30 +255,30 @@
 | 233 | `domain/member/service/impl/MemberDeletionServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
 | 234 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | = | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | legacy bridge (탈퇴·삭제, PR11 교체) |
 | 235 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | `application/member/service/UpdateMyInfoService.java` | member | service impl | application/member/service (+ 필요한 output Port) | PR02 | 전환 |
-| 236 | `domain/notice/entity/Notice.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
-| 237 | `domain/notice/entity/NoticeImage.java` | = | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | legacy |
-| 238 | `domain/notice/exception/NoticeForbiddenException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
-| 239 | `domain/notice/exception/NoticeNotFoundException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
-| 240 | `domain/notice/exception/UnauthorizedNoticeAccessException.java` | = | notice | exception | domain/notice/exception | PR10 | legacy |
-| 241 | `domain/notice/presentation/NoticeController.java` | = | notice | controller | adapter/web/notice/controller | PR10 | legacy |
-| 242 | `domain/notice/presentation/dto/request/CreateNoticeRequest.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
-| 243 | `domain/notice/presentation/dto/request/UpdateNoticeRequest.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
-| 244 | `domain/notice/presentation/dto/response/FindAllNoticeResponse.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
-| 245 | `domain/notice/presentation/dto/response/FindNoticeResponse.java` | = | notice | web dto | adapter/web/notice/dto | PR10 | legacy |
-| 246 | `domain/notice/repository/NoticeImageRepository.java` | = | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | legacy |
-| 247 | `domain/notice/repository/NoticeRepository.java` | = | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | legacy |
-| 248 | `domain/notice/repository/custom/NoticeImageCustomRepository.java` | = | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | legacy |
-| 249 | `domain/notice/repository/custom/impl/NoticeImageCustomRepositoryImpl.java` | = | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | legacy |
-| 250 | `domain/notice/service/CreateNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
-| 251 | `domain/notice/service/DeleteNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
-| 252 | `domain/notice/service/FindAllNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
-| 253 | `domain/notice/service/FindNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
-| 254 | `domain/notice/service/UpdateNoticeService.java` | = | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | legacy |
-| 255 | `domain/notice/service/impl/CreateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 256 | `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 257 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 258 | `domain/notice/service/impl/FindNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
-| 259 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | = | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | legacy |
+| 236 | `domain/notice/entity/Notice.java` | `adapter/persistence/notice/NoticeJpaEntity.java + domain/notice/model/Notice.java` | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | PR10 완료 |
+| 237 | `domain/notice/entity/NoticeImage.java` | `adapter/persistence/notice/NoticeImageJpaEntity.java` | notice | jpa entity | adapter/persistence/notice (JpaEntity) + domain/notice/model (순수 모델, 규칙 있을 때) | PR10 | PR10 완료 |
+| 238 | `domain/notice/exception/NoticeForbiddenException.java` | = | notice | exception | domain/notice/exception | PR10 | PR10 완료 (위치 유지, domain 규칙 통과) |
+| 239 | `domain/notice/exception/NoticeNotFoundException.java` | = | notice | exception | domain/notice/exception | PR10 | PR10 완료 (위치 유지, domain 규칙 통과) |
+| 240 | `domain/notice/exception/UnauthorizedNoticeAccessException.java` | = | notice | exception | domain/notice/exception | PR10 | PR10 완료 (위치 유지, domain 규칙 통과) |
+| 241 | `domain/notice/presentation/NoticeController.java` | `adapter/web/notice/controller/NoticeController.java` | notice | controller | adapter/web/notice/controller | PR10 | PR10 완료 |
+| 242 | `domain/notice/presentation/dto/request/CreateNoticeRequest.java` | `adapter/web/notice/dto/CreateNoticeRequest.java` | notice | web dto | adapter/web/notice/dto | PR10 | PR10 완료 |
+| 243 | `domain/notice/presentation/dto/request/UpdateNoticeRequest.java` | `adapter/web/notice/dto/UpdateNoticeRequest.java` | notice | web dto | adapter/web/notice/dto | PR10 | PR10 완료 |
+| 244 | `domain/notice/presentation/dto/response/FindAllNoticeResponse.java` | `adapter/web/notice/dto/FindAllNoticeResponse.java` | notice | web dto | adapter/web/notice/dto | PR10 | PR10 완료 |
+| 245 | `domain/notice/presentation/dto/response/FindNoticeResponse.java` | `adapter/web/notice/dto/FindNoticeResponse.java` | notice | web dto | adapter/web/notice/dto | PR10 | PR10 완료 |
+| 246 | `domain/notice/repository/NoticeImageRepository.java` | `adapter/persistence/notice/NoticeImageJpaRepository.java` | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | PR10 완료 |
+| 247 | `domain/notice/repository/NoticeRepository.java` | `adapter/persistence/notice/NoticeJpaRepository.java` | notice | repository | adapter/persistence/notice (JpaRepository) + application/notice/port/out | PR10 | PR10 완료 |
+| 248 | `domain/notice/repository/custom/NoticeImageCustomRepository.java` | `adapter/persistence/notice/NoticeImageJpaCustomRepository.java` | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | PR10 완료 |
+| 249 | `domain/notice/repository/custom/impl/NoticeImageCustomRepositoryImpl.java` | `adapter/persistence/notice/NoticeImageJpaCustomRepositoryImpl.java` | notice | querydsl | adapter/persistence/notice (QueryPort 구현) | PR10 | PR10 완료 (공지 id 필터 정정) |
+| 250 | `domain/notice/service/CreateNoticeService.java` | `application/notice/port/in/CreateNoticeUseCase.java` | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | PR10 완료 |
+| 251 | `domain/notice/service/DeleteNoticeService.java` | `application/notice/port/in/DeleteNoticeUseCase.java` | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | PR10 완료 |
+| 252 | `domain/notice/service/FindAllNoticeService.java` | `application/notice/port/in/NoticeListQuery.java` | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | PR10 완료 |
+| 253 | `domain/notice/service/FindNoticeService.java` | `application/notice/port/in/NoticeDetailQuery.java` | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | PR10 완료 |
+| 254 | `domain/notice/service/UpdateNoticeService.java` | `application/notice/port/in/UpdateNoticeUseCase.java` | notice | service interface | application/notice/port/in (UseCase/Query) | PR10 | PR10 완료 |
+| 255 | `domain/notice/service/impl/CreateNoticeServiceImpl.java` | `application/notice/service/CreateNoticeService.java` | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | PR10 완료 |
+| 256 | `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | `application/notice/service/DeleteNoticeService.java` | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | PR10 완료 |
+| 257 | `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | `application/notice/service/NoticeListService.java` | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | PR10 완료 |
+| 258 | `domain/notice/service/impl/FindNoticeServiceImpl.java` | `application/notice/service/NoticeDetailService.java` | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | PR10 완료 |
+| 259 | `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | `application/notice/service/UpdateNoticeService.java` | notice | service impl | application/notice/service (+ 필요한 output Port) | PR10 | PR10 완료 |
 | 260 | `domain/notification/NotificationPort.java` | `(삭제)` | notification | port | application/notification/port/out | PR04 | PR06 완료: 예약 알림이 SendPushUseCase 직접 호출, LegacyNotificationPortBridge 와 함께 삭제 |
 | 261 | `domain/notification/entity/DeviceToken.java` | `adapter/persistence/notification/DeviceToken.java` | notification | jpa entity | adapter/persistence/notification (JpaEntity) + domain/notification/model (순수 모델, 규칙 있을 때) | PR04 | PR04 완료 (@TypeAlias 로 _class 유지) |
 | 262 | `domain/notification/entity/constant/NotificationType.java` | `domain/notification/model/NotificationType.java` | notification | enum | domain/notification/model | PR04 | PR04 완료 |
@@ -510,7 +510,7 @@
 | 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 489 | `global/event/DeleteNotUsedImageEvent.java` | `adapter/event/image/DeleteNotUsedImageEvent.java` | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | PR06 완료: image listener 옆으로 이동, 소유 타입은 ImageOwnerType (AFTER_COMMIT 비동기 유지) |
 | 490 | `global/event/ReservationCancelledEvent.java` | `adapter/integration/post/ReservationCancelledEvent.java` | post | global/event | adapter/integration/post (커밋 후 알림 bridge 내부 이벤트) | PR06 | PR06 완료 |
-| 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
+| 491 | `global/event/SendNotificationEvent.java` | 삭제 | notification | global/event | application/notification 발송 계약 | PR04 | PR10 삭제 (공지 발행자 PushRequestedEvent 전환, 남은 발행자 0) |
 | 492 | `global/event/TradeStatusChangedEvent.java` | `adapter/event/trade/TradeStatusChangedEvent.java` | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | PR07 완료 |
 | 493 | `global/event/constant/ImageType.java` | `(삭제)` | image | global/event | domain/image/model | PR05 | PR06 완료: ImageOwnerType 으로 대체 |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | `adapter/event/chat/ChatMessageMutationEventListener.java` (+ `ChatMessageMutationEventPublisher`) | chat | global/event | adapter/event/chat | PR08 | PR08 완료 |
@@ -519,7 +519,7 @@
 | 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
 | 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | `adapter/event/image/DeleteNotUsedImageEventListener.java (+ application/image/service/DeleteUnusedImagesService)` | image | global/event | adapter/event/image | PR05 | 전환 |
 | 499 | `global/event/handler/ReservationCancelledEventListener.java` | `adapter/integration/post/ReservationCancelledEventListener.java` | post | global/event | adapter/integration/post (커밋 후 비동기 푸시·채팅 HTTP. notification PR04·채팅 HTTP PR08 bridge) | PR06 | PR06 완료 |
-| 500 | `global/event/handler/SendNotificationEventListener.java` | `adapter/integration/notification/LegacySendNotificationEventBridge.java` | notification | global/event | adapter/event/notification | PR04 | PR04 완료 (bridge, 제거 PR10) |
+| 500 | `global/event/handler/SendNotificationEventListener.java` | 삭제 (`LegacySendNotificationEventBridge`·`LegacyDeviceTokens` PR10 삭제) | notification | global/event | adapter/event/notification | PR04 | PR10 삭제 |
 | 501 | `global/event/handler/TradeStatusChangedEventListener.java` | `adapter/event/trade/TradeStatusChangedEventListener.java` | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | PR07 완료 |
 | 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
 | 503 | `global/exception/ErrorResponse.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
@@ -608,11 +608,11 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | PATCH | `/api/member` | `adapter/web/member/controller/MemberController.java` | updateMyInfo | 200 |
 | GET | `/api/member/all` | `adapter/web/member/controller/MemberController.java` | findAllUserInfo | 200 |
 | GET | `/api/member/{id}` | `adapter/web/member/controller/MemberController.java` | findUserInfo | 200 |
-| GET | `/api/notice` | `domain/notice/presentation/NoticeController.java` | findAllNotices | 200 |
-| POST | `/api/notice` | `domain/notice/presentation/NoticeController.java` | createNotice | 201 |
-| DELETE | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | deleteNotice | 204 |
-| GET | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | findNotice | 200 |
-| PATCH | `/api/notice/{noticeId}` | `domain/notice/presentation/NoticeController.java` | updateNotice | 200 |
+| GET | `/api/notice` | `adapter/web/notice/controller/NoticeController.java` (PR10) | findAllNotices | 200 |
+| POST | `/api/notice` | `adapter/web/notice/controller/NoticeController.java` (PR10) | createNotice | 201 |
+| DELETE | `/api/notice/{noticeId}` | `adapter/web/notice/controller/NoticeController.java` (PR10) | deleteNotice | 204 |
+| GET | `/api/notice/{noticeId}` | `adapter/web/notice/controller/NoticeController.java` (PR10) | findNotice | 200 |
+| PATCH | `/api/notice/{noticeId}` | `adapter/web/notice/controller/NoticeController.java` (PR10) | updateNotice | 200 |
 | GET | `/api/related-keyword` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | findAllKeywords | 200 |
 | GET | `/api/related-keyword/current` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | findMyKeywords | 200 |
 | DELETE | `/api/related-keyword/{memberRelatedKeywordId}` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | deleteMyKeyword | 204 |
@@ -757,11 +757,11 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/member/service/impl/FindMyInfoServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/member/service/FindMyInfoService.java`) |
 | `domain/member/service/impl/MemberWithdrawalServiceImpl.java` | 1 | PR11 (탈퇴 bridge, PR02 에서 유지) |
 | `domain/member/service/impl/UpdateMyInfoServiceImpl.java` | 1 | PR02 (완료: ActorContext, `application/member/service/UpdateMyInfoService.java`) |
-| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | 1 | PR10 |
-| `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | 1 | PR10 |
-| `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | 1 | PR10 |
-| `domain/notice/service/impl/FindNoticeServiceImpl.java` | 1 | PR10 |
-| `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | 1 | PR10 |
+| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | 1 | PR10 (완료: ActorContext) |
+| `domain/notice/service/impl/DeleteNoticeServiceImpl.java` | 1 | PR10 (완료: ActorContext) |
+| `domain/notice/service/impl/FindAllNoticeServiceImpl.java` | 1 | PR10 (완료: ActorContext) |
+| `domain/notice/service/impl/FindNoticeServiceImpl.java` | 1 | PR10 (완료: ActorContext) |
+| `domain/notice/service/impl/UpdateNoticeServiceImpl.java` | 1 | PR10 (완료: ActorContext) |
 | `domain/post/service/impl/CreateProductServiceImpl.java` | 1 | PR06 |
 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | 1 | PR06 |
 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | 1 | PR06 |
@@ -832,8 +832,8 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/auth/service/impl/SignUpServiceImpl.java` | CreateAlertEvent |
 | `domain/chat/service/impl/ChatMessageMutationService.java` | ChatMessageMutationEvent |
 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | SendNotificationEvent |
-| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | CreateAlertMembersEvent |
-| `domain/notice/service/impl/CreateNoticeServiceImpl.java` | SendNotificationEvent |
+| `adapter/integration/notice/NoticeNotificationAdapter.java` (PR10, 기준 `domain/notice/service/impl/CreateNoticeServiceImpl.java`) | CreateAlertMembersEvent (`adapter/event/alert`, AFTER_COMMIT async 유지) |
+| `adapter/integration/notice/NoticeNotificationAdapter.java` (PR10, 기준 `domain/notice/service/impl/CreateNoticeServiceImpl.java`) | PushRequestedEvent (기존 SendNotificationEvent, 회원 ID 만 전달) |
 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | ReservationCancelledEvent |
 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | TradeStatusChangedEvent |
 | `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | CreateAlertEvent |
@@ -903,9 +903,9 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `application/member/service/RegisterMemberService.java` (PR02 신규) | execute | `(기본)` 가입 트랜잭션에 참여 |
 | `application/member/service/ChangePasswordService.java` (PR02 신규) | execute | `(기본)` |
 | `application/member/service/MemberAccountService.java` (PR02 신규) | 클래스 | `(readOnly = true)` |
-| `domain/notice/service/impl/CreateNoticeServiceImpl.java:47` | execute | `(기본)` |
-| `domain/notice/service/impl/DeleteNoticeServiceImpl.java:25` | execute | `(기본)` |
-| `domain/notice/service/impl/UpdateNoticeServiceImpl.java:32` | execute | `(기본)` |
+| `application/notice/service/CreateNoticeService.java` (PR10, 기준 `domain/notice/service/impl/CreateNoticeServiceImpl.java:47`) | execute | `(기본)` |
+| `application/notice/service/DeleteNoticeService.java` (PR10, 기준 `domain/notice/service/impl/DeleteNoticeServiceImpl.java:25`) | execute | `(기본)` |
+| `application/notice/service/UpdateNoticeService.java` (PR10, 기준 `domain/notice/service/impl/UpdateNoticeServiceImpl.java:32`) | execute | `(기본)` |
 | `domain/notification/service/impl/SendNotificationServiceImpl.java:29` | execute | `(기본)` |
 | `domain/post/service/impl/CreateProductServiceImpl.java:31` | execute | `(기본)` |
 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java:24` | execute | `(기본)` |
@@ -996,8 +996,8 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `adapter/persistence/member/MemberJpaEntity.java` (entity name `Member`) | Entity | tbl_member | ManyToOne recommender:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` (entity name `MemberDetail`) | Entity | tbl_member_detail | OneToOne member:Member (fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}); ManyToOne dong:Dong (fetch = FetchType.LAZY); ManyToOne place:Place (fetch = FetchType.LAZY) | - | - |
 | `adapter/persistence/member/WithdrawalRecordJpaEntity.java` (entity name `WithdrawalRecord`) | Entity | tbl_withdrawal_record | - | - | Y |
-| `domain/notice/entity/Notice.java` | Entity | tbl_notice | ManyToOne place:Place (fetch = FetchType.LAZY); ManyToOne member:Member (fetch = FetchType.LAZY) | - | Y |
-| `domain/notice/entity/NoticeImage.java` | Entity | tbl_notice_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne notice:Notice (fetch = FetchType.LAZY) | - | - |
+| `adapter/persistence/notice/NoticeJpaEntity.java` (PR10) | Entity | tbl_notice | ManyToOne place:Place (fetch = FetchType.LAZY); ManyToOne member:MemberJpaEntity (fetch = FetchType.LAZY) | - | Y |
+| `adapter/persistence/notice/NoticeImageJpaEntity.java` (PR10) | Entity | tbl_notice_image | ManyToOne image:Image (fetch = FetchType.LAZY); ManyToOne notice:Notice (fetch = FetchType.LAZY) | - | - |
 | `domain/place/entity/Head.java` | Entity | tbl_head_place | - | - | - |
 | `domain/place/entity/Place.java` | Entity | tbl_place | ManyToOne head:Head (fetch = FetchType.LAZY) | - | - |
 | `domain/post/entity/Product.java` | Entity | tbl_product | ManyToOne member:Member (fetch = FetchType.LAZY) | EnumType.STRING | Y |
@@ -1030,9 +1030,9 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | `domain/chat/entity/ChatRoom.java` | seller | member.Member | ManyToOne |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` | dong | dong.DongJpaEntity (PR03) | ManyToOne |
 | `adapter/persistence/member/MemberDetailJpaEntity.java` | place | place.Place | ManyToOne |
-| `domain/notice/entity/Notice.java` | member | member.Member | ManyToOne |
-| `domain/notice/entity/Notice.java` | place | place.Place | ManyToOne |
-| `domain/notice/entity/NoticeImage.java` | image | image.Image | ManyToOne |
+| `adapter/persistence/notice/NoticeJpaEntity.java` (PR10) | member | member.MemberJpaEntity | ManyToOne |
+| `adapter/persistence/notice/NoticeJpaEntity.java` (PR10) | place | place.Place | ManyToOne |
+| `adapter/persistence/notice/NoticeImageJpaEntity.java` (PR10) | image | image.Image | ManyToOne |
 | `domain/post/entity/Product.java` | member | member.Member | ManyToOne |
 | `domain/post/entity/ProductImage.java` | image | image.Image | ManyToOne |
 | `domain/post/entity/ProductReservation.java` | reserver | member.Member | ManyToOne |
@@ -1074,19 +1074,19 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
 | `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
 | PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | (삭제) 예약 리마인더/취소가 SendPushUseCase 직접 호출 | PR06 완료 |
-| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 — **PR08 완료(채팅)**: `ChatPushBridge` 가 `PushRequestedEvent`(회원 ID) 발행, chat 의 DeviceToken 사용 0 |
+| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 — **PR08 완료(채팅)**: `ChatPushBridge` 가 `PushRequestedEvent`(회원 ID) 발행, chat 의 DeviceToken 사용 0 — **PR10 완료(공지)**: `NoticeNotificationAdapter` 가 `PushRequestedEvent` 발행, 남은 발행자 0 → `SendNotificationEvent`·`LegacySendNotificationEventBridge`·`LegacyDeviceTokens` 삭제 |
 | PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
-| PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
-| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 — **PR07 완료(철회)**: `productIdsByTradeCancel` → trade 공개 `TradeCancelQuery.findProductIds` |
+| PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 — **PR10 완료(공지)**: `noticeTitle` → notice 공개 `NoticeQuery.getTitle` |
+| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 — **PR07 완료(철회)**: `productIdsByTradeCancel` → trade 공개 `TradeCancelQuery.findProductIds` — **PR10 완료(공지)**: `noticeImages` → notice 공개 `NoticeQuery.findImageLinks` (연결 행 ID 유지, 공지 id 필터) |
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
 | PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** — **PR08 완료(채팅 조회 제거)** |
-| PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |
-| `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 |
+| PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) — **PR10 완료(공지)**: `noticeTitle` → notice 공개 `NoticeQuery.getTitle` |
+| `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 — **PR10 완료(notice)**: 이미지 존재 확인은 `ImageQuery.findAllByIds`, `NoticeImageJpaEntity` 의 Image 연관은 스키마 보존용 persistence 간 참조 |
 | `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
 | `ImageValidateUtil` (PR05 잔여) | **PR08 완료: 삭제**. chat `ChatImageBridge` 가 `ImageQuery.getAllByIds` 사용 | - |
 | `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | PR06 완료: 이벤트는 `adapter/event/image` 로 이동(ImageOwnerType 사용), ImageType 삭제 | - |
 | `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | PR06 완료: `adapter/http/ai` 로 이동, AiImageModerationAdapter·PostImageBridgeAdapter 가 사용 | - |
-| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | NoticeImageRepository 직접 사용 (post 는 UnlinkProductImageUseCase, report 는 UnlinkReportImageUseCase 로 교체 완료) | post=PR06 완료, report=PR09 완료, notice=PR10 공개 command 로 교체 |
+| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | post `UnlinkProductImageUseCase`, report `UnlinkReportImageUseCase`, notice `UnlinkNoticeImageUseCase` 사용 (legacy Repository 직접 사용 0) | post=PR06 완료, report=PR09 완료, notice=PR10 완료 |
 | PR06 `PostImageBridgeAdapter` (adapter/integration/post) | image 공개 ImageQuery 사용. 미사용 이미지 정리는 adapter/event/image 이벤트, 텍스트 검열은 adapter/http/ai 클라이언트 | - (전환 완료, 연결 adapter) |
 | PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 block 공개 BlockRelationQuery(PR09 완료) | 프로필 공개 query PR11/PR12 |
 | PR06 `PostChatBridgeAdapter` (adapter/integration/post) | **PR08 완료**: chat 공개 `ChatRoomLookupQuery`(방·대화 여부)·`SaveChatSystemMessageUseCase`(예약 취소 시스템 메시지, 호출자 트랜잭션 참여) 사용 | - (전환 완료, 연결 adapter) |
@@ -1108,3 +1108,6 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | report/suspend/block JpaRepository 직접 사용 (legacy) | admin `CreateAdminAlert`·`FindAlertByAlertTypeAndPlace`·`RejectAdminAlert`, member `MemberDeletionServiceImpl`(reassign/delete) | PR11 (필요 공개 Port 를 PR09 범위에 요청) |
 | PR08 chat 공개 Port 소비 | trade `TradeChatBridge`, post `PostChatBridgeAdapter` 가 `ChatRoomLookupQuery`·`SaveChatSystemMessageUseCase` 사용. post `ProductCustomRepository` 의 chat DTO 반환 메서드(`findRoomProductsWithImagesByIds`)는 삭제 | - |
 | chat JPA Repository 직접 사용 (legacy) | member `MemberDeletionServiceImpl` 의 채팅방·메시지 재지정(`reassignBuyer/Seller/Sender`). image `OrphanImageQueryAdapter` 의 `QChatMessageImageJpaEntity` 는 persistence 간 참조(허용) | PR11 (회원 탈퇴 정리 시 chat 공개 command 요청) |
+| PR10 `adapter/integration/notice/NoticeMemberAdapter` | member 공개 Port 에 "회원 소속 지점·지점 회원 id" 조회가 없어 `MemberDetailJpaRepository`·legacy `PlaceRepository.getReferenceById` 직접 사용 | member 공개 query 추가 시 교체, 최종 PR12 |
+| PR10 공개 Port 제공 | `NoticeQuery`(PR04 `LegacyAlertSourceAdapter.noticeTitle`·`LegacyAlertImageAdapter.noticeImages`), `UnlinkNoticeImageUseCase`(PR05 `LegacyImageReferenceCleanupAdapter` NOTICE) | - |
+| notice JPA 직접 사용 (legacy/persistence) | member `MemberDeletionServiceImpl` 의 `NoticeJpaRepository.reassignMember`(import 만 갱신). image `OrphanImageQueryAdapter` 의 `QNoticeImageJpaEntity` join 은 persistence 간 참조(SQL 무변경) | PR11 (공개 command), 최종 PR12 |

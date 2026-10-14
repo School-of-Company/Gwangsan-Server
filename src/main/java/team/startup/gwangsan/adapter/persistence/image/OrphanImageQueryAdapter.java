@@ -10,7 +10,7 @@ import java.util.List;
 
 import static team.startup.gwangsan.adapter.persistence.chat.QChatMessageImageJpaEntity.chatMessageImageJpaEntity;
 import static team.startup.gwangsan.domain.image.entity.QImage.image;
-import static team.startup.gwangsan.domain.notice.entity.QNoticeImage.noticeImage;
+import static team.startup.gwangsan.adapter.persistence.notice.QNoticeImageJpaEntity.noticeImageJpaEntity;
 import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
 import static team.startup.gwangsan.adapter.persistence.report.QReportImageJpaEntity.reportImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.QTradeCancelImageJpaEntity;
@@ -32,13 +32,13 @@ public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
         return queryFactory
                 .selectFrom(image)
                 .leftJoin(productImage).on(productImage.image.eq(image))
-                .leftJoin(noticeImage).on(noticeImage.image.eq(image))
+                .leftJoin(noticeImageJpaEntity).on(noticeImageJpaEntity.image.eq(image))
                 .leftJoin(reportImageJpaEntity).on(reportImageJpaEntity.image.eq(image))
                 .leftJoin(chatMessageImageJpaEntity).on(chatMessageImageJpaEntity.image.eq(image))
                 .leftJoin(tradeCancelImage).on(tradeCancelImage.image.eq(image))
                 .where(
                         productImage.id.isNull(),
-                        noticeImage.id.isNull(),
+                        noticeImageJpaEntity.id.isNull(),
                         reportImageJpaEntity.id.isNull(),
                         chatMessageImageJpaEntity.id.isNull(),
                         tradeCancelImage.id.isNull()

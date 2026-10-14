@@ -10,6 +10,8 @@ import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter
 import team.startup.gwangsan.application.chat.service.ChatRoomLookupService;
 import team.startup.gwangsan.adapter.persistence.alert.AlertPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.notice.NoticePersistenceAdapter;
+import team.startup.gwangsan.application.notice.service.NoticePublicQueryService;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ReservationPersistenceAdapter;
@@ -44,6 +46,7 @@ import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ChangeGwangsanService.class, MemberAccountService.class, MemberPersistenceAdapter.class,
         CreateAlertService.class, AlertPersistenceAdapter.class, LegacyAlertSourceAdapter.class,
+        NoticePublicQueryService.class, NoticePersistenceAdapter.class,
         BlockQueryService.class, MemberBlockPersistenceAdapter.class,
         ReportQueryService.class, ReportPersistenceAdapter.class, SuspensionQueryService.class, SuspendPersistenceAdapter.class})
 public class TradeIntegrationWiring {

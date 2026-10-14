@@ -8,16 +8,13 @@ import team.startup.gwangsan.application.alert.data.AlertImage;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCancelSource;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCompleteSource;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.ReportSource;
-import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
-import team.startup.gwangsan.domain.notice.entity.Notice;
-import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
-import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
+import team.startup.gwangsan.application.notice.data.NoticeImageLink;
+import team.startup.gwangsan.application.notice.port.in.NoticeQuery;
 import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.application.post.data.ProductImageLinkView;
@@ -62,7 +59,7 @@ class LegacyAlertBridgeTest {
         private final ReportQuery reports = mock(ReportQuery.class);
         private final SuspensionQuery suspends = mock(SuspensionQuery.class);
         private final TradeCancelJpaRepository cancels = mock(TradeCancelJpaRepository.class);
-        private final NoticeRepository notices = mock(NoticeRepository.class);
+        private final NoticeQuery notices = mock(NoticeQuery.class);
         private final LegacyAlertSourceAdapter adapter = new LegacyAlertSourceAdapter(
                 members, memberJpaRepository, trades, products, reviews, reports, suspends, cancels, notices);
 
@@ -77,7 +74,7 @@ class LegacyAlertBridgeTest {
             when(suspends.getSuspendedDays(any())).thenThrow(new NotFoundSuspendException());
             when(cancels.findById(any())).thenReturn(Optional.empty());
             when(cancels.findByIdWithTradeCompleteAndMember(any())).thenReturn(Optional.empty());
-            when(notices.findById(any())).thenReturn(Optional.empty());
+            when(notices.getTitle(any())).thenThrow(new NoticeNotFoundException());
 
             assertThatThrownBy(() -> adapter.requireMember(1L)).isInstanceOf(NotFoundMemberException.class);
             assertThatThrownBy(() -> adapter.tradeComplete(1L)).isInstanceOf(NotFoundTradeCompleteException.class);
@@ -129,7 +126,7 @@ class LegacyAlertBridgeTest {
     @DisplayName("LegacyAlertImageAdapter 는")
     class Describe_images {
 
-        private final NoticeImageRepository noticeImages = mock(NoticeImageRepository.class);
+        private final NoticeQuery noticeImages = mock(NoticeQuery.class);
         private final TradeCancelQuery tradeCancelQuery = mock(TradeCancelQuery.class);
         private final ProductImageQuery productImages = mock(ProductImageQuery.class);
         private final ReportQuery reportQuery = mock(ReportQuery.class);
@@ -147,13 +144,8 @@ class LegacyAlertBridgeTest {
         @Test
         @DisplayName("기존 응답처럼 imageId 에 연결 행 ID 를 넣는다")
         void it_uses_link_row_id_as_image_id() {
-            Notice notice = mock(Notice.class);
-            when(notice.getId()).thenReturn(100L);
-            NoticeImage link = mock(NoticeImage.class);
-            when(link.getId()).thenReturn(11L);
-            when(link.getNotice()).thenReturn(notice);
-            when(link.getImage()).thenReturn(Image.builder().imageUrl("https://n").build());
-            when(noticeImages.findAllByNoticeIdIn(List.of(100L))).thenReturn(List.of(link));
+            when(noticeImages.findImageLinks(List.of(100L)))
+                    .thenReturn(Map.of(100L, List.of(new NoticeImageLink(11L, 900L, "https://n"))));
 
             assertThat(adapter.noticeImages(List.of(100L))).isEqualTo(Map.of(100L, List.of(new AlertImage(11L, "https://n"))));
         }
