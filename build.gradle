@@ -103,14 +103,15 @@ jacocoTestReport {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
 				'**/GwangsanApplication*',
-				'**/global/config/**',
-				'**/global/security/config/**',
-				'**/global/querydsl/**',
-				'**/global/sms/**',
+				// 헥사고날 전환으로 옮긴 기존 제외 대상: global/config·querydsl → infrastructure/config,
+				// global/security/config → infrastructure/security/SecurityConfig, global/sms → adapter/sms, entity → *JpaEntity
+				'**/infrastructure/config/**',
+				'**/infrastructure/security/SecurityConfig*',
+				'**/adapter/sms/**',
 				'**/*Exception*',
 				'**/*Properties*',
 				'**/dto/**',
-				'**/entity/**',
+				'**/*JpaEntity*',
 				'**/projection/**',
 				'**/constant/**',
 			])
