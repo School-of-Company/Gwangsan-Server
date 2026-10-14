@@ -26,10 +26,6 @@ import team.startup.gwangsan.application.post.port.in.ValidateProductContentUseC
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.domain.post.presentation.dto.request.RequestTradeCompleteRequest;
-import team.startup.gwangsan.domain.post.presentation.dto.request.WithdrawTradeCompleteRequest;
-import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
-import team.startup.gwangsan.domain.post.service.WithdrawTradeCompleteService;
 
 import java.util.List;
 
@@ -47,9 +43,6 @@ public class PostController {
     private final MemberProductsQuery memberProductsQuery;
     private final ReserveProductUseCase reserveProductUseCase;
     private final CancelReservationUseCase cancelReservationUseCase;
-    // bridge: 거래 완료 요청/철회는 PR07 이 trade input Port 로 교체한다.
-    private final RequestTradeCompleteService requestTradeCompleteService;
-    private final WithdrawTradeCompleteService withdrawTradeCompleteService;
 
     @PostMapping
     public ResponseEntity<Void> createProduct(ActorContext actor, @RequestBody @Valid CreateProductRequest request) {
@@ -121,18 +114,6 @@ public class PostController {
         }
         return ResponseEntity.ok(GetProductResponse.from(memberProductsQuery.query(
                 new MemberProductsCriteria(memberId, type, mode, lastId, size, completed))));
-    }
-
-    @PostMapping("/trade")
-    public ResponseEntity<Void> tradeRequest(@RequestBody @Valid RequestTradeCompleteRequest request) {
-        requestTradeCompleteService.execute(request.productId(), request.otherMemberId());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @DeleteMapping("/trade")
-    public ResponseEntity<Void> tradeWithdraw(@RequestBody @Valid WithdrawTradeCompleteRequest request) {
-        withdrawTradeCompleteService.execute(request.productId(), request.otherMemberId());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PatchMapping("/reservation/{product_id}")

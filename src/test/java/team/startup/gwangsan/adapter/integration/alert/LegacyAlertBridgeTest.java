@@ -1,5 +1,6 @@
 package team.startup.gwangsan.adapter.integration.alert;
 
+import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,15 +26,15 @@ import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
-import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.exception.NotFoundSuspendException;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -53,12 +54,12 @@ class LegacyAlertBridgeTest {
 
         private final MemberAccountQuery members = mock(MemberAccountQuery.class);
         private final MemberJpaRepository memberJpaRepository = mock(MemberJpaRepository.class);
-        private final TradeCompleteRepository trades = mock(TradeCompleteRepository.class);
+        private final TradeCompleteJpaRepository trades = mock(TradeCompleteJpaRepository.class);
         private final ProductSnapshotQuery products = mock(ProductSnapshotQuery.class);
-        private final ReviewRepository reviews = mock(ReviewRepository.class);
+        private final ReviewJpaRepository reviews = mock(ReviewJpaRepository.class);
         private final ReportRepository reports = mock(ReportRepository.class);
         private final SuspendRepository suspends = mock(SuspendRepository.class);
-        private final TradeCancelRepository cancels = mock(TradeCancelRepository.class);
+        private final TradeCancelJpaRepository cancels = mock(TradeCancelJpaRepository.class);
         private final NoticeRepository notices = mock(NoticeRepository.class);
         private final LegacyAlertSourceAdapter adapter = new LegacyAlertSourceAdapter(
                 members, memberJpaRepository, trades, products, reviews, reports, suspends, cancels, notices);
@@ -96,12 +97,12 @@ class LegacyAlertBridgeTest {
             Product product = mock(Product.class);
             when(product.getId()).thenReturn(5L);
             when(product.getTitle()).thenReturn("상품");
-            TradeComplete trade = mock(TradeComplete.class);
+            TradeCompleteJpaEntity trade = mock(TradeCompleteJpaEntity.class);
             when(trade.getProduct()).thenReturn(product);
             when(trade.getBuyer()).thenReturn(buyer);
             when(trade.getSeller()).thenReturn(seller);
             when(trades.findById(1L)).thenReturn(Optional.of(trade));
-            TradeCancel cancel = mock(TradeCancel.class);
+            TradeCancelJpaEntity cancel = mock(TradeCancelJpaEntity.class);
             when(cancel.getMember()).thenReturn(buyer);
             when(cancel.getTradeComplete()).thenReturn(trade);
             when(cancels.findByIdWithTradeCompleteAndMember(9L)).thenReturn(Optional.of(cancel));
@@ -117,10 +118,10 @@ class LegacyAlertBridgeTest {
     class Describe_images {
 
         private final NoticeImageRepository noticeImages = mock(NoticeImageRepository.class);
-        private final TradeCancelRepository cancels = mock(TradeCancelRepository.class);
+        private final TradeCancelQuery tradeCancelQuery = mock(TradeCancelQuery.class);
         private final ProductImageQuery productImages = mock(ProductImageQuery.class);
         private final LegacyAlertImageAdapter adapter = new LegacyAlertImageAdapter(
-                noticeImages, productImages, mock(ReportImageRepository.class), cancels);
+                noticeImages, productImages, mock(ReportImageRepository.class), tradeCancelQuery);
 
         @Test
         @DisplayName("기존 응답처럼 imageId 에 연결 행 ID 를 넣는다")
@@ -146,12 +147,11 @@ class LegacyAlertBridgeTest {
         }
 
         @Test
-        @DisplayName("상품이 없는 거래 철회는 결과에서 뺀다")
-        void it_skips_trade_cancel_without_product() {
-            TradeCancel orphan = mock(TradeCancel.class);
-            when(cancels.findAllById(List.of(1L))).thenReturn(List.of(orphan));
+        @DisplayName("거래 철회 → 상품 ID 는 trade 공개 TradeCancelQuery 결과를 그대로 쓴다(없는 철회는 빠짐)")
+        void it_delegates_trade_cancel_products_to_trade_query() {
+            when(tradeCancelQuery.findProductIds(List.of(1L, 2L))).thenReturn(Map.of(1L, 5L));
 
-            assertThat(adapter.productIdsByTradeCancel(List.of(1L))).isEmpty();
+            assertThat(adapter.productIdsByTradeCancel(List.of(1L, 2L))).isEqualTo(Map.of(1L, 5L));
         }
     }
 

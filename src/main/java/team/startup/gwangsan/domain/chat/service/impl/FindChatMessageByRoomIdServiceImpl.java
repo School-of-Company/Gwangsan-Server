@@ -22,11 +22,11 @@ import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.ReservationStatus;
 import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductReservationRepository;
-import team.startup.gwangsan.domain.trade.service.TradeStateReader;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
+import team.startup.gwangsan.application.trade.data.CompletedTrade;
+import team.startup.gwangsan.application.trade.data.TradeStateKey;
+import team.startup.gwangsan.application.trade.port.in.CompletedTradeQuery;
+import team.startup.gwangsan.application.trade.port.in.TradeStateQuery;
+import team.startup.gwangsan.application.trade.data.TradeStateSnapshot;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -44,9 +44,9 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final ProductImageRepository productImageRepository;
-    private final TradeStateReader tradeStateReader;
+    private final TradeStateQuery tradeStateQuery;
     private final ProductReservationRepository productReservationRepository;
-    private final TradeCompleteRepository tradeCompleteRepository;
+    private final CompletedTradeQuery completedTradeQuery;
 
     @Override
     @Transactional
@@ -75,15 +75,14 @@ public class FindChatMessageByRoomIdServiceImpl implements FindChatMessageByRoom
         boolean isDeleted = product.getStatus() == ProductStatus.DELETED;
 
         // 거래 상태 변경 이벤트와 같은 값을 쓰기 위해 조회도 이 스냅샷을 거친다.
-        TradeStateSnapshot tradeState = tradeStateReader.read(product, chatRoom.getBuyer(), chatRoom.getSeller());
+        TradeStateSnapshot tradeState = tradeStateQuery.query(new TradeStateKey(product.getId(), chatRoom.getBuyer().getId(), chatRoom.getSeller().getId()));
         boolean isReserved = tradeState.reserved();
 
         Optional<ProductReservation> reservation = isReserved
                 ? productReservationRepository.findByProductAndStatus(product, ReservationStatus.PENDING)
                 : Optional.empty();
         LocalDateTime completedAt = tradeState.completed()
-                ? tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED)
-                    .map(TradeComplete::getCompletedAt).orElse(null)
+                ? completedTradeQuery.query(product.getId()).map(CompletedTrade::completedAt).orElse(null)
                 : null;
 
         GetChatProductDto productDto = new GetChatProductDto(

@@ -13,7 +13,7 @@ import static team.startup.gwangsan.domain.image.entity.QImage.image;
 import static team.startup.gwangsan.domain.notice.entity.QNoticeImage.noticeImage;
 import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
 import static team.startup.gwangsan.domain.report.entity.QReportImage.reportImage;
-import static team.startup.gwangsan.domain.trade.entity.QTradeCancelImage.tradeCancelImage;
+import team.startup.gwangsan.adapter.persistence.trade.QTradeCancelImageJpaEntity;
 
 /**
  * 기존 단일 join SQL·정렬·limit 를 그대로 유지한다. 타 업무 Q 타입 참조는 persistence 저장 모델 간 기존 association 의
@@ -22,6 +22,8 @@ import static team.startup.gwangsan.domain.trade.entity.QTradeCancelImage.tradeC
 @Repository
 @RequiredArgsConstructor
 public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
+
+    private static final QTradeCancelImageJpaEntity tradeCancelImage = QTradeCancelImageJpaEntity.tradeCancelImageJpaEntity;
 
     private final JPAQueryFactory queryFactory;
 

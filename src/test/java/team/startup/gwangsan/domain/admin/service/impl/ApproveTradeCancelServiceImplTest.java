@@ -4,30 +4,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import team.startup.gwangsan.application.trade.data.ApproveTradeCancelCommand;
+import team.startup.gwangsan.application.trade.port.in.ApproveTradeCancelUseCase;
 import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
-import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.adapter.persistence.post.Product;
-import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.service.TradeCancelApplier;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -36,174 +32,94 @@ import static org.mockito.Mockito.*;
 @DisplayName("ApproveTradeCancelServiceImpl 단위 테스트")
 class ApproveTradeCancelServiceImplTest {
 
-    private static final Long ALERT_ID = 10L;
-    private static final Long TRADE_CANCEL_ID = 5L;
-    private static final Long PRODUCT_ID = 7L;
-    private static final Long ADMIN_ID = 1L;
-    private static final Long BUYER_ID = 2L;
-    private static final Long SELLER_ID = 3L;
-
     @InjectMocks private ApproveTradeCancelServiceImpl service;
 
     @Mock private AdminAlertRepository adminAlertRepository;
-    @Mock private TradeCancelRepository tradeCancelRepository;
-    @Mock private ProductRepository productRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private ValidatePlaceUtil validatePlaceUtil;
-    @Mock private TradeCancelApplier tradeCancelApplier;
+    @Mock private ApproveTradeCancelUseCase approveTradeCancelUseCase;
 
-    private MemberJpaEntity member(Long id) {
-        MemberJpaEntity member = mock(MemberJpaEntity.class);
-        lenient().when(member.getId()).thenReturn(id);
-        return member;
-    }
+    private MemberJpaEntity admin;
+    private MemberDetailJpaEntity adminDetail;
 
-    /** 관리자 로그인 + 알림 조회까지 준비한다. */
-    private void givenAdminAndAlert() {
-        MemberJpaEntity admin = member(ADMIN_ID);
+    private void givenAlert() {
+        admin = mock(MemberJpaEntity.class);
+        when(admin.getId()).thenReturn(1L);
         when(memberUtil.getCurrentMember()).thenReturn(admin);
-
         AdminAlert alert = mock(AdminAlert.class);
-        lenient().when(alert.getSourceId()).thenReturn(TRADE_CANCEL_ID);
-        when(adminAlertRepository.findByIdWithMember(ALERT_ID)).thenReturn(Optional.of(alert));
-
-        when(memberDetailRepository.findById(ADMIN_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
+        when(alert.getSourceId()).thenReturn(20L);
+        when(adminAlertRepository.findByIdWithMember(5L)).thenReturn(Optional.of(alert));
+        adminDetail = mock(MemberDetailJpaEntity.class);
+        when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
     }
 
-    /** 잠금까지 통과한 뒤 반환될 TradeCancel 을 준비한다. */
-    private TradeCancel givenLockedTradeCancel() {
-        when(tradeCancelRepository.findProductIdById(TRADE_CANCEL_ID)).thenReturn(Optional.of(PRODUCT_ID));
-        when(productRepository.findByIdForUpdate(PRODUCT_ID)).thenReturn(Optional.of(mock(Product.class)));
-
-        MemberJpaEntity buyer = member(BUYER_ID);
-        MemberJpaEntity seller = member(SELLER_ID);
-
-        TradeComplete tradeComplete = mock(TradeComplete.class);
-        lenient().when(tradeComplete.getBuyer()).thenReturn(buyer);
-        lenient().when(tradeComplete.getSeller()).thenReturn(seller);
-
-        TradeCancel tradeCancel = mock(TradeCancel.class);
-        lenient().when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
-
-        when(tradeCancelRepository.findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(TRADE_CANCEL_ID))
-                .thenReturn(Optional.of(tradeCancel));
-
-        lenient().when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
-        lenient().when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
-
-        return tradeCancel;
+    /** trade use case 가 잠금 후 구매자/판매자로 인가 콜백을 호출하는 것을 흉내 낸다. */
+    private ApproveTradeCancelCommand executeAndCapture() {
+        service.execute(5L);
+        ArgumentCaptor<ApproveTradeCancelCommand> command = ArgumentCaptor.forClass(ApproveTradeCancelCommand.class);
+        verify(approveTradeCancelUseCase).execute(command.capture());
+        return command.getValue();
     }
 
     @Nested
-    @DisplayName("execute() 메서드는")
-    class Describe_execute {
+    @DisplayName("정상 승인 시")
+    class Context_success {
 
-        @Nested
-        @DisplayName("정상 승인 시")
-        class Context_with_valid_alert {
+        @Test
+        @DisplayName("알림의 sourceId 로 trade 의 철회 승인 command 에 위임한다")
+        void it_delegates_to_trade_use_case() {
+            givenAlert();
 
-            @Test
-            @DisplayName("상품 행을 잠근 뒤 철회 반영을 TradeCancelApplier 에 위임한다")
-            void it_delegates_to_applier() {
-                givenAdminAndAlert();
-                TradeCancel tradeCancel = givenLockedTradeCancel();
-
-                service.execute(ALERT_ID);
-
-                verify(productRepository).findByIdForUpdate(PRODUCT_ID);
-                verify(tradeCancelApplier).apply(tradeCancel);
-            }
-
-            @Test
-            @DisplayName("TradeCancel 은 잠금을 잡은 뒤에 조회한다")
-            void it_loads_trade_cancel_after_locking() {
-                givenAdminAndAlert();
-                givenLockedTradeCancel();
-
-                service.execute(ALERT_ID);
-
-                // 잠금 전에 엔티티를 읽으면 1차 캐시의 옛 상태를 보고 광산이 두 번 환불된다.
-                InOrder order = inOrder(tradeCancelRepository, productRepository);
-                order.verify(tradeCancelRepository).findProductIdById(TRADE_CANCEL_ID);
-                order.verify(productRepository).findByIdForUpdate(PRODUCT_ID);
-                order.verify(tradeCancelRepository).findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(TRADE_CANCEL_ID);
-            }
-
-            @Test
-            @DisplayName("구매자와 판매자 모두 관리자와 같은 지역인지 검증한다")
-            void it_validates_place_for_both_sides() {
-                givenAdminAndAlert();
-                givenLockedTradeCancel();
-
-                service.execute(ALERT_ID);
-
-                verify(validatePlaceUtil, times(2)).validateSamePlace(any(), any(), any());
-            }
-
-            @Test
-            @DisplayName("지역이 다르면 철회를 반영하지 않는다")
-            void it_does_not_apply_when_place_mismatched() {
-                givenAdminAndAlert();
-                givenLockedTradeCancel();
-
-                doThrow(new PlaceMismatchException()).when(validatePlaceUtil).validateSamePlace(any(), any(), any());
-
-                assertThatThrownBy(() -> service.execute(ALERT_ID))
-                        .isInstanceOf(PlaceMismatchException.class);
-
-                verify(tradeCancelApplier, never()).apply(any());
-            }
+            assertThat(executeAndCapture().tradeCancelId()).isEqualTo(20L);
         }
 
-        @Nested
-        @DisplayName("AlertId에 해당하는 알림이 없을 때")
-        class Context_with_alert_not_found {
+        @Test
+        @DisplayName("인가 콜백은 구매자와 판매자 모두 관리자와 같은 지역인지 검증한다")
+        void it_validates_both_participants_in_callback() {
+            givenAlert();
+            MemberDetailJpaEntity buyerDetail = mock(MemberDetailJpaEntity.class);
+            MemberDetailJpaEntity sellerDetail = mock(MemberDetailJpaEntity.class);
+            when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(buyerDetail));
+            when(memberDetailRepository.findById(3L)).thenReturn(Optional.of(sellerDetail));
 
-            @Test
-            @DisplayName("NotFoundAdminAlertException을 던진다")
-            void it_throws_not_found_admin_alert_exception() {
-                when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
-                when(adminAlertRepository.findByIdWithMember(ALERT_ID)).thenReturn(Optional.empty());
+            executeAndCapture().authorizer().authorize(2L, 3L);
 
-                assertThatThrownBy(() -> service.execute(ALERT_ID))
-                        .isInstanceOf(NotFoundAdminAlertException.class);
-            }
+            verify(validatePlaceUtil).validateSamePlace(admin, adminDetail, buyerDetail);
+            verify(validatePlaceUtil).validateSamePlace(admin, adminDetail, sellerDetail);
         }
 
-        @Nested
-        @DisplayName("TradeCancel이 없을 때")
-        class Context_with_trade_cancel_not_found {
+        @Test
+        @DisplayName("지역이 다르면 인가 콜백이 예외를 던져 trade 가 철회를 반영하지 않게 한다")
+        void it_fails_callback_on_region_mismatch() {
+            givenAlert();
+            MemberDetailJpaEntity buyerDetail = mock(MemberDetailJpaEntity.class);
+            when(memberDetailRepository.findById(2L)).thenReturn(Optional.of(buyerDetail));
+            when(memberDetailRepository.findById(3L)).thenReturn(Optional.of(mock(MemberDetailJpaEntity.class)));
+            doThrow(new PlaceMismatchException()).when(validatePlaceUtil).validateSamePlace(admin, adminDetail, buyerDetail);
 
-            @Test
-            @DisplayName("NotFoundTradeCancelException을 던진다")
-            void it_throws_not_found_trade_cancel_exception() {
-                givenAdminAndAlert();
-                when(tradeCancelRepository.findProductIdById(TRADE_CANCEL_ID)).thenReturn(Optional.empty());
+            ApproveTradeCancelCommand command = executeAndCapture();
 
-                assertThatThrownBy(() -> service.execute(ALERT_ID))
-                        .isInstanceOf(NotFoundTradeCancelException.class);
-
-                verify(productRepository, never()).findByIdForUpdate(any());
-            }
+            assertThatThrownBy(() -> command.authorizer().authorize(2L, 3L)).isInstanceOf(PlaceMismatchException.class);
         }
+    }
 
-        @Nested
-        @DisplayName("상품이 삭제되었을 때")
-        class Context_with_product_not_found {
+    @Test
+    @DisplayName("알림이 없으면 NotFoundAdminAlertException 을 던지고 trade 를 호출하지 않는다")
+    void it_requires_alert() {
+        when(memberUtil.getCurrentMember()).thenReturn(mock(MemberJpaEntity.class));
+        when(adminAlertRepository.findByIdWithMember(5L)).thenReturn(Optional.empty());
 
-            @Test
-            @DisplayName("NotFoundProductException을 던진다")
-            void it_throws_not_found_product_exception() {
-                givenAdminAndAlert();
-                when(tradeCancelRepository.findProductIdById(TRADE_CANCEL_ID)).thenReturn(Optional.of(PRODUCT_ID));
-                when(productRepository.findByIdForUpdate(PRODUCT_ID)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.execute(5L)).isInstanceOf(NotFoundAdminAlertException.class);
+        verifyNoInteractions(approveTradeCancelUseCase);
+    }
 
-                assertThatThrownBy(() -> service.execute(ALERT_ID))
-                        .isInstanceOf(NotFoundProductException.class);
+    @Test
+    @DisplayName("trade 의 오류(철회 요청 없음 등)를 그대로 전달한다")
+    void it_propagates_trade_errors() {
+        givenAlert();
+        doThrow(new NotFoundTradeCancelException()).when(approveTradeCancelUseCase).execute(any());
 
-                verify(tradeCancelApplier, never()).apply(any());
-            }
-        }
+        assertThatThrownBy(() -> service.execute(5L)).isInstanceOf(NotFoundTradeCancelException.class);
     }
 }

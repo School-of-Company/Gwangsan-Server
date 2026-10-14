@@ -22,10 +22,10 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 import java.util.Optional;
 
@@ -40,11 +40,11 @@ class MemberDeletionServiceImplTest {
 
     @Mock private MemberJpaRepository memberRepository;
     @Mock private ProductRepository productRepository;
-    @Mock private TradeCompleteRepository tradeCompleteRepository;
-    @Mock private TradeCancelRepository tradeCancelRepository;
+    @Mock private TradeCompleteJpaRepository tradeCompleteRepository;
+    @Mock private TradeCancelJpaRepository tradeCancelRepository;
     @Mock private ChatRoomRepository chatRoomRepository;
     @Mock private ChatMessageRepository chatMessageRepository;
-    @Mock private ReviewRepository reviewRepository;
+    @Mock private ReviewJpaRepository reviewRepository;
     @Mock private ReportRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private AlertJpaRepository alertRepository;

@@ -289,7 +289,7 @@
 | 267 | `domain/place/entity/Head.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — Place association·QueryDSL 호출자(PR02·06·07·09·10·11) 전환 후 PR12 최종 단계에서 PR03 이 이동(legacy 태그 PR12) |
 | 268 | `domain/place/entity/Place.java` | = | place | jpa entity | adapter/persistence/place (JpaEntity) + domain/place/model (순수 모델, 규칙 있을 때) | PR12 | legacy 유지 — 위와 같음, PlaceQuery/PlacePersistenceAdapter 가 내부 사용(legacy 태그 PR12) |
 | 269 | `domain/place/exception/PlaceMismatchException.java` | = (위치 유지) | place | exception | domain/place/exception | PR03 | PR03 완료 |
-| 270 | `domain/place/presentation/dto/PlaceDto.java` | = | place | web dto | adapter/web/place/dto | PR07 | legacy 유지 — trade 응답 전용 DTO, PR07 이 trade web DTO 로 흡수하며 제거(legacy 태그 PR07) |
+| 270 | `domain/place/presentation/dto/PlaceDto.java` | (삭제) → adapter/web/trade/dto/TradePlaceResponse.java (같은 JSON id·name) | place | web dto | adapter/web/place/dto | PR07 | PR07 완료 |
 | 271 | `domain/place/repository/PlaceRepository.java` | = | place | repository | adapter/persistence/place (JpaRepository) + application/place/port/out | PR12 | legacy 유지 — PlacePersistenceAdapter 내부 사용(+findAllByHeadId), 호출자(PR07·10·11) 전환 후 PR12 최종 단계에서 이동(legacy 태그 PR12) |
 | 272 | `domain/post/entity/Product.java` | `adapter/persistence/post/Product.java` | post | jpa entity | adapter/persistence/post/ (저장 모델, 이름 유지) + domain/post/model/Product (순수 모델) | PR06 | PR06 완료 (타 업무 legacy 호출자는 import만 갱신) |
 | 273 | `domain/post/entity/ProductImage.java` | `adapter/persistence/post/ProductImage.java` | post | jpa entity | adapter/persistence/post/ (저장 모델) | PR06 | PR06 완료 (타 업무 legacy 호출자는 import만 갱신) |
@@ -310,9 +310,9 @@
 | 288 | `domain/post/presentation/PostController.java` | `adapter/web/post/controller/PostController.java` | post | controller | adapter/web/post/controller | PR06 | PR06 완료 (`/trade` 2개는 PR07 bridge) |
 | 289 | `domain/post/presentation/dto/request/CreateProductRequest.java` | `adapter/web/post/dto/CreateProductRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
 | 290 | `domain/post/presentation/dto/request/PatchProductRequest.java` | `adapter/web/post/dto/PatchProductRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
-| 291 | `domain/post/presentation/dto/request/RequestTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
+| 291 | `domain/post/presentation/dto/request/RequestTradeCompleteRequest.java` | `adapter/web/trade/dto/RequestTradeCompleteRequest.java` | post | web dto | adapter/web/post/dto | PR07 | PR07 완료 |
 | 292 | `domain/post/presentation/dto/request/ReservationRequest.java` | `adapter/web/post/dto/ReservationRequest.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
-| 293 | `domain/post/presentation/dto/request/WithdrawTradeCompleteRequest.java` | = | post | web dto | adapter/web/post/dto | PR07 | legacy |
+| 293 | `domain/post/presentation/dto/request/WithdrawTradeCompleteRequest.java` | `adapter/web/trade/dto/WithdrawTradeCompleteRequest.java` | post | web dto | adapter/web/post/dto | PR07 | PR07 완료 |
 | 294 | `domain/post/presentation/dto/response/GetProductByIdResponse.java` | `adapter/web/post/dto/GetProductByIdResponse.java` | post | web dto | adapter/web/post/dto | PR06 | PR06 완료 |
 | 295 | `domain/post/presentation/dto/response/GetProductMemberResponse.java` | `adapter/web/post/dto/GetProductMemberResponse.java` | post | web dto | adapter/web/post/dto (legacy 사본 삭제, member QueryDSL projection·admin 호출자 import 갱신) | PR06 | PR06 완료 |
 | 296 | `domain/post/presentation/dto/response/GetProductResponse.java` | `adapter/web/post/dto/GetProductResponse.java` | post | web dto | adapter/web/post/dto (legacy 사본 삭제, admin 호출자는 이미지 원소 타입만 ProductImageResponse 로 갱신) | PR06 | PR06 완료 |
@@ -331,10 +331,10 @@
 | 309 | `domain/post/service/FindProductsByMemberIdService.java` | `(삭제)` | post | service interface | application/post/port/in/MemberProductsQuery | PR06 | PR06 완료 |
 | 310 | `domain/post/service/FindProductsByTypeAndModeService.java` | `(삭제)` | post | service interface | application/post/port/in/PlaceProductsQuery | PR06 | PR06 완료 |
 | 311 | `domain/post/service/ProductContentValidationService.java` | `(삭제)` | post | service interface | application/post/port/in/ValidateProductContentUseCase | PR06 | PR06 완료 |
-| 312 | `domain/post/service/RequestTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
+| 312 | `domain/post/service/RequestTradeCompleteService.java` | (삭제) → application/trade/port/in/RequestTradeCompletionUseCase.java | post | service interface | application/post/port/in (UseCase/Query) | PR07 | PR07 완료 |
 | 313 | `domain/post/service/ReservationProductService.java` | `(삭제)` | post | service interface | application/post/port/in/ReserveProductUseCase | PR06 | PR06 완료 |
 | 314 | `domain/post/service/UpdateProductService.java` | `(삭제)` | post | service interface | application/post/port/in/UpdateProductUseCase | PR06 | PR06 완료 |
-| 315 | `domain/post/service/WithdrawTradeCompleteService.java` | = | post | service interface | application/post/port/in (UseCase/Query) | PR07 | legacy |
+| 315 | `domain/post/service/WithdrawTradeCompleteService.java` | (삭제) → application/trade/port/in/WithdrawTradeCompletionUseCase.java | post | service interface | application/post/port/in (UseCase/Query) | PR07 | PR07 완료 |
 | 316 | `domain/post/service/impl/CreateProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/CreateProductService | PR06 | PR06 완료 |
 | 317 | `domain/post/service/impl/DeleteProductByIdServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/DeleteProductService | PR06 | PR06 완료 |
 | 318 | `domain/post/service/impl/DeleteReservationProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/CancelReservationService | PR06 | PR06 완료 |
@@ -343,11 +343,11 @@
 | 321 | `domain/post/service/impl/FindProductsByMemberIdServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductListQueryService | PR06 | PR06 완료 |
 | 322 | `domain/post/service/impl/FindProductsByTypeAndModeServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ProductListQueryService | PR06 | PR06 완료 |
 | 323 | `domain/post/service/impl/ProductContentValidationServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ValidateProductContentService | PR06 | PR06 완료 |
-| 324 | `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
+| 324 | `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` | (삭제) → application/trade/service/RequestTradeCompletionService.java | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | PR07 완료 |
 | 325 | `domain/post/service/impl/ReservationProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/ReserveProductService | PR06 | PR06 완료 |
 | 326 | `domain/post/service/impl/ReservationReminderSender.java` | `(삭제)` | post | service impl | application/post/service/ReservationReminderService | PR06 | PR06 완료 |
 | 327 | `domain/post/service/impl/UpdateProductServiceImpl.java` | `(삭제)` | post | service impl | application/post/service/UpdateProductService | PR06 | PR06 완료 |
-| 328 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | = | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | legacy |
+| 328 | `domain/post/service/impl/WithdrawTradeCompleteServiceImpl.java` | (삭제) → application/trade/service/WithdrawTradeCompletionService.java | post | service impl | application/post/service (+ 필요한 output Port) | PR07 | PR07 완료 |
 | 329 | `domain/relatedkeyword/entity/MemberRelatedKeyword.java` | `adapter/persistence/relatedkeyword/MemberRelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 330 | `domain/relatedkeyword/entity/RelatedKeyword.java` | `adapter/persistence/relatedkeyword/RelatedKeywordJpaEntity.java` | relatedkeyword | jpa entity | adapter/persistence/relatedkeyword (JpaEntity) + domain/relatedkeyword/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 331 | `domain/relatedkeyword/exception/MemberRelatedKeywordForbiddenException.java` | = (위치 유지) | relatedkeyword | exception | domain/relatedkeyword/exception | PR03 | PR03 완료 |
@@ -381,31 +381,31 @@
 | 359 | `domain/report/repository/custom/impl/ReportImageCustomRepositoryImpl.java` | = | report | querydsl | adapter/persistence/report (QueryPort 구현) | PR09 | legacy |
 | 360 | `domain/report/service/CreateReportService.java` | = | report | service interface | application/report/port/in (UseCase/Query) | PR09 | legacy |
 | 361 | `domain/report/service/impl/CreateReportServiceImpl.java` | = | report | service impl | application/report/service (+ 필요한 output Port) | PR09 | legacy |
-| 362 | `domain/review/entity/Review.java` | = | review | jpa entity | adapter/persistence/review (JpaEntity) + domain/review/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
-| 363 | `domain/review/exception/AlreadyReviewedException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
-| 364 | `domain/review/exception/CannotReviewBeforeTradeException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
-| 365 | `domain/review/exception/CannotReviewSelfException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
-| 366 | `domain/review/exception/NotFoundReviewException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
-| 367 | `domain/review/exception/NotTradeParticipantException.java` | = | review | exception | domain/review/exception | PR07 | legacy |
-| 368 | `domain/review/presentation/ReviewController.java` | = | review | controller | adapter/web/review/controller | PR07 | legacy |
-| 369 | `domain/review/presentation/dto/request/CreateReviewRequest.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
-| 370 | `domain/review/presentation/dto/response/ReviewDetailResponse.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
-| 371 | `domain/review/presentation/dto/response/ReviewResponse.java` | = | review | web dto | adapter/web/review/dto | PR07 | legacy |
-| 372 | `domain/review/repository/ReviewRepository.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
-| 373 | `domain/review/repository/custom/ReviewCustomRepository.java` | = | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | legacy |
-| 374 | `domain/review/repository/custom/impl/ReviewCustomRepositoryImpl.java` | = | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | legacy |
-| 375 | `domain/review/repository/projection/MyReviewDto.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
-| 376 | `domain/review/repository/projection/ReceivedReviewDto.java` | = | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | legacy |
-| 377 | `domain/review/service/CreateReviewService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
-| 378 | `domain/review/service/GetMyReviewListService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
-| 379 | `domain/review/service/GetReceivedReviewListService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
-| 380 | `domain/review/service/GetReviewByMemberService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
-| 381 | `domain/review/service/GetReviewDetailService.java` | = | review | service interface | application/review/port/in (UseCase/Query) | PR07 | legacy |
-| 382 | `domain/review/service/impl/CreateReviewServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
-| 383 | `domain/review/service/impl/GetMyReviewListServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
-| 384 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
-| 385 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
-| 386 | `domain/review/service/impl/GetReviewDetailServiceImpl.java` | = | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | legacy |
+| 362 | `domain/review/entity/Review.java` | `adapter/persistence/review/ReviewJpaEntity.java` + `domain/review/model/Review.java` | review | jpa entity | adapter/persistence/review (JpaEntity) + domain/review/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
+| 363 | `domain/review/exception/AlreadyReviewedException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
+| 364 | `domain/review/exception/CannotReviewBeforeTradeException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
+| 365 | `domain/review/exception/CannotReviewSelfException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
+| 366 | `domain/review/exception/NotFoundReviewException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
+| 367 | `domain/review/exception/NotTradeParticipantException.java` | = | review | exception | domain/review/exception | PR07 | PR07 완료 |
+| 368 | `domain/review/presentation/ReviewController.java` | `adapter/web/review/controller/ReviewController.java` | review | controller | adapter/web/review/controller | PR07 | PR07 완료 |
+| 369 | `domain/review/presentation/dto/request/CreateReviewRequest.java` | `adapter/web/review/dto/CreateReviewRequest.java` | review | web dto | adapter/web/review/dto | PR07 | PR07 완료 |
+| 370 | `domain/review/presentation/dto/response/ReviewDetailResponse.java` | `adapter/web/review/dto/ReviewDetailResponse.java` | review | web dto | adapter/web/review/dto | PR07 | PR07 완료 |
+| 371 | `domain/review/presentation/dto/response/ReviewResponse.java` | `adapter/web/review/dto/ReviewResponse.java` | review | web dto | adapter/web/review/dto | PR07 | PR07 완료 |
+| 372 | `domain/review/repository/ReviewRepository.java` | `adapter/persistence/review/ReviewJpaRepository.java` | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | PR07 완료 |
+| 373 | `domain/review/repository/custom/ReviewCustomRepository.java` | `adapter/persistence/review/ReviewCustomRepository.java` | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | PR07 완료 |
+| 374 | `domain/review/repository/custom/impl/ReviewCustomRepositoryImpl.java` | `adapter/persistence/review/ReviewCustomRepositoryImpl.java` | review | querydsl | adapter/persistence/review (QueryPort 구현) | PR07 | PR07 완료 |
+| 375 | `domain/review/repository/projection/MyReviewDto.java` | `adapter/persistence/review/MyReviewDto.java` | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | PR07 완료 |
+| 376 | `domain/review/repository/projection/ReceivedReviewDto.java` | `adapter/persistence/review/ReceivedReviewDto.java` | review | repository | adapter/persistence/review (JpaRepository) + application/review/port/out | PR07 | PR07 완료 |
+| 377 | `domain/review/service/CreateReviewService.java` | (삭제) → application/review/port/in/CreateReviewUseCase.java | review | service interface | application/review/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 378 | `domain/review/service/GetMyReviewListService.java` | (삭제) → application/review/port/in/ReviewQuery.java | review | service interface | application/review/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 379 | `domain/review/service/GetReceivedReviewListService.java` | (삭제) → application/review/port/in/ReviewQuery.java | review | service interface | application/review/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 380 | `domain/review/service/GetReviewByMemberService.java` | (삭제) → application/review/port/in/ReviewQuery.java | review | service interface | application/review/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 381 | `domain/review/service/GetReviewDetailService.java` | (삭제) → application/review/port/in/ReviewQuery.java | review | service interface | application/review/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 382 | `domain/review/service/impl/CreateReviewServiceImpl.java` | (삭제) → application/review/service/CreateReviewService.java | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 383 | `domain/review/service/impl/GetMyReviewListServiceImpl.java` | (삭제) → application/review/service/ReviewQueryService.java | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 384 | `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | (삭제) → application/review/service/ReviewQueryService.java | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 385 | `domain/review/service/impl/GetReviewByMemberServiceImpl.java` | (삭제) → application/review/service/ReviewQueryService.java | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 386 | `domain/review/service/impl/GetReviewDetailServiceImpl.java` | (삭제) → application/review/service/ReviewQueryService.java | review | service impl | application/review/service (+ 필요한 output Port) | PR07 | PR07 완료 |
 | 387 | `domain/sms/exception/AlreadyRegisteredPhoneNumberException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
 | 388 | `domain/sms/exception/AuthCodeGenerationException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
 | 389 | `domain/sms/exception/NotMatchRandomCodeException.java` | = | sms | exception | domain/sms/exception | PR02 | 전환 (순수 domain 예외, 위치 유지) |
@@ -434,57 +434,57 @@
 | 412 | `domain/suspend/repository/SuspendRepository.java` | = | suspend | repository | adapter/persistence/suspend (JpaRepository) + application/suspend/port/out | PR09 | legacy |
 | 413 | `domain/suspend/service/SuspendMemberService.java` | = | suspend | service interface | application/suspend/port/in (UseCase/Query) | PR09 | legacy |
 | 414 | `domain/suspend/service/impl/SuspendMemberServiceImpl.java` | = | suspend | service impl | application/suspend/service (+ 필요한 output Port) | PR09 | legacy |
-| 415 | `domain/trade/entity/TradeCancel.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
-| 416 | `domain/trade/entity/TradeCancelImage.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
-| 417 | `domain/trade/entity/TradeComplete.java` | = | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | legacy |
-| 418 | `domain/trade/entity/constant/TradeCancelStatus.java` | = | trade | enum | domain/trade/model | PR07 | legacy |
-| 419 | `domain/trade/entity/constant/TradeStatus.java` | = | trade | enum | domain/trade/model | PR07 | legacy |
-| 420 | `domain/trade/exception/AlreadyTradeCancelRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 421 | `domain/trade/exception/CannotPendingTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 422 | `domain/trade/exception/CannotSelectSelfException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 423 | `domain/trade/exception/InvalidTradeStatisticsPeriodException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 424 | `domain/trade/exception/NotFoundTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 425 | `domain/trade/exception/NotFoundTradeCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 426 | `domain/trade/exception/NotTradeCancelRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 427 | `domain/trade/exception/NotTradeCompleteRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 428 | `domain/trade/exception/TradeAlreadyCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 429 | `domain/trade/exception/TradeAlreadyCompleteRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 430 | `domain/trade/exception/TradeCompleteWithoutChattingException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 431 | `domain/trade/exception/TradeParticipantOnlyException.java` | = | trade | exception | domain/trade/exception | PR07 | legacy |
-| 432 | `domain/trade/presentation/TradeController.java` | = | trade | controller | adapter/web/trade/controller | PR07 | legacy |
-| 433 | `domain/trade/presentation/dto/request/TradeCancelRequest.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 434 | `domain/trade/presentation/dto/request/constant/Period.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 435 | `domain/trade/presentation/dto/response/GetTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 436 | `domain/trade/presentation/dto/response/GetTradeMemberResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 437 | `domain/trade/presentation/dto/response/GetTradeProductResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 438 | `domain/trade/presentation/dto/response/HeadTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 439 | `domain/trade/presentation/dto/response/PlaceTradeHistoryResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 440 | `domain/trade/presentation/dto/response/TradeCancelResponse.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 441 | `domain/trade/presentation/dto/response/constant/TradeRole.java` | = | trade | web dto | adapter/web/trade/dto | PR07 | legacy |
-| 442 | `domain/trade/repository/TradeCancelImageRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
-| 443 | `domain/trade/repository/TradeCancelRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
-| 444 | `domain/trade/repository/TradeCompleteRepository.java` | = | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | legacy |
-| 445 | `domain/trade/repository/custom/TradeCancelCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 446 | `domain/trade/repository/custom/TradeCancelImageCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 447 | `domain/trade/repository/custom/TradeCompleteCustomRepository.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 448 | `domain/trade/repository/custom/impl/TradeCancelCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 449 | `domain/trade/repository/custom/impl/TradeCancelImageCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 450 | `domain/trade/repository/custom/impl/TradeCompleteCustomRepositoryImpl.java` | = | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | legacy |
-| 451 | `domain/trade/service/FindMyTradeHistoryService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 452 | `domain/trade/service/TradeCancelApplier.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 453 | `domain/trade/service/TradeCancelService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 454 | `domain/trade/service/TradeCancelWithdrawService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 455 | `domain/trade/service/TradeHistoryByHeadService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 456 | `domain/trade/service/TradeHistoryByPlaceService.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 457 | `domain/trade/service/TradeStateReader.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 458 | `domain/trade/service/TradeStateSnapshot.java` | = | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | legacy |
-| 459 | `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
-| 460 | `domain/trade/service/impl/TradeCancelServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
-| 461 | `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
-| 462 | `domain/trade/service/impl/TradeHistoryByHeadServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
-| 463 | `domain/trade/service/impl/TradeHistoryByPlaceServiceImpl.java` | = | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | legacy |
-| 464 | `global/aop/BlockAspect.java` | = | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | legacy |
-| 465 | `global/aop/CheckBlocked.java` | = | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | legacy |
+| 415 | `domain/trade/entity/TradeCancel.java` | `adapter/persistence/trade/TradeCancelJpaEntity.java` + `domain/trade/model/TradeCancel.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
+| 416 | `domain/trade/entity/TradeCancelImage.java` | `adapter/persistence/trade/TradeCancelImageJpaEntity.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
+| 417 | `domain/trade/entity/TradeComplete.java` | `adapter/persistence/trade/TradeCompleteJpaEntity.java` + `domain/trade/model/TradeComplete.java` | trade | jpa entity | adapter/persistence/trade (JpaEntity) + domain/trade/model (순수 모델, 규칙 있을 때) | PR07 | PR07 완료 |
+| 418 | `domain/trade/entity/constant/TradeCancelStatus.java` | `domain/trade/model/TradeCancelStatus.java` | trade | enum | domain/trade/model | PR07 | PR07 완료 |
+| 419 | `domain/trade/entity/constant/TradeStatus.java` | `domain/trade/model/TradeStatus.java` | trade | enum | domain/trade/model | PR07 | PR07 완료 |
+| 420 | `domain/trade/exception/AlreadyTradeCancelRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 421 | `domain/trade/exception/CannotPendingTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 422 | `domain/trade/exception/CannotSelectSelfException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 423 | `domain/trade/exception/InvalidTradeStatisticsPeriodException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 424 | `domain/trade/exception/NotFoundTradeCancelException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 425 | `domain/trade/exception/NotFoundTradeCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 426 | `domain/trade/exception/NotTradeCancelRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 427 | `domain/trade/exception/NotTradeCompleteRequesterException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 428 | `domain/trade/exception/TradeAlreadyCompleteException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 429 | `domain/trade/exception/TradeAlreadyCompleteRequestException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 430 | `domain/trade/exception/TradeCompleteWithoutChattingException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 431 | `domain/trade/exception/TradeParticipantOnlyException.java` | = | trade | exception | domain/trade/exception | PR07 | PR07 완료 |
+| 432 | `domain/trade/presentation/TradeController.java` | `adapter/web/trade/controller/TradeController.java` | trade | controller | adapter/web/trade/controller | PR07 | PR07 완료 |
+| 433 | `domain/trade/presentation/dto/request/TradeCancelRequest.java` | `adapter/web/trade/dto/TradeCancelRequest.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 434 | `domain/trade/presentation/dto/request/constant/Period.java` | `adapter/web/trade/dto/Period.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 435 | `domain/trade/presentation/dto/response/GetTradeHistoryResponse.java` | `adapter/web/trade/dto/GetTradeHistoryResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 436 | `domain/trade/presentation/dto/response/GetTradeMemberResponse.java` | `adapter/web/trade/dto/GetTradeMemberResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 437 | `domain/trade/presentation/dto/response/GetTradeProductResponse.java` | `adapter/web/trade/dto/GetTradeProductResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 438 | `domain/trade/presentation/dto/response/HeadTradeHistoryResponse.java` | `adapter/web/trade/dto/HeadTradeHistoryResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 439 | `domain/trade/presentation/dto/response/PlaceTradeHistoryResponse.java` | `adapter/web/trade/dto/PlaceTradeHistoryResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 440 | `domain/trade/presentation/dto/response/TradeCancelResponse.java` | `adapter/web/trade/dto/TradeCancelResponse.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 441 | `domain/trade/presentation/dto/response/constant/TradeRole.java` | `adapter/web/trade/dto/TradeRole.java` | trade | web dto | adapter/web/trade/dto | PR07 | PR07 완료 |
+| 442 | `domain/trade/repository/TradeCancelImageRepository.java` | `adapter/persistence/trade/TradeCancelImageJpaRepository.java` | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | PR07 완료 |
+| 443 | `domain/trade/repository/TradeCancelRepository.java` | `adapter/persistence/trade/TradeCancelJpaRepository.java` | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | PR07 완료 |
+| 444 | `domain/trade/repository/TradeCompleteRepository.java` | `adapter/persistence/trade/TradeCompleteJpaRepository.java` | trade | repository | adapter/persistence/trade (JpaRepository) + application/trade/port/out | PR07 | PR07 완료 |
+| 445 | `domain/trade/repository/custom/TradeCancelCustomRepository.java` | `adapter/persistence/trade/TradeCancelCustomRepository.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 446 | `domain/trade/repository/custom/TradeCancelImageCustomRepository.java` | `adapter/persistence/trade/TradeCancelImageCustomRepository.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 447 | `domain/trade/repository/custom/TradeCompleteCustomRepository.java` | `adapter/persistence/trade/TradeCompleteCustomRepository.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 448 | `domain/trade/repository/custom/impl/TradeCancelCustomRepositoryImpl.java` | `adapter/persistence/trade/TradeCancelCustomRepositoryImpl.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 449 | `domain/trade/repository/custom/impl/TradeCancelImageCustomRepositoryImpl.java` | `adapter/persistence/trade/TradeCancelImageCustomRepositoryImpl.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 450 | `domain/trade/repository/custom/impl/TradeCompleteCustomRepositoryImpl.java` | `adapter/persistence/trade/TradeCompleteCustomRepositoryImpl.java` | trade | querydsl | adapter/persistence/trade (QueryPort 구현) | PR07 | PR07 완료 |
+| 451 | `domain/trade/service/FindMyTradeHistoryService.java` | (삭제) → application/trade/port/in/TradeHistoryQuery.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 452 | `domain/trade/service/TradeCancelApplier.java` | `application/trade/service/TradeCancelApplier.java` | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 453 | `domain/trade/service/TradeCancelService.java` | (삭제) → application/trade/port/in/RequestTradeCancelUseCase.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 454 | `domain/trade/service/TradeCancelWithdrawService.java` | (삭제) → application/trade/port/in/WithdrawTradeCancelUseCase.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 455 | `domain/trade/service/TradeHistoryByHeadService.java` | (삭제) → application/trade/port/in/TradeStatisticsQuery.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 456 | `domain/trade/service/TradeHistoryByPlaceService.java` | (삭제) → application/trade/port/in/TradeStatisticsQuery.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 457 | `domain/trade/service/TradeStateReader.java` | (삭제) → application/trade/port/in/TradeStateQuery.java + service/TradeStateService.java | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 458 | `domain/trade/service/TradeStateSnapshot.java` | `application/trade/data/TradeStateSnapshot.java` (+ 규칙 `domain/trade/model/TradeState.java`) | trade | service interface | application/trade/port/in (UseCase/Query) | PR07 | PR07 완료 |
+| 459 | `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | (삭제) → application/trade/service/TradeHistoryService.java | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 460 | `domain/trade/service/impl/TradeCancelServiceImpl.java` | (삭제) → application/trade/service/RequestTradeCancelService.java | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 461 | `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | (삭제) → application/trade/service/WithdrawTradeCancelService.java | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 462 | `domain/trade/service/impl/TradeHistoryByHeadServiceImpl.java` | (삭제) → application/trade/service/TradeStatisticsService.java | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 463 | `domain/trade/service/impl/TradeHistoryByPlaceServiceImpl.java` | (삭제) → application/trade/service/TradeStatisticsService.java | trade | service impl | application/trade/service (+ 필요한 output Port) | PR07 | PR07 완료 |
+| 464 | `global/aop/BlockAspect.java` | (삭제) → application/trade/port/out/TradeBlockPort.java + adapter/integration/trade/TradeBlockBridge.java | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | PR07 완료 |
+| 465 | `global/aop/CheckBlocked.java` | (삭제) (유일 사용처가 거래 완료 요청이었음) | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | PR07 완료 |
 | 466 | `global/auth/MemberDetails.java` | `adapter/security/auth/MemberDetails.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
 | 467 | `global/auth/MemberDetailsService.java` | `adapter/security/auth/MemberDetailsService.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
 | 468 | `global/chat/notification/ChattingServerMessageMutationNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
@@ -511,7 +511,7 @@
 | 489 | `global/event/DeleteNotUsedImageEvent.java` | `adapter/event/image/DeleteNotUsedImageEvent.java` | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | PR06 완료: image listener 옆으로 이동, 소유 타입은 ImageOwnerType (AFTER_COMMIT 비동기 유지) |
 | 490 | `global/event/ReservationCancelledEvent.java` | `adapter/integration/post/ReservationCancelledEvent.java` | post | global/event | adapter/integration/post (커밋 후 알림 bridge 내부 이벤트) | PR06 | PR06 완료 |
 | 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
-| 492 | `global/event/TradeStatusChangedEvent.java` | = | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | legacy |
+| 492 | `global/event/TradeStatusChangedEvent.java` | `adapter/event/trade/TradeStatusChangedEvent.java` | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | PR07 완료 |
 | 493 | `global/event/constant/ImageType.java` | `(삭제)` | image | global/event | domain/image/model | PR05 | PR06 완료: ImageOwnerType 으로 대체 |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
 | 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
@@ -520,7 +520,7 @@
 | 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | `adapter/event/image/DeleteNotUsedImageEventListener.java (+ application/image/service/DeleteUnusedImagesService)` | image | global/event | adapter/event/image | PR05 | 전환 |
 | 499 | `global/event/handler/ReservationCancelledEventListener.java` | `adapter/integration/post/ReservationCancelledEventListener.java` | post | global/event | adapter/integration/post (커밋 후 비동기 푸시·채팅 HTTP. notification PR04·채팅 HTTP PR08 bridge) | PR06 | PR06 완료 |
 | 500 | `global/event/handler/SendNotificationEventListener.java` | `adapter/integration/notification/LegacySendNotificationEventBridge.java` | notification | global/event | adapter/event/notification | PR04 | PR04 완료 (bridge, 제거 PR10) |
-| 501 | `global/event/handler/TradeStatusChangedEventListener.java` | = | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | legacy |
+| 501 | `global/event/handler/TradeStatusChangedEventListener.java` | `adapter/event/trade/TradeStatusChangedEventListener.java` | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | PR07 완료 |
 | 502 | `global/exception/ErrorCode.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
 | 503 | `global/exception/ErrorResponse.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
 | 504 | `global/exception/GlobalException.java` | = | common | global/exception | domain/common(GlobalException·ErrorCode) + infrastructure/web(Handler·ErrorResponse) | PR12 | legacy |
@@ -617,11 +617,11 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | GET | `/api/related-keyword/current` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | findMyKeywords | 200 |
 | DELETE | `/api/related-keyword/{memberRelatedKeywordId}` | `adapter/web/relatedkeyword/controller/RelatedKeywordController.java` | deleteMyKeyword | 204 |
 | POST | `/api/report` | `domain/report/presentation/ReportController.java` | createReport | 201 |
-| GET | `/api/review` | `domain/review/presentation/ReviewController.java` | getMyReviews | 200 |
-| POST | `/api/review` | `domain/review/presentation/ReviewController.java` | createReview | 201 |
-| GET | `/api/review/current` | `domain/review/presentation/ReviewController.java` | getMyReceivedReviews | 200 / 400(분기) |
-| GET | `/api/review/detail/{reviewId}` | `domain/review/presentation/ReviewController.java` | getReviewDetail | 200 |
-| GET | `/api/review/{memberId}` | `domain/review/presentation/ReviewController.java` | getReviewByMember | 200 / 400(분기) |
+| GET | `/api/review` | `adapter/web/review/controller/ReviewController.java` | getMyReviews | 200 |
+| POST | `/api/review` | `adapter/web/review/controller/ReviewController.java` | createReview | 201 |
+| GET | `/api/review/current` | `adapter/web/review/controller/ReviewController.java` | getMyReceivedReviews | 200 / 400(분기) |
+| GET | `/api/review/detail/{reviewId}` | `adapter/web/review/controller/ReviewController.java` | getReviewDetail | 200 |
+| GET | `/api/review/{memberId}` | `adapter/web/review/controller/ReviewController.java` | getReviewByMember | 200 / 400(분기) |
 | POST | `/api/sms` | `adapter/web/sms/controller/SmsController.java` | sendSms | 200 |
 | POST | `/api/sms/nickname` | `adapter/web/sms/controller/SmsController.java` | sendFindNicknameSms | 200 |
 | POST | `/api/sms/nickname/verify` | `adapter/web/sms/controller/SmsController.java` | verifyFindNicknameSms | 200 |
@@ -629,21 +629,21 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | POST | `/api/sms/password/verify` | `adapter/web/sms/controller/SmsController.java` | verifyResetPasswordSms | 200 |
 | POST | `/api/sms/verify` | `adapter/web/sms/controller/SmsController.java` | verifySms | 200 |
 | PATCH | `/api/suspend` | `domain/suspend/presentation/SuspendController.java` | suspend | 204 |
-| DELETE | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancelWithdraw | 204 |
-| POST | `/api/trade/cancel/{product_id}` | `domain/trade/presentation/TradeController.java` | cancel | 200 |
-| GET | `/api/trade/graph/head` | `domain/trade/presentation/TradeController.java` | getHeadHistory | 200 |
-| GET | `/api/trade/graph/place` | `domain/trade/presentation/TradeController.java` | getPlaceHistory | 200 |
-| GET | `/api/trade/history` | `domain/trade/presentation/TradeController.java` | getMyTradeHistory | 200 |
-| GET | `/api/trade/statistics/head` | `domain/trade/presentation/TradeController.java` | getHeadStatistics | 200 |
-| GET | `/api/trade/statistics/place` | `domain/trade/presentation/TradeController.java` | getPlaceStatistics | 200 |
+| DELETE | `/api/trade/cancel/{product_id}` | `adapter/web/trade/controller/TradeController.java` | cancelWithdraw | 204 |
+| POST | `/api/trade/cancel/{product_id}` | `adapter/web/trade/controller/TradeController.java` | cancel | 200 |
+| GET | `/api/trade/graph/head` | `adapter/web/trade/controller/TradeController.java` | getHeadHistory | 200 |
+| GET | `/api/trade/graph/place` | `adapter/web/trade/controller/TradeController.java` | getPlaceHistory | 200 |
+| GET | `/api/trade/history` | `adapter/web/trade/controller/TradeController.java` | getMyTradeHistory | 200 |
+| GET | `/api/trade/statistics/head` | `adapter/web/trade/controller/TradeController.java` | getHeadStatistics | 200 |
+| GET | `/api/trade/statistics/place` | `adapter/web/trade/controller/TradeController.java` | getPlaceStatistics | 200 |
 | GET | `api/post` | `domain/post/presentation/PostController.java` | findProductByTypeAndMode | 200 |
 | POST | `api/post` | `domain/post/presentation/PostController.java` | createProduct | 201 |
 | GET | `api/post/current` | `domain/post/presentation/PostController.java` | findCurrentProduct | 200 / 400(분기) |
 | GET | `api/post/member/{member_id}` | `domain/post/presentation/PostController.java` | findByMemberID | 200 / 400(분기) |
 | DELETE | `api/post/reservation/{product_id}` | `domain/post/presentation/PostController.java` | deleteReservation | 204 |
 | PATCH | `api/post/reservation/{product_id}` | `domain/post/presentation/PostController.java` | reservation | 200 |
-| DELETE | `api/post/trade` | `domain/post/presentation/PostController.java` | tradeWithdraw | 204 |
-| POST | `api/post/trade` | `domain/post/presentation/PostController.java` | tradeRequest | 204 |
+| DELETE | `api/post/trade` | `adapter/web/trade/controller/TradeCompletionController.java` | tradeWithdraw | 204 |
+| POST | `api/post/trade` | `adapter/web/trade/controller/TradeCompletionController.java` | tradeRequest | 204 |
 | DELETE | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | deleteProduct | 204 |
 | GET | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | findProductById | 200 |
 | PATCH | `api/post/{post_id}` | `domain/post/presentation/PostController.java` | updateProduct | 204 |
@@ -773,13 +773,13 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `domain/relatedkeyword/service/impl/DeleteMemberRelatedKeywordServiceImpl.java` | 0 (PR03 완료: ActorContext) | PR03 |
 | `domain/relatedkeyword/service/impl/FindMyRelatedKeywordServiceImpl.java` | 0 (PR03 완료: ActorContext) | PR03 |
 | `domain/report/service/impl/CreateReportServiceImpl.java` | 1 | PR09 |
-| `domain/review/service/impl/CreateReviewServiceImpl.java` | 1 | PR07 |
-| `domain/review/service/impl/GetMyReviewListServiceImpl.java` | 1 | PR07 |
-| `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | 1 | PR07 |
-| `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | 1 | PR07 |
-| `domain/trade/service/impl/TradeCancelServiceImpl.java` | 1 | PR07 |
-| `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | 1 | PR07 |
-| `global/aop/BlockAspect.java` | 1 | PR07 |
+| `domain/review/service/impl/CreateReviewServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `domain/review/service/impl/GetMyReviewListServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `domain/review/service/impl/GetReceivedReviewListServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `domain/trade/service/impl/FindMyTradeHistoryServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `domain/trade/service/impl/TradeCancelServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `domain/trade/service/impl/TradeCancelWithdrawServiceImpl.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
+| `global/aop/BlockAspect.java` | 1 | PR07 완료 (파일 삭제, ActorContext 사용) |
 
 총 51회 / 51파일.
 
@@ -789,9 +789,9 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 - `domain/chat/service/impl/SaveChatMessageServiceImpl.java` → PR08
 - `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` → PR08
 - `domain/post/service/impl/FindProductByIdServiceImpl.java` → PR06
-- `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` → PR07
-- `domain/review/service/impl/CreateReviewServiceImpl.java` → PR07
-- `global/aop/BlockAspect.java` → PR07
+- `domain/post/service/impl/RequestTradeCompleteServiceImpl.java` → PR07 완료: `RequestTradeCompletionService` 첫 단계 `TradeBlockPort` (기존과 같이 다른 검증·잠금보다 먼저)
+- `domain/review/service/impl/CreateReviewServiceImpl.java` → PR07 완료: `CreateReviewService` 의 `ReviewBlockPort` (대상 회원 확인 뒤, 기존 순서)
+- `global/aop/BlockAspect.java` → PR07 완료: 삭제
 
 ## 6. 비 HTTP 진입점 (scheduler·event listener·async·stream)
 
@@ -1057,7 +1057,7 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | --- | --- | --- |
 | `legacy-classes.txt` 항목 | 전환 전 클래스 목록, PR별 태그 | 각 태그 PR (최종 0건은 PR12) |
 | `MemberUtil` | 5절 호출처가 사용 | 호출처: 각 업무 PR, 클래스: PR12 |
-| `@CheckBlocked`/`BlockAspect` | RequestTradeCompleteServiceImpl 1곳 | PR07 (block 공개 query는 PR09, 그 전에는 BlockValidator bridge) |
+| `@CheckBlocked`/`BlockAspect` | PR07에서 삭제. 거래 완료 요청은 `TradeBlockPort` → `adapter/integration/trade/TradeBlockBridge`(BlockValidator) | 완료 (bridge 교체는 PR09) |
 | `BlockValidator` | 5절 사용처 | PR09 (공개 query 제공 후 각 호출처 PR에서 교체) |
 | `GlobalException`/`ErrorCode` | 순수 JDK 타입, ArchUnit shared kernel로 허용 | PR12에서 domain/common 이동 |
 | `GlobalExceptionHandler`/`ErrorResponse` | global/exception | PR12 → infrastructure/web |
@@ -1069,17 +1069,17 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR02 bridge: `LegacyDeviceTokenAdapter` (DeviceTokenRepository) | PR04 교체 완료: `adapter/integration/auth/DeviceTokenAdapter` → notification `RegisterDeviceTokenUseCase` | 완료 (PR04) |
 | PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
 | PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |
-| PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) |
+| PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) — **PR07 부분 완료**: 거래 잔액은 `ChangeGwangsanUseCase`, 회원 확인·별명은 `MemberAccountQuery`. 후기 `plusLight` 만 `ReviewMemberBridge` 에 남음(빛 공개 command 없음) |
 | PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR |
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
 | `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
 | PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | (삭제) 예약 리마인더/취소가 SendPushUseCase 직접 호출 | PR06 완료 |
-| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) |
+| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 |
 | PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
 | PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
-| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 |
+| PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 — **PR07 완료(철회)**: `productIdsByTradeCancel` → trade 공개 `TradeCancelQuery.findProductIds` |
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
-| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 |
+| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |
 | `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 |
 | `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
@@ -1090,7 +1090,11 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR06 `PostImageBridgeAdapter` (adapter/integration/post) | image 공개 ImageQuery 사용. 미사용 이미지 정리는 adapter/event/image 이벤트, 텍스트 검열은 adapter/http/ai 클라이언트 | - (전환 완료, 연결 adapter) |
 | PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 BlockValidator | 프로필 공개 query PR11/PR12, 차단 PR09 |
 | PR06 `PostChatBridgeAdapter` (adapter/integration/post) | ChatRoomRepository·ChatMessageRepository(방 조회, 예약 취소 시스템 메시지 저장 — 호출자 트랜잭션 참여) | PR08 |
-| PR06 `PostTradeStatusBridgeAdapter` (adapter/integration/post) | TradeStateReader + legacy TradeStatusChangedEvent 발행 | PR07 |
+| PR06 `PostTradeStatusBridgeAdapter` (adapter/integration/post) | TradeStateReader + legacy TradeStatusChangedEvent 발행 | PR07 — **PR07 완료**: 삭제, `adapter/integration/post/PostTradeStatusAdapter`(trade `TradeStateQuery` + `adapter.event.trade.TradeStatusChangedEvent`) |
 | PR06 `ReservationNotificationBridgeAdapter`·`ReservationCancelledEventListener`·`ReservationCancelledEvent` (adapter/integration/post) | SendPushUseCase(공개, reminder 최종 실패 시 예외)·ChattingServerSystemMessageNotifier | 채팅 서버 HTTP PR08 (푸시는 PR06 에서 공개 Port 로 교체 완료) |
-| PR06 `PostController` `/api/post/trade` POST·DELETE | legacy RequestTradeCompleteService/WithdrawTradeCompleteService 직접 주입 | PR07 (trade input Port로 교체) |
+| PR06 `PostController` `/api/post/trade` POST·DELETE | legacy RequestTradeCompleteService/WithdrawTradeCompleteService 직접 주입 | PR07 (trade input Port로 교체) — **PR07 완료**: 핸들러 제거, 같은 URL은 `adapter/web/trade/controller/TradeCompletionController` |
 | PR06 공개 Port 소비 전 타 업무 legacy 호출자(trade·review·chat·report·alert·admin·member·image 의 post Entity/Repository 직접 사용) | `adapter/persistence/post` 의 Entity·Repository 를 import 만 바꿔 계속 사용 | 각 호출자 PR(PR02·PR04·PR05·PR07·PR08·PR09·PR11)이 `.omo/evidence/hex-pr06-handoff.md` 의 post 공개 Port 로 교체 |
+| PR07 남은 legacy bridge (`adapter/integration/{trade,review}/*Bridge`) | `TradeBlockBridge`·`ReviewBlockBridge`(BlockValidator), `TradeChatBridge`(chat Repository), `TradeAlertBridge` 의 관리자 알림 생성·삭제(CreateAdminAlertEvent·AdminAlertRepository, 중요 알림 2종은 `RecordAlertUseCase` 로 교체 완료), `ReviewMemberBridge.addLight`(member 빛 command 없음) | PR09, PR08, PR11, PR02 후속/PR12 |
+| PR07 `TradeCancelPersistenceAdapter` 의 `ImageRepository`·legacy `Image` Entity | 철회 이미지 연결 저장(JPA association) | PR05 후속/PR12 |
+| PR07 공개 Port 를 직접 쓰는 legacy 호출자 | chat `FindChatMessageByRoomIdServiceImpl`(`TradeStateQuery`·`CompletedTradeQuery`), admin `ApproveTradeCancelServiceImpl`(`ApproveTradeCancelUseCase`) | PR08, PR11 |
+| trade/review JpaRepository 를 직접 쓰는 legacy 호출자 | admin `RejectAdminAlertServiceImpl`·`CreateAdminAlertServiceImpl`·`FindAlertByAlertTypeAndPlaceServiceImpl`, member `MemberDeletionServiceImpl`, PR04 `LegacyAlertSourceAdapter`(후기·철회 기각 원천) | PR11, PR02·PR11, PR04/PR12 |

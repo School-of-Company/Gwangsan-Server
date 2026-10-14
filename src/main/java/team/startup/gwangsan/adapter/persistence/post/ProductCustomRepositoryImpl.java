@@ -128,8 +128,8 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
             Long imageId = row.get(image.id);
             String imageUrl = row.get(image.imageUrl);
 
-            // 상태 값은 TradeStateReader.read()가 반환하는 completed()/reserved()와 같아야 한다.
-            // 일괄 조회를 유지하기 위해 엔티티 기반 TradeStateReader 대신 조회한 상태로 계산한다.
+            // 상태 값은 trade TradeStateQuery(domain TradeState)가 반환하는 completed()/reserved()와 같아야 한다.
+            // 일괄 조회를 유지하기 위해 단건 TradeStateQuery 대신 조회한 상태로 계산한다.
             GetRoomProductDto dto = resultMap.computeIfAbsent(
                     productId,
                     id -> new GetRoomProductDto(

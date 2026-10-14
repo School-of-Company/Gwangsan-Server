@@ -16,9 +16,9 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
     private final AdminAlertRepository adminAlertRepository;
     private final ReportRepository reportRepository;
     private final MemberJpaRepository memberRepository;
-    private final TradeCancelRepository tradeCancelRepository;
+    private final TradeCancelJpaRepository tradeCancelRepository;
 
     private static final String REPORT_SEXUAL_ALERT_TITLE = "음란/성적 콘텐츠 신고";
     private static final String REPORT_ABUSE_HATE_HARASSMENT_ALERT_TITLE = "욕설/혐오/괴롭힘 신고";
@@ -74,7 +74,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
             }
 
             case TRADE_CANCEL -> {
-                TradeCancel tradeCancel = tradeCancelRepository.findByIdWithMember(sourceId)
+                TradeCancelJpaEntity tradeCancel = tradeCancelRepository.findByIdWithMember(sourceId)
                         .orElseThrow(NotFoundTradeCancelException::new);
 
                 AdminAlert alert = AdminAlert.builder()

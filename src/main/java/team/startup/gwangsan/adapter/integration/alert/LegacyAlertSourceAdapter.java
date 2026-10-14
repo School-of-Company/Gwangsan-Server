@@ -13,17 +13,17 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.review.entity.Review;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
-import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.exception.NotFoundSuspendException;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 import java.util.List;
 
@@ -41,12 +41,12 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
     private final MemberAccountQuery memberAccountQuery;
     // bridge: 회원 batch 조회 공개 Port 가 없어 N+1 을 피하려고 직접 쓴다. 스택 끝 정리 단계에서 PR02 batch Port 추가 후 교체한다.
     private final MemberJpaRepository memberJpaRepository;
-    private final TradeCompleteRepository tradeCompleteRepository;
+    private final TradeCompleteJpaRepository tradeCompleteRepository;
     private final ProductSnapshotQuery productSnapshotQuery;
-    private final ReviewRepository reviewRepository;
+    private final ReviewJpaRepository reviewRepository;
     private final ReportRepository reportRepository;
     private final SuspendRepository suspendRepository;
-    private final TradeCancelRepository tradeCancelRepository;
+    private final TradeCancelJpaRepository tradeCancelRepository;
     private final NoticeRepository noticeRepository;
 
     @Override
@@ -66,7 +66,7 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public TradeCompleteSource tradeComplete(Long tradeCompleteId) {
-        TradeComplete trade = tradeCompleteRepository.findById(tradeCompleteId)
+        TradeCompleteJpaEntity trade = tradeCompleteRepository.findById(tradeCompleteId)
                 .orElseThrow(NotFoundTradeCompleteException::new);
         return new TradeCompleteSource(
                 trade.getProduct().getId(),
@@ -85,7 +85,7 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public ReviewSource review(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(NotFoundReviewException::new);
+        ReviewJpaEntity review = reviewRepository.findById(reviewId).orElseThrow(NotFoundReviewException::new);
         return new ReviewSource(review.getReviewer().getId(), review.getReviewer().getNickname());
     }
 
@@ -110,7 +110,7 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public TradeCancelSource tradeCancelWithParties(Long tradeCancelId) {
-        TradeCancel cancel = tradeCancelRepository.findByIdWithTradeCompleteAndMember(tradeCancelId)
+        TradeCancelJpaEntity cancel = tradeCancelRepository.findByIdWithTradeCompleteAndMember(tradeCancelId)
                 .orElseThrow(NotFoundTradeCancelException::new);
         return new TradeCancelSource(
                 cancel.getMember().getId(),

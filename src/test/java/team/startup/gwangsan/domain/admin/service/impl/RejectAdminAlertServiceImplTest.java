@@ -20,10 +20,10 @@ import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -56,7 +56,7 @@ class RejectAdminAlertServiceImplTest {
     private ValidatePlaceUtil validatePlaceUtil;
 
     @Mock
-    private TradeCancelRepository tradeCancelRepository;
+    private TradeCancelJpaRepository tradeCancelRepository;
 
     @Mock
     private ProductRepository productRepository;
@@ -164,7 +164,7 @@ class RejectAdminAlertServiceImplTest {
 
                 MemberJpaEntity cancelMember = mock(MemberJpaEntity.class);
                 when(cancelMember.getId()).thenReturn(2L);
-                TradeCancel tradeCancel = mock(TradeCancel.class);
+                TradeCancelJpaEntity tradeCancel = mock(TradeCancelJpaEntity.class);
                 when(tradeCancel.getId()).thenReturn(7L);
                 when(tradeCancel.getMember()).thenReturn(cancelMember);
                 when(tradeCancel.getStatus()).thenReturn(TradeCancelStatus.PENDING);
@@ -198,7 +198,7 @@ class RejectAdminAlertServiceImplTest {
                 when(alert.getSourceId()).thenReturn(7L);
 
                 // 양측 동의로 이미 철회가 반영된 뒤 관리자가 기각을 누른 상황.
-                TradeCancel tradeCancel = mock(TradeCancel.class);
+                TradeCancelJpaEntity tradeCancel = mock(TradeCancelJpaEntity.class);
                 when(tradeCancel.getStatus()).thenReturn(TradeCancelStatus.APPROVED);
 
                 when(adminAlertRepository.findById(10L)).thenReturn(Optional.of(alert));

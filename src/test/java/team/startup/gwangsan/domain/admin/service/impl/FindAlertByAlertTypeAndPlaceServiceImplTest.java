@@ -36,14 +36,14 @@ import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeCancelImage;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
+import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
+import team.startup.gwangsan.domain.trade.model.TradeStatus;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelImageRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -68,8 +68,8 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
     @Mock private PlaceRepository placeRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private ProductImageRepository productImageRepository;
-    @Mock private TradeCancelRepository tradeCancelRepository;
-    @Mock private TradeCancelImageRepository tradeCancelImageRepository;
+    @Mock private TradeCancelJpaRepository tradeCancelRepository;
+    @Mock private TradeCancelImageJpaRepository tradeCancelImageRepository;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -109,8 +109,8 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
             Report memberReport = report(10L, ReportType.SEXUAL, reported, null);
             Report productReport = report(11L, ReportType.SPAM_AD, owner, reservedProduct);
             Report missingTargetReport = report(12L, ReportType.ETC, null, null);
-            TradeCancel withImages = cancel(40L, requester, reservedProduct, "이미지 포함 철회");
-            TradeCancel withoutImages = cancel(41L, requester, completedProduct, "이미지 없는 철회");
+            TradeCancelJpaEntity withImages = cancel(40L, requester, reservedProduct, "이미지 포함 철회");
+            TradeCancelJpaEntity withoutImages = cancel(41L, requester, completedProduct, "이미지 없는 철회");
             List<AdminAlert> alerts = List.of(
                     alert(100L, AlertType.REPORT, 10L, requester), alert(101L, AlertType.REPORT, 11L, requester),
                     alert(102L, AlertType.REPORT, 12L, requester), alert(103L, AlertType.SIGN_UP, 20L, joinedWithRecommender),
@@ -129,7 +129,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
             when(reportImageRepository.findAllByReportIdIn(List.of(10L, 11L, 12L))).thenReturn(List.of(ReportImage.builder().report(memberReport).image(reportImage).build()));
             when(memberRepository.findAllByIdIn(List.of(20L, 21L))).thenReturn(List.of(joinedWithRecommender, joinedWithoutRecommender));
             when(tradeCancelRepository.findAllByIdIn(List.of(40L, 41L))).thenReturn(List.of(withImages, withoutImages));
-            when(tradeCancelImageRepository.findByTradeCancelIn(List.of(40L, 41L))).thenReturn(List.of(TradeCancelImage.builder().tradeCancel(withImages).image(cancelImage).build()));
+            when(tradeCancelImageRepository.findByTradeCancelIn(List.of(40L, 41L))).thenReturn(List.of(TradeCancelImageJpaEntity.builder().tradeCancel(withImages).image(cancelImage).build()));
             when(productImageRepository.findAllByProductIdIn(anySet())).thenReturn(List.of(ProductImage.builder().product(reservedProduct).image(productImage).build()));
             when(memberRepository.findProductMemberResponsesByMemberIds(anySet())).thenReturn(List.of(new GetProductMemberResponse(3L, "작성자", "작성자 지점", 9)));
 
@@ -258,10 +258,10 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         return report;
     }
 
-    private TradeCancel cancel(Long id, MemberJpaEntity requester, Product product, String reason) {
-        TradeComplete complete = TradeComplete.builder().product(product).buyer(requester).seller(product.getMember())
+    private TradeCancelJpaEntity cancel(Long id, MemberJpaEntity requester, Product product, String reason) {
+        TradeCompleteJpaEntity complete = TradeCompleteJpaEntity.builder().product(product).buyer(requester).seller(product.getMember())
                 .status(TradeStatus.PENDING).requestedBySeller(false).build();
-        TradeCancel cancel = TradeCancel.builder().tradeComplete(complete).member(requester).reason(reason).status(TradeCancelStatus.PENDING).build();
+        TradeCancelJpaEntity cancel = TradeCancelJpaEntity.builder().tradeComplete(complete).member(requester).reason(reason).status(TradeCancelStatus.PENDING).build();
         ReflectionTestUtils.setField(cancel, "id", id);
         return cancel;
     }
