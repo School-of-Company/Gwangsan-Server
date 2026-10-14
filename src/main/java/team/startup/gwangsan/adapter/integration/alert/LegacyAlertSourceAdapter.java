@@ -8,8 +8,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
+import team.startup.gwangsan.application.notice.port.in.NoticeQuery;
 import team.startup.gwangsan.application.report.data.ReportAlertSource;
 import team.startup.gwangsan.application.report.port.in.ReportQuery;
 import team.startup.gwangsan.application.suspend.port.in.SuspensionQuery;
@@ -30,7 +29,7 @@ import static team.startup.gwangsan.domain.admin.service.impl.VerificationSignUp
 /**
  * 임시 bridge: 기존 CreateAlertServiceImpl 이 하던 원천 조회를 legacy Repository 로 그대로 수행한다.
  * 비동기 알림 경로는 유지되므로 Port 는 남고, 구현만 각 업무의 공개 조회로 교체한다
- * (회원 PR02, 상품 PR06 완료: ProductSnapshotQuery, 거래·후기 PR07, 신고·정지 PR09 완료: ReportQuery·SuspensionQuery, 공지 PR10, 최종 PR12).
+ * (회원 PR02, 상품 PR06 완료: ProductSnapshotQuery, 거래·후기 PR07, 신고·정지 PR09 완료: ReportQuery·SuspensionQuery, 공지 PR10 완료: NoticeQuery, 최종 PR12).
  */
 @Component
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
     private final ReportQuery reportQuery;
     private final SuspensionQuery suspensionQuery;
     private final TradeCancelJpaRepository tradeCancelRepository;
-    private final NoticeRepository noticeRepository;
+    private final NoticeQuery noticeQuery;
 
     @Override
     public void requireMember(Long memberId) {
@@ -118,6 +117,6 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public String noticeTitle(Long noticeId) {
-        return noticeRepository.findById(noticeId).orElseThrow(NoticeNotFoundException::new).getTitle();
+        return noticeQuery.getTitle(noticeId);
     }
 }

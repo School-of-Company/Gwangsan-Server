@@ -23,8 +23,8 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-import team.startup.gwangsan.domain.notice.entity.Notice;
-import team.startup.gwangsan.domain.notice.entity.NoticeImage;
+import team.startup.gwangsan.adapter.persistence.notice.NoticeJpaEntity;
+import team.startup.gwangsan.adapter.persistence.notice.NoticeImageJpaEntity;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.adapter.persistence.post.Product;
@@ -123,7 +123,7 @@ class OrphanImageQueryAdapterTest {
         Image firstOrphan = image("first-orphan");
         Image secondOrphan = image("second-orphan");
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
-        em.persist(NoticeImage.builder().notice(relationships.notice()).image(noticeOnly).build());
+        em.persist(NoticeImageJpaEntity.builder().notice(relationships.notice()).image(noticeOnly).build());
         em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reportOnly).build());
         em.flush();
 
@@ -157,7 +157,7 @@ class OrphanImageQueryAdapterTest {
         Image sameTimeSecond = image("same-time-second");
 
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
-        em.persist(NoticeImage.builder().notice(relationships.notice()).image(noticeOnly).build());
+        em.persist(NoticeImageJpaEntity.builder().notice(relationships.notice()).image(noticeOnly).build());
         em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reportOnly).build());
         em.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.tradeCancel()).image(tradeCancelOnly).build());
@@ -202,7 +202,7 @@ class OrphanImageQueryAdapterTest {
                 .build());
         Head head = em.persist(new Head("head-" + suffix));
         Place place = em.persist(Place.builder().name("place-" + suffix).head(head).build());
-        Notice notice = em.persist(Notice.builder().title("notice").content("content").place(place).member(seller).build());
+        NoticeJpaEntity notice = em.persist(NoticeJpaEntity.builder().title("notice").content("content").place(place).member(seller).build());
         ReportJpaEntity report = em.persist(ReportJpaEntity.builder()
                 .reportType(ReportType.ETC)
                 .content("content")
@@ -261,6 +261,6 @@ class OrphanImageQueryAdapterTest {
                 .executeUpdate();
     }
 
-    private record Relationships(Product product, Notice notice, ReportJpaEntity report, ChatMessageJpaEntity chatMessage, TradeCancelJpaEntity tradeCancel) {
+    private record Relationships(Product product, NoticeJpaEntity notice, ReportJpaEntity report, ChatMessageJpaEntity chatMessage, TradeCancelJpaEntity tradeCancel) {
     }
 }

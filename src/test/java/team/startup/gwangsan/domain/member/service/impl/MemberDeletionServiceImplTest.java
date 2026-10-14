@@ -18,7 +18,7 @@ import team.startup.gwangsan.domain.member.exception.DummyMemberDeletionNotAllow
 import team.startup.gwangsan.domain.member.exception.NotFoundDummyMemberException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
-import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
+import team.startup.gwangsan.adapter.persistence.notice.NoticeJpaRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
@@ -48,7 +48,7 @@ class MemberDeletionServiceImplTest {
     @Mock private ReportJpaRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private AlertJpaRepository alertRepository;
-    @Mock private NoticeRepository noticeRepository;
+    @Mock private NoticeJpaRepository noticeRepository;
     @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private SuspendJpaRepository suspendRepository;
     @Mock private MemberBlockJpaRepository memberBlockRepository;
