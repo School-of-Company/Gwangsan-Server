@@ -11,4 +11,6 @@ public interface PlaceRepository extends JpaRepository<Place, Integer> {
     Optional<Place> findByName(String name);
 
     List<Place> findByHead(Head head);
+
+    List<Place> findAllByHeadId(Integer headId);
 }
