@@ -12,4 +12,7 @@ public interface SaveReportPort {
     void saveImages(Long reportId, List<Long> imageIds);
 
     void deleteImageLink(Long reportId, Long imageId);
+
+    /** 신고자 → 피신고자 순서로 회원 참조를 bulk 재지정한다(영속성 컨텍스트 자동 clear). */
+    void reassignMember(Long memberId, Long dummyMemberId);
 }

@@ -41,4 +41,9 @@ public class SuspendPersistenceAdapter implements SaveSuspensionPort, LoadExpire
     public Optional<Integer> findSuspendedDays(Long suspendId) {
         return suspendJpaRepository.findById(suspendId).map(SuspendJpaEntity::getSuspendedDays);
     }
+
+    @Override
+    public void deleteAllOf(Long memberId) {
+        suspendJpaRepository.deleteAllByMember(entityManager.getReference(MemberJpaEntity.class, memberId));
+    }
 }

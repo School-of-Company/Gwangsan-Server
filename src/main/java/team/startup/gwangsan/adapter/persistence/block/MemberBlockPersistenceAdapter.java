@@ -53,4 +53,9 @@ public class MemberBlockPersistenceAdapter implements LoadMemberBlockPort, SaveM
                 })
                 .orElse(false);
     }
+
+    @Override
+    public void deleteAllOf(Long memberId) {
+        memberBlockJpaRepository.deleteAllByBlockerOrBlocked(entityManager.getReference(MemberJpaEntity.class, memberId));
+    }
 }
