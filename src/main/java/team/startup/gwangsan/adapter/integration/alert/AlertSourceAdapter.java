@@ -1,46 +1,40 @@
 package team.startup.gwangsan.adapter.integration.alert;
 
-import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
-import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.application.notice.port.in.NoticeQuery;
+import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.application.report.data.ReportAlertSource;
 import team.startup.gwangsan.application.report.port.in.ReportQuery;
+import team.startup.gwangsan.application.review.data.ReviewAuthor;
+import team.startup.gwangsan.application.review.port.in.ReviewSummaryQuery;
 import team.startup.gwangsan.application.suspend.port.in.SuspensionQuery;
+import team.startup.gwangsan.application.trade.data.TradeCancelParties;
+import team.startup.gwangsan.application.trade.data.TradeCompleteSummary;
 import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
-import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
-import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
-import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
+import team.startup.gwangsan.application.trade.port.in.TradeSummaryQuery;
+import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 import java.util.List;
 
 import static team.startup.gwangsan.domain.admin.policy.SignUpReward.RECOMMENDER_GWANGSAN_REWARD;
 
 /**
- * 임시 bridge: 기존 CreateAlertServiceImpl 이 하던 원천 조회를 수행한다. 비동기 알림 경로는 유지되므로 Port 는 남고, 구현만 각 업무의 공개 조회로 교체한다.
- * 회원·상품·신고·정지·공지·철회 요청자는 공개 Port 로 교체됨. 남은 trade/review 저장 모델 직접 사용
- * (tradeComplete·tradeCancelWithParties·review) 은 PR07 이 알림용 공개 조회를 제공하면 교체하고 이름에서 Legacy 를 뺀다.
+ * 비동기 알림 경로의 원천 조회를 각 업무 공개 조회로 수행한다. 원천이 없으면 각 업무의 기존 NotFound 예외가 그대로 나간다.
  */
 @Component
 @RequiredArgsConstructor
-public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
+public class AlertSourceAdapter implements LoadAlertSourcePort {
 
     private final MemberAccountQuery memberAccountQuery;
-    private final TradeCompleteJpaRepository tradeCompleteRepository;
+    private final TradeSummaryQuery tradeSummaryQuery;
     private final ProductSnapshotQuery productSnapshotQuery;
-    private final ReviewJpaRepository reviewRepository;
+    private final ReviewSummaryQuery reviewSummaryQuery;
     private final ReportQuery reportQuery;
     private final SuspensionQuery suspensionQuery;
-    private final TradeCancelJpaRepository tradeCancelRepository;
     private final TradeCancelQuery tradeCancelQuery;
     private final NoticeQuery noticeQuery;
 
@@ -61,14 +55,13 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public TradeCompleteSource tradeComplete(Long tradeCompleteId) {
-        TradeCompleteJpaEntity trade = tradeCompleteRepository.findById(tradeCompleteId)
-                .orElseThrow(NotFoundTradeCompleteException::new);
+        TradeCompleteSummary trade = tradeSummaryQuery.getTradeComplete(tradeCompleteId);
         return new TradeCompleteSource(
-                trade.getProduct().getId(),
-                trade.getProduct().getTitle(),
-                trade.getBuyer().getId(),
-                trade.getSeller().getId(),
-                trade.getBuyer().getNickname()
+                trade.productId(),
+                trade.productTitle(),
+                trade.buyerId(),
+                trade.sellerId(),
+                trade.buyerNickname()
         );
     }
 
@@ -80,8 +73,8 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public ReviewSource review(Long reviewId) {
-        ReviewJpaEntity review = reviewRepository.findById(reviewId).orElseThrow(NotFoundReviewException::new);
-        return new ReviewSource(review.getReviewer().getId(), review.getReviewer().getNickname());
+        ReviewAuthor author = reviewSummaryQuery.getAuthor(reviewId);
+        return new ReviewSource(author.reviewerId(), author.reviewerNickname());
     }
 
     @Override
@@ -102,13 +95,8 @@ public class LegacyAlertSourceAdapter implements LoadAlertSourcePort {
 
     @Override
     public TradeCancelSource tradeCancelWithParties(Long tradeCancelId) {
-        TradeCancelJpaEntity cancel = tradeCancelRepository.findByIdWithTradeCompleteAndMember(tradeCancelId)
-                .orElseThrow(NotFoundTradeCancelException::new);
-        return new TradeCancelSource(
-                cancel.getMember().getId(),
-                cancel.getTradeComplete().getBuyer().getId(),
-                cancel.getTradeComplete().getSeller().getId()
-        );
+        TradeCancelParties parties = tradeSummaryQuery.getCancelParties(tradeCancelId);
+        return new TradeCancelSource(parties.requesterId(), parties.buyerId(), parties.sellerId());
     }
 
     @Override

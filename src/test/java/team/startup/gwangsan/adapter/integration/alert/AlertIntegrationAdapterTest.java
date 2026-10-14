@@ -8,13 +8,17 @@ import team.startup.gwangsan.application.alert.data.AlertImage;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCancelSource;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCompleteSource;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.ReportSource;
-import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.ReviewSource;
+import team.startup.gwangsan.application.review.data.ReviewAuthor;
+import team.startup.gwangsan.application.review.port.in.ReviewSummaryQuery;
+import team.startup.gwangsan.application.trade.data.TradeCancelParties;
+import team.startup.gwangsan.application.trade.data.TradeCompleteSummary;
+import team.startup.gwangsan.application.trade.port.in.TradeSummaryQuery;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.application.member.port.in.MemberAccountQuery;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.notice.port.in.NoticeQuery;
-import team.startup.gwangsan.adapter.persistence.post.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.application.post.data.ProductImageLinkView;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
@@ -25,14 +29,9 @@ import team.startup.gwangsan.application.report.data.ReportImageLink;
 import team.startup.gwangsan.application.report.port.in.ReportQuery;
 import team.startup.gwangsan.application.suspend.port.in.SuspensionQuery;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
-import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.exception.NotFoundSuspendException;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCompleteException;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
-import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -45,35 +44,34 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @DisplayName("알림 legacy bridge")
-class LegacyAlertBridgeTest {
+class AlertIntegrationAdapterTest {
 
     @Nested
-    @DisplayName("LegacyAlertSourceAdapter 는")
+    @DisplayName("AlertSourceAdapter 는")
     class Describe_source {
 
         private final MemberAccountQuery members = mock(MemberAccountQuery.class);
-        private final TradeCompleteJpaRepository trades = mock(TradeCompleteJpaRepository.class);
+        private final TradeSummaryQuery trades = mock(TradeSummaryQuery.class);
         private final ProductSnapshotQuery products = mock(ProductSnapshotQuery.class);
-        private final ReviewJpaRepository reviews = mock(ReviewJpaRepository.class);
+        private final ReviewSummaryQuery reviews = mock(ReviewSummaryQuery.class);
         private final ReportQuery reports = mock(ReportQuery.class);
         private final SuspensionQuery suspends = mock(SuspensionQuery.class);
-        private final TradeCancelJpaRepository cancels = mock(TradeCancelJpaRepository.class);
         private final TradeCancelQuery cancelQuery = mock(TradeCancelQuery.class);
         private final NoticeQuery notices = mock(NoticeQuery.class);
-        private final LegacyAlertSourceAdapter adapter = new LegacyAlertSourceAdapter(
-                members, trades, products, reviews, reports, suspends, cancels, cancelQuery, notices);
+        private final AlertSourceAdapter adapter = new AlertSourceAdapter(
+                members, trades, products, reviews, reports, suspends, cancelQuery, notices);
 
         @Test
         @DisplayName("원천이 없으면 기존 업무별 NotFound 예외를 그대로 던진다")
         void it_keeps_existing_not_found_exceptions() {
             when(members.findById(any())).thenReturn(Optional.empty());
-            when(trades.findById(any())).thenReturn(Optional.empty());
+            when(trades.getTradeComplete(anyLong())).thenThrow(new NotFoundTradeCompleteException());
             when(products.getActive(any())).thenThrow(new NotFoundProductException());
-            when(reviews.findById(any())).thenReturn(Optional.empty());
+            when(reviews.getAuthor(anyLong())).thenThrow(new NotFoundReviewException());
             when(reports.getAlertSource(any())).thenThrow(new NotFoundReportException());
             when(suspends.getSuspendedDays(any())).thenThrow(new NotFoundSuspendException());
             when(cancelQuery.findRequesterId(anyLong())).thenReturn(Optional.empty());
-            when(cancels.findByIdWithTradeCompleteAndMember(any())).thenReturn(Optional.empty());
+            when(trades.getCancelParties(anyLong())).thenThrow(new NotFoundTradeCancelException());
             when(notices.getTitle(any())).thenThrow(new NoticeNotFoundException());
 
             assertThatThrownBy(() -> adapter.requireMember(1L)).isInstanceOf(NotFoundMemberException.class);
@@ -91,24 +89,20 @@ class LegacyAlertBridgeTest {
         @Test
         @DisplayName("거래 완료·철회 원천을 회원 ID 와 문구 값으로만 돌려준다")
         void it_maps_trade_sources() {
-            MemberJpaEntity buyer = member(2L, "구매자");
-            MemberJpaEntity seller = member(3L, "판매자");
-            Product product = mock(Product.class);
-            when(product.getId()).thenReturn(5L);
-            when(product.getTitle()).thenReturn("상품");
-            TradeCompleteJpaEntity trade = mock(TradeCompleteJpaEntity.class);
-            when(trade.getProduct()).thenReturn(product);
-            when(trade.getBuyer()).thenReturn(buyer);
-            when(trade.getSeller()).thenReturn(seller);
-            when(trades.findById(1L)).thenReturn(Optional.of(trade));
-            TradeCancelJpaEntity cancel = mock(TradeCancelJpaEntity.class);
-            when(cancel.getMember()).thenReturn(buyer);
-            when(cancel.getTradeComplete()).thenReturn(trade);
-            when(cancels.findByIdWithTradeCompleteAndMember(9L)).thenReturn(Optional.of(cancel));
+            when(trades.getTradeComplete(1L)).thenReturn(new TradeCompleteSummary(1L, 5L, "상품", 2L, "구매자", 3L));
+            when(trades.getCancelParties(9L)).thenReturn(new TradeCancelParties(9L, 2L, 2L, 3L));
 
             assertThat(adapter.tradeComplete(1L)).isEqualTo(new TradeCompleteSource(5L, "상품", 2L, 3L, "구매자"));
             assertThat(adapter.tradeCancelWithParties(9L)).isEqualTo(new TradeCancelSource(2L, 2L, 3L));
             assertThat(adapter.recommenderReward()).isEqualTo(5000);
+        }
+
+        @Test
+        @DisplayName("후기 원천은 review 공개 query 의 작성자 ID·별명을 그대로 옮긴다")
+        void it_maps_review_source() {
+            when(reviews.getAuthor(6L)).thenReturn(new ReviewAuthor(6L, 2L, "작성자"));
+
+            assertThat(adapter.review(6L)).isEqualTo(new ReviewSource(2L, "작성자"));
         }
 
         @Test
@@ -176,12 +170,5 @@ class LegacyAlertBridgeTest {
 
             assertThat(adapter.productIdsByTradeCancel(List.of(1L, 2L))).isEqualTo(Map.of(1L, 5L));
         }
-    }
-
-    private static MemberJpaEntity member(Long id, String nickname) {
-        MemberJpaEntity member = mock(MemberJpaEntity.class);
-        when(member.getId()).thenReturn(id);
-        when(member.getNickname()).thenReturn(nickname);
-        return member;
     }
 }
