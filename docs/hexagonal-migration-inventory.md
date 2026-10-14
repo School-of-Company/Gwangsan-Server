@@ -202,25 +202,25 @@
 | 180 | `domain/dong/entity/Dong.java` | `adapter/persistence/dong/DongJpaEntity.java` | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 181 | `domain/dong/repository/DongRepository.java` | `adapter/persistence/dong/DongJpaRepository.java` (+ application/dong/port/out/LoadDongPort.java) | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | PR03 완료 |
 | 182 | `domain/health/presentation/HealthController.java` | `adapter/web/health/controller/HealthController.java` | health | controller | adapter/web/health/controller | PR03 | PR03 완료 |
-| 183 | `domain/image/entity/Image.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
-| 184 | `domain/image/entity/dto/DeleteResult.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy |
-| 185 | `domain/image/exception/ImageDeleteFailedException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 186 | `domain/image/exception/ImageNotFoundException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 187 | `domain/image/exception/ImageUploadFailedException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 188 | `domain/image/exception/InappropriateImageException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 189 | `domain/image/exception/InvalidImageIdsException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 190 | `domain/image/exception/NotFoundImageIdsException.java` | = | image | exception | domain/image/exception | PR05 | legacy |
-| 191 | `domain/image/presentation/ImageController.java` | = | image | controller | adapter/web/image/controller | PR05 | legacy |
-| 192 | `domain/image/presentation/dto/request/UploadImageRequest.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
-| 193 | `domain/image/presentation/dto/response/GetImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
-| 194 | `domain/image/presentation/dto/response/UploadImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy |
-| 195 | `domain/image/repository/ImageRepository.java` | = | image | repository | adapter/persistence/image (JpaRepository) + application/image/port/out | PR05 | legacy |
-| 196 | `domain/image/repository/custom/ImageCustomRepository.java` | = | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | legacy |
-| 197 | `domain/image/repository/custom/impl/ImageCustomRepositoryImpl.java` | = | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | legacy |
-| 198 | `domain/image/service/DeleteImageService.java` | = | image | service interface | application/image/port/in (UseCase/Query) | PR05 | legacy |
-| 199 | `domain/image/service/UploadImageService.java` | = | image | service interface | application/image/port/in (UseCase/Query) | PR05 | legacy |
-| 200 | `domain/image/service/impl/DeleteImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
-| 201 | `domain/image/service/impl/UploadImageServiceImpl.java` | = | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | legacy |
+| 183 | `domain/image/entity/Image.java` | = | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | legacy 유지(bridge→PR12): 5개 업무 Entity association·legacy 서비스 사용. 순수 모델은 domain/image/model/Image |
+| 184 | `domain/image/entity/dto/DeleteResult.java` | `application/image/data/DeleteResult.java` | image | jpa entity | adapter/persistence/image (JpaEntity) + domain/image/model (순수 모델, 규칙 있을 때) | PR05 | 이동 |
+| 185 | `domain/image/exception/ImageDeleteFailedException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 186 | `domain/image/exception/ImageNotFoundException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 187 | `domain/image/exception/ImageUploadFailedException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 188 | `domain/image/exception/InappropriateImageException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 189 | `domain/image/exception/InvalidImageIdsException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 190 | `domain/image/exception/NotFoundImageIdsException.java` | = (순수 domain 예외 확인, shared kernel 만 의존) | image | exception | domain/image/exception | PR05 | 전환 |
+| 191 | `domain/image/presentation/ImageController.java` | `adapter/web/image/controller/ImageController.java` | image | controller | adapter/web/image/controller | PR05 | 이동 |
+| 192 | `domain/image/presentation/dto/request/UploadImageRequest.java` | (삭제: 미사용) | image | web dto | adapter/web/image/dto | PR05 | 삭제 |
+| 193 | `domain/image/presentation/dto/response/GetImageResponse.java` | = | image | web dto | adapter/web/image/dto | PR05 | legacy 유지(bridge→각 소비 업무 PR/PR12): 타 업무 web DTO 약 40곳 공유 |
+| 194 | `domain/image/presentation/dto/response/UploadImageResponse.java` | `adapter/web/image/dto/UploadImageResponse.java` | image | web dto | adapter/web/image/dto | PR05 | 이동 |
+| 195 | `domain/image/repository/ImageRepository.java` | = | image | repository | adapter/persistence/image (JpaRepository) + application/image/port/out | PR05 | legacy 유지(bridge→PR12): ImagePersistenceAdapter 와 타 업무 legacy 서비스가 사용. custom 상속 제거 |
+| 196 | `domain/image/repository/custom/ImageCustomRepository.java` | (삭제) → application/image/port/out/LoadOrphanImageCandidatesPort.java | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | 삭제 |
+| 197 | `domain/image/repository/custom/impl/ImageCustomRepositoryImpl.java` | `adapter/persistence/image/OrphanImageQueryAdapter.java` | image | querydsl | adapter/persistence/image (QueryPort 구현) | PR05 | 이동 |
+| 198 | `domain/image/service/DeleteImageService.java` | `application/image/port/in/DeleteImageUseCase.java` | image | service interface | application/image/port/in (UseCase/Query) | PR05 | 전환 |
+| 199 | `domain/image/service/UploadImageService.java` | `application/image/port/in/UploadImageUseCase.java` | image | service interface | application/image/port/in (UseCase/Query) | PR05 | 전환 |
+| 200 | `domain/image/service/impl/DeleteImageServiceImpl.java` | `application/image/service/DeleteImageService.java` | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | 전환 |
+| 201 | `domain/image/service/impl/UploadImageServiceImpl.java` | `application/image/service/UploadImageService.java` | image | service impl | application/image/service (+ 필요한 output Port) | PR05 | 전환 |
 | 202 | `domain/member/entity/Member.java` | `adapter/persistence/member/MemberJpaEntity.java + domain/member/model/Member.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
 | 203 | `domain/member/entity/MemberDetail.java` | `adapter/persistence/member/MemberDetailJpaEntity.java + domain/member/model/MemberDetail.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
 | 204 | `domain/member/entity/WithdrawalRecord.java` | `adapter/persistence/member/WithdrawalRecordJpaEntity.java` | member | jpa entity | adapter/persistence/member (JpaEntity) + domain/member/model (순수 모델, 규칙 있을 때) | PR02 | 전환 (@Entity(name) 유지) |
@@ -508,16 +508,16 @@
 | 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
 | 487 | `global/event/CreateAlertEvent.java` | `adapter/event/alert/CreateAlertEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (비동기 경로 유지. OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 발행만 PR07 이 동기로 이동) |
 | 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
-| 489 | `global/event/DeleteNotUsedImageEvent.java` | = | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | legacy |
+| 489 | `global/event/DeleteNotUsedImageEvent.java` | = | image | global/event | application/image (기존 이벤트 경계 정리) | PR05 | legacy 유지(bridge→PR06): 발행자 post 가 import |
 | 490 | `global/event/ReservationCancelledEvent.java` | = | post | global/event | application/post (기존 이벤트 경계 정리) | PR06 | legacy |
 | 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
 | 492 | `global/event/TradeStatusChangedEvent.java` | = | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | legacy |
-| 493 | `global/event/constant/ImageType.java` | = | image | global/event | domain/image/model | PR05 | legacy |
+| 493 | `global/event/constant/ImageType.java` | = | image | global/event | domain/image/model | PR05 | legacy 유지(bridge→PR06): 발행자 post 가 import, listener 가 ImageOwnerType 으로 변환 |
 | 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
 | 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
 | 496 | `global/event/handler/CreateAlertEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (비동기 경로 유지) |
 | 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
-| 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | = | image | global/event | adapter/event/image | PR05 | legacy |
+| 498 | `global/event/handler/DeleteNotUsedImageEventListener.java` | `adapter/event/image/DeleteNotUsedImageEventListener.java (+ application/image/service/DeleteUnusedImagesService)` | image | global/event | adapter/event/image | PR05 | 전환 |
 | 499 | `global/event/handler/ReservationCancelledEventListener.java` | = | post | global/event | adapter/event/post | PR06 | legacy |
 | 500 | `global/event/handler/SendNotificationEventListener.java` | `adapter/integration/notification/LegacySendNotificationEventBridge.java` | notification | global/event | adapter/event/notification | PR04 | PR04 완료 (bridge, 제거 PR10) |
 | 501 | `global/event/handler/TradeStatusChangedEventListener.java` | = | trade | global/event | adapter/event/trade → adapter/http/chat | PR07 | legacy |
@@ -532,7 +532,7 @@
 | 510 | `global/querydsl/QueryDslConfig.java` | = | infrastructure | global/querydsl | infrastructure/config | PR12 | legacy |
 | 511 | `global/redis/RedisConfig.java` | = | infrastructure | global/redis | infrastructure/config | PR12 | legacy |
 | 512 | `global/redis/RedisUtil.java` | = | common | global/redis | 사용처별 좁은 output Port 뒤 adapter/redis/<업무> (각 업무 PR에서 호출 교체) | PR12 | legacy |
-| 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | = | image | global/scheduler | adapter/scheduler/image | PR05 | legacy |
+| 513 | `global/scheduler/DeleteOrphanImageScheduler.java` | `adapter/scheduler/image/DeleteOrphanImageScheduler.java (+ application/image/service/CleanupOrphanImagesService)` | image | global/scheduler | adapter/scheduler/image | PR05 | 전환 |
 | 514 | `global/scheduler/ReservationReminderScheduler.java` | = | post | global/scheduler | adapter/scheduler/post | PR06 | legacy |
 | 515 | `global/scheduler/SuspendReleaseScheduler.java` | = | suspend | global/scheduler | adapter/scheduler/suspend | PR09 | legacy |
 | 516 | `global/security/config/JwtSecurityConfig.java` | `(삭제)` | infrastructure | global/security | 삭제 (어디서도 적용되지 않는 dead code) | PR01 | PR01 완료 |
@@ -550,14 +550,14 @@
 | 528 | `global/sms/SmsDemoAccount.java` | `domain/sms/policy/SmsDemoAccount.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
 | 529 | `global/sms/SmsProperties.java` | `adapter/sms/SmsProperties.java` | sms | global/sms | adapter/sms | PR02 | 전환 |
 | 530 | `global/sms/SmsSendHelper.java` | `adapter/sms/CoolSmsSenderAdapter.java` | sms | global/sms | adapter/sms | PR02 | 전환 (SmsSenderPort 구현) |
-| 531 | `global/thirdparty/ai/AiModerationClient.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
-| 532 | `global/thirdparty/ai/AiModerationProperties.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy |
-| 533 | `global/thirdparty/aws/s3/config/S3Config.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
-| 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
-| 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | = | image | global/thirdparty | adapter/s3/image | PR05 | legacy |
+| 531 | `global/thirdparty/ai/AiModerationClient.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy 유지(bridge→PR06): post 텍스트 검사 공유. isNsfw 를 (byte[], fileName) 로 변경, AiImageModerationAdapter 가 위임 |
+| 532 | `global/thirdparty/ai/AiModerationProperties.java` | = | image | global/thirdparty | adapter/http/image (AI 응답 변환=Adapter 내부 ACL) | PR05 | legacy 유지(bridge→PR06): AiModerationClient 와 함께 이동 |
+| 533 | `global/thirdparty/aws/s3/config/S3Config.java` | `infrastructure/config/S3Config.java` | image | global/thirdparty | adapter/s3/image | PR05 | 이동 |
+| 534 | `global/thirdparty/aws/s3/service/S3DeleteService.java` | `adapter/s3/image/S3ImageStorageAdapter.java (병합)` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
+| 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | `adapter/s3/image/S3ImageStorageAdapter.java` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
 | 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
-| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy |
+| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy 유지(bridge→PR06/PR08): post·chat 호출. 대체 계약 application/image/port/in/ImageQuery.getAllByIds |
 | 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
 
 ## 3. HTTP API (Controller 매핑)
@@ -601,8 +601,8 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | GET | `/api/chat/rooms` | `domain/chat/presentation/ChatController.java` | getRooms | 200 |
 | GET | `/api/chat/{room_id}` | `domain/chat/presentation/ChatController.java` | getChatMessage | 200 |
 | GET | `/api/health` | `domain/health/presentation/HealthController.java` | health | 200 |
-| POST | `/api/image` | `domain/image/presentation/ImageController.java` | upload | 200 |
-| DELETE | `/api/image/{image_id}` | `domain/image/presentation/ImageController.java` | delete | 204 |
+| POST | `/api/image` | `adapter/web/image/controller/ImageController.java` | upload | 200 |
+| DELETE | `/api/image/{image_id}` | `adapter/web/image/controller/ImageController.java` | delete | 204 |
 | DELETE | `/api/member` | `adapter/web/member/controller/MemberController.java` | deleteMember | 204 |
 | GET | `/api/member` | `adapter/web/member/controller/MemberController.java` | findMyInfo | 200 |
 | PATCH | `/api/member` | `adapter/web/member/controller/MemberController.java` | updateMyInfo | 200 |
@@ -807,20 +807,20 @@ URL·method·body 계약은 전환 중 변경하지 않는다. 내부 업무 이
 | `global/event/handler/CreateAlertEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
 | `global/event/handler/CreateAlertMembersEventListener.java` | `@Async("asyncExecutor")` |
 | `global/event/handler/CreateAlertMembersEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
-| `global/event/handler/DeleteNotUsedImageEventListener.java` | `@Async("asyncExecutor")` |
-| `global/event/handler/DeleteNotUsedImageEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
+| `adapter/event/image/DeleteNotUsedImageEventListener.java` (PR05 이동) | `@Async("asyncExecutor")` |
+| `adapter/event/image/DeleteNotUsedImageEventListener.java` (PR05 이동) | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
 | `global/event/handler/ReservationCancelledEventListener.java` | `@Async("asyncExecutor")` |
 | `global/event/handler/ReservationCancelledEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
 | `global/event/handler/SendNotificationEventListener.java` | `@Async("asyncExecutor")` |
 | `global/event/handler/SendNotificationEventListener.java` | `@TransactionalEventListener(value = SendNotificationEvent.class, phase = TransactionPhase.AFTER_COMMIT)` |
 | `global/event/handler/TradeStatusChangedEventListener.java` | `@Async("asyncExecutor")` |
 | `global/event/handler/TradeStatusChangedEventListener.java` | `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` |
-| `global/scheduler/DeleteOrphanImageScheduler.java` | `@Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")` |
+| `adapter/scheduler/image/DeleteOrphanImageScheduler.java` (PR05 이동) | `@Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")` |
 | `global/scheduler/ReservationReminderScheduler.java` | `@Scheduled(fixedDelay = 30000)` |
 | `global/scheduler/SuspendReleaseScheduler.java` | `@Scheduled(cron = "0 0 * * * *")` |
 | `global/sms/SmsSendHelper.java` | `@Async("asyncExecutor")` |
-| `global/thirdparty/aws/s3/service/S3DeleteService.java` | `@Async` |
-| `global/thirdparty/aws/s3/service/S3UploadService.java` | `@Async` |
+| ~~`global/thirdparty/aws/s3/service/S3DeleteService.java`~~ | ~~`@Async`~~ PR05 제거: 단건 삭제는 SDK 비동기 호출로 대기 없이 반환, deleteAll 은 self-call 이라 원래 미적용 |
+| ~~`global/thirdparty/aws/s3/service/S3UploadService.java`~~ | ~~`@Async`~~ PR05 제거: 호출자가 결과를 동기 대기했음. S3ImageStorageAdapter.upload 가 직접 대기 |
 
 이벤트 발행처(`publishEvent`):
 
@@ -891,8 +891,8 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java:24` | execute | `(기본)` |
 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java:53` | execute | `(기본)` |
 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java:35` | execute | `(readOnly = true)` |
-| `domain/image/service/impl/DeleteImageServiceImpl.java:20` | execute | `(기본)` |
-| `domain/image/service/impl/UploadImageServiceImpl.java:28` | execute | `(기본)` |
+| `application/image/service/DeleteImageService.java` (PR05) | execute | `(기본)` |
+| `application/image/service/UploadImageService.java` (PR05) | execute | `(기본)` |
 | `application/member/service/FindAllUserInfoService.java:23` | execute | `(readOnly = true)` |
 | `application/member/service/FindMyInfoService.java:22` | execute | `(readOnly = true)` |
 | `application/member/service/FindUserInfoService.java:21` | execute | `(readOnly = true)` |
@@ -944,12 +944,12 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 | `global/event/handler/CreateAdminAlertEventListener.java:18` | handleCreateAdminAlertEvent | `(기본)` |
 | `global/event/handler/CreateAlertEventListener.java:18` | handleCreateAlertEvent | `(기본)` |
 | `global/event/handler/CreateAlertMembersEventListener.java:18` | handleCreateAlertMembersEvent | `(기본)` |
-| `global/event/handler/DeleteNotUsedImageEventListener.java:24` | handleDeleteNotUsedImageEvent | `(기본)` |
+| `adapter/event/image/DeleteNotUsedImageEventListener.java` (PR05 이동) | handleDeleteNotUsedImageEvent | `(기본)` — @TransactionalEventListener 매칭, 트랜잭션 없음 |
 | `global/event/handler/ReservationCancelledEventListener.java:24` | handle | `(기본)` |
 | `global/event/handler/SendNotificationEventListener.java:18` | handleNotification | `(기본)` |
 | `global/event/handler/TradeStatusChangedEventListener.java:20` | handleTradeStatusChangedEvent | `(기본)` |
-| `global/scheduler/DeleteOrphanImageScheduler.java:67` | findOrphanImages | `(readOnly = true)` |
-| `global/scheduler/DeleteOrphanImageScheduler.java:87` | deleteFromDatabase | `(propagation = Propagation.REQUIRED, rollbackFor = Exception.class, timeout = 60)` |
+| ~~`global/scheduler/DeleteOrphanImageScheduler.java:67`~~ | findOrphanImages | ~~`(readOnly = true)`~~ self-call 로 미적용이었음. PR05: CleanupOrphanImagesService 는 트랜잭션 없음(저장소 기본 트랜잭션) |
+| ~~`global/scheduler/DeleteOrphanImageScheduler.java:87`~~ | deleteFromDatabase | ~~`(REQUIRED, rollbackFor, timeout = 60)`~~ self-call 로 미적용이었음. PR05: 200건 배치마다 deleteAllByIdInBatch 자체 트랜잭션(기준선 동작 유지) |
 | `global/scheduler/SuspendReleaseScheduler.java:24` | releaseSuspensions | `(기본)` |
 
 @Transactional 94곳.
@@ -972,7 +972,7 @@ application 공개 실행 메서드가 트랜잭션을 소유한다. 아래 read
 
 같은 클래스 안에 @Scheduled와 @Transactional 메서드가 공존하는 파일(자기 호출 시 프록시 미적용 여부를 담당 PR이 기준선으로 확인):
 
-- `global/scheduler/DeleteOrphanImageScheduler.java`
+- `global/scheduler/DeleteOrphanImageScheduler.java` — PR05 확인: 프록시 미적용이 기준선. 전환 후에도 바깥 트랜잭션 없음(DeleteOrphanImageSchedulerTest 가 S3 호출 중 트랜잭션 비활성 assert)
 - `global/scheduler/SuspendReleaseScheduler.java`
 
 ## 8. 스키마 (JPA 매핑)
@@ -1081,3 +1081,9 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
 | PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지·예약 리마인더·예약 취소(조회). 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR06·07·08·10 |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |
+| `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 |
+| `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
+| `ImageValidateUtil` (PR05 잔여) | post Create/UpdateProduct, chat ValidateChatSendable | PR06/PR08 에서 `ImageQuery.getAllByIds` 로 교체 후 삭제 |
+| `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | 발행자 post UpdateProductServiceImpl 이 import | PR06 (발행 Port 정리 시 이동) |
+| `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | post 텍스트 검사 + AiImageModerationAdapter(위임) | PR06 에서 adapter/http 로 이동, AiImageModerationAdapter import 갱신 |
+| `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | Product/Notice/ReportImageRepository 직접 사용 | post=PR06, report=PR09, notice=PR10 공개 command 로 교체 |
