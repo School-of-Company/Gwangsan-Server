@@ -34,9 +34,9 @@ import team.startup.gwangsan.application.trade.data.TradeCompletionCommand;
 import team.startup.gwangsan.domain.alert.model.AlertType;
 import team.startup.gwangsan.application.alert.service.CreateAlertService;
 import team.startup.gwangsan.application.alert.data.RecordAlertCommand;
-import team.startup.gwangsan.domain.chat.entity.ChatMessage;
-import team.startup.gwangsan.domain.chat.entity.ChatRoom;
-import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
+import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaEntity;
+import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaEntity;
+import team.startup.gwangsan.domain.chat.model.MessageType;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
@@ -274,7 +274,7 @@ class TradeAlertAtomicityIntegrationTest {
                     .status(completed == null ? ProductStatus.ONGOING : ProductStatus.COMPLETED).build();
             em.persist(product);
 
-            ChatRoom room = ChatRoom.builder().product(product).buyer(buyer).seller(seller).isActive(true).build();
+            ChatRoomJpaEntity room = ChatRoomJpaEntity.builder().product(product).buyer(buyer).seller(seller).isActive(true).build();
             em.persist(room);
             em.persist(message(room, seller));
             em.persist(message(room, buyer));
@@ -288,8 +288,8 @@ class TradeAlertAtomicityIntegrationTest {
         });
     }
 
-    private ChatMessage message(ChatRoom room, MemberJpaEntity sender) {
-        return ChatMessage.builder().id(MESSAGE_IDS.incrementAndGet()).content("안녕하세요").messageType(MessageType.TEXT)
+    private ChatMessageJpaEntity message(ChatRoomJpaEntity room, MemberJpaEntity sender) {
+        return ChatMessageJpaEntity.builder().id(MESSAGE_IDS.incrementAndGet()).content("안녕하세요").messageType(MessageType.TEXT)
                 .checked(false).room(room).sender(sender).createdAt(LocalDateTime.now()).build();
     }
 

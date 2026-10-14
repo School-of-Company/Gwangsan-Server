@@ -146,59 +146,59 @@
 | 124 | `domain/block/service/impl/BlockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
 | 125 | `domain/block/service/impl/GetBlockListServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
 | 126 | `domain/block/service/impl/UnblockMemberServiceImpl.java` | = | block | service impl | application/block/service (+ 필요한 output Port) | PR09 | legacy |
-| 127 | `domain/chat/entity/ChatMessage.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
-| 128 | `domain/chat/entity/ChatMessageImage.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
-| 129 | `domain/chat/entity/ChatRoom.java` | = | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | legacy |
-| 130 | `domain/chat/entity/constant/MessageType.java` | = | chat | enum | domain/chat/model | PR08 | legacy |
-| 131 | `domain/chat/exception/ChatMessageIdConflictException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
-| 132 | `domain/chat/exception/InvalidChatStreamPayloadException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
-| 133 | `domain/chat/exception/NotFoundChatMessageException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
-| 134 | `domain/chat/exception/NotFoundChatRoomException.java` | = | chat | exception | domain/chat/exception | PR08 | legacy |
-| 135 | `domain/chat/presentation/ChatController.java` | = | chat | controller | adapter/web/chat/controller | PR08 | legacy |
-| 136 | `domain/chat/presentation/dto/GetChatMessageDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 137 | `domain/chat/presentation/dto/GetChatProductDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 138 | `domain/chat/presentation/dto/GetRoomProductDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 139 | `domain/chat/presentation/dto/GetRoomsDto.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 140 | `domain/chat/presentation/dto/request/UpdateChatMessageRequest.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 141 | `domain/chat/presentation/dto/request/UpdateMessageCheckedRequest.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 142 | `domain/chat/presentation/dto/response/CreateChatRoomResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 143 | `domain/chat/presentation/dto/response/GetChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 144 | `domain/chat/presentation/dto/response/GetChatMessagesResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 145 | `domain/chat/presentation/dto/response/GetRoomIdResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 146 | `domain/chat/presentation/dto/response/GetRoomMemberResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 147 | `domain/chat/presentation/dto/response/GetRoomsResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 148 | `domain/chat/presentation/dto/response/SaveChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 149 | `domain/chat/presentation/dto/response/UpdateChatMessageResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 150 | `domain/chat/presentation/dto/response/ValidateChatSendableResponse.java` | = | chat | web dto | adapter/web/chat/dto | PR08 | legacy |
-| 151 | `domain/chat/repository/ChatMessageImageRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 152 | `domain/chat/repository/ChatMessageRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 153 | `domain/chat/repository/ChatRoomRepository.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 154 | `domain/chat/repository/custom/ChatMessageCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 155 | `domain/chat/repository/custom/ChatMessageImageCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 156 | `domain/chat/repository/custom/ChatRoomCustomRepository.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 157 | `domain/chat/repository/custom/impl/ChatMessageCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 158 | `domain/chat/repository/custom/impl/ChatMessageImageCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 159 | `domain/chat/repository/custom/impl/ChatRoomCustomRepositoryImpl.java` | = | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | legacy |
-| 160 | `domain/chat/repository/projection/ChatRoomDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 161 | `domain/chat/repository/projection/LatestMessageDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 162 | `domain/chat/repository/projection/UnreadCountDto.java` | = | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | legacy |
-| 163 | `domain/chat/service/CreateChatRoomService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 164 | `domain/chat/service/DeleteChatRoomService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 165 | `domain/chat/service/FindChatMessageByRoomIdService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 166 | `domain/chat/service/FindRoomIdByProductIdService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 167 | `domain/chat/service/FindRoomsByCurrentUserService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 168 | `domain/chat/service/ReadChatMessageService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 169 | `domain/chat/service/SaveChatMessageService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 170 | `domain/chat/service/ValidateChatSendableService.java` | = | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | legacy |
-| 171 | `domain/chat/service/impl/ChatMessageMutationService.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 172 | `domain/chat/service/impl/CreateChatRoomServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 173 | `domain/chat/service/impl/DeleteChatRoomServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 174 | `domain/chat/service/impl/FindChatMessageByRoomIdServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 175 | `domain/chat/service/impl/FindRoomIdByProductIdServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 176 | `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 177 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 178 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
-| 179 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | = | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | legacy |
+| 127 | `domain/chat/entity/ChatMessage.java` | `adapter/persistence/chat/ChatMessageJpaEntity.java` + `domain/chat/model/ChatMessage.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
+| 128 | `domain/chat/entity/ChatMessageImage.java` | `adapter/persistence/chat/ChatMessageImageJpaEntity.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
+| 129 | `domain/chat/entity/ChatRoom.java` | `adapter/persistence/chat/ChatRoomJpaEntity.java` + `domain/chat/model/ChatRoom.java` | chat | jpa entity | adapter/persistence/chat (JpaEntity) + domain/chat/model (순수 모델, 규칙 있을 때) | PR08 | PR08 완료 |
+| 130 | `domain/chat/entity/constant/MessageType.java` | `domain/chat/model/MessageType.java` | chat | enum | domain/chat/model | PR08 | PR08 완료 |
+| 131 | `domain/chat/exception/ChatMessageIdConflictException.java` | = | chat | exception | domain/chat/exception | PR08 | PR08 완료 |
+| 132 | `domain/chat/exception/InvalidChatStreamPayloadException.java` | = | chat | exception | domain/chat/exception | PR08 | PR08 완료 |
+| 133 | `domain/chat/exception/NotFoundChatMessageException.java` | = | chat | exception | domain/chat/exception | PR08 | PR08 완료 |
+| 134 | `domain/chat/exception/NotFoundChatRoomException.java` | = | chat | exception | domain/chat/exception | PR08 | PR08 완료 |
+| 135 | `domain/chat/presentation/ChatController.java` | `adapter/web/chat/controller/ChatController.java` | chat | controller | adapter/web/chat/controller | PR08 | PR08 완료 |
+| 136 | `domain/chat/presentation/dto/GetChatMessageDto.java` | `adapter/web/chat/dto/GetChatMessageDto.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 137 | `domain/chat/presentation/dto/GetChatProductDto.java` | `adapter/web/chat/dto/GetChatProductDto.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 138 | `domain/chat/presentation/dto/GetRoomProductDto.java` | `adapter/web/chat/dto/GetRoomProductDto.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 139 | `domain/chat/presentation/dto/GetRoomsDto.java` | 삭제 → `application/chat/data/ChatRoomListRow.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 140 | `domain/chat/presentation/dto/request/UpdateChatMessageRequest.java` | `adapter/web/chat/dto/UpdateChatMessageRequest.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 141 | `domain/chat/presentation/dto/request/UpdateMessageCheckedRequest.java` | `adapter/web/chat/dto/UpdateMessageCheckedRequest.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 142 | `domain/chat/presentation/dto/response/CreateChatRoomResponse.java` | `adapter/web/chat/dto/CreateChatRoomResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 143 | `domain/chat/presentation/dto/response/GetChatMessageResponse.java` | 삭제 (미사용) | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 144 | `domain/chat/presentation/dto/response/GetChatMessagesResponse.java` | `adapter/web/chat/dto/GetChatMessagesResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 145 | `domain/chat/presentation/dto/response/GetRoomIdResponse.java` | `adapter/web/chat/dto/GetRoomIdResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 146 | `domain/chat/presentation/dto/response/GetRoomMemberResponse.java` | `adapter/web/chat/dto/GetRoomMemberResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 147 | `domain/chat/presentation/dto/response/GetRoomsResponse.java` | `adapter/web/chat/dto/GetRoomsResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 148 | `domain/chat/presentation/dto/response/SaveChatMessageResponse.java` | 삭제 → `application/chat/data/SavedChatMessage.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 149 | `domain/chat/presentation/dto/response/UpdateChatMessageResponse.java` | `adapter/web/chat/dto/UpdateChatMessageResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 150 | `domain/chat/presentation/dto/response/ValidateChatSendableResponse.java` | `adapter/web/chat/dto/ValidateChatSendableResponse.java` | chat | web dto | adapter/web/chat/dto | PR08 | PR08 완료 |
+| 151 | `domain/chat/repository/ChatMessageImageRepository.java` | `adapter/persistence/chat/ChatMessageImageJpaRepository.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 152 | `domain/chat/repository/ChatMessageRepository.java` | `adapter/persistence/chat/ChatMessageJpaRepository.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 153 | `domain/chat/repository/ChatRoomRepository.java` | `adapter/persistence/chat/ChatRoomJpaRepository.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 154 | `domain/chat/repository/custom/ChatMessageCustomRepository.java` | `adapter/persistence/chat/ChatMessageCustomRepository.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 155 | `domain/chat/repository/custom/ChatMessageImageCustomRepository.java` | `adapter/persistence/chat/ChatMessageImageCustomRepository.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 156 | `domain/chat/repository/custom/ChatRoomCustomRepository.java` | `adapter/persistence/chat/ChatRoomCustomRepository.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 157 | `domain/chat/repository/custom/impl/ChatMessageCustomRepositoryImpl.java` | `adapter/persistence/chat/ChatMessageCustomRepositoryImpl.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 158 | `domain/chat/repository/custom/impl/ChatMessageImageCustomRepositoryImpl.java` | `adapter/persistence/chat/ChatMessageImageCustomRepositoryImpl.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 159 | `domain/chat/repository/custom/impl/ChatRoomCustomRepositoryImpl.java` | `adapter/persistence/chat/ChatRoomCustomRepositoryImpl.java` | chat | querydsl | adapter/persistence/chat (QueryPort 구현) | PR08 | PR08 완료 |
+| 160 | `domain/chat/repository/projection/ChatRoomDto.java` | `adapter/persistence/chat/ChatRoomDto.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 161 | `domain/chat/repository/projection/LatestMessageDto.java` | `adapter/persistence/chat/LatestMessageDto.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 162 | `domain/chat/repository/projection/UnreadCountDto.java` | `adapter/persistence/chat/UnreadCountDto.java` | chat | repository | adapter/persistence/chat (JpaRepository) + application/chat/port/out | PR08 | PR08 완료 |
+| 163 | `domain/chat/service/CreateChatRoomService.java` | 삭제 → `application/chat/port/in/CreateChatRoomUseCase.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 164 | `domain/chat/service/DeleteChatRoomService.java` | 삭제 → `application/chat/port/in/HideChatRoomUseCase.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 165 | `domain/chat/service/FindChatMessageByRoomIdService.java` | 삭제 → `application/chat/port/in/LoadChatRoomMessagesUseCase.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 166 | `domain/chat/service/FindRoomIdByProductIdService.java` | 삭제 → `application/chat/port/in/ChatRoomIdQuery.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 167 | `domain/chat/service/FindRoomsByCurrentUserService.java` | 삭제 → `application/chat/port/in/ChatRoomListQuery.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 168 | `domain/chat/service/ReadChatMessageService.java` | 삭제 → `application/chat/port/in/ReadChatMessagesUseCase.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 169 | `domain/chat/service/SaveChatMessageService.java` | 삭제 → `application/chat/port/in/SaveChatMessageUseCase.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 170 | `domain/chat/service/ValidateChatSendableService.java` | 삭제 → `application/chat/port/in/ValidateChatSendableQuery.java` | chat | service interface | application/chat/port/in (UseCase/Query) | PR08 | PR08 완료 |
+| 171 | `domain/chat/service/impl/ChatMessageMutationService.java` | `application/chat/service/ChatMessageMutationService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 172 | `domain/chat/service/impl/CreateChatRoomServiceImpl.java` | `application/chat/service/CreateChatRoomService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 173 | `domain/chat/service/impl/DeleteChatRoomServiceImpl.java` | `application/chat/service/HideChatRoomService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 174 | `domain/chat/service/impl/FindChatMessageByRoomIdServiceImpl.java` | `application/chat/service/LoadChatRoomMessagesService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 175 | `domain/chat/service/impl/FindRoomIdByProductIdServiceImpl.java` | `application/chat/service/ChatRoomIdService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 176 | `domain/chat/service/impl/FindRoomsByCurrentUserServiceImpl.java` | `application/chat/service/ChatRoomListService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 177 | `domain/chat/service/impl/ReadChatMessageServiceImpl.java` | `application/chat/service/ReadChatMessagesService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 178 | `domain/chat/service/impl/SaveChatMessageServiceImpl.java` | `application/chat/service/SaveChatMessageService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
+| 179 | `domain/chat/service/impl/ValidateChatSendableServiceImpl.java` | `application/chat/service/ValidateChatSendableService.java` | chat | service impl | application/chat/service (+ 필요한 output Port) | PR08 | PR08 완료 |
 | 180 | `domain/dong/entity/Dong.java` | `adapter/persistence/dong/DongJpaEntity.java` | dong | jpa entity | adapter/persistence/dong (JpaEntity) + domain/dong/model (순수 모델, 규칙 있을 때) | PR03 | PR03 완료 |
 | 181 | `domain/dong/repository/DongRepository.java` | `adapter/persistence/dong/DongJpaRepository.java` (+ application/dong/port/out/LoadDongPort.java) | dong | repository | adapter/persistence/dong (JpaRepository) + application/dong/port/out | PR03 | PR03 완료 |
 | 182 | `domain/health/presentation/HealthController.java` | `adapter/web/health/controller/HealthController.java` | health | controller | adapter/web/health/controller | PR03 | PR03 완료 |
@@ -487,24 +487,24 @@
 | 465 | `global/aop/CheckBlocked.java` | (삭제) (유일 사용처가 거래 완료 요청이었음) | block | global/aop | @CheckBlocked 유일 사용처(RequestTradeComplete) 전환 시 consumer output Port(차단 조회)로 대체 후 삭제 | PR07 | PR07 완료 |
 | 466 | `global/auth/MemberDetails.java` | `adapter/security/auth/MemberDetails.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
 | 467 | `global/auth/MemberDetailsService.java` | `adapter/security/auth/MemberDetailsService.java` | auth | global/auth | adapter/security/auth | PR01 | PR01 완료 |
-| 468 | `global/chat/notification/ChattingServerMessageMutationNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
-| 469 | `global/chat/notification/ChattingServerProperties.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
-| 470 | `global/chat/notification/ChattingServerSystemMessageNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
-| 471 | `global/chat/notification/ChattingServerTradeStatusNotifier.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
-| 472 | `global/chat/notification/ChattingServerTradeStatusNotifierImpl.java` | = | chat | global/chat | adapter/http/chat | PR08 | legacy |
-| 473 | `global/chat/stream/ChatStreamConsumerWorker.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 474 | `global/chat/stream/ChatStreamField.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 475 | `global/chat/stream/ChatStreamHandler.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 476 | `global/chat/stream/ChatStreamMessage.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 477 | `global/chat/stream/ChatStreamMessageProcessor.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 478 | `global/chat/stream/ChatStreamProperties.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 479 | `global/chat/stream/ChatStreamRedisAdapter.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
-| 480 | `global/chat/stream/SaveChatMessageHandler.java` | = | chat | global/chat | adapter/stream/chat | PR08 | legacy |
+| 468 | `global/chat/notification/ChattingServerMessageMutationNotifier.java` | `adapter/http/chat/ChattingServerMessageMutationNotifier.java` | chat | global/chat | adapter/http/chat | PR08 | PR08 완료 |
+| 469 | `global/chat/notification/ChattingServerProperties.java` | `adapter/http/chat/ChattingServerProperties.java` | chat | global/chat | adapter/http/chat | PR08 | PR08 완료 |
+| 470 | `global/chat/notification/ChattingServerSystemMessageNotifier.java` | `adapter/http/chat/ChattingServerSystemMessageNotifier.java` | chat | global/chat | adapter/http/chat | PR08 | PR08 완료 |
+| 471 | `global/chat/notification/ChattingServerTradeStatusNotifier.java` | `adapter/http/chat/ChattingServerTradeStatusNotifier.java` | chat | global/chat | adapter/http/chat | PR08 | PR08 완료 |
+| 472 | `global/chat/notification/ChattingServerTradeStatusNotifierImpl.java` | `adapter/http/chat/ChattingServerTradeStatusNotifierImpl.java` | chat | global/chat | adapter/http/chat | PR08 | PR08 완료 |
+| 473 | `global/chat/stream/ChatStreamConsumerWorker.java` | `adapter/stream/chat/ChatStreamConsumerWorker.java` | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 474 | `global/chat/stream/ChatStreamField.java` | `adapter/stream/chat/ChatStreamField.java` | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 475 | `global/chat/stream/ChatStreamHandler.java` | 삭제 → Processor 가 `SaveChatMessageUseCase`/`SaveChatMessageCommand` 직접 사용 | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 476 | `global/chat/stream/ChatStreamMessage.java` | 삭제 → Processor 가 `SaveChatMessageUseCase`/`SaveChatMessageCommand` 직접 사용 | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 477 | `global/chat/stream/ChatStreamMessageProcessor.java` | `adapter/stream/chat/ChatStreamMessageProcessor.java` | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 478 | `global/chat/stream/ChatStreamProperties.java` | `adapter/stream/chat/ChatStreamProperties.java` | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 479 | `global/chat/stream/ChatStreamRedisAdapter.java` | `adapter/stream/chat/ChatStreamRedisAdapter.java` | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
+| 480 | `global/chat/stream/SaveChatMessageHandler.java` | 삭제 → Processor 가 `SaveChatMessageUseCase`/`SaveChatMessageCommand` 직접 사용 | chat | global/chat | adapter/stream/chat | PR08 | PR08 완료 |
 | 481 | `global/config/AsyncConfig.java` | `infrastructure/config/AsyncConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 482 | `global/config/GsonConfig.java` | `infrastructure/config/GsonConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 483 | `global/config/RetryConfig.java` | `infrastructure/config/RetryConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
 | 484 | `global/config/SchedulerConfig.java` | `infrastructure/config/SchedulerConfig.java` | infrastructure | global/config | infrastructure/config | PR01 | PR01 완료 |
-| 485 | `global/event/ChatMessageMutationEvent.java` | = | chat | global/event | application/chat (기존 이벤트 경계 정리) | PR08 | legacy |
+| 485 | `global/event/ChatMessageMutationEvent.java` | `application/chat/data/ChatMessageMutationEvent.java` | chat | global/event | application/chat (기존 이벤트 경계 정리) | PR08 | PR08 완료 |
 | 486 | `global/event/CreateAdminAlertEvent.java` | = | admin | global/event | application/admin (관리자 알림) | PR11 | legacy |
 | 487 | `global/event/CreateAlertEvent.java` | `adapter/event/alert/CreateAlertEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (비동기 경로 유지. OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 발행만 PR07 이 동기로 이동) |
 | 488 | `global/event/CreateAlertMembersEvent.java` | `adapter/event/alert/CreateAlertMembersEvent.java` | alert | global/event | alert 공개 input Port (중요 알림은 동기 저장으로 대체) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
@@ -513,7 +513,7 @@
 | 491 | `global/event/SendNotificationEvent.java` | = | notification | global/event | application/notification 발송 계약 | PR04 | PR04 bridge (소비 LegacySendNotificationEventBridge, 제거 PR10) |
 | 492 | `global/event/TradeStatusChangedEvent.java` | `adapter/event/trade/TradeStatusChangedEvent.java` | trade | global/event | application/trade (기존 이벤트 경계 정리) | PR07 | PR07 완료 |
 | 493 | `global/event/constant/ImageType.java` | `(삭제)` | image | global/event | domain/image/model | PR05 | PR06 완료: ImageOwnerType 으로 대체 |
-| 494 | `global/event/handler/ChatMessageMutationEventListener.java` | = | chat | global/event | adapter/event/chat | PR08 | legacy |
+| 494 | `global/event/handler/ChatMessageMutationEventListener.java` | `adapter/event/chat/ChatMessageMutationEventListener.java` (+ `ChatMessageMutationEventPublisher`) | chat | global/event | adapter/event/chat | PR08 | PR08 완료 |
 | 495 | `global/event/handler/CreateAdminAlertEventListener.java` | = | admin | global/event | adapter/event/admin | PR11 | legacy |
 | 496 | `global/event/handler/CreateAlertEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (비동기 경로 유지) |
 | 497 | `global/event/handler/CreateAlertMembersEventListener.java` | `adapter/event/alert/AlertEventListener.java` | alert | global/event | adapter/event/alert (중요 알림 발행자 전환은 PR06/07/09/10/11) | PR04 | PR04 완료 (공지 비동기 경로 유지) |
@@ -557,7 +557,7 @@
 | 535 | `global/thirdparty/aws/s3/service/S3UploadService.java` | `adapter/s3/image/S3ImageStorageAdapter.java` | image | global/thirdparty | adapter/s3/image | PR05 | 전환 |
 | 536 | `global/thirdparty/expo/ExpoPushAdapter.java` | `adapter/push/notification/ExpoPushAdapter.java` | notification | global/thirdparty | adapter/push/notification | PR04 | PR04 완료 |
 | 537 | `global/util/BlockValidator.java` | = | block | global/util | block 공개 query + consumer output Port (호출처 교체는 각 업무 PR) | PR09 | legacy |
-| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | legacy 유지(bridge→PR08): post 는 ImageQuery.getAllByIds 로 교체 완료(PR06), 남은 호출자 chat ValidateChatSendable |
+| 538 | `global/util/ImageValidateUtil.java` | = | image | global/util | image 공개 계약 (호출처 교체는 각 업무 PR) | PR05 | 삭제 (PR08: chat `ChatImageBridge` → `ImageQuery.getAllByIds`) |
 | 539 | `global/util/MemberUtil.java` | = | auth | global/util | ActorContext 로 대체. 호출처 교체는 각 업무 PR, 클래스 삭제는 PR12 | PR12 | legacy |
 
 ## 3. HTTP API (Controller 매핑)
@@ -1070,31 +1070,36 @@ Flyway migration: `V10__create_app_version.sql`, `V11__add_chat_message_mutation
 | PR02 bridge: `SignUpAlertEventAdapter` (CreateAdminAlertEvent·CreateAlertEvent 발행, 확정 정책상 AFTER_COMMIT 비동기 유지·원자 저장 대상 아님) | adapter/event/auth | 이벤트 타입 이동 시 import 만 교체(CreateAlertEvent=PR04, CreateAdminAlertEvent=PR11), PR12 대조 |
 | PR02 bridge: `MemberController` DELETE → legacy `MemberWithdrawalService`/`MemberDeletionService` | adapter/web/member, domain/member/service | PR11 |
 | PR02 bridge: `MemberDetailJpaEntity` 직접 변경 메서드(plus/minus/adjustGwangsan·plusLight·updatePlace)와 `MemberJpaEntity.updateMemberRole/Status` | legacy 호출자 post/trade/admin/review/suspend/scheduler | PR07·PR09·PR11 (`ChangeGwangsanUseCase` 등 공개 command 로 교체 후 삭제) — **PR07 부분 완료**: 거래 잔액은 `ChangeGwangsanUseCase`, 회원 확인·별명은 `MemberAccountQuery`. 후기 `plusLight` 만 `ReviewMemberBridge` 에 남음(빛 공개 command 없음) |
-| PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR |
+| PR02 bridge: 타 업무의 `MemberJpaRepository`/`MemberDetailJpaRepository`/`MemberJpaEntity` 직접 사용(import 만 갱신) | admin·alert·block·chat·notice·post·relatedkeyword·report·review·suspend·trade·global | 각 소유 PR — **PR08 완료(chat)**: 회원 존재 확인은 `MemberAccountQuery`, `MemberJpaEntity` 는 chat persistence 연관(JPA)만 |
 | PR02 bridge: `MemberCustomRepository` 가 post DTO `GetProductMemberResponse` 반환(admin 조회용) | adapter/persistence/member | PR06 또는 PR11 |
 | `JwtProvider.generate*`/`RefreshTokenRepository` 의 admin 로그인 직접 사용 | domain/admin/service/impl/SignInAdminServiceImpl | PR11 (auth 공개 발급 command 필요 시 추가 요청) |
 | PR04 `LegacyNotificationPortBridge` + `domain/notification/NotificationPort` | (삭제) 예약 리마인더/취소가 SendPushUseCase 직접 호출 | PR06 완료 |
-| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 |
+| PR04 `LegacySendNotificationEventBridge` + `global/event/SendNotificationEvent` | 거래 확정·채팅·공지 발행자가 DeviceToken 목록 이벤트 발행 | PR07·PR08·PR10 (이벤트·bridge 삭제는 PR10, 대상: `PushRequestedEvent`) — **PR07 완료(거래 확정)**: `TradePushAdapter` 가 `PushRequestedEvent`(회원 ID) 발행, trade 의 DeviceToken 사용 0 — **PR08 완료(채팅)**: `ChatPushBridge` 가 `PushRequestedEvent`(회원 ID) 발행, chat 의 DeviceToken 사용 0 |
 | PR04 알림 저장 범위 (계획 "1차 구현 검토 확정") | `RecordAlertUseCase` 는 OTHER_MEMBER_TRADE_COMPLETE·TRADE_CANCEL 만 허용(`AlertType.isRecordedWithBusinessTransaction`). 그 밖의 유형은 `CreateAlertEvent`/`CreateAlertMembersEvent` → `AlertEventListener`(AFTER_COMMIT async) 유지 | PR07: `RequestTradeCompleteServiceImpl`(OTHER_MEMBER_TRADE_COMPLETE)·`TradeCancelApplier`(TRADE_CANCEL)를 동기 저장으로 바꾸고 같은 commit 에서 해당 `CreateAlertEvent` 발행 제거. PR02/09/10/11·후기는 비동기 유지. PR12 전 발행자 대조 |
 | PR04 `LegacyAlertSourceAdapter` | 비동기 경로의 원천 조회를 legacy Repository 로 수행 (Port 는 유지) | 구현만 각 업무 공개 조회로 교체: PR02(회원)·PR06(상품, 완료: ProductSnapshotQuery)·PR07(거래·후기)·PR09(신고·정지)·PR10(공지), 최종 PR12 |
 | PR04 `LegacyAlertImageAdapter` | 알림 이미지·거래 철회→상품 조회를 legacy Repository 로 수행 | PR06(상품, 완료: ProductImageQuery.findImageLinks — 연결 행 ID 유지)·PR07(철회)·PR09(신고)·PR10(공지), 최종 PR12 — **PR07 완료(철회)**: `productIdsByTradeCancel` → trade 공개 `TradeCancelQuery.findProductIds` |
 | PR04 `AlertJpaRepository`/`AlertReceiptJpaRepository` 직접 사용 | MemberDeletionServiceImpl | PR11 (`AlertMemberCleanupUseCase`) |
-| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** |
+| PR04 `DeviceTokenRepository` 직접 사용 | 거래 확정·채팅·공지(조회). 예약 리마인더·취소는 PR06 에서 SendPushUseCase 로 교체 완료. 로그인 저장은 PR04 에서 `RegisterDeviceTokenUseCase` 로 교체 완료 | 조회: PR07·08·10 — **PR07 완료(거래 확정 조회 제거)** — **PR08 완료(채팅 조회 제거)** |
 | PR04 `LegacyAlertSourceAdapter` 의 `MemberJpaRepository.findAllByIdIn` 직접 사용 | 공지 알림 수신자 일괄 존재 확인 (N+1 회피 bridge). 단건 회원 확인은 `MemberAccountQuery` 공개 Port 사용 | 제거: 스택 끝 정리 단계 — PR02 회원 batch 조회 공개 Port 추가 후 PR04 교체 (PR12 가 PR11 이후 요청) |
 | `domain.image.entity.Image`/`ImageRepository` (PR05 잔여) | ImagePersistenceAdapter·OrphanImageQueryAdapter 가 사용, 타 업무 Entity association·legacy 서비스(post/notice/report/trade/chat)도 직접 사용 | 소비 업무 PR06~PR10 이 ImageQuery/자기 persistence 로 교체 후 PR12 에서 adapter/persistence/image 로 이동 |
 | `GetImageResponse` (PR05 잔여) | 타 업무 web 응답 DTO 약 40곳 공유 | 각 소비 업무 PR 에서 자기 web DTO 로 교체, 클래스 삭제는 PR12 |
-| `ImageValidateUtil` (PR05 잔여) | chat ValidateChatSendable (post 는 PR06 에서 `ImageQuery.getAllByIds` 로 교체 완료) | PR08 에서 교체 후 삭제 |
+| `ImageValidateUtil` (PR05 잔여) | **PR08 완료: 삭제**. chat `ChatImageBridge` 가 `ImageQuery.getAllByIds` 사용 | - |
 | `DeleteNotUsedImageEvent`/`ImageType` (PR05 잔여) | PR06 완료: 이벤트는 `adapter/event/image` 로 이동(ImageOwnerType 사용), ImageType 삭제 | - |
 | `AiModerationClient`/`AiModerationProperties` (PR05 잔여) | PR06 완료: `adapter/http/ai` 로 이동, AiImageModerationAdapter·PostImageBridgeAdapter 가 사용 | - |
 | `LegacyImageReferenceCleanupAdapter` (adapter/integration/image) | Notice/ReportImageRepository 직접 사용 (post 는 UnlinkProductImageUseCase 로 교체 완료) | post=PR06 완료, report=PR09, notice=PR10 공개 command 로 교체 |
 | PR06 `PostImageBridgeAdapter` (adapter/integration/post) | image 공개 ImageQuery 사용. 미사용 이미지 정리는 adapter/event/image 이벤트, 텍스트 검열은 adapter/http/ai 클라이언트 | - (전환 완료, 연결 adapter) |
 | PR06 `PostMemberBridgeAdapter` (adapter/integration/post) | 닉네임은 MemberAccountQuery(공개). 지점 ID·작성자 프로필은 MemberDetailJpaRepository 직접, 차단은 BlockValidator | 프로필 공개 query PR11/PR12, 차단 PR09 |
-| PR06 `PostChatBridgeAdapter` (adapter/integration/post) | ChatRoomRepository·ChatMessageRepository(방 조회, 예약 취소 시스템 메시지 저장 — 호출자 트랜잭션 참여) | PR08 |
+| PR06 `PostChatBridgeAdapter` (adapter/integration/post) | **PR08 완료**: chat 공개 `ChatRoomLookupQuery`(방·대화 여부)·`SaveChatSystemMessageUseCase`(예약 취소 시스템 메시지, 호출자 트랜잭션 참여) 사용 | - (전환 완료, 연결 adapter) |
 | PR06 `PostTradeStatusBridgeAdapter` (adapter/integration/post) | TradeStateReader + legacy TradeStatusChangedEvent 발행 | PR07 — **PR07 완료**: 삭제, `adapter/integration/post/PostTradeStatusAdapter`(trade `TradeStateQuery` + `adapter.event.trade.TradeStatusChangedEvent`) |
-| PR06 `ReservationNotificationBridgeAdapter`·`ReservationCancelledEventListener`·`ReservationCancelledEvent` (adapter/integration/post) | SendPushUseCase(공개, reminder 최종 실패 시 예외)·ChattingServerSystemMessageNotifier | 채팅 서버 HTTP PR08 (푸시는 PR06 에서 공개 Port 로 교체 완료) |
+| PR06 `ReservationNotificationBridgeAdapter`·`ReservationCancelledEventListener`·`ReservationCancelledEvent` (adapter/integration/post) | SendPushUseCase(공개, reminder 최종 실패 시 예외)·ChattingServerSystemMessageNotifier | 채팅 서버 HTTP PR08 (푸시는 PR06 에서 공개 Port 로 교체 완료) — PR08: notifier 는 `adapter/http/chat` 으로 이동(import 만 갱신), listener 는 adapter 간 직접 호출 유지(이벤트 소유 PR06) |
 | PR06 `PostController` `/api/post/trade` POST·DELETE | legacy RequestTradeCompleteService/WithdrawTradeCompleteService 직접 주입 | PR07 (trade input Port로 교체) — **PR07 완료**: 핸들러 제거, 같은 URL은 `adapter/web/trade/controller/TradeCompletionController` |
-| PR06 공개 Port 소비 전 타 업무 legacy 호출자(trade·review·chat·report·alert·admin·member·image 의 post Entity/Repository 직접 사용) | `adapter/persistence/post` 의 Entity·Repository 를 import 만 바꿔 계속 사용 | 각 호출자 PR(PR02·PR04·PR05·PR07·PR08·PR09·PR11)이 `.omo/evidence/hex-pr06-handoff.md` 의 post 공개 Port 로 교체 |
-| PR07 남은 legacy bridge (`adapter/integration/{trade,review}/*Bridge`) | `TradeBlockBridge`·`ReviewBlockBridge`(BlockValidator), `TradeChatBridge`(chat Repository), `TradeAlertBridge` 의 관리자 알림 생성·삭제(CreateAdminAlertEvent·AdminAlertRepository, 중요 알림 2종은 `RecordAlertUseCase` 로 교체 완료), `ReviewMemberBridge.addLight`(member 빛 command 없음) | PR09, PR08, PR11, PR02 후속/PR12 |
+| PR06 공개 Port 소비 전 타 업무 legacy 호출자(trade·review·chat·report·alert·admin·member·image 의 post Entity/Repository 직접 사용) | `adapter/persistence/post` 의 Entity·Repository 를 import 만 바꿔 계속 사용 | 각 호출자 PR(PR02·PR04·PR05·PR07·PR08·PR09·PR11)이 `.omo/evidence/hex-pr06-handoff.md` 의 post 공개 Port 로 교체 — **PR08 완료(chat)**: `ChatProductBridge` 가 `ProductSnapshotQuery`·`ProductImageQuery`·`PendingReservationUseCase` 사용 |
+| PR07 남은 legacy bridge (`adapter/integration/{trade,review}/*Bridge`) | `TradeBlockBridge`·`ReviewBlockBridge`(BlockValidator), `TradeChatBridge`(chat Repository), `TradeAlertBridge` 의 관리자 알림 생성·삭제(CreateAdminAlertEvent·AdminAlertRepository, 중요 알림 2종은 `RecordAlertUseCase` 로 교체 완료), `ReviewMemberBridge.addLight`(member 빛 command 없음) | PR09, PR08, PR11, PR02 후속/PR12 — **PR08 완료(`TradeChatBridge`)**: chat 공개 `ChatRoomLookupQuery` 사용 |
 | PR07 `TradeCancelPersistenceAdapter` 의 `ImageRepository`·legacy `Image` Entity | 철회 이미지 연결 저장(JPA association) | PR05 후속/PR12 |
-| PR07 공개 Port 를 직접 쓰는 legacy 호출자 | chat `FindChatMessageByRoomIdServiceImpl`(`TradeStateQuery`·`CompletedTradeQuery`), admin `ApproveTradeCancelServiceImpl`(`ApproveTradeCancelUseCase`) | PR08, PR11 |
+| PR07 공개 Port 를 직접 쓰는 legacy 호출자 | chat `FindChatMessageByRoomIdServiceImpl`(`TradeStateQuery`·`CompletedTradeQuery`), admin `ApproveTradeCancelServiceImpl`(`ApproveTradeCancelUseCase`) | PR08, PR11 — **PR08 완료(chat)**: legacy 서비스 삭제, `ChatProductBridge` 가 `TradeStateQuery`·`CompletedTradeQuery` 사용 |
 | trade/review JpaRepository 를 직접 쓰는 legacy 호출자 | admin `RejectAdminAlertServiceImpl`·`CreateAdminAlertServiceImpl`·`FindAlertByAlertTypeAndPlaceServiceImpl`, member `MemberDeletionServiceImpl`, PR04 `LegacyAlertSourceAdapter`(후기·철회 기각 원천) | PR11, PR02·PR11, PR04/PR12 |
+| PR08 `adapter/integration/chat/ChatProductBridge` | post 공개 `ProductSnapshotQuery`·`ProductImageQuery`·`PendingReservationUseCase`, trade 공개 `TradeStateQuery`·`CompletedTradeQuery` 사용. 채팅방 목록 상품 조회는 1 쿼리 → 2 쿼리(PR06 handoff 승인) | - (전환 완료, 연결 adapter) |
+| PR08 `adapter/integration/chat/ChatImageBridge`·`ChatMemberBridge`·`ChatPushBridge` | image `ImageQuery.getAllByIds`, member `MemberAccountQuery.findById`, notification `PushRequestedEvent`(커밋 후 발송) | - (전환 완료, 연결 adapter) |
+| PR08 `adapter/integration/chat/ChatBlockBridge` | chat → `BlockValidator` | PR09 |
+| PR08 chat 공개 Port 소비 | trade `TradeChatBridge`, post `PostChatBridgeAdapter` 가 `ChatRoomLookupQuery`·`SaveChatSystemMessageUseCase` 사용. post `ProductCustomRepository` 의 chat DTO 반환 메서드(`findRoomProductsWithImagesByIds`)는 삭제 | - |
+| chat JPA Repository 직접 사용 (legacy) | member `MemberDeletionServiceImpl` 의 채팅방·메시지 재지정(`reassignBuyer/Seller/Sender`). image `OrphanImageQueryAdapter` 의 `QChatMessageImageJpaEntity` 는 persistence 간 참조(허용) | PR11 (회원 탈퇴 정리 시 chat 공개 command 요청) |

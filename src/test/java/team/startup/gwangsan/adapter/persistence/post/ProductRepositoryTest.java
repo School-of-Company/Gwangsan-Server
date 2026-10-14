@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -106,69 +104,6 @@ class ProductRepositoryTest {
             assertThat(productRepository.findAdminProducts(null, null, deleted.getId(), 1))
                     .extracting(Product::getId).containsExactly(third.getId());
             assertThat(productRepository.findAdminProducts(Type.OBJECT, null, null, 2)).isEmpty();
-        }
-    }
-
-    @Nested
-    @DisplayName("findRoomProductsWithImagesByIds 메서드는")
-    class Describe_findRoomProductsWithImagesByIds {
-
-        @ParameterizedTest
-        @CsvSource({
-                "COMPLETED, true, false, false",
-                "RESERVATION, false, true, false",
-                "ONGOING, false, false, false",
-                "DELETED, false, false, true"
-        })
-        @DisplayName("상품 상태를 isCompleted/isReserved/isDeleted로 매핑한다")
-        void it_maps_status_to_completed_and_reserved(
-                ProductStatus status, boolean completed, boolean reserved, boolean deleted) {
-            Product product = persistProduct(status);
-            em.flush();
-            em.clear();
-
-            var result = productRepository.findRoomProductsWithImagesByIds(List.of(product.getId()));
-
-            assertThat(result).hasSize(1);
-            var dto = result.getFirst();
-            assertThat(dto.productId()).isEqualTo(product.getId());
-            assertThat(dto.isCompleted()).isEqualTo(completed);
-            assertThat(dto.isReserved()).isEqualTo(reserved);
-            assertThat(dto.isDeleted()).isEqualTo(deleted);
-        }
-
-        @Test
-        @DisplayName("이미지가 없는 상품도 빈 이미지 목록과 함께 반환한다")
-        void it_returns_product_without_images() {
-            Product product = persistProduct(ProductStatus.RESERVATION);
-            em.flush();
-            em.clear();
-
-            var result = productRepository.findRoomProductsWithImagesByIds(List.of(product.getId()));
-
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().productId()).isEqualTo(product.getId());
-            assertThat(result.getFirst().images()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("여러 이미지를 상품 하나에 모아 반환한다")
-        void it_groups_images_in_one_product() {
-            Product product = persistProduct(ProductStatus.RESERVATION);
-            Image first = em.persist(Image.builder().imageUrl("https://example.com/first").build());
-            Image second = em.persist(Image.builder().imageUrl("https://example.com/second").build());
-            em.persist(ProductImage.builder().product(product).image(first).build());
-            em.persist(ProductImage.builder().product(product).image(second).build());
-            em.flush();
-            em.clear();
-
-            var result = productRepository.findRoomProductsWithImagesByIds(List.of(product.getId()));
-
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().productId()).isEqualTo(product.getId());
-            assertThat(result.getFirst().images()).containsExactlyInAnyOrder(
-                    new GetImageResponse(first.getId(), first.getImageUrl()),
-                    new GetImageResponse(second.getId(), second.getImageUrl()));
         }
     }
 

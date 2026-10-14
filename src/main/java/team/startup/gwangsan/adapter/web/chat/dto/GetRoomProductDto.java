@@ -1,0 +1,15 @@
+package team.startup.gwangsan.adapter.web.chat.dto;
+
+import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
+
+import java.util.List;
+
+public record GetRoomProductDto(
+        Long productId,
+        String title,
+        boolean isCompleted,
+        boolean isReserved,
+        boolean isDeleted,
+        List<GetImageResponse> images
+) {
+}

@@ -1,11 +1,8 @@
 package team.startup.gwangsan.adapter.persistence.post;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
-import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.model.Mode;
@@ -15,15 +12,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import static team.startup.gwangsan.domain.image.entity.QImage.image;
 import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
 import static team.startup.gwangsan.adapter.persistence.post.QProduct.product;
-import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
 
 @Repository
 @RequiredArgsConstructor
@@ -97,57 +89,6 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .fetch()
                 .stream()
                 .toList();
-    }
-
-    @Override
-    public List<GetRoomProductDto> findRoomProductsWithImagesByIds(Collection<Long> productIds) {
-        if (productIds == null || productIds.isEmpty()) {
-            return List.of();
-        }
-
-        List<Tuple> rows = queryFactory
-                .select(
-                        product.id,
-                        product.title,
-                        product.status,
-                        image.id,
-                        image.imageUrl
-                )
-                .from(product)
-                .leftJoin(productImage).on(productImage.product.eq(product))
-                .leftJoin(image).on(productImage.image.eq(image))
-                .where(product.id.in(productIds))
-                .fetch();
-
-        Map<Long, GetRoomProductDto> resultMap = new LinkedHashMap<>();
-
-        for (Tuple row : rows) {
-            Long productId = row.get(product.id);
-            String title = row.get(product.title);
-            ProductStatus status = row.get(product.status);
-            Long imageId = row.get(image.id);
-            String imageUrl = row.get(image.imageUrl);
-
-            // 상태 값은 trade TradeStateQuery(domain TradeState)가 반환하는 completed()/reserved()와 같아야 한다.
-            // 일괄 조회를 유지하기 위해 단건 TradeStateQuery 대신 조회한 상태로 계산한다.
-            GetRoomProductDto dto = resultMap.computeIfAbsent(
-                    productId,
-                    id -> new GetRoomProductDto(
-                            id,
-                            title,
-                            status == ProductStatus.COMPLETED,
-                            status == ProductStatus.RESERVATION,
-                            status == ProductStatus.DELETED,
-                            new ArrayList<>()
-                    )
-            );
-
-            if (imageId != null) {
-                dto.images().add(new GetImageResponse(imageId, imageUrl));
-            }
-        }
-
-        return new ArrayList<>(resultMap.values());
     }
 
     private BooleanExpression typeEq(Type type) {
