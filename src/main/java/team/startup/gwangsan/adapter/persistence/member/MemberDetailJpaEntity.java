@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberDetail;
 import team.startup.gwangsan.domain.place.entity.Place;
 
@@ -25,7 +25,7 @@ public class MemberDetailJpaEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dong_id", nullable = false)
-    private Dong dong;
+    private DongJpaEntity dong;
 
     @Column(name = "gwangsan", nullable = false)
     private Integer gwangsan;
@@ -41,7 +41,7 @@ public class MemberDetailJpaEntity {
     private String description;
 
     @Builder
-    public MemberDetailJpaEntity(MemberJpaEntity member, Dong dong, Integer gwangsan, Place place, Integer light, String description) {
+    public MemberDetailJpaEntity(MemberJpaEntity member, DongJpaEntity dong, Integer gwangsan, Place place, Integer light, String description) {
         this.member = member;
         this.dong = dong;
         this.gwangsan = gwangsan;

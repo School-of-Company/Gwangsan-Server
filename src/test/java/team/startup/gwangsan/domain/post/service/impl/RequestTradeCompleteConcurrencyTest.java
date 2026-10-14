@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -245,7 +245,7 @@ class RequestTradeCompleteConcurrencyTest {
             em.persist(head);
             Place place = Place.builder().name("지점" + suffix).head(head).build();
             em.persist(place);
-            Dong dong = Dong.builder().name("동" + suffix).build();
+            DongJpaEntity dong = DongJpaEntity.builder().name("동" + suffix).build();
             em.persist(dong);
 
             MemberJpaEntity seller = member("seller" + suffix);
@@ -285,7 +285,7 @@ class RequestTradeCompleteConcurrencyTest {
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
     }
 
-    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, Dong dong, Place place) {
+    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, DongJpaEntity dong, Place place) {
         return MemberDetailJpaEntity.builder().member(member).dong(dong).gwangsan(BALANCE)
                 .place(place).light(0).description("소개").build();
     }

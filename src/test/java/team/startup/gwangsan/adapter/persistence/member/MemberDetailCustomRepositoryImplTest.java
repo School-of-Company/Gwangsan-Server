@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -124,7 +124,7 @@ class MemberDetailCustomRepositoryImplTest {
         MemberJpaEntity member = member(suffix);
         return em.persist(MemberDetailJpaEntity.builder()
                 .member(member)
-                .dong(em.persist(Dong.builder().name("동-" + suffix).build()))
+                .dong(em.persist(DongJpaEntity.builder().name("동-" + suffix).build()))
                 .place(place)
                 .gwangsan(0)
                 .light(0)

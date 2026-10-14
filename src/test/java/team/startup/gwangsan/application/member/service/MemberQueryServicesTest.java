@@ -8,23 +8,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.adapter.integration.member.LegacyMemberKeywordAdapter;
+import team.startup.gwangsan.adapter.integration.member.MemberKeywordAdapter;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.*;
 import team.startup.gwangsan.application.member.data.MemberProfile;
 import team.startup.gwangsan.application.member.data.MyInfoResult;
 import team.startup.gwangsan.application.member.data.UserInfoResult;
+import team.startup.gwangsan.application.relatedkeyword.service.FindMemberRelatedKeywordsService;
+import team.startup.gwangsan.application.relatedkeyword.service.MemberKeywordCommandService;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotAllowedUserAccessException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
-import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
-import team.startup.gwangsan.domain.relatedkeyword.repository.MemberRelatedKeywordRepository;
-import team.startup.gwangsan.domain.relatedkeyword.repository.RelatedKeywordRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaEntity;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaEntity;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
+import team.startup.gwangsan.adapter.persistence.relatedkeyword.RelatedKeywordJpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,8 +49,8 @@ class MemberQueryServicesTest {
     @Mock private MemberJpaRepository memberJpaRepository;
     @Mock private MemberDetailJpaRepository memberDetailJpaRepository;
     @Mock private WithdrawalRecordJpaRepository withdrawalRecordJpaRepository;
-    @Mock private RelatedKeywordRepository relatedKeywordRepository;
-    @Mock private MemberRelatedKeywordRepository memberRelatedKeywordRepository;
+    @Mock private RelatedKeywordJpaRepository relatedKeywordRepository;
+    @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private EntityManager entityManager;
 
     private FindMyInfoService findMyInfo;
@@ -58,8 +61,10 @@ class MemberQueryServicesTest {
     void setUp() {
         MemberPersistenceAdapter persistence = new MemberPersistenceAdapter(memberJpaRepository,
                 memberDetailJpaRepository, withdrawalRecordJpaRepository, entityManager);
-        LegacyMemberKeywordAdapter keywords = new LegacyMemberKeywordAdapter(relatedKeywordRepository,
-                memberRelatedKeywordRepository, entityManager);
+        RelatedKeywordPersistenceAdapter keywordPersistence = new RelatedKeywordPersistenceAdapter(
+                relatedKeywordRepository, memberRelatedKeywordRepository, entityManager);
+        MemberKeywordAdapter keywords = new MemberKeywordAdapter(
+                new FindMemberRelatedKeywordsService(keywordPersistence), new MemberKeywordCommandService(keywordPersistence));
         findMyInfo = new FindMyInfoService(persistence, keywords);
         findUserInfo = new FindUserInfoService(persistence, keywords);
         findAllUserInfo = new FindAllUserInfoService(persistence);
@@ -96,12 +101,11 @@ class MemberQueryServicesTest {
     }
 
     private void keywordsOf(Long memberId, MemberJpaEntity member, String name) {
-        RelatedKeyword keyword = mock(RelatedKeyword.class);
+        RelatedKeywordJpaEntity keyword = mock(RelatedKeywordJpaEntity.class);
         when(keyword.getName()).thenReturn(name);
-        MemberRelatedKeyword mrk = mock(MemberRelatedKeyword.class);
+        MemberRelatedKeywordJpaEntity mrk = mock(MemberRelatedKeywordJpaEntity.class);
         when(mrk.getRelatedKeyword()).thenReturn(keyword);
-        when(entityManager.getReference(MemberJpaEntity.class, memberId)).thenReturn(member);
-        when(memberRelatedKeywordRepository.findAllByMember(member)).thenReturn(List.of(mrk));
+        when(memberRelatedKeywordRepository.findAllByMemberId(memberId)).thenReturn(List.of(mrk));
     }
 
     @Nested
@@ -113,7 +117,7 @@ class MemberQueryServicesTest {
         void it_returns_my_info() {
             Head head = mock(Head.class);
             when(head.getName()).thenReturn("광산구");
-            Dong dong = mock(Dong.class);
+            DongJpaEntity dong = mock(DongJpaEntity.class);
             when(dong.getName()).thenReturn("수완동");
             MemberJpaEntity member = member(1L, "테스터일");
             MemberDetailJpaEntity detail = detail(member, place(5, "수완지점", head), 5, 1000, "자기소개");

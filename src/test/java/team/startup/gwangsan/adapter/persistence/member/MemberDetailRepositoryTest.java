@@ -16,7 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.dong.entity.Dong;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -60,7 +60,7 @@ class MemberDetailRepositoryTest {
     void savesAndReloadsTwoDetailsWithOneDong() {
         inTransaction(() -> {
             Place place = place("공유");
-            Dong dong = persist(Dong.builder().name("공유동").build());
+            DongJpaEntity dong = persist(DongJpaEntity.builder().name("공유동").build());
             MemberJpaEntity first = member("첫회원", "010-0000-0001");
             MemberJpaEntity second = member("둘회원", "010-0000-0002");
 
@@ -90,10 +90,10 @@ class MemberDetailRepositoryTest {
             MemberJpaEntity second = member("넷회원", "010-0000-0004");
 
             memberDetailRepository.save(MemberDetailJpaEntity.builder()
-                    .member(first).dong(persist(Dong.builder().name("첫동").build())).place(place)
+                    .member(first).dong(persist(DongJpaEntity.builder().name("첫동").build())).place(place)
                     .gwangsan(0).light(0).description("소개").build());
             memberDetailRepository.save(MemberDetailJpaEntity.builder()
-                    .member(second).dong(persist(Dong.builder().name("둘동").build())).place(place)
+                    .member(second).dong(persist(DongJpaEntity.builder().name("둘동").build())).place(place)
                     .gwangsan(0).light(0).description("소개").build());
 
             entityManager.flush();
