@@ -105,7 +105,7 @@ import static org.mockito.Mockito.doAnswer;
         team.startup.gwangsan.adapter.persistence.admin.AdminAlertPersistenceAdapter.class,
         ReportQueryService.class, SuspensionQueryService.class, DeleteMemberBlocksService.class, DeleteMemberSuspensionsService.class,
         // 선행 업무 공개 Port 실제 구현(bridge 연결 대상): member·post·image
-        MemberAccountService.class, MemberPersistenceAdapter.class,
+        MemberAccountService.class, team.startup.gwangsan.application.member.service.ManageMemberService.class, MemberPersistenceAdapter.class,
         ProductPublicQueryService.class, ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class,
         ImageQueryService.class, ImagePersistenceAdapter.class,
         ReportBlockSuspendBoundaryIntegrationTest.RecordedEvents.class})
@@ -492,7 +492,7 @@ class ReportBlockSuspendBoundaryIntegrationTest {
     }
 
     @Nested
-    @DisplayName("정지 해제 트랜잭션은")
+    @DisplayName("정지·해제 트랜잭션은")
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     class Describe_release_rollback {
 
@@ -501,6 +501,37 @@ class ReportBlockSuspendBoundaryIntegrationTest {
         @Autowired private SuspendJpaRepository suspendJpaRepository;
         @Autowired private PlatformTransactionManager transactionManager;
         @Autowired private ReleaseExpiredSuspensionsService releaseService;
+        @Autowired private SuspendMemberService suspendService;
+
+        @Test
+        @DisplayName("it_정지는 member 공개 command 를 거쳐 정지 이력과 SUSPENDED 를 함께 커밋한다")
+        void it_commits_suspension_with_status() {
+            Long memberId = new TransactionTemplate(transactionManager)
+                    .execute(status -> memberRepository.save(newMember("커밋", MemberStatus.ACTIVE)).getId());
+
+            suspendService.execute(new SuspendMemberCommand(memberId, 3, null));
+
+            assertThat(memberRepository.findById(memberId)).get().extracting(MemberJpaEntity::getStatus)
+                    .isEqualTo(MemberStatus.SUSPENDED);
+            assertThat(suspendJpaRepository.count()).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("it_정지 이력 저장 뒤 상태 변경이 실패하면 정지 이력까지 rollback 한다")
+        void it_rolls_back_suspension_when_status_change_fails() {
+            Long memberId = new TransactionTemplate(transactionManager)
+                    .execute(status -> memberRepository.save(newMember("정지롤백", MemberStatus.ACTIVE)).getId());
+            doAnswer(invocation -> {
+                throw new IllegalStateException("상태 변경 실패");
+            }).when(memberStatusBridgeAdapter).suspend(any());
+
+            assertThatThrownBy(() -> suspendService.execute(new SuspendMemberCommand(memberId, 3, null)))
+                    .isInstanceOf(IllegalStateException.class);
+
+            assertThat(suspendJpaRepository.count()).isZero();
+            assertThat(memberRepository.findById(memberId)).get().extracting(MemberJpaEntity::getStatus)
+                    .isEqualTo(MemberStatus.ACTIVE);
+        }
 
         @AfterEach
         void cleanUp() {
