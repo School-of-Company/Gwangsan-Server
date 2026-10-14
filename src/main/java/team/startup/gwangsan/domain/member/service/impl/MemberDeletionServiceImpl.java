@@ -19,10 +19,10 @@ import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.review.repository.ReviewRepository;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +33,13 @@ public class MemberDeletionServiceImpl implements MemberDeletionService {
     private final MemberJpaRepository memberRepository;
     private final MemberDetailJpaRepository memberDetailRepository;
     private final ProductRepository productRepository;
-    private final TradeCompleteRepository tradeCompleteRepository;
+    private final TradeCompleteJpaRepository tradeCompleteRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final ReviewRepository reviewRepository;
+    private final ReviewJpaRepository reviewRepository;
     private final ReportRepository reportRepository;
     private final AdminAlertRepository adminAlertRepository;
-    private final TradeCancelRepository tradeCancelRepository;
+    private final TradeCancelJpaRepository tradeCancelRepository;
     private final AlertJpaRepository alertRepository;
     private final NoticeRepository noticeRepository;
     private final MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;

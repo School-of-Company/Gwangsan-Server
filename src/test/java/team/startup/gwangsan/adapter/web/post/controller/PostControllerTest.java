@@ -34,8 +34,6 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.domain.post.exception.InappropriateContentException;
-import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
-import team.startup.gwangsan.domain.post.service.WithdrawTradeCompleteService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 
 import java.time.LocalDateTime;
@@ -71,8 +69,6 @@ class PostControllerTest {
     private MemberProductsQuery memberProductsQuery;
     private ReserveProductUseCase reservationProductService;
     private CancelReservationUseCase deleteReservationProductService;
-    private RequestTradeCompleteService requestTradeCompleteService;
-    private WithdrawTradeCompleteService withdrawTradeCompleteService;
 
     @BeforeEach
     void setUp() {
@@ -85,8 +81,6 @@ class PostControllerTest {
         memberProductsQuery = mock(MemberProductsQuery.class);
         reservationProductService = mock(ReserveProductUseCase.class);
         deleteReservationProductService = mock(CancelReservationUseCase.class);
-        requestTradeCompleteService = mock(RequestTradeCompleteService.class);
-        withdrawTradeCompleteService = mock(WithdrawTradeCompleteService.class);
         mvc = MockMvcBuilders.standaloneSetup(new PostController(
                         contentValidationService,
                         createProductService,
@@ -96,9 +90,7 @@ class PostControllerTest {
                         findProductsByTypeAndModeService,
                         memberProductsQuery,
                         reservationProductService,
-                        deleteReservationProductService,
-                        requestTradeCompleteService,
-                        withdrawTradeCompleteService))
+                        deleteReservationProductService))
                 .setCustomArgumentResolvers(new FixedActorResolver())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -303,28 +295,8 @@ class PostControllerTest {
     }
 
     @Nested
-    @DisplayName("거래와 예약 요청은")
+    @DisplayName("예약과 삭제 요청은")
     class Describe_trade_and_reservation {
-
-        @Test
-        void it_binds_trade_request_body_and_returns_no_content() throws Exception {
-            String request = "{\"productId\":7,\"otherMemberId\":8}";
-
-            mvc.perform(post("/api/post/trade").contentType(MediaType.APPLICATION_JSON).content(request))
-                    .andExpect(status().isNoContent()).andExpect(content().string(""));
-
-            verify(requestTradeCompleteService).execute(7L, 8L);
-        }
-
-        @Test
-        void it_binds_trade_withdraw_body_and_returns_no_content() throws Exception {
-            String request = "{\"productId\":7,\"otherMemberId\":8}";
-
-            mvc.perform(delete("/api/post/trade").contentType(MediaType.APPLICATION_JSON).content(request))
-                    .andExpect(status().isNoContent()).andExpect(content().string(""));
-
-            verify(withdrawTradeCompleteService).execute(7L, 8L);
-        }
 
         @Test
         void it_binds_reservation_datetime_and_coordinates() throws Exception {
@@ -353,15 +325,6 @@ class PostControllerTest {
                     .andExpect(status().isNoContent()).andExpect(content().string(""));
 
             verify(deleteReservationProductService).execute(ACTOR, 7L);
-        }
-
-        @Test
-        void it_maps_malformed_trade_body_without_service() throws Exception {
-            mvc.perform(post("/api/post/trade").contentType(MediaType.APPLICATION_JSON).content("{"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.status").value(400));
-
-            verifyNoInteractions(requestTradeCompleteService);
         }
 
         @Test

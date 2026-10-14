@@ -20,11 +20,11 @@ import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.adapter.event.alert.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -37,7 +37,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
     private final MemberUtil memberUtil;
     private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
-    private final TradeCancelRepository tradeCancelRepository;
+    private final TradeCancelJpaRepository tradeCancelRepository;
     private final ProductRepository productRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -97,7 +97,7 @@ public class RejectAdminAlertServiceImpl implements RejectAdminAlertService {
     }
 
     private void rejectTradeCancel(AdminAlert alert) {
-        TradeCancel tradeCancel = tradeCancelRepository.findById(alert.getSourceId())
+        TradeCancelJpaEntity tradeCancel = tradeCancelRepository.findById(alert.getSourceId())
                 .orElseThrow(NotFoundTradeCancelException::new);
 
         if (tradeCancel.getStatus() != TradeCancelStatus.PENDING) {

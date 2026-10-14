@@ -27,9 +27,9 @@ import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
 import team.startup.gwangsan.application.post.service.DeleteProductService;
-import team.startup.gwangsan.domain.review.entity.Review;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
+import team.startup.gwangsan.domain.trade.model.TradeStatus;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,9 +71,9 @@ class DeleteAdminProductServiceIntegrationTest {
             ProductImage link = em.persist(ProductImage.builder().product(product).image(image).build());
             ChatRoom room = em.persist(ChatRoom.builder().product(product).buyer(buyer).seller(author)
                     .isActive(true).build());
-            TradeComplete trade = em.persist(TradeComplete.builder().product(product).buyer(buyer)
+            TradeCompleteJpaEntity trade = em.persist(TradeCompleteJpaEntity.builder().product(product).buyer(buyer)
                     .seller(author).status(TradeStatus.COMPLETED).build());
-            Review review = em.persist(Review.builder().product(product).reviewer(buyer).reviewed(author)
+            ReviewJpaEntity review = em.persist(ReviewJpaEntity.builder().product(product).reviewer(buyer).reviewed(author)
                     .content("거래 후기").light(5).build());
             ProductReservation reservation = em.persist(ProductReservation.builder().product(product)
                     .reserver(buyer).status(ReservationStatus.PENDING).build());
@@ -93,10 +93,10 @@ class DeleteAdminProductServiceIntegrationTest {
             ChatRoom storedRoom = em.find(ChatRoom.class, room.getId());
             assertThat(storedRoom.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedRoom.getIsActive()).isTrue();
-            TradeComplete storedTrade = em.find(TradeComplete.class, trade.getId());
+            TradeCompleteJpaEntity storedTrade = em.find(TradeCompleteJpaEntity.class, trade.getId());
             assertThat(storedTrade.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedTrade.getStatus()).isEqualTo(TradeStatus.COMPLETED);
-            Review storedReview = em.find(Review.class, review.getId());
+            ReviewJpaEntity storedReview = em.find(ReviewJpaEntity.class, review.getId());
             assertThat(storedReview.getProduct().getId()).isEqualTo(product.getId());
             assertThat(storedReview.getContent()).isEqualTo("거래 후기");
             ProductReservation storedReservation = em.find(ProductReservation.class, reservation.getId());

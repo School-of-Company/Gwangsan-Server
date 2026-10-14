@@ -34,11 +34,11 @@ import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
 import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeCancelImage;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelImageRepository;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -59,8 +59,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
     private final ProductImageRepository productImageRepository;
-    private final TradeCancelRepository tradeCancelRepository;
-    private final TradeCancelImageRepository tradeCancelImageRepository;
+    private final TradeCancelJpaRepository tradeCancelRepository;
+    private final TradeCancelImageJpaRepository tradeCancelImageRepository;
 
     @Override
     @Transactional
@@ -93,8 +93,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
 
         List<Long> tradeCancelIds = tradeCancelAlerts.stream().map(AdminAlert::getSourceId).toList();
-        List<TradeCancel> tradeCancels = tradeCancelIds.isEmpty() ? List.of() : tradeCancelRepository.findAllByIdIn(tradeCancelIds);
-        List<TradeCancelImage> tradeCancelImages = tradeCancels.isEmpty() ? List.of() : tradeCancelImageRepository.findByTradeCancelIn(tradeCancelIds);
+        List<TradeCancelJpaEntity> tradeCancels = tradeCancelIds.isEmpty() ? List.of() : tradeCancelRepository.findAllByIdIn(tradeCancelIds);
+        List<TradeCancelImageJpaEntity> tradeCancelImages = tradeCancels.isEmpty() ? List.of() : tradeCancelImageRepository.findByTradeCancelIn(tradeCancelIds);
 
         Set<Long> productIds = tradeCancels.stream()
                 .map(tc -> tc.getTradeComplete().getProduct().getId())
@@ -236,14 +236,14 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private List<GetTradeCancelAlertResponse> createTradeCancelAlertResponses(
             List<AdminAlert> alerts,
-            List<TradeCancel> tradeCancels,
-            List<TradeCancelImage> images,
+            List<TradeCancelJpaEntity> tradeCancels,
+            List<TradeCancelImageJpaEntity> images,
             Map<Long, List<ProductImageResponse>> productImageMap,
             Map<Long, String> requesterPlaceNameMap,
             Map<Long, GetProductMemberResponse> ownerInfoByMemberId
     ) {
-        Map<Long, TradeCancel> tcMap = tradeCancels.stream()
-                .collect(Collectors.toMap(TradeCancel::getId, t -> t));
+        Map<Long, TradeCancelJpaEntity> tcMap = tradeCancels.stream()
+                .collect(Collectors.toMap(TradeCancelJpaEntity::getId, t -> t));
 
         Map<Long, List<GetImageResponse>> tcImageMap = images.stream()
                 .collect(Collectors.groupingBy(
@@ -256,7 +256,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
         return alerts.stream()
                 .map(alert -> {
-                    TradeCancel tc = Optional.ofNullable(tcMap.get(alert.getSourceId()))
+                    TradeCancelJpaEntity tc = Optional.ofNullable(tcMap.get(alert.getSourceId()))
                             .orElseThrow(NotFoundTradeCancelException::new);
 
                     Product product = tc.getTradeComplete().getProduct();

@@ -36,13 +36,19 @@ import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.exception.ForbiddenProductException;
 import team.startup.gwangsan.domain.post.exception.ReservedProductDeletionException;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
-import team.startup.gwangsan.domain.review.entity.Review;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
-import team.startup.gwangsan.domain.trade.service.TradeStateReader;
+import team.startup.gwangsan.adapter.persistence.review.ReviewJpaEntity;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
+import team.startup.gwangsan.domain.trade.model.TradeStatus;
+import team.startup.gwangsan.adapter.integration.trade.TradePostAdapter;
+import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCompletePersistenceAdapter;
+import team.startup.gwangsan.application.post.service.PendingReservationService;
+import team.startup.gwangsan.application.post.service.ProductPublicQueryService;
+import team.startup.gwangsan.application.post.service.ProductStatusService;
+import team.startup.gwangsan.application.trade.service.TradeStateService;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.adapter.integration.post.PostChatBridgeAdapter;
-import team.startup.gwangsan.adapter.integration.post.PostTradeStatusBridgeAdapter;
+import team.startup.gwangsan.adapter.integration.post.PostTradeStatusAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ReservationPersistenceAdapter;
 import team.startup.gwangsan.application.post.data.ReserveProductCommand;
@@ -64,7 +70,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryDslConfig.class, DeleteProductService.class, ReserveProductService.class,
         ProductPersistenceAdapter.class, ReservationPersistenceAdapter.class, PostChatBridgeAdapter.class,
-        PostTradeStatusBridgeAdapter.class, TradeStateReader.class})
+        PostTradeStatusAdapter.class, TradeStateService.class, TradeCompletePersistenceAdapter.class, TradePostAdapter.class,
+        ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
+        ProductImagePersistenceAdapter.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DisplayName("MariaDB 예약과 작성자 삭제 직렬화 통합 테스트")
 class ProductReservationDeletionIntegrationTest {
@@ -195,10 +203,10 @@ class ProductReservationDeletionIntegrationTest {
                         .scheduledAt(LocalDateTime.now().minusDays(1)).placeName("취소한 장소").build();
                 cancelled.cancel();
                 em.persist(cancelled);
-                TradeComplete trade = TradeComplete.builder().product(product).buyer(buyer)
+                TradeCompleteJpaEntity trade = TradeCompleteJpaEntity.builder().product(product).buyer(buyer)
                         .seller(product.getMember()).status(TradeStatus.COMPLETED).build();
                 em.persist(trade);
-                Review review = Review.builder().product(product).reviewer(buyer).reviewed(product.getMember())
+                ReviewJpaEntity review = ReviewJpaEntity.builder().product(product).reviewer(buyer).reviewed(product.getMember())
                         .content("보존할 후기").light(5).build();
                 em.persist(review);
                 em.flush();

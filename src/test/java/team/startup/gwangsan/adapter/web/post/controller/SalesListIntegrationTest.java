@@ -42,11 +42,8 @@ import team.startup.gwangsan.adapter.integration.post.PostMemberBridgeAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductImagePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.post.ProductPersistenceAdapter;
 import team.startup.gwangsan.adapter.security.auth.ActorContextArgumentResolver;
-import team.startup.gwangsan.adapter.web.post.controller.PostController;
 import team.startup.gwangsan.application.post.port.in.*;
 import team.startup.gwangsan.application.post.service.ProductListQueryService;
-import team.startup.gwangsan.domain.post.service.RequestTradeCompleteService;
-import team.startup.gwangsan.domain.post.service.WithdrawTradeCompleteService;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
@@ -114,8 +111,6 @@ class SalesListIntegrationTest {
     @MockitoBean ProductDetailQuery productDetailQuery;
     @MockitoBean UpdateProductUseCase updateProductUseCase;
     @MockitoBean DeleteProductUseCase deleteProductUseCase;
-    @MockitoBean RequestTradeCompleteService requestTradeCompleteService;
-    @MockitoBean WithdrawTradeCompleteService withdrawTradeCompleteService;
     @MockitoBean ReserveProductUseCase reserveProductUseCase;
     @MockitoBean CancelReservationUseCase cancelReservationUseCase;
 

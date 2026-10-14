@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
-import team.startup.gwangsan.global.event.TradeStatusChangedEvent;
+import team.startup.gwangsan.adapter.event.trade.TradeStatusChangedEvent;
 
 import java.time.LocalDateTime;
 

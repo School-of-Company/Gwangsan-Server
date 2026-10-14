@@ -22,9 +22,9 @@ import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
+import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ class CreateAdminAlertServiceImplTest {
     private MemberJpaRepository memberRepository;
 
     @Mock
-    private TradeCancelRepository tradeCancelRepository;
+    private TradeCancelJpaRepository tradeCancelRepository;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -147,7 +147,7 @@ class CreateAdminAlertServiceImplTest {
             @DisplayName("거래 취소 요청으로 AdminAlert를 저장한다")
             void it_saves_trade_cancel_alert() {
                 MemberJpaEntity requester = mock(MemberJpaEntity.class);
-                TradeCancel tradeCancel = mock(TradeCancel.class);
+                TradeCancelJpaEntity tradeCancel = mock(TradeCancelJpaEntity.class);
                 when(tradeCancel.getMember()).thenReturn(requester);
                 when(tradeCancelRepository.findByIdWithMember(1L)).thenReturn(Optional.of(tradeCancel));
 

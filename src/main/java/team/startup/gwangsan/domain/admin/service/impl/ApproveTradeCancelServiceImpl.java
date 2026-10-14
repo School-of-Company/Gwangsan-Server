@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import team.startup.gwangsan.application.trade.data.ApproveTradeCancelCommand;
+import team.startup.gwangsan.application.trade.port.in.ApproveTradeCancelUseCase;
 import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
@@ -13,33 +15,23 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
-import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
-import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeCancel;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
-import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
-import team.startup.gwangsan.domain.trade.service.TradeCancelApplier;
 import team.startup.gwangsan.global.util.MemberUtil;
 
+/**
+ * 관리자 철회 승인 진입. 철회 반영(잠금 순서·환불·상태 전이)은 trade 의 ApproveTradeCancelUseCase 가 소유하고,
+ * 여기서는 관리자 인가만 남긴다. legacy bridge: PR11 에서 admin application 으로 전환한다.
+ */
 @Service
 @RequiredArgsConstructor
 public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService {
 
     private final AdminAlertRepository adminAlertRepository;
-    private final TradeCancelRepository tradeCancelRepository;
-    private final ProductRepository productRepository;
     private final MemberUtil memberUtil;
     private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
-    private final TradeCancelApplier tradeCancelApplier;
+    private final ApproveTradeCancelUseCase approveTradeCancelUseCase;
 
-    /**
-     * 잠금 순서가 핵심이다. TradeCancel 을 잠금 전에 엔티티로 읽으면 그 값이 1차 캐시에 남아,
-     * 양측 동의로 이미 철회된 뒤에도 PENDING 으로 보여 광산이 두 번 환불된다. 그래서 상품 ID 만
-     * 스칼라로 먼저 읽어 잠금을 잡고, TradeCancel 은 그 뒤에 처음 로드한다.
-     * READ_COMMITTED 이유는 {@code TradeCancelServiceImpl} 주석 참고.
-     */
+    /** 잠금 순서와 READ_COMMITTED 이유는 trade ApproveTradeCancelService 주석 참고. */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void execute(Long alertId) {
@@ -49,24 +41,12 @@ public class ApproveTradeCancelServiceImpl implements ApproveTradeCancelService 
 
         MemberDetailJpaEntity adminDetail = getMemberDetail(admin.getId());
 
-        Long productId = tradeCancelRepository.findProductIdById(alert.getSourceId())
-                .orElseThrow(NotFoundTradeCancelException::new);
-
-        productRepository.findByIdForUpdate(productId)
-                .orElseThrow(NotFoundProductException::new);
-
-        TradeCancel tradeCancel = tradeCancelRepository.findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(alert.getSourceId())
-                .orElseThrow(NotFoundTradeCancelException::new);
-
-        TradeComplete tradeComplete = tradeCancel.getTradeComplete();
-
-        MemberDetailJpaEntity buyerDetail = getMemberDetail(tradeComplete.getBuyer().getId());
-        MemberDetailJpaEntity sellerDetail = getMemberDetail(tradeComplete.getSeller().getId());
-
-        validatePlaceUtil.validateSamePlace(admin, adminDetail, buyerDetail);
-        validatePlaceUtil.validateSamePlace(admin, adminDetail, sellerDetail);
-
-        tradeCancelApplier.apply(tradeCancel);
+        approveTradeCancelUseCase.execute(new ApproveTradeCancelCommand(alert.getSourceId(), (buyerId, sellerId) -> {
+            MemberDetailJpaEntity buyerDetail = getMemberDetail(buyerId);
+            MemberDetailJpaEntity sellerDetail = getMemberDetail(sellerId);
+            validatePlaceUtil.validateSamePlace(admin, adminDetail, buyerDetail);
+            validatePlaceUtil.validateSamePlace(admin, adminDetail, sellerDetail);
+        }));
     }
 
     private MemberDetailJpaEntity getMemberDetail(Long memberId) {

@@ -32,11 +32,11 @@ import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.ReservationStatus;
 import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductReservationRepository;
-import team.startup.gwangsan.domain.trade.service.TradeStateReader;
-import team.startup.gwangsan.domain.trade.service.TradeStateSnapshot;
-import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
-import team.startup.gwangsan.domain.trade.entity.TradeComplete;
-import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
+import team.startup.gwangsan.application.trade.port.in.TradeStateQuery;
+import team.startup.gwangsan.application.trade.data.TradeStateSnapshot;
+import team.startup.gwangsan.application.trade.data.CompletedTrade;
+import team.startup.gwangsan.application.trade.port.in.CompletedTradeQuery;
+import team.startup.gwangsan.domain.trade.model.TradeStatus;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -61,9 +61,9 @@ class FindChatMessageByRoomIdServiceImplTest {
     @Mock private ChatMessageRepository chatMessageRepository;
     @Mock private ChatMessageImageRepository chatMessageImageRepository;
     @Mock private ProductImageRepository productImageRepository;
-    @Mock private TradeStateReader tradeStateReader;
+    @Mock private TradeStateQuery tradeStateQuery;
     @Mock private ProductReservationRepository productReservationRepository;
-    @Mock private TradeCompleteRepository tradeCompleteRepository;
+    @Mock private CompletedTradeQuery completedTradeQuery;
 
     @InjectMocks
     private FindChatMessageByRoomIdServiceImpl service;
@@ -116,7 +116,7 @@ class FindChatMessageByRoomIdServiceImplTest {
 
         /** 거래 상태 스냅샷을 지정한다. isCompletable 은 실제 record 로직으로 계산된다. */
         private void givenTradeState(boolean completed, boolean reserved, Boolean requestedBySeller) {
-            lenient().when(tradeStateReader.read(any(), any(), any()))
+            lenient().when(tradeStateQuery.query(any()))
                     .thenReturn(new TradeStateSnapshot(completed, reserved, requestedBySeller, TRADE_REQUESTED_AT));
         }
 
@@ -342,11 +342,9 @@ class FindChatMessageByRoomIdServiceImplTest {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
             givenTradeState(true, false, null);
-            TradeComplete completion = mock(TradeComplete.class);
             LocalDateTime completedAt = LocalDateTime.of(2026, 9, 1, 15, 0);
-            when(completion.getCompletedAt()).thenReturn(completedAt);
-            when(tradeCompleteRepository.findByProductAndStatus(product, TradeStatus.COMPLETED))
-                    .thenReturn(Optional.of(completion));
+            when(completedTradeQuery.query(product.getId()))
+                    .thenReturn(Optional.of(new CompletedTrade(1L, 2L, 3L, completedAt)));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
 
@@ -361,7 +359,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         void it_clears_created_at_after_rollback() {
             arrangeRoomAsSellerView();
             arrangeEmptyMessages();
-            lenient().when(tradeStateReader.read(any(), any(), any()))
+            lenient().when(tradeStateQuery.query(any()))
                     .thenReturn(new TradeStateSnapshot(false, false, null, null));
 
             GetChatMessagesResponse response = service.execute(5L, null, null, 20);
