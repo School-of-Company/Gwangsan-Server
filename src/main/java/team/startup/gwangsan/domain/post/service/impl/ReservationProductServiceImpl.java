@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -41,7 +41,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
     @Override
     @Transactional
     public void execute(Long productId, Long roomId, LocalDateTime scheduledAt, String placeName, String address, Double latitude, Double longitude) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(NotFoundProductException::new);
@@ -65,7 +65,7 @@ public class ReservationProductServiceImpl implements ReservationProductService 
             throw new NotFoundChatRoomException();
         }
 
-        Member reserver = chatRoom.getBuyer().getId().equals(member.getId())
+        MemberJpaEntity reserver = chatRoom.getBuyer().getId().equals(member.getId())
                 ? chatRoom.getSeller()
                 : chatRoom.getBuyer();
 

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 
@@ -42,8 +42,8 @@ class SuspendReleaseSchedulerTest {
         @Test
         @DisplayName("만료된 정지 목록의 회원 상태를 ACTIVE로 변경한다")
         void it_releases_each_member_returned_as_expired() {
-            Member first = suspendedMember("first");
-            Member second = suspendedMember("second");
+            MemberJpaEntity first = suspendedMember("first");
+            MemberJpaEntity second = suspendedMember("second");
             when(suspendRepository.findAllBySuspendedUntilBefore(any(LocalDateTime.class)))
                     .thenReturn(List.of(expiredSuspend(first), expiredSuspend(second)));
 
@@ -67,8 +67,8 @@ class SuspendReleaseSchedulerTest {
         }
     }
 
-    private Member suspendedMember(String name) {
-        return Member.builder()
+    private MemberJpaEntity suspendedMember(String name) {
+        return MemberJpaEntity.builder()
                 .name(name)
                 .nickname(name)
                 .phoneNumber("010-0000-" + name)
@@ -78,7 +78,7 @@ class SuspendReleaseSchedulerTest {
                 .build();
     }
 
-    private Suspend expiredSuspend(Member member) {
+    private Suspend expiredSuspend(MemberJpaEntity member) {
         return Suspend.builder()
                 .member(member)
                 .suspendedAt(LocalDateTime.of(2000, 1, 1, 0, 0))

@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
@@ -21,7 +21,7 @@ public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Lo
         LocalDateTime getCreatedAt();
     }
 
-    Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, Member buyer, Member seller, TradeStatus tradeStatus);
+    Optional<TradeComplete> findByProductAndBuyerAndSellerAndStatus(Product product, MemberJpaEntity buyer, MemberJpaEntity seller, TradeStatus tradeStatus);
 
     @Query("""
             SELECT t.status AS status, t.requestedBySeller AS requestedBySeller, t.createdAt AS createdAt
@@ -31,8 +31,8 @@ public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Lo
                                team.startup.gwangsan.domain.trade.entity.constant.TradeStatus.COMPLETED)
             """)
     List<TradeStateProjection> findTradeState(@Param("product") Product product,
-                                               @Param("buyer") Member buyer,
-                                               @Param("seller") Member seller);
+                                               @Param("buyer") MemberJpaEntity buyer,
+                                               @Param("seller") MemberJpaEntity seller);
 
     Optional<TradeComplete> findByProductAndStatus(Product product, TradeStatus tradeStatus);
 
@@ -40,9 +40,9 @@ public interface TradeCompleteRepository extends JpaRepository<TradeComplete, Lo
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE TradeComplete t SET t.buyer = :dummy WHERE t.buyer = :target")
-    void reassignBuyer(@Param("target") Member target, @Param("dummy") Member dummy);
+    void reassignBuyer(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE TradeComplete t SET t.seller = :dummy WHERE t.seller = :target")
-    void reassignSeller(@Param("target") Member target, @Param("dummy") Member dummy);
+    void reassignSeller(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);
 }

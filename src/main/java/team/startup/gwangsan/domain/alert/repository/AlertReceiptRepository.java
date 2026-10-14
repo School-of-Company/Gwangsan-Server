@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import team.startup.gwangsan.domain.alert.entity.AlertReceipt;
 import team.startup.gwangsan.domain.alert.repository.custom.AlertReceiptCustomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 public interface AlertReceiptRepository extends JpaRepository<AlertReceipt, Long>, AlertReceiptCustomRepository {
     boolean existsByMemberIdAndChecked(Long memberId, boolean check);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM AlertReceipt r WHERE r.member = :member")
-    void deleteAllByMember(@Param("member") Member member);
+    void deleteAllByMember(@Param("member") MemberJpaEntity member);
 }

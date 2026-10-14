@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.entity.RelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.presentation.dto.response.RelatedKeywordResponse;
@@ -45,7 +45,7 @@ class FindMyRelatedKeywordServiceImplTest {
             @Test
             @DisplayName("키워드 목록을 반환한다")
             void it_returns_related_keyword_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
 
                 RelatedKeyword rk1 = RelatedKeyword.builder().name("keyword1").build();
                 ReflectionTestUtils.setField(rk1, "id", 1L);
@@ -80,7 +80,7 @@ class FindMyRelatedKeywordServiceImplTest {
             @Test
             @DisplayName("빈 리스트를 반환한다")
             void it_returns_empty_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(memberRelatedKeywordRepository.findAllByMember(member)).thenReturn(Collections.emptyList());

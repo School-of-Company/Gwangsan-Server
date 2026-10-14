@@ -11,18 +11,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
-import team.startup.gwangsan.domain.auth.entity.RefreshToken;
+import team.startup.gwangsan.adapter.persistence.auth.RefreshToken;
 import team.startup.gwangsan.domain.auth.exception.ForbiddenException;
 import team.startup.gwangsan.domain.auth.exception.PendingApprovalException;
 import team.startup.gwangsan.domain.auth.exception.UnauthorizedException;
-import team.startup.gwangsan.domain.auth.repository.RefreshTokenRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.auth.RefreshTokenRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.global.exception.GlobalException;
-import team.startup.gwangsan.global.security.jwt.JwtProvider;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ class SignInAdminServiceImplTest {
     private SignInAdminServiceImpl service;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -62,7 +62,7 @@ class SignInAdminServiceImplTest {
             @Test
             @DisplayName("토큰을 포함한 SignInAdminResponse를 반환한다")
             void it_returns_sign_in_response() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
                 when(member.getStatus()).thenReturn(MemberStatus.ACTIVE);
                 when(member.getPassword()).thenReturn("encodedPw");
@@ -108,7 +108,7 @@ class SignInAdminServiceImplTest {
             @Test
             @DisplayName("ForbiddenException을 던진다")
             void it_throws_forbidden_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getRole()).thenReturn(MemberRole.ROLE_USER);
                 when(memberRepository.findByNickname("user")).thenReturn(Optional.of(member));
 
@@ -125,7 +125,7 @@ class SignInAdminServiceImplTest {
             @EnumSource(value = MemberStatus.class, names = {"PENDING", "SUSPENDED", "WITHDRAWN"})
             @DisplayName("승인 대기와 제한 상태를 구분하고 토큰을 발급하지 않는다")
             void it_rejects_inactive_status(MemberStatus status) {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
                 when(member.getStatus()).thenReturn(status);
                 when(member.getPassword()).thenReturn("encodedPw");
@@ -156,7 +156,7 @@ class SignInAdminServiceImplTest {
             @EnumSource(MemberStatus.class)
             @DisplayName("UnauthorizedException을 던진다")
             void it_throws_unauthorized_exception(MemberStatus status) {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
                 when(member.getPassword()).thenReturn("encodedPw");
                 lenient().when(member.getStatus()).thenReturn(status);

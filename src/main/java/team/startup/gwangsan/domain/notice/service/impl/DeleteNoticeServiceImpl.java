@@ -3,8 +3,8 @@ package team.startup.gwangsan.domain.notice.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.exception.NoticeForbiddenException;
 import team.startup.gwangsan.domain.notice.exception.NoticeNotFoundException;
@@ -24,7 +24,7 @@ public class DeleteNoticeServiceImpl implements DeleteNoticeService {
     @Override
     @Transactional
     public void execute(Long noticeId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(NoticeNotFoundException::new);

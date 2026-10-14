@@ -2,7 +2,7 @@ package team.startup.gwangsan.domain.trade.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
@@ -25,7 +25,7 @@ public class TradeStateReader {
 
     private final TradeCompleteRepository tradeCompleteRepository;
 
-    public TradeStateSnapshot read(Product product, Member buyer, Member seller) {
+    public TradeStateSnapshot read(Product product, MemberJpaEntity buyer, MemberJpaEntity seller) {
         List<TradeStateProjection> states = tradeCompleteRepository.findTradeState(product, buyer, seller);
         Optional<TradeStateProjection> pending = find(states, TradeStatus.PENDING);
 

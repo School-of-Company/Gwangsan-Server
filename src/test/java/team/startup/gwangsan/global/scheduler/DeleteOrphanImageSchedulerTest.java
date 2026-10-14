@@ -31,9 +31,9 @@ import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.entity.dto.DeleteResult;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.place.entity.Head;
@@ -279,8 +279,8 @@ class DeleteOrphanImageSchedulerTest {
     }
 
     private Relationships persistRelationships() {
-        Member buyer = member("buyer", "010-1000-0001");
-        Member seller = member("seller", "010-1000-0002");
+        MemberJpaEntity buyer = member("buyer", "010-1000-0001");
+        MemberJpaEntity seller = member("seller", "010-1000-0002");
         Product product = persist(Product.builder().title("product").description("description").gwangsan(5_000)
                 .member(seller).type(Type.SERVICE).mode(Mode.GIVER).status(ProductStatus.ONGOING).build());
         Head head = persist(new Head("head"));
@@ -297,8 +297,8 @@ class DeleteOrphanImageSchedulerTest {
         return new Relationships(product, notice, report, message, cancel);
     }
 
-    private Member member(String nickname, String phoneNumber) {
-        return persist(Member.builder().name(nickname).nickname(nickname).password("pw").phoneNumber(phoneNumber)
+    private MemberJpaEntity member(String nickname, String phoneNumber) {
+        return persist(MemberJpaEntity.builder().name(nickname).nickname(nickname).password("pw").phoneNumber(phoneNumber)
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build());
     }
 

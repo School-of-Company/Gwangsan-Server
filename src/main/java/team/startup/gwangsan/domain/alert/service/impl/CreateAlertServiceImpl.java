@@ -10,9 +10,9 @@ import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.repository.AlertRepository;
 import team.startup.gwangsan.domain.alert.service.CreateAlertService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
@@ -39,7 +39,7 @@ import static team.startup.gwangsan.domain.admin.service.impl.VerificationSignUp
 public class CreateAlertServiceImpl implements CreateAlertService {
 
     private final AlertRepository alertRepository;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
@@ -69,7 +69,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
     @Override
     @Transactional
     public void execute(Long sourceId, Long memberId, AlertType alertType, Long suspendId) {
-        Member member = memberRepository.findById(memberId)
+        MemberJpaEntity member = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         switch (alertType) {
@@ -78,8 +78,8 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                         .orElseThrow(NotFoundTradeCompleteException::new);
 
                 Product product = tradeComplete.getProduct();
-                Member buyer = tradeComplete.getBuyer();
-                Member seller = tradeComplete.getSeller();
+                MemberJpaEntity buyer = tradeComplete.getBuyer();
+                MemberJpaEntity seller = tradeComplete.getSeller();
 
                 Alert buyerAlert = saveAlert(
                         product.getId(),
@@ -120,7 +120,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
             }
 
             case RECOMMENDER -> {
-                Member signUpMember = getMember(sourceId);
+                MemberJpaEntity signUpMember = getMember(sourceId);
                 Alert alert = saveAlert(
                         sourceId,
                         alertType,
@@ -174,8 +174,8 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 TradeCancel tradeCancel = tradeCancelRepository.findByIdWithTradeCompleteAndMember(sourceId)
                         .orElseThrow(NotFoundTradeCancelException::new);
 
-                Member buyerMember = tradeCancel.getTradeComplete().getBuyer();
-                Member sellerMember = tradeCancel.getTradeComplete().getSeller();
+                MemberJpaEntity buyerMember = tradeCancel.getTradeComplete().getBuyer();
+                MemberJpaEntity sellerMember = tradeCancel.getTradeComplete().getSeller();
 
                 Alert alert = saveAlert(
                         sourceId,
@@ -209,7 +209,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
         }
     }
 
-    private Member getMember(Long id) {
+    private MemberJpaEntity getMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(NotFoundMemberException::new);
     }
@@ -228,7 +228,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .build();
     }
 
-    private Alert createAlert(Long sourceId, AlertType alertType, Member sendMember, String title, String content) {
+    private Alert createAlert(Long sourceId, AlertType alertType, MemberJpaEntity sendMember, String title, String content) {
         return Alert.builder()
                 .alertType(alertType)
                 .sourceId(sourceId)
@@ -238,7 +238,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .build();
     }
 
-    private AlertReceipt createAlertReceipt(Alert alert, Member member) {
+    private AlertReceipt createAlertReceipt(Alert alert, MemberJpaEntity member) {
         return AlertReceipt.builder()
                 .alert(alert)
                 .checked(false)
@@ -246,7 +246,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
                 .build();
     }
 
-    private void saveAlertReceipt(Alert alert, Member member) {
+    private void saveAlertReceipt(Alert alert, MemberJpaEntity member) {
         alertReceiptRepository.save(createAlertReceipt(alert, member));
     }
 
@@ -254,7 +254,7 @@ public class CreateAlertServiceImpl implements CreateAlertService {
         return alertRepository.save(createAlert(sourceId, alertType, title, content));
     }
 
-    private Alert saveAlert(Long sourceId, AlertType alertType, Member sendMember, String title, String content) {
+    private Alert saveAlert(Long sourceId, AlertType alertType, MemberJpaEntity sendMember, String title, String content) {
         return alertRepository.save(createAlert(sourceId, alertType, sendMember, title, content));
     }
 }

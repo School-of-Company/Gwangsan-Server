@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notification.NotificationPort;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -39,8 +39,8 @@ class ReservationReminderSenderTest {
     @Test
     void sendsBothRemindersToBothParticipantsOnce() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        Member buyer = member(1L, "구매자");
-        Member seller = member(2L, "판매자");
+        MemberJpaEntity buyer = member(1L, "구매자");
+        MemberJpaEntity seller = member(2L, "판매자");
         ProductReservation reservation = ProductReservation.builder()
                 .reserver(buyer).status(ReservationStatus.PENDING)
                 .scheduledAt(now.minusMinutes(1)).build();
@@ -77,8 +77,8 @@ class ReservationReminderSenderTest {
         verifyNoInteractions(notificationPort, rooms);
     }
 
-    private Member member(Long id, String nickname) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity member(Long id, String nickname) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         lenient().when(member.getId()).thenReturn(id);
         lenient().when(member.getNickname()).thenReturn(nickname);
         return member;

@@ -9,10 +9,10 @@ import team.startup.gwangsan.domain.admin.exception.NotFoundAlertTypeException;
 import team.startup.gwangsan.domain.admin.exception.NotFoundPendingMemberException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.CreateAdminAlertService;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
 import team.startup.gwangsan.domain.report.repository.ReportRepository;
@@ -26,7 +26,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
     private final AdminAlertRepository adminAlertRepository;
     private final ReportRepository reportRepository;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final TradeCancelRepository tradeCancelRepository;
 
     private static final String REPORT_SEXUAL_ALERT_TITLE = "음란/성적 콘텐츠 신고";
@@ -48,7 +48,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
 
                 String alertTile = resolveReportAlertTitle(report);
 
-                Member member = memberRepository.findById(memberId)
+                MemberJpaEntity member = memberRepository.findById(memberId)
                         .orElseThrow(NotFoundMemberException::new);
 
                 AdminAlert alert = AdminAlert.builder()
@@ -60,7 +60,7 @@ public class CreateAdminAlertServiceImpl implements CreateAdminAlertService {
                 saveAdminAlert(alert);
             }
             case SIGN_UP -> {
-                Member signUpMember = memberRepository.findByStatusAndId(MemberStatus.PENDING, sourceId)
+                MemberJpaEntity signUpMember = memberRepository.findByStatusAndId(MemberStatus.PENDING, sourceId)
                         .orElseThrow(NotFoundPendingMemberException::new);
 
                 AdminAlert alert = AdminAlert.builder()

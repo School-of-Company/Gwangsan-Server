@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 import team.startup.gwangsan.domain.suspend.service.SuspendMemberService;
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class SuspendMemberServiceImpl implements SuspendMemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final SuspendRepository suspendRepository;
     private final AdminAlertRepository adminAlertRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -29,7 +29,7 @@ public class SuspendMemberServiceImpl implements SuspendMemberService {
     @Override
     @Transactional
     public void execute(Long memberId, int suspendedDays, Long alertId) {
-        Member member = memberRepository.findById(memberId)
+        MemberJpaEntity member = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         LocalDateTime now = LocalDateTime.now();

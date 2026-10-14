@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -50,10 +50,10 @@ class ReviewCustomRepositoryImplTest {
         @Test
         @DisplayName("리뷰 작성자를 고정하고 대상 별명과 ID 내림차순 투영을 반환한다")
         void it_returns_only_reviewer_reviews_with_reviewed_nickname_in_descending_id_order() {
-            Member reviewer = member("작성자");
-            Member firstReviewed = member("첫대상");
-            Member secondReviewed = member("둘대상");
-            Member otherReviewer = member("다른작성자");
+            MemberJpaEntity reviewer = member("작성자");
+            MemberJpaEntity firstReviewed = member("첫대상");
+            MemberJpaEntity secondReviewed = member("둘대상");
+            MemberJpaEntity otherReviewer = member("다른작성자");
             Review oldest = review(reviewer, firstReviewed, "첫 리뷰", 3);
             Review newest = review(reviewer, secondReviewed, "둘 리뷰", 7);
             review(otherReviewer, firstReviewed, "제외 리뷰", 9);
@@ -82,10 +82,10 @@ class ReviewCustomRepositoryImplTest {
         @Test
         @DisplayName("리뷰 대상을 고정하고 작성자 별명과 ID 내림차순 투영을 반환한다")
         void it_returns_only_received_reviews_with_reviewer_nickname_in_descending_id_order() {
-            Member reviewed = member("대상");
-            Member firstReviewer = member("첫작성자");
-            Member secondReviewer = member("둘작성자");
-            Member otherReviewed = member("다른대상");
+            MemberJpaEntity reviewed = member("대상");
+            MemberJpaEntity firstReviewer = member("첫작성자");
+            MemberJpaEntity secondReviewer = member("둘작성자");
+            MemberJpaEntity otherReviewed = member("다른대상");
             Review oldest = review(firstReviewer, reviewed, "첫 받은 리뷰", 2);
             Review newest = review(secondReviewer, reviewed, "둘 받은 리뷰", 8);
             review(firstReviewer, otherReviewed, "제외 받은 리뷰", 1);
@@ -107,8 +107,8 @@ class ReviewCustomRepositoryImplTest {
         }
     }
 
-    private Member member(String suffix) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity member(String suffix) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("이름-" + suffix)
                 .nickname("회원-" + suffix)
                 .password("pw")
@@ -118,7 +118,7 @@ class ReviewCustomRepositoryImplTest {
                 .build());
     }
 
-    private Review review(Member reviewer, Member reviewed, String content, int light) {
+    private Review review(MemberJpaEntity reviewer, MemberJpaEntity reviewed, String content, int light) {
         Product product = em.persist(Product.builder()
                 .title("상품-" + content)
                 .description("설명")

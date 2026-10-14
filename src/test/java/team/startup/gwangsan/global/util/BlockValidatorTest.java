@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.block.exception.BlockedMemberException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -67,8 +67,8 @@ class BlockValidatorTest {
             @Test
             @DisplayName("BlockedMemberException을 던진다")
             void it_throws_blocked_member_exception() {
-                Member current = mock(Member.class);
-                Member target = mock(Member.class);
+                MemberJpaEntity current = mock(MemberJpaEntity.class);
+                MemberJpaEntity target = mock(MemberJpaEntity.class);
                 when(current.getId()).thenReturn(1L);
                 when(target.getId()).thenReturn(2L);
                 when(memberBlockRepository.existsBlockBetween(1L, 2L)).thenReturn(true);
@@ -85,8 +85,8 @@ class BlockValidatorTest {
             @Test
             @DisplayName("예외 없이 통과한다")
             void it_passes_without_exception() {
-                Member current = mock(Member.class);
-                Member target = mock(Member.class);
+                MemberJpaEntity current = mock(MemberJpaEntity.class);
+                MemberJpaEntity target = mock(MemberJpaEntity.class);
                 when(current.getId()).thenReturn(1L);
                 when(target.getId()).thenReturn(2L);
                 when(memberBlockRepository.existsBlockBetween(1L, 2L)).thenReturn(false);

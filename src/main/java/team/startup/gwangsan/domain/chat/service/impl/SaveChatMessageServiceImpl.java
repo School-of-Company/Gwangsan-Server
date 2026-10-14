@@ -20,9 +20,9 @@ import team.startup.gwangsan.domain.chat.service.SaveChatMessageService;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notification.entity.DeviceToken;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -42,7 +42,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final ImageRepository imageRepository;
     private final ChatMessageImageRepository chatMessageImageRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -56,7 +56,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             return replay(messageId, roomId, content, imageIds, messageType, senderId, createdAt);
         }
 
-        Member member = memberRepository.findById(senderId).orElseThrow(NotFoundMemberException::new);
+        MemberJpaEntity member = memberRepository.findById(senderId).orElseThrow(NotFoundMemberException::new);
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);
 
@@ -74,7 +74,7 @@ public class SaveChatMessageServiceImpl implements SaveChatMessageService {
             return replay(messageId, roomId, content, imageIds, messageType, senderId, createdAt);
         }
 
-        Member otherMember = chatRoom.getOtherMember(member);
+        MemberJpaEntity otherMember = chatRoom.getOtherMember(member);
         blockValidator.validate(member, otherMember);
         boolean recipientHidden = chatRoom.isHiddenFor(otherMember);
 

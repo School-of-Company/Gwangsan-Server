@@ -7,7 +7,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.DeleteChatRoomService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class DeleteChatRoomServiceImpl implements DeleteChatRoomService {
     @Override
     @Transactional
     public void execute(Long roomId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);

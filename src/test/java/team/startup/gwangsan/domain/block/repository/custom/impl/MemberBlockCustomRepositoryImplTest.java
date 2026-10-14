@@ -10,9 +10,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import team.startup.gwangsan.domain.block.entity.MemberBlock;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +42,9 @@ class MemberBlockCustomRepositoryImplTest {
         @Test
         @DisplayName("저장 방향과 반대 방향 모두를 같은 차단 관계로 판단한다")
         void it_treats_a_persisted_block_as_existing_in_both_member_orders() {
-            Member blocker = member("차단자");
-            Member blocked = member("차단대상");
-            Member unrelated = member("무관회원");
+            MemberJpaEntity blocker = member("차단자");
+            MemberJpaEntity blocked = member("차단대상");
+            MemberJpaEntity unrelated = member("무관회원");
             em.persist(MemberBlock.builder().blocker(blocker).blocked(blocked).build());
             em.flush();
             em.clear();
@@ -55,8 +55,8 @@ class MemberBlockCustomRepositoryImplTest {
         }
     }
 
-    private Member member(String suffix) {
-        return em.persist(Member.builder()
+    private MemberJpaEntity member(String suffix) {
+        return em.persist(MemberJpaEntity.builder()
                 .name("이름-" + suffix)
                 .nickname("회원-" + suffix)
                 .password("pw")

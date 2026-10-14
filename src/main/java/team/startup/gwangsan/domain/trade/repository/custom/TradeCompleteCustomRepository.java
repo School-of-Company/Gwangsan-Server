@@ -1,6 +1,6 @@
 package team.startup.gwangsan.domain.trade.repository.custom;
 
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.trade.entity.TradeComplete;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 
@@ -22,5 +22,5 @@ public interface TradeCompleteCustomRepository {
 
     Optional<TradeComplete> findByIdWithProductAndMember(Long id);
 
-    List<TradeComplete> findAllByMemberAndStatus(Member member, TradeStatus status);
+    List<TradeComplete> findAllByMemberAndStatus(MemberJpaEntity member, TradeStatus status);
 }

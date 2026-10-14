@@ -12,10 +12,10 @@ import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -54,7 +54,7 @@ class FindProductByIdServiceImplTest {
     private ProductImageRepository productImageRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -81,7 +81,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(100L);
             when(currentMember.getNickname()).thenReturn("현재 유저");
 
@@ -91,7 +91,7 @@ class FindProductByIdServiceImplTest {
             when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
                     .thenReturn(myPlace);
 
-            Member owner = mock(Member.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             when(owner.getId()).thenReturn(200L);
             when(owner.getNickname()).thenReturn("판매자");
 
@@ -113,7 +113,7 @@ class FindProductByIdServiceImplTest {
                     .thenReturn(productPlace);
             when(productPlace.isSamePlace(myPlace)).thenReturn(true);
 
-            MemberDetail ownerDetail = mock(MemberDetail.class);
+            MemberDetailJpaEntity ownerDetail = mock(MemberDetailJpaEntity.class);
             when(ownerDetail.getId()).thenReturn(300L);
             when(ownerDetail.getMember()).thenReturn(owner);
             when(ownerDetail.getPlace()).thenReturn(productPlace);
@@ -177,7 +177,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 999L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -201,7 +201,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -209,7 +209,7 @@ class FindProductByIdServiceImplTest {
             when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
                     .thenReturn(myPlace);
 
-            Member owner = mock(Member.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             when(owner.getId()).thenReturn(2L);
 
             Product product = mock(Product.class);
@@ -222,7 +222,7 @@ class FindProductByIdServiceImplTest {
                     .thenReturn(productPlace);
             when(productPlace.isSamePlace(myPlace)).thenReturn(false);
 
-            MemberDetail ownerDetail = mock(MemberDetail.class);
+            MemberDetailJpaEntity ownerDetail = mock(MemberDetailJpaEntity.class);
             when(ownerDetail.getMember()).thenReturn(owner);
             when(ownerDetail.getPlace()).thenReturn(productPlace);
             when(ownerDetail.getLight()).thenReturn(10);
@@ -242,7 +242,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member owner = mock(Member.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             when(owner.getId()).thenReturn(1L);
             when(owner.getNickname()).thenReturn("나");
 
@@ -266,7 +266,7 @@ class FindProductByIdServiceImplTest {
 
             when(productRepository.findActiveById(productId)).thenReturn(Optional.of(product));
 
-            MemberDetail ownerDetail = mock(MemberDetail.class);
+            MemberDetailJpaEntity ownerDetail = mock(MemberDetailJpaEntity.class);
             when(ownerDetail.getId()).thenReturn(10L);
             when(ownerDetail.getMember()).thenReturn(owner);
             when(ownerDetail.getPlace()).thenReturn(place);
@@ -299,7 +299,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -307,7 +307,7 @@ class FindProductByIdServiceImplTest {
             when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
                     .thenReturn(myPlace);
 
-            Member owner = mock(Member.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             when(owner.getId()).thenReturn(2L);
 
             Product product = mock(Product.class);
@@ -332,7 +332,7 @@ class FindProductByIdServiceImplTest {
             // given
             Long productId = 1L;
 
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -340,7 +340,7 @@ class FindProductByIdServiceImplTest {
             when(memberDetailRepository.findPlaceByMemberId(currentMember.getId()))
                     .thenReturn(myPlace);
 
-            Member owner = mock(Member.class);
+            MemberJpaEntity owner = mock(MemberJpaEntity.class);
             when(owner.getId()).thenReturn(2L);
 
             Product product = mock(Product.class);

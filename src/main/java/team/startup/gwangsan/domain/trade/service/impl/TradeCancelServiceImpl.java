@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -54,7 +54,7 @@ public class TradeCancelServiceImpl implements TradeCancelService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TradeCancelResponse execute(Long productId, String reason, List<Long> imageIds) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         // 철회 요청·승인·기각·요청 취소가 모두 이 잠금을 거쳐 직렬화된다.
         // 첫 요청 시점에는 TradeCancel 행이 아직 없으므로 상시 존재하는 상품 행을 잠근다.

@@ -8,7 +8,7 @@ import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.chat.service.FindRoomIdByProductIdService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -21,7 +21,7 @@ public class FindRoomIdByProductIdServiceImpl implements FindRoomIdByProductIdSe
     @Override
     @Transactional(readOnly = true)
     public GetRoomIdResponse execute(Long productId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
         ChatRoom chatRoom = chatRoomRepository.findByProductIdAndMember(productId, member)
                 .orElseThrow(NotFoundChatRoomException::new);
 

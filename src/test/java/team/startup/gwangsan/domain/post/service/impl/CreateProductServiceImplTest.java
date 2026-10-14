@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -77,7 +77,7 @@ class CreateProductServiceImplTest {
 
                 List<Long> imageIds = List.of(1L, 2L);
 
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 Image image1 = mock(Image.class);
                 Image image2 = mock(Image.class);
 
@@ -119,7 +119,7 @@ class CreateProductServiceImplTest {
         @Test
         @DisplayName("SERVICE 게시물은 이미지 목록이 비어 있어도 생성한다")
         void it_creates_service_product_without_images() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
 
@@ -135,7 +135,7 @@ class CreateProductServiceImplTest {
         @Test
         @DisplayName("OBJECT 수령 게시물은 이미지가 없어도 생성한다")
         void it_creates_object_receiver_product_without_images() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(imageRepository.findByIdIn(List.of())).thenReturn(List.of());
 

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
@@ -42,20 +42,20 @@ class ValidatePlaceUtilTest {
             @Test
             @DisplayName("같은 head 소속 장소이면 통과한다")
             void it_passes_when_same_head() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getRole()).thenReturn(MemberRole.ROLE_HEAD_ADMIN);
 
                 Place adminPlace = mock(Place.class);
                 Head head = mock(Head.class);
                 when(adminPlace.getHead()).thenReturn(head);
 
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
                 when(adminDetail.getPlace()).thenReturn(adminPlace);
 
                 Place targetPlace = mock(Place.class);
                 when(targetPlace.getId()).thenReturn(2);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
                 when(targetDetail.getPlace()).thenReturn(targetPlace);
 
                 Place headPlace1 = mock(Place.class);
@@ -72,20 +72,20 @@ class ValidatePlaceUtilTest {
             @Test
             @DisplayName("다른 head 소속 장소이면 PlaceMismatchException을 던진다")
             void it_throws_when_different_head() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getRole()).thenReturn(MemberRole.ROLE_HEAD_ADMIN);
 
                 Place adminPlace = mock(Place.class);
                 Head head = mock(Head.class);
                 when(adminPlace.getHead()).thenReturn(head);
 
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
                 when(adminDetail.getPlace()).thenReturn(adminPlace);
 
                 Place targetPlace = mock(Place.class);
                 when(targetPlace.getId()).thenReturn(99);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
                 when(targetDetail.getPlace()).thenReturn(targetPlace);
 
                 Place headPlace1 = mock(Place.class);
@@ -107,19 +107,19 @@ class ValidatePlaceUtilTest {
             @Test
             @DisplayName("같은 장소이면 통과한다")
             void it_passes_when_same_place() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
 
                 Place adminPlace = mock(Place.class);
                 when(adminPlace.getId()).thenReturn(1);
 
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
                 when(adminDetail.getPlace()).thenReturn(adminPlace);
 
                 Place targetPlace = mock(Place.class);
                 when(targetPlace.getId()).thenReturn(1);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
                 when(targetDetail.getPlace()).thenReturn(targetPlace);
 
                 assertThatCode(() -> validatePlaceUtil.validateSamePlace(admin, adminDetail, targetDetail))
@@ -129,19 +129,19 @@ class ValidatePlaceUtilTest {
             @Test
             @DisplayName("다른 장소이면 PlaceMismatchException을 던진다")
             void it_throws_when_different_place() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getRole()).thenReturn(MemberRole.ROLE_PLACE_ADMIN);
 
                 Place adminPlace = mock(Place.class);
                 when(adminPlace.getId()).thenReturn(1);
 
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
                 when(adminDetail.getPlace()).thenReturn(adminPlace);
 
                 Place targetPlace = mock(Place.class);
                 when(targetPlace.getId()).thenReturn(2);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
                 when(targetDetail.getPlace()).thenReturn(targetPlace);
 
                 assertThatThrownBy(() -> validatePlaceUtil.validateSamePlace(admin, adminDetail, targetDetail))

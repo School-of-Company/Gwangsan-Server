@@ -19,10 +19,10 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.dong.entity.Dong;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -36,7 +36,7 @@ import team.startup.gwangsan.domain.trade.entity.constant.TradeCancelStatus;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
 import team.startup.gwangsan.domain.trade.repository.TradeCancelRepository;
 import team.startup.gwangsan.domain.trade.repository.TradeCompleteRepository;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.trade.service.TradeCancelApplier;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -85,7 +85,7 @@ class TradeCancelConcurrencyTest {
     }
 
     /** 스레드마다 다른 사용자로 요청하기 위해 현재 회원을 스레드 로컬로 흘려 넣는다. */
-    private static final ThreadLocal<Member> CURRENT_MEMBER = new ThreadLocal<>();
+    private static final ThreadLocal<MemberJpaEntity> CURRENT_MEMBER = new ThreadLocal<>();
 
     @MockitoBean
     private MemberUtil memberUtil;
@@ -93,7 +93,7 @@ class TradeCancelConcurrencyTest {
     @Autowired private TradeCancelServiceImpl tradeCancelService;
     @Autowired private TradeCompleteRepository tradeCompleteRepository;
     @Autowired private TradeCancelRepository tradeCancelRepository;
-    @Autowired private MemberDetailRepository memberDetailRepository;
+    @Autowired private MemberDetailJpaRepository memberDetailRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private EntityManager entityManager;
     @Autowired private PlatformTransactionManager transactionManager;
@@ -127,13 +127,13 @@ class TradeCancelConcurrencyTest {
     }
 
     /** 두 요청을 같은 순간에 출발시킨다. 예외는 정상 결과다 — 한쪽이 늦게 도착하면 자동 철회가 된다. */
-    private void runConcurrently(Member buyer, Member seller, Long productId) throws Exception {
+    private void runConcurrently(MemberJpaEntity buyer, MemberJpaEntity seller, Long productId) throws Exception {
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(2);
         AtomicReference<Throwable> unexpected = new AtomicReference<>();
         ExecutorService pool = Executors.newFixedThreadPool(2);
 
-        for (Member requester : List.of(buyer, seller)) {
+        for (MemberJpaEntity requester : List.of(buyer, seller)) {
             pool.submit(() -> {
                 CURRENT_MEMBER.set(requester);
                 try {
@@ -164,7 +164,7 @@ class TradeCancelConcurrencyTest {
         return memberDetailRepository.findById(memberId).orElseThrow().getGwangsan();
     }
 
-    private record Fixture(Member buyer, Member seller, Long buyerId, Long sellerId,
+    private record Fixture(MemberJpaEntity buyer, MemberJpaEntity seller, Long buyerId, Long sellerId,
                            Long productId, Long tradeCompleteId) {
     }
 
@@ -181,8 +181,8 @@ class TradeCancelConcurrencyTest {
             Dong dong = Dong.builder().name("공유동").build();
             entityManager.persist(dong);
 
-            Member buyer = member("구매자", "010-0000-0001");
-            Member seller = member("판매자", "010-0000-0002");
+            MemberJpaEntity buyer = member("구매자", "010-0000-0001");
+            MemberJpaEntity seller = member("판매자", "010-0000-0002");
             entityManager.persist(buyer);
             entityManager.persist(seller);
 
@@ -209,15 +209,15 @@ class TradeCancelConcurrencyTest {
         });
     }
 
-    private Member member(String name, String phoneNumber) {
-        return Member.builder()
+    private MemberJpaEntity member(String name, String phoneNumber) {
+        return MemberJpaEntity.builder()
                 .name(name).nickname(name).password("pw").phoneNumber(phoneNumber)
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE)
                 .build();
     }
 
-    private MemberDetail memberDetail(Member member, Dong dong, Place place) {
-        return MemberDetail.builder()
+    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, Dong dong, Place place) {
+        return MemberDetailJpaEntity.builder()
                 .member(member).dong(dong).gwangsan(GWANGSAN * 2)
                 .place(place).light(0).description("소개")
                 .build();

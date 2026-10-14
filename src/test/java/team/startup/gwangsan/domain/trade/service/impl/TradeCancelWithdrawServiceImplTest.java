@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -51,7 +51,7 @@ class TradeCancelWithdrawServiceImplTest {
             @Test
             @DisplayName("취소 상태를 WITHDRAWN으로 변경하고 이미지를 삭제한다")
             void it_withdraws_trade_cancel() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getId()).thenReturn(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
@@ -61,7 +61,7 @@ class TradeCancelWithdrawServiceImplTest {
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
 
-                Member requester = mock(Member.class);
+                MemberJpaEntity requester = mock(MemberJpaEntity.class);
                 when(requester.getId()).thenReturn(1L);
 
                 TradeCancel tradeCancel = mock(TradeCancel.class);
@@ -84,7 +84,7 @@ class TradeCancelWithdrawServiceImplTest {
             @Test
             @DisplayName("NotFoundTradeCompleteException을 던진다")
             void it_throws_not_found_trade_complete_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.of(mock(Product.class)));
                 when(tradeCompleteRepository.findByProductIdAndStatus(99L, TradeStatus.COMPLETED))
@@ -102,7 +102,7 @@ class TradeCancelWithdrawServiceImplTest {
             @Test
             @DisplayName("NotFoundProductException을 던지고 철회 후속 작업을 하지 않는다")
             void it_throws_not_found_product_exception_without_withdrawal_side_effects() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(productRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
@@ -120,7 +120,7 @@ class TradeCancelWithdrawServiceImplTest {
             @Test
             @DisplayName("NotFoundTradeCancelException을 던진다")
             void it_throws_not_found_trade_cancel_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
                 TradeComplete tradeComplete = mock(TradeComplete.class);
@@ -143,7 +143,7 @@ class TradeCancelWithdrawServiceImplTest {
             @Test
             @DisplayName("NotTradeCancelRequesterException을 던진다")
             void it_throws_not_trade_cancel_requester_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getId()).thenReturn(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
@@ -153,7 +153,7 @@ class TradeCancelWithdrawServiceImplTest {
                 when(tradeCompleteRepository.findByProductIdAndStatus(100L, TradeStatus.COMPLETED))
                         .thenReturn(Optional.of(tradeComplete));
 
-                Member requester = mock(Member.class);
+                MemberJpaEntity requester = mock(MemberJpaEntity.class);
                 when(requester.getId()).thenReturn(2L);
 
                 TradeCancel tradeCancel = mock(TradeCancel.class);

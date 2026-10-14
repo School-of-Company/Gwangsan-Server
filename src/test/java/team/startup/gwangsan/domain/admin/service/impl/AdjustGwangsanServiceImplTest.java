@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -29,7 +29,7 @@ class AdjustGwangsanServiceImplTest {
     private AdjustGwangsanServiceImpl service;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private MemberUtil memberUtil;
@@ -48,11 +48,11 @@ class AdjustGwangsanServiceImplTest {
             @Test
             @DisplayName("대상 회원의 광산을 조정한다")
             void it_adjusts_member_gwangsan() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -72,11 +72,11 @@ class AdjustGwangsanServiceImplTest {
             @Test
             @DisplayName("음수 값을 그대로 반영한다")
             void it_applies_negative_gwangsan() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
-                MemberDetail targetDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity targetDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));
@@ -95,9 +95,9 @@ class AdjustGwangsanServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberException을 던진다")
             void it_throws_not_found_member_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(admin.getId()).thenReturn(1L);
-                MemberDetail adminDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity adminDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(adminDetail));

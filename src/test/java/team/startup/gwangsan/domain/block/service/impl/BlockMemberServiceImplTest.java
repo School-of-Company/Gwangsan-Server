@@ -12,9 +12,9 @@ import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.block.exception.AlreadyBlockedException;
 import team.startup.gwangsan.domain.block.exception.SelfBlockNotAllowedException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -31,7 +31,7 @@ class BlockMemberServiceImplTest {
     private MemberUtil memberUtil;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
     private MemberBlockRepository memberBlockRepository;
@@ -47,11 +47,11 @@ class BlockMemberServiceImplTest {
         @DisplayName("정상적으로 차단하면 MemberBlock 을 저장한다")
         void it_saves_block() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
-            Member targetMember = mock(Member.class);
+            MemberJpaEntity targetMember = mock(MemberJpaEntity.class);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(targetMember));
             when(memberBlockRepository.existsByBlockerIdAndBlockedId(1L, 2L)).thenReturn(false);
 
@@ -71,7 +71,7 @@ class BlockMemberServiceImplTest {
         @DisplayName("본인을 차단하면 SelfBlockNotAllowedException 을 던진다")
         void it_throws_SelfBlockNotAllowedException_when_self_block() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -86,7 +86,7 @@ class BlockMemberServiceImplTest {
         @DisplayName("이미 차단한 유저면 AlreadyBlockedException 을 던진다")
         void it_throws_AlreadyBlockedException_when_already_blocked() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
@@ -102,7 +102,7 @@ class BlockMemberServiceImplTest {
         @Test
         @DisplayName("차단 대상 회원이 없으면 NotFoundMemberException 을 던지고 저장하지 않는다")
         void it_throws_NotFoundMemberException_when_target_member_not_found() {
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(currentMember.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
             when(memberBlockRepository.existsByBlockerIdAndBlockedId(1L, 2L)).thenReturn(false);

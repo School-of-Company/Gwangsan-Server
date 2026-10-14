@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.block.presentation.dto.response.GetBlockedMemberResponse;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -39,14 +39,14 @@ class GetBlockListServiceImplTest {
         @DisplayName("차단 목록을 반환한다")
         void it_returns_block_list() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
-            Member blocked1 = mock(Member.class);
+            MemberJpaEntity blocked1 = mock(MemberJpaEntity.class);
             when(blocked1.getId()).thenReturn(10L);
             when(blocked1.getNickname()).thenReturn("차단유저A");
 
-            Member blocked2 = mock(Member.class);
+            MemberJpaEntity blocked2 = mock(MemberJpaEntity.class);
             when(blocked2.getId()).thenReturn(20L);
             when(blocked2.getNickname()).thenReturn("차단유저B");
 
@@ -74,7 +74,7 @@ class GetBlockListServiceImplTest {
         @DisplayName("차단 목록이 없으면 빈 리스트를 반환한다")
         void it_returns_empty_list_when_no_blocks() {
             // given
-            Member currentMember = mock(Member.class);
+            MemberJpaEntity currentMember = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(currentMember);
 
             when(memberBlockRepository.findAllByBlocker(currentMember)).thenReturn(List.of());

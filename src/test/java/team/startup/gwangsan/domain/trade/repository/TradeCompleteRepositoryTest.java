@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -32,8 +32,8 @@ class TradeCompleteRepositoryTest {
 
     @Test
     void findsPendingAndCompletedStateWithOneProjectionQuery() {
-        Member buyer = member("buyer", "010-1000-0001");
-        Member seller = member("seller", "010-1000-0002");
+        MemberJpaEntity buyer = member("buyer", "010-1000-0001");
+        MemberJpaEntity seller = member("seller", "010-1000-0002");
         Product product = entityManager.persist(Product.builder()
                 .title("상품")
                 .description("설명")
@@ -60,8 +60,8 @@ class TradeCompleteRepositoryTest {
         assertThat(states).allSatisfy(state -> assertThat(state.getCreatedAt()).isNotNull());
     }
 
-    private Member member(String nickname, String phoneNumber) {
-        return entityManager.persist(Member.builder()
+    private MemberJpaEntity member(String nickname, String phoneNumber) {
+        return entityManager.persist(MemberJpaEntity.builder()
                 .name(nickname)
                 .nickname(nickname)
                 .password("pw")

@@ -9,13 +9,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.adapter.security.auth.MemberDetails;
-import team.startup.gwangsan.global.security.exception.InvalidMemberPrincipalException;
+import team.startup.gwangsan.adapter.security.auth.exception.InvalidMemberPrincipalException;
+import team.startup.gwangsan.support.MemberAccounts;
 
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ class MemberUtilTest {
 
     private static final String PHONE_NUMBER = "010-1234-5678";
 
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
 
     @AfterEach
     void clearSecurityContext() {
@@ -45,8 +46,8 @@ class MemberUtilTest {
         @Test
         @DisplayName("it_MemberDetails principal의 전화번호로 현재 회원을 반환한다")
         void it_returns_member_for_member_details_principal() {
-            Member member = member();
-            authenticate(new MemberDetails(member));
+            MemberJpaEntity member = member();
+            authenticate(new MemberDetails(MemberAccounts.of(member)));
             when(memberRepository.findByPhoneNumber(PHONE_NUMBER)).thenReturn(Optional.of(member));
 
             assertThat(memberUtil().getCurrentMember()).isSameAs(member);
@@ -57,7 +58,7 @@ class MemberUtilTest {
         @Test
         @DisplayName("it_MemberDetails principal에 대응하는 회원이 없으면 NotFoundMemberException을 던진다")
         void it_throws_not_found_when_authenticated_member_was_removed() {
-            authenticate(new MemberDetails(member()));
+            authenticate(new MemberDetails(MemberAccounts.of(member())));
             when(memberRepository.findByPhoneNumber(PHONE_NUMBER)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> memberUtil().getCurrentMember())
@@ -88,8 +89,8 @@ class MemberUtilTest {
         );
     }
 
-    private Member member() {
-        return Member.builder()
+    private MemberJpaEntity member() {
+        return MemberJpaEntity.builder()
                 .name("회원")
                 .nickname("회원닉네임")
                 .phoneNumber(PHONE_NUMBER)

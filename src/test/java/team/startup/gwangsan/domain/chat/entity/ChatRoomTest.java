@@ -3,7 +3,7 @@ package team.startup.gwangsan.domain.chat.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -21,9 +21,9 @@ class ChatRoomTest {
         @Test
         @DisplayName("실제 buyer·seller ID를 참여자로 판단하고 각 참여자의 상대를 반환한다")
         void it_identifies_actual_participants_and_returns_the_other_participant() {
-            Member buyer = member(1L, "구매자");
-            Member seller = member(2L, "판매자");
-            Member outsider = member(3L, "외부인");
+            MemberJpaEntity buyer = member(1L, "구매자");
+            MemberJpaEntity seller = member(2L, "판매자");
+            MemberJpaEntity outsider = member(3L, "외부인");
             ChatRoom room = ChatRoom.builder().buyer(buyer).seller(seller).build();
 
             assertThat(room.isParticipant(buyer)).isTrue();
@@ -41,9 +41,9 @@ class ChatRoomTest {
         @Test
         @DisplayName("참여자별 hidden 상태를 구분하고 비참여자는 false를 반환한다")
         void it_checks_hidden_state_for_each_participant_only() {
-            Member buyer = mock(Member.class);
-            Member seller = mock(Member.class);
-            Member outsider = mock(Member.class);
+            MemberJpaEntity buyer = mock(MemberJpaEntity.class);
+            MemberJpaEntity seller = mock(MemberJpaEntity.class);
+            MemberJpaEntity outsider = mock(MemberJpaEntity.class);
             when(buyer.getId()).thenReturn(1L);
             when(seller.getId()).thenReturn(2L);
             when(outsider.getId()).thenReturn(3L);
@@ -66,8 +66,8 @@ class ChatRoomTest {
         }
     }
 
-    private static Member member(Long id, String nickname) {
-        Member member = Member.builder()
+    private static MemberJpaEntity member(Long id, String nickname) {
+        MemberJpaEntity member = MemberJpaEntity.builder()
                 .name(nickname).nickname(nickname).phoneNumber(id + "0000000000").password("password").build();
         org.springframework.test.util.ReflectionTestUtils.setField(member, "id", id);
         return member;

@@ -24,10 +24,10 @@ import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
 import team.startup.gwangsan.domain.dong.entity.Dong;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
 import team.startup.gwangsan.domain.place.entity.Head;
 import team.startup.gwangsan.domain.place.entity.Place;
@@ -248,8 +248,8 @@ class RequestTradeCompleteConcurrencyTest {
             Dong dong = Dong.builder().name("동" + suffix).build();
             em.persist(dong);
 
-            Member seller = member("seller" + suffix);
-            Member buyer = member("buyer" + suffix);
+            MemberJpaEntity seller = member("seller" + suffix);
+            MemberJpaEntity buyer = member("buyer" + suffix);
             em.persist(seller);
             em.persist(buyer);
             em.persist(memberDetail(seller, dong, place));
@@ -275,18 +275,18 @@ class RequestTradeCompleteConcurrencyTest {
         });
     }
 
-    private ChatMessage message(ChatRoom room, Member sender) {
+    private ChatMessage message(ChatRoom room, MemberJpaEntity sender) {
         return ChatMessage.builder().id(MESSAGE_IDS.incrementAndGet()).content("안녕하세요").messageType(MessageType.TEXT).checked(false)
                 .room(room).sender(sender).createdAt(LocalDateTime.now()).build();
     }
 
-    private Member member(String name) {
-        return Member.builder().name(name).nickname(name).phoneNumber(name).password("test-password")
+    private MemberJpaEntity member(String name) {
+        return MemberJpaEntity.builder().name(name).nickname(name).phoneNumber(name).password("test-password")
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
     }
 
-    private MemberDetail memberDetail(Member member, Dong dong, Place place) {
-        return MemberDetail.builder().member(member).dong(dong).gwangsan(BALANCE)
+    private MemberDetailJpaEntity memberDetail(MemberJpaEntity member, Dong dong, Place place) {
+        return MemberDetailJpaEntity.builder().member(member).dong(dong).gwangsan(BALANCE)
                 .place(place).light(0).description("소개").build();
     }
 

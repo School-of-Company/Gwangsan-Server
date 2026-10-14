@@ -24,7 +24,7 @@ import team.startup.gwangsan.domain.chat.repository.ChatMessageImageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.ProductReservation;
@@ -72,15 +72,15 @@ class FindChatMessageByRoomIdServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member currentMember;
-        private Member otherMember;
+        private MemberJpaEntity currentMember;
+        private MemberJpaEntity otherMember;
         private ChatRoom chatRoom;
         private Product product;
 
         @BeforeEach
         void setUp() {
-            currentMember = mock(Member.class);
-            otherMember = mock(Member.class);
+            currentMember = mock(MemberJpaEntity.class);
+            otherMember = mock(MemberJpaEntity.class);
             chatRoom = mock(ChatRoom.class);
             product = mock(Product.class);
             lenient().when(product.getMember()).thenReturn(currentMember);
@@ -137,7 +137,7 @@ class FindChatMessageByRoomIdServiceImplTest {
         @Test
         @DisplayName("현재 사용자가 채팅방 멤버가 아니면 NotFoundChatRoomException 을 던진다")
         void it_throws_NotFoundChatRoomException_when_member_not_in_room() {
-            Member stranger = mock(Member.class);
+            MemberJpaEntity stranger = mock(MemberJpaEntity.class);
             when(stranger.getId()).thenReturn(99L);
             when(memberUtil.getCurrentMember()).thenReturn(stranger);
             when(chatRoom.getSeller()).thenReturn(currentMember);
@@ -482,8 +482,8 @@ class FindChatMessageByRoomIdServiceImplTest {
                 "RECEIVER, true, false", "RECEIVER, false, true"})
         @DisplayName("Mode와 작성자 여부에 따른 isAuthor/isSeller를 HTTP boolean 키로 반환한다")
         void it_returns_author_and_seller_independently(Mode mode, boolean author, boolean seller) throws Exception {
-            Member owner = author ? currentMember : otherMember;
-            Member partner = author ? otherMember : currentMember;
+            MemberJpaEntity owner = author ? currentMember : otherMember;
+            MemberJpaEntity partner = author ? otherMember : currentMember;
             Product actualProduct = Product.builder().title("상품명").member(owner).mode(mode).build();
             ReflectionTestUtils.setField(actualProduct, "id", 10L);
             ChatRoom actualRoom = ChatRoom.builder().product(actualProduct)

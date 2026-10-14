@@ -13,11 +13,11 @@ import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.FindAlertByAlertTypeAndPlaceService;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -50,10 +50,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlertTypeAndPlaceService {
 
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ReportRepository reportRepository;
     private final AdminAlertRepository adminAlertRepository;
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final ReportImageRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
@@ -64,7 +64,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
     @Override
     @Transactional
     public GetAdminAlertResponse execute(Integer placeId, AlertType type) {
-        Member admin = memberUtil.getCurrentMember();
+        MemberJpaEntity admin = memberUtil.getCurrentMember();
         List<Place> places = findTargetPlaces(placeId, admin);
 
         List<AdminAlert> alerts = adminAlertRepository.findAdminAlertByPlacesAndAlertType(places, type);
@@ -86,7 +86,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                 createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
 
         List<Long> signUpMemberIds = signUpAlerts.stream().map(AdminAlert::getSourceId).toList();
-        List<Member> members = signUpMemberIds.isEmpty() ? List.of() : memberRepository.findAllByIdIn(signUpMemberIds);
+        List<MemberJpaEntity> members = signUpMemberIds.isEmpty() ? List.of() : memberRepository.findAllByIdIn(signUpMemberIds);
 
         List<GetSignUpAlertResponse> signUpAlertResponses =
                 createSignUpAlertResponses(signUpAlerts, members, memberIdToPlaceName);
@@ -140,7 +140,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         return alerts.stream().filter(a -> a.getType() == type).toList();
     }
 
-    private List<Place> findTargetPlaces(Integer placeId, Member member) {
+    private List<Place> findTargetPlaces(Integer placeId, MemberJpaEntity member) {
         if (member.getRole() == MemberRole.ROLE_HEAD_ADMIN) {
             if (placeId == null) {
                 Place place = memberDetailRepository.findPlaceByMemberId(member.getId());
@@ -178,7 +178,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
-                    Member reported = report.getReported();
+                    MemberJpaEntity reported = report.getReported();
                     Product reportedProduct = report.getProduct();
 
                     return new GetReportAlertResponse(
@@ -205,15 +205,15 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private List<GetSignUpAlertResponse> createSignUpAlertResponses(
             List<AdminAlert> alerts,
-            List<Member> members,
+            List<MemberJpaEntity> members,
             Map<Long, String> memberIdToPlaceName
     ) {
-        Map<Long, Member> memberMap = members.stream()
-                .collect(Collectors.toMap(Member::getId, m -> m));
+        Map<Long, MemberJpaEntity> memberMap = members.stream()
+                .collect(Collectors.toMap(MemberJpaEntity::getId, m -> m));
 
         return alerts.stream()
                 .map(alert -> {
-                    Member member = Optional.ofNullable(memberMap.get(alert.getRequester().getId()))
+                    MemberJpaEntity member = Optional.ofNullable(memberMap.get(alert.getRequester().getId()))
                             .orElseThrow(NotFoundMemberException::new);
 
                     String placeName = memberIdToPlaceName.get(alert.getRequester().getId());
@@ -259,7 +259,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
                             .orElseThrow(NotFoundTradeCancelException::new);
 
                     Product product = tc.getTradeComplete().getProduct();
-                    Member owner = product.getMember();
+                    MemberJpaEntity owner = product.getMember();
                     Long ownerId = owner.getId();
 
                     List<GetImageResponse> cancelImages = tcImageMap.getOrDefault(tc.getId(), List.of());
@@ -293,7 +293,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
             String ownerPlaceName,
             Integer ownerLight
     ) {
-        Member member = product.getMember();
+        MemberJpaEntity member = product.getMember();
 
         GetProductMemberResponse memberDto = new GetProductMemberResponse(
                 member.getId(),

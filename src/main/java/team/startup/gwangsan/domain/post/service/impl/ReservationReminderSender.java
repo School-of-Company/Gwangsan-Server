@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notification.NotificationPort;
 import team.startup.gwangsan.domain.notification.entity.constant.NotificationType;
 import team.startup.gwangsan.domain.notification.repository.DeviceTokenRepository;
@@ -53,7 +53,7 @@ public class ReservationReminderSender {
         sendTo(room.getSeller(), room.getBuyer(), room.getId(), suffix);
     }
 
-    private void sendTo(Member recipient, Member counterpart, Long roomId, String suffix) {
+    private void sendTo(MemberJpaEntity recipient, MemberJpaEntity counterpart, Long roomId, String suffix) {
         notificationPort.sendNotification(deviceTokens.findAllByUserId(recipient.getId()),
                 "시민화폐, 광산", counterpart.getNickname() + suffix,
                 NotificationType.RESERVATION_REMINDER, roomId);

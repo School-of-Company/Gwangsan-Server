@@ -5,11 +5,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.entity.NoticeImage;
 import team.startup.gwangsan.domain.notice.presentation.dto.response.FindAllNoticeResponse;
@@ -31,14 +31,14 @@ public class FindAllNoticeServiceImpl implements FindAllNoticeService {
 
     private final NoticeRepository noticeRepository;
     private final NoticeImageRepository noticeImageRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final PlaceRepository placeRepository;
 
     @Override
     public List<FindAllNoticeResponse> execute(Long lastId, int size) {
-        Member member = memberUtil.getCurrentMember();
-        MemberDetail memberDetail = memberDetailRepository.findByMember(member)
+        MemberJpaEntity member = memberUtil.getCurrentMember();
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findByMember(member)
                 .orElseThrow(NotFoundMemberDetailException::new);
         Place myPlace = memberDetail.getPlace();
         MemberRole myRole = member.getRole();

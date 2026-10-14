@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.review.presentation.dto.response.ReviewResponse;
 import team.startup.gwangsan.domain.review.repository.ReviewRepository;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberRepository;
     private final ReviewRepository reviewRepository;
     private final ProductImageRepository productImageRepository;
 
@@ -39,7 +39,7 @@ public class GetReviewByMemberServiceImpl implements GetReviewByMemberService {
 
     private List<ReviewResponse> findReviews(Long memberId, Long cursor, Integer size) {
 
-        Member target = memberRepository.findById(memberId)
+        MemberJpaEntity target = memberRepository.findById(memberId)
                 .orElseThrow(NotFoundMemberException::new);
 
         List<ReceivedReviewDto> rows = size == null

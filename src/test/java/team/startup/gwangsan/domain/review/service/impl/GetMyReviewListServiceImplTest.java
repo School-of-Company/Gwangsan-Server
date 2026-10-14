@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -43,7 +43,7 @@ class GetMyReviewListServiceImplTest {
             @Test
             @DisplayName("빈 리스트를 반환한다")
             void it_returns_empty_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getId()).thenReturn(1L);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(reviewRepository.findMyReviews(1L)).thenReturn(List.of());
@@ -62,7 +62,7 @@ class GetMyReviewListServiceImplTest {
             @Test
             @DisplayName("이미지와 함께 ReviewResponse 리스트를 반환한다")
             void it_returns_review_response_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getId()).thenReturn(1L);
                 when(member.getNickname()).thenReturn("리뷰어");
                 when(memberUtil.getCurrentMember()).thenReturn(member);

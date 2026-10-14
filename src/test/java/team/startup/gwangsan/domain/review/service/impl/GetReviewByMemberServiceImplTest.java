@@ -8,9 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
@@ -31,7 +31,7 @@ class GetReviewByMemberServiceImplTest {
 
     @InjectMocks private GetReviewByMemberServiceImpl service;
 
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ReviewRepository reviewRepository;
     @Mock private ProductImageRepository productImageRepository;
 
@@ -40,7 +40,7 @@ class GetReviewByMemberServiceImplTest {
     class Pagination {
         @Test
         void it_batches_only_distinct_product_ids_from_the_page() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             when(reviewRepository.findReceivedReviews(1L, 30L, 3)).thenReturn(List.of(
                     new ReceivedReviewDto(29L, 100L, "a", 7, "writer"),
@@ -83,7 +83,7 @@ class GetReviewByMemberServiceImplTest {
             @Test
             @DisplayName("빈 리스트를 반환한다")
             void it_returns_empty_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
                 when(reviewRepository.findReceivedReviews(1L)).thenReturn(List.of());
 
@@ -101,7 +101,7 @@ class GetReviewByMemberServiceImplTest {
             @Test
             @DisplayName("이미지와 함께 ReviewResponse 리스트를 반환한다")
             void it_returns_review_response_list() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
                 ReceivedReviewDto dto = new ReceivedReviewDto(30L, 200L, "최고예요", 10, "작성자닉");

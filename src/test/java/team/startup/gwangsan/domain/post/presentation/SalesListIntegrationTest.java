@@ -30,10 +30,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.domain.dong.entity.Dong;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -49,7 +49,10 @@ import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
 import team.startup.gwangsan.adapter.security.auth.TokenParser;
-import team.startup.gwangsan.global.security.jwt.*;
+import team.startup.gwangsan.adapter.security.auth.JwtProperties;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
+import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
+import team.startup.gwangsan.application.member.service.MemberAccountService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -82,14 +85,14 @@ class SalesListIntegrationTest {
 
     @Configuration
     @EnableAutoConfiguration
-    @EntityScan("team.startup.gwangsan.domain")
+    @EntityScan({"team.startup.gwangsan.domain", "team.startup.gwangsan.adapter.persistence.member"})
     @EnableJpaAuditing
     @EnableJpaRepositories(basePackages = {"team.startup.gwangsan.domain.post.repository",
-            "team.startup.gwangsan.domain.member.repository"})
+            "team.startup.gwangsan.adapter.persistence.member"})
     @EnableConfigurationProperties(JwtProperties.class)
     @Import({PostController.class, FindProductByCurrentUserAndTypeAndModeServiceImpl.class,
             FindProductsByMemberIdServiceImpl.class, MemberUtil.class, QueryDslConfig.class,
-            SecurityConfig.class, JwtProvider.class, TokenParser.class, MemberDetailsService.class,
+            SecurityConfig.class, JwtProvider.class, TokenParser.class, MemberDetailsService.class, MemberAccountService.class, MemberPersistenceAdapter.class,
             JwtAuthenticationEntryPoint.class, JwtAccessDeniedHandler.class, GlobalExceptionHandler.class})
     static class Config { }
 
@@ -120,8 +123,8 @@ class SalesListIntegrationTest {
     class Contract {
         @Test
         void it_pages_both_routes_without_duplicates_and_preserves_legacy_arrays() throws Exception {
-            Member owner = member();
-            Member other = member();
+            MemberJpaEntity owner = member();
+            MemberJpaEntity other = member();
             List<Long> expected = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 expected.add(product(owner, Type.OBJECT, Mode.GIVER,
@@ -155,7 +158,7 @@ class SalesListIntegrationTest {
 
         @Test
         void it_filters_before_limiting_and_includes_reservations_in_selling() throws Exception {
-            Member owner = member();
+            MemberJpaEntity owner = member();
             long ongoing = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.ONGOING, 0);
             long reserved = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.RESERVATION, 2);
             long completed = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.COMPLETED, 1);
@@ -184,7 +187,7 @@ class SalesListIntegrationTest {
 
         @Test
         void it_accepts_a_deleted_cursor_and_ignores_newer_inserts() throws Exception {
-            Member owner = member();
+            MemberJpaEntity owner = member();
             long oldest = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.ONGOING, 0);
             long middle = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.RESERVATION, 0);
             long cursor = product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.ONGOING, 0);
@@ -208,7 +211,7 @@ class SalesListIntegrationTest {
 
         @Test
         void it_rejects_bad_inputs_and_unauthenticated_requests() {
-            Member owner = member();
+            MemberJpaEntity owner = member();
             for (String path : paths(owner)) {
                 for (String query : List.of("size=0", "size=-1", "size=101", "size=abc", "size=2147483648",
                         "size=2&last_id=0", "size=2&last_id=-1", "size=2&last_id=abc",
@@ -223,7 +226,7 @@ class SalesListIntegrationTest {
 
         @Test
         void it_smokes_the_live_server_with_curl() throws Exception {
-            Member owner = member();
+            MemberJpaEntity owner = member();
             product(owner, Type.OBJECT, Mode.GIVER, ProductStatus.RESERVATION, 1);
             for (String path : paths(owner)) {
                 Process process = new ProcessBuilder("curl", "--silent", "--show-error", "--fail", "--max-time", "10",
@@ -243,7 +246,7 @@ class SalesListIntegrationTest {
         @Test
         void it_measures_legacy_and_page_queries_bytes_and_latency() throws Exception {
             for (int count : List.of(10, 100, 1000)) {
-                Member owner = member();
+                MemberJpaEntity owner = member();
                 new TransactionTemplate(transactions).executeWithoutResult(status -> {
                     for (int i = 0; i < count; i++) persistProduct(owner, Type.OBJECT, Mode.GIVER, ProductStatus.ONGOING, 2);
                 });
@@ -295,28 +298,28 @@ class SalesListIntegrationTest {
         }
     }
 
-    private Member member() {
+    private MemberJpaEntity member() {
         return new TransactionTemplate(transactions).execute(status -> {
             int id = sequence.incrementAndGet();
-            Member member = Member.builder().name("test" + id).nickname("test" + id).phoneNumber("test" + id)
+            MemberJpaEntity member = MemberJpaEntity.builder().name("test" + id).nickname("test" + id).phoneNumber("test" + id)
                     .password("unused").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
             em.persist(member);
             Dong dong = Dong.builder().name("dong" + id).build();
             Place place = Place.builder().name("place" + id).build();
             em.persist(dong);
             em.persist(place);
-            em.persist(MemberDetail.builder().member(member).dong(dong).place(place)
+            em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
                     .gwangsan(10000).light(30).description("test").build());
             return member;
         });
     }
 
-    private long product(Member owner, Type type, Mode mode, ProductStatus state, int images) {
+    private long product(MemberJpaEntity owner, Type type, Mode mode, ProductStatus state, int images) {
         return new TransactionTemplate(transactions).execute(status -> persistProduct(owner, type, mode, state, images));
     }
 
-    private long persistProduct(Member owner, Type type, Mode mode, ProductStatus state, int images) {
-        Product product = Product.builder().member(em.getReference(Member.class, owner.getId())).title("판매 목록 테스트")
+    private long persistProduct(MemberJpaEntity owner, Type type, Mode mode, ProductStatus state, int images) {
+        Product product = Product.builder().member(em.getReference(MemberJpaEntity.class, owner.getId())).title("판매 목록 테스트")
                 .description("설명".repeat(100)).gwangsan(5000).type(type).mode(mode).status(state).build();
         em.persist(product);
         for (int i = 0; i < images; i++) {
@@ -327,15 +330,15 @@ class SalesListIntegrationTest {
         return product.getId();
     }
 
-    private List<String> paths(Member owner) {
+    private List<String> paths(MemberJpaEntity owner) {
         return List.of("/api/post/current", "/api/post/member/" + owner.getId());
     }
 
-    private String token(Member owner) {
+    private String token(MemberJpaEntity owner) {
         return jwt.generateAccessToken(owner.getPhoneNumber(), owner.getRole());
     }
 
-    private ResponseEntity<String> get(String path, Member owner) {
+    private ResponseEntity<String> get(String path, MemberJpaEntity owner) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token(owner));
         return http.exchange(path, HttpMethod.GET, new HttpEntity<>(headers), String.class);

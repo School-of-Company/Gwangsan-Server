@@ -12,7 +12,7 @@ import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomIdResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.Optional;
@@ -37,11 +37,11 @@ class FindRoomIdByProductIdServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member member;
+        private MemberJpaEntity member;
 
         @BeforeEach
         void setUp() {
-            member = mock(Member.class);
+            member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
         }
 

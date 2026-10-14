@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -29,7 +29,7 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
 
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -48,7 +48,7 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
                 .distinct()
                 .toList();
 
-        Map<Long, MemberDetail> memberDetailMap = memberDetailRepository.findAllByMemberIdIn(memberIds).stream()
+        Map<Long, MemberDetailJpaEntity> memberDetailMap = memberDetailRepository.findAllByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(md -> md.getMember().getId(), md -> md));
 
         List<Long> productIds = products.stream()
@@ -70,8 +70,8 @@ public class FindProductsByTypeAndModeServiceImpl implements FindProductsByTypeA
 
         return products.stream()
                 .map(product -> {
-                    Member member = product.getMember();
-                    MemberDetail memberDetail = memberDetailMap.get(member.getId());
+                    MemberJpaEntity member = product.getMember();
+                    MemberDetailJpaEntity memberDetail = memberDetailMap.get(member.getId());
 
                     int rawLight = memberDetail.getLight();
                     int light = Math.max(1, rawLight / 10);

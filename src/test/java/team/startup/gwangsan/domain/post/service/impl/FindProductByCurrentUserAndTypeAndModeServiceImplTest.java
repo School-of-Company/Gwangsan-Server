@@ -9,10 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private ProductImageRepository productImageRepository;
@@ -56,7 +56,7 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
         @DisplayName("MemberDetail이 존재하지 않으면 NotFoundMemberDetailException 발생")
         void it_throws_NotFoundMemberDetailException_when_memberDetail_not_found() {
             // given
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(member.getId()).thenReturn(10L);
             when(memberDetailRepository.findById(10L)).thenReturn(Optional.empty());
@@ -72,10 +72,10 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
         @Test
         @DisplayName("상품이 없으면 빈 리스트를 반환한다")
         void it_returns_empty_list_when_no_products() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(member.getId()).thenReturn(1L);
-            MemberDetail memberDetail = mock(MemberDetail.class);
+            MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
             when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(memberDetail));
             when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(
                     member, Type.SERVICE, Mode.GIVER, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
@@ -90,11 +90,11 @@ class FindProductByCurrentUserAndTypeAndModeServiceImplTest {
         @DisplayName("정상적으로 Product 리스트와 이미지 리스트를 매핑하여 반환한다")
         void it_returns_GetProductResponse_list_properly() {
             // given
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(member.getId()).thenReturn(1L);
             when(member.getNickname()).thenReturn("홍길동");
-            MemberDetail memberDetail = mock(MemberDetail.class);
+            MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
             when(memberDetailRepository.findById(1L)).thenReturn(Optional.of(memberDetail));
             when(memberDetail.getLight()).thenReturn(37);
 

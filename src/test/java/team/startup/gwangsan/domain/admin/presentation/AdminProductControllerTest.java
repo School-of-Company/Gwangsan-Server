@@ -13,7 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import team.startup.gwangsan.domain.admin.service.FindAdminProductsService;
 import team.startup.gwangsan.domain.admin.service.impl.DeleteAdminProductServiceImpl;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -26,7 +26,7 @@ import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.infrastructure.security.SecurityConfig;
 import team.startup.gwangsan.infrastructure.security.JwtAccessDeniedHandler;
 import team.startup.gwangsan.infrastructure.security.JwtAuthenticationEntryPoint;
-import team.startup.gwangsan.global.security.jwt.JwtProvider;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 import team.startup.gwangsan.adapter.security.auth.TokenParser;
 
 import java.util.List;
@@ -58,7 +58,7 @@ class AdminProductControllerTest {
         @ValueSource(strings = {"PLACE_ADMIN", "HEAD_ADMIN"})
         void it_allows_both_admin_roles_to_list_and_delete_another_members_product(String role) throws Exception {
             when(findAdminProductsService.execute(null, null, null, 10)).thenReturn(List.of());
-            Product product = Product.builder().member(Member.builder().nickname("다른 작성자").build())
+            Product product = Product.builder().member(MemberJpaEntity.builder().nickname("다른 작성자").build())
                     .status(ProductStatus.COMPLETED).build();
             when(productRepository.findActiveById(7L)).thenReturn(Optional.of(product));
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.block.repository.custom.MemberBlockCustomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +19,9 @@ public interface MemberBlockRepository extends JpaRepository<MemberBlock, Long>,
     Optional<MemberBlock> findByBlockerIdAndBlockedId(Long blockerId, Long blockedId);
 
     @EntityGraph(attributePaths = "blocked")
-    List<MemberBlock> findAllByBlocker(Member blocker);
+    List<MemberBlock> findAllByBlocker(MemberJpaEntity blocker);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM MemberBlock b WHERE b.blocker = :member OR b.blocked = :member")
-    void deleteAllByBlockerOrBlocked(@Param("member") Member member);
+    void deleteAllByBlockerOrBlocked(@Param("member") MemberJpaEntity member);
 }

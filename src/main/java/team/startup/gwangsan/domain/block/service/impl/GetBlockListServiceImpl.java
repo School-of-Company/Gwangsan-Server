@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.block.presentation.dto.response.GetBlockedMemberResponse;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.block.service.GetBlockListService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class GetBlockListServiceImpl implements GetBlockListService {
     @Override
     @Transactional(readOnly = true)
     public List<GetBlockedMemberResponse> execute() {
-        Member currentMember = memberUtil.getCurrentMember();
+        MemberJpaEntity currentMember = memberUtil.getCurrentMember();
 
         return memberBlockRepository.findAllByBlocker(currentMember)
                 .stream()

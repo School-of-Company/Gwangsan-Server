@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.exception.NotFoundProductException;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.*;
 class CreateReportServiceImplTest {
 
     @Mock private MemberUtil memberUtil;
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ProductRepository productRepository;
     @Mock private ReportRepository reportRepository;
     @Mock private ReportImageRepository reportImageRepository;
@@ -54,8 +54,8 @@ class CreateReportServiceImplTest {
     @InjectMocks
     private CreateReportServiceImpl service;
 
-    private Member mockMember(Long id) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity mockMember(Long id) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         when(member.getId()).thenReturn(id);
         return member;
     }
@@ -69,10 +69,10 @@ class CreateReportServiceImplTest {
         @DisplayName("모든 타입은 신고 대상 회원을 조회하고 저장한다")
         void it_saves_report_with_member_based_types(ReportType reportType) {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(2L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
 
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, reportType))
@@ -101,10 +101,10 @@ class CreateReportServiceImplTest {
         @DisplayName("targetType 이 없는 기존 요청은 회원 신고로 해석한다")
         void it_treats_null_target_type_as_member() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(2L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
 
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.ETC))
@@ -129,10 +129,10 @@ class CreateReportServiceImplTest {
         @DisplayName("이미지 ID가 있으면 ReportImage 를 저장한다")
         void it_saves_report_images_when_image_ids_exist() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(2L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.SEXUAL))
                     .thenReturn(Optional.empty());
@@ -157,8 +157,8 @@ class CreateReportServiceImplTest {
         @Test
         @DisplayName("이미지 ID가 빈 목록이면 신고와 관리자 알림은 저장하고 이미지 저장은 생략한다")
         void it_persists_report_and_event_without_image_calls_when_image_ids_are_empty() {
-            Member reporter = mockMember(1L);
-            Member reported = mockMember(2L);
+            MemberJpaEntity reporter = mockMember(1L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.ETC))
@@ -176,10 +176,10 @@ class CreateReportServiceImplTest {
         @DisplayName("본인 신고 시 SelfReportNotAllowedException 을 던진다")
         void it_throws_when_self_report() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(1L);
+            MemberJpaEntity reported = mockMember(1L);
             when(memberRepository.findById(1L)).thenReturn(Optional.of(reported));
 
             CreateReportRequest request =
@@ -194,10 +194,10 @@ class CreateReportServiceImplTest {
         @DisplayName("이미 신고한 대상이면 AlreadyReportedException 을 던진다")
         void it_throws_when_already_reported() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(2L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
 
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.IMPERSONATION))
@@ -215,7 +215,7 @@ class CreateReportServiceImplTest {
         @DisplayName("존재하지 않는 회원 신고 시 NotFoundMemberException 을 던진다")
         void it_throws_when_member_not_found() {
             // given
-            Member reporter = mock(Member.class);
+            MemberJpaEntity reporter = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
             when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -231,10 +231,10 @@ class CreateReportServiceImplTest {
         @DisplayName("같은 작성자의 게시글을 이미 신고했어도 회원 신고는 막히지 않는다")
         void it_allows_member_report_even_if_product_report_exists() {
             // given - 게시글 신고 이력(product 가 채워진 행)은 회원 신고 중복 검사 대상이 아니다
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member reported = mockMember(2L);
+            MemberJpaEntity reported = mockMember(2L);
             when(memberRepository.findById(2L)).thenReturn(Optional.of(reported));
 
             when(reportRepository.findByReporterAndReportedAndReportTypeAndProductIsNull(reporter, reported, ReportType.SPAM_AD))
@@ -260,10 +260,10 @@ class CreateReportServiceImplTest {
         @DisplayName("게시글과 작성자를 함께 신고 대상으로 저장한다")
         void it_saves_report_with_product_and_owner() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member owner = mockMember(2L);
+            MemberJpaEntity owner = mockMember(2L);
             Product product = mock(Product.class);
             when(product.getMember()).thenReturn(owner);
             when(productRepository.findActiveById(5L)).thenReturn(Optional.of(product));
@@ -292,10 +292,10 @@ class CreateReportServiceImplTest {
         @DisplayName("게시글 ID와 같은 숫자의 회원이 있어도 그 회원을 신고 대상으로 삼지 않는다")
         void it_does_not_report_member_whose_id_equals_product_id() {
             // given - 이슈 #392 의 핵심: sourceId 5 는 회원 5 가 아니라 게시글 5 로만 해석돼야 한다
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member owner = mockMember(2L);
+            MemberJpaEntity owner = mockMember(2L);
             Product product = mock(Product.class);
             when(product.getMember()).thenReturn(owner);
             when(productRepository.findActiveById(5L)).thenReturn(Optional.of(product));
@@ -322,10 +322,10 @@ class CreateReportServiceImplTest {
         @DisplayName("본인 게시글 신고 시 SelfReportNotAllowedException 을 던진다")
         void it_throws_self_report_not_allowed_when_reporting_own_product() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member owner = mockMember(1L);
+            MemberJpaEntity owner = mockMember(1L);
             Product product = mock(Product.class);
             when(product.getMember()).thenReturn(owner);
             when(productRepository.findActiveById(5L)).thenReturn(Optional.of(product));
@@ -342,10 +342,10 @@ class CreateReportServiceImplTest {
         @DisplayName("같은 게시글을 같은 타입으로 다시 신고하면 AlreadyReportedException 을 던진다")
         void it_throws_already_reported_for_same_product_and_type() {
             // given
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member owner = mockMember(2L);
+            MemberJpaEntity owner = mockMember(2L);
             Product product = mock(Product.class);
             when(product.getMember()).thenReturn(owner);
             when(productRepository.findActiveById(5L)).thenReturn(Optional.of(product));
@@ -365,10 +365,10 @@ class CreateReportServiceImplTest {
         @DisplayName("같은 작성자의 다른 게시글은 별개 신고로 허용한다")
         void it_allows_report_for_another_product_of_same_owner() {
             // given - 게시글 6 은 신고 이력이 없으므로 게시글 5 신고와 무관하게 저장돼야 한다
-            Member reporter = mockMember(1L);
+            MemberJpaEntity reporter = mockMember(1L);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
 
-            Member owner = mockMember(2L);
+            MemberJpaEntity owner = mockMember(2L);
             Product anotherProduct = mock(Product.class);
             when(anotherProduct.getMember()).thenReturn(owner);
             when(productRepository.findActiveById(6L)).thenReturn(Optional.of(anotherProduct));
@@ -393,7 +393,7 @@ class CreateReportServiceImplTest {
         @DisplayName("삭제된 게시글 신고 시 NotFoundProductException 을 던진다")
         void it_throws_not_found_product_exception_when_product_deleted() {
             // given - findActiveById 는 DELETED 상태 게시글을 제외한다
-            Member reporter = mock(Member.class);
+            MemberJpaEntity reporter = mock(MemberJpaEntity.class);
             when(memberUtil.getCurrentMember()).thenReturn(reporter);
             when(productRepository.findActiveById(5L)).thenReturn(Optional.empty());
 

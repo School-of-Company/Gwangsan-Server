@@ -10,13 +10,13 @@ import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.admin.service.VerificationSignUpService;
 import team.startup.gwangsan.domain.admin.util.ValidatePlaceUtil;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
 import team.startup.gwangsan.global.event.CreateAlertEvent;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -26,9 +26,9 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
 
     private final AdminAlertRepository adminAlertRepository;
     private final MemberUtil memberUtil;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ValidatePlaceUtil validatePlaceUtil;
-    private final WithdrawalRecordRepository withdrawalRecordRepository;
+    private final WithdrawalRecordJpaRepository withdrawalRecordRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final int SIGNUP_GWANGSAN_REWARD = 10000;
@@ -37,18 +37,18 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
     @Override
     @Transactional
     public void execute(Long alertId) {
-        Member admin = memberUtil.getCurrentMember();
-        MemberDetail adminDetail = memberDetailRepository.findById(admin.getId())
+        MemberJpaEntity admin = memberUtil.getCurrentMember();
+        MemberDetailJpaEntity adminDetail = memberDetailRepository.findById(admin.getId())
                 .orElseThrow(NotFoundMemberDetailException::new);
 
         AdminAlert alert = adminAlertRepository.findByIdAndType(alertId, AlertType.SIGN_UP)
                 .orElseThrow(NotFoundAdminAlertException::new);
 
-        MemberDetail memberDetail = memberDetailRepository.findById(alert.getSourceId())
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findById(alert.getSourceId())
                 .orElseThrow(NotFoundMemberDetailException::new);
-        Member member = memberDetail.getMember();
+        MemberJpaEntity member = memberDetail.getMember();
 
-        MemberDetail recommenderDetail = memberDetailRepository.findById(member.getRecommender().getId())
+        MemberDetailJpaEntity recommenderDetail = memberDetailRepository.findById(member.getRecommender().getId())
                         .orElseThrow(NotFoundMemberDetailException::new);
 
         recommenderDetail.plusGwangsan(RECOMMENDER_GWANGSAN_REWARD);
@@ -57,7 +57,7 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
 
         member.updateMemberStatus(MemberStatus.ACTIVE);
 
-        WithdrawalRecord withdrawalRecord = withdrawalRecordRepository.findByPhoneNumber(member.getPhoneNumber())
+        WithdrawalRecordJpaEntity withdrawalRecord = withdrawalRecordRepository.findByPhoneNumber(member.getPhoneNumber())
                 .orElse(null);
 
         applyGwangsanPolicy(memberDetail, withdrawalRecord);
@@ -70,7 +70,7 @@ public class VerificationSignUpServiceImpl implements VerificationSignUpService 
                 team.startup.gwangsan.domain.alert.entity.constant.AlertType.RECOMMENDER));
     }
 
-    private void applyGwangsanPolicy(MemberDetail memberDetail, WithdrawalRecord record) {
+    private void applyGwangsanPolicy(MemberDetailJpaEntity memberDetail, WithdrawalRecordJpaEntity record) {
         if (record != null) {
             memberDetail.plusGwangsan(record.getGwangsan());
             withdrawalRecordRepository.delete(record);

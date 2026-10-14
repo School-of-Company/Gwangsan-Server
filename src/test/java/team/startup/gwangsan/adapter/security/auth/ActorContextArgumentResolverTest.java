@@ -18,10 +18,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import team.startup.gwangsan.domain.common.ActorContext;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
+import team.startup.gwangsan.support.MemberAccounts;
 
 import java.util.Map;
 
@@ -116,14 +117,14 @@ class ActorContextArgumentResolverTest {
         }
     }
 
-    private void authenticate(Member member) {
-        MemberDetails details = new MemberDetails(member);
+    private void authenticate(MemberJpaEntity member) {
+        MemberDetails details = new MemberDetails(MemberAccounts.of(member));
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities()));
     }
 
-    private Member member(Long id, MemberRole role) {
-        Member member = Member.builder()
+    private MemberJpaEntity member(Long id, MemberRole role) {
+        MemberJpaEntity member = MemberJpaEntity.builder()
                 .name("실행자")
                 .nickname("actor")
                 .phoneNumber("010-1234-5678")

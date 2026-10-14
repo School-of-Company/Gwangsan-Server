@@ -3,7 +3,7 @@ package team.startup.gwangsan.domain.relatedkeyword.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.relatedkeyword.entity.MemberRelatedKeyword;
 import team.startup.gwangsan.domain.relatedkeyword.exception.MemberRelatedKeywordForbiddenException;
 import team.startup.gwangsan.domain.relatedkeyword.exception.MemberRelatedKeywordNotFoundException;
@@ -21,7 +21,7 @@ public class DeleteMemberRelatedKeywordServiceImpl implements DeleteMemberRelate
     @Override
     @Transactional
     public void execute(Long memberRelatedKeywordId) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         MemberRelatedKeyword memberRelatedKeyword = memberRelatedKeywordRepository.findById(memberRelatedKeywordId)
                 .orElseThrow(MemberRelatedKeywordNotFoundException::new);

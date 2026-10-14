@@ -14,10 +14,10 @@ import team.startup.gwangsan.domain.admin.entity.AdminAlert;
 import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.exception.NotFoundPendingMemberException;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.report.entity.Report;
 import team.startup.gwangsan.domain.report.entity.constant.ReportType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
@@ -47,7 +47,7 @@ class CreateAdminAlertServiceImplTest {
     private ReportRepository reportRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberRepository;
 
     @Mock
     private TradeCancelRepository tradeCancelRepository;
@@ -72,7 +72,7 @@ class CreateAdminAlertServiceImplTest {
             @DisplayName("신고 타입에 맞는 제목으로 AdminAlert를 저장한다")
             void it_saves_report_alert(ReportType reportType, String expectedTitle) {
                 Report report = mock(Report.class);
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(report.getReportType()).thenReturn(reportType);
                 when(reportRepository.findById(1L)).thenReturn(Optional.of(report));
                 when(memberRepository.findById(2L)).thenReturn(Optional.of(member));
@@ -116,7 +116,7 @@ class CreateAdminAlertServiceImplTest {
             @Test
             @DisplayName("PENDING 상태의 회원으로 AdminAlert를 저장한다")
             void it_saves_sign_up_alert() {
-                Member signUpMember = mock(Member.class);
+                MemberJpaEntity signUpMember = mock(MemberJpaEntity.class);
                 when(memberRepository.findByStatusAndId(MemberStatus.PENDING, 1L))
                         .thenReturn(Optional.of(signUpMember));
 
@@ -146,7 +146,7 @@ class CreateAdminAlertServiceImplTest {
             @Test
             @DisplayName("거래 취소 요청으로 AdminAlert를 저장한다")
             void it_saves_trade_cancel_alert() {
-                Member requester = mock(Member.class);
+                MemberJpaEntity requester = mock(MemberJpaEntity.class);
                 TradeCancel tradeCancel = mock(TradeCancel.class);
                 when(tradeCancel.getMember()).thenReturn(requester);
                 when(tradeCancelRepository.findByIdWithMember(1L)).thenReturn(Optional.of(tradeCancel));

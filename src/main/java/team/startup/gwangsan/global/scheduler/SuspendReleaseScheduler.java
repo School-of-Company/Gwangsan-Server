@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.suspend.entity.Suspend;
 import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 
@@ -26,7 +26,7 @@ public class SuspendReleaseScheduler {
         List<Suspend> suspends = suspendRepository.findAllBySuspendedUntilBefore(LocalDateTime.now());
 
         for (Suspend suspend : suspends) {
-            Member member = suspend.getMember();
+            MemberJpaEntity member = suspend.getMember();
             member.updateMemberStatus(MemberStatus.ACTIVE);
         }
 

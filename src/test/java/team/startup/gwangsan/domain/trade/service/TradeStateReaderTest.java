@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.constant.TradeStatus;
@@ -44,8 +44,8 @@ class TradeStateReaderTest {
     private TradeStateReader tradeStateReader;
 
     private final Product product = mock(Product.class);
-    private final Member buyer = mock(Member.class);
-    private final Member seller = mock(Member.class);
+    private final MemberJpaEntity buyer = mock(MemberJpaEntity.class);
+    private final MemberJpaEntity seller = mock(MemberJpaEntity.class);
 
     private void givenProductStatus(ProductStatus status) {
         when(product.getStatus()).thenReturn(status);

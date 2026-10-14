@@ -9,7 +9,7 @@ import team.startup.gwangsan.domain.alert.presentation.dto.response.GetAlertResp
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
 import team.startup.gwangsan.domain.alert.service.FindAlertByCurrentService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.domain.post.repository.ProductImageRepository;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -34,7 +34,7 @@ public class FindAlertByCurrentServiceImpl implements FindAlertByCurrentService 
     @Override
     @Transactional(readOnly = true)
     public List<GetAlertResponse> execute() {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
         List<Alert> alerts = alertReceiptRepository.findByMemberId(member.getId());
 
         List<Long> noticeIds = alerts.stream()

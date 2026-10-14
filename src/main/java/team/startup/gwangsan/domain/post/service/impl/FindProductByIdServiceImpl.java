@@ -7,10 +7,10 @@ import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.exception.PlaceMismatchException;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -32,7 +32,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final MemberUtil memberUtil;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
@@ -41,7 +41,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
     @Override
     @Transactional(readOnly = true)
     public GetProductByIdResponse execute(Long id) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
         Place myPlace = memberDetailRepository.findPlaceByMemberId(member.getId());
 
         Product product = productRepository.findActiveById(id)
@@ -51,7 +51,7 @@ public class FindProductByIdServiceImpl implements FindProductByIdService {
 
         Place productPlace = memberDetailRepository.findPlaceByMemberId(product.getMember().getId());
 
-        MemberDetail memberDetail = memberDetailRepository.findById(product.getMember().getId())
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findById(product.getMember().getId())
                 .orElseThrow(NotFoundMemberException::new);
 
         validateSamePlace(myPlace, productPlace);

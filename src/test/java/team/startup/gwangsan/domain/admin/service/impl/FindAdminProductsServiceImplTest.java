@@ -8,9 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -38,7 +38,7 @@ class FindAdminProductsServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @InjectMocks
     private FindAdminProductsServiceImpl service;
@@ -57,8 +57,8 @@ class FindAdminProductsServiceImplTest {
             Product product1 = mock(Product.class);
             Product product2 = mock(Product.class);
 
-            Member member1 = mock(Member.class);
-            Member member2 = mock(Member.class);
+            MemberJpaEntity member1 = mock(MemberJpaEntity.class);
+            MemberJpaEntity member2 = mock(MemberJpaEntity.class);
 
             when(member1.getId()).thenReturn(1L);
             when(member2.getId()).thenReturn(2L);
@@ -83,8 +83,8 @@ class FindAdminProductsServiceImplTest {
 
             when(productRepository.findAdminProducts(TYPE, MODE, 102L, 20)).thenReturn(List.of(product1, product2));
 
-            MemberDetail detail1 = mock(MemberDetail.class);
-            MemberDetail detail2 = mock(MemberDetail.class);
+            MemberDetailJpaEntity detail1 = mock(MemberDetailJpaEntity.class);
+            MemberDetailJpaEntity detail2 = mock(MemberDetailJpaEntity.class);
             Place place1 = mock(Place.class);
             Place place2 = mock(Place.class);
 
@@ -151,7 +151,7 @@ class FindAdminProductsServiceImplTest {
         void it_fills_default_when_member_detail_is_missing() {
             // given
             Product product = mock(Product.class);
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
 
             when(member.getId()).thenReturn(1L);
 
@@ -183,8 +183,8 @@ class FindAdminProductsServiceImplTest {
         @DisplayName("지점 없는 회원의 예약 상품을 기본 지점명과 예약 상태로 반환한다")
         void it_maps_reservation_when_member_detail_has_no_place() {
             Product product = mock(Product.class);
-            Member member = mock(Member.class);
-            MemberDetail detail = mock(MemberDetail.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
+            MemberDetailJpaEntity detail = mock(MemberDetailJpaEntity.class);
             when(member.getId()).thenReturn(1L);
             when(product.getId()).thenReturn(100L);
             when(product.getTitle()).thenReturn("예약 상품");

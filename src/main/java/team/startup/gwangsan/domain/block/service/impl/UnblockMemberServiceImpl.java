@@ -7,7 +7,7 @@ import team.startup.gwangsan.domain.block.entity.MemberBlock;
 import team.startup.gwangsan.domain.block.exception.NotFoundBlockException;
 import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
 import team.startup.gwangsan.domain.block.service.UnblockMemberService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 @Service
@@ -20,7 +20,7 @@ public class UnblockMemberServiceImpl implements UnblockMemberService {
     @Override
     @Transactional
     public void execute(Long targetMemberId) {
-        Member currentMember = memberUtil.getCurrentMember();
+        MemberJpaEntity currentMember = memberUtil.getCurrentMember();
 
         MemberBlock block = memberBlockRepository
                 .findByBlockerIdAndBlockedId(currentMember.getId(), targetMemberId)

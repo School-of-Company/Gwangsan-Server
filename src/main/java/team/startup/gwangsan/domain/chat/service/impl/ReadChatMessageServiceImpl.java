@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatMessage;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
 import team.startup.gwangsan.domain.chat.service.ReadChatMessageService;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import java.util.List;

@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.admin.service.FindAdminProductsService;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -27,7 +27,7 @@ public class FindAdminProductsServiceImpl implements FindAdminProductsService {
 
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class FindAdminProductsServiceImpl implements FindAdminProductsService {
                 .distinct()
                 .toList();
 
-        Map<Long, MemberDetail> memberDetailMap = memberDetailRepository.findAllByMemberIdIn(memberIds).stream()
+        Map<Long, MemberDetailJpaEntity> memberDetailMap = memberDetailRepository.findAllByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(md -> md.getMember().getId(), md -> md));
 
         List<Long> productIds = products.stream()
@@ -65,8 +65,8 @@ public class FindAdminProductsServiceImpl implements FindAdminProductsService {
 
         return products.stream()
                 .map(product -> {
-                    Member member = product.getMember();
-                    MemberDetail memberDetail = memberDetailMap.get(member.getId());
+                    MemberJpaEntity member = product.getMember();
+                    MemberDetailJpaEntity memberDetail = memberDetailMap.get(member.getId());
 
                     int light = memberDetail == null ? 1 : Math.max(1, memberDetail.getLight() / 10);
                     String placeName = (memberDetail == null || memberDetail.getPlace() == null)

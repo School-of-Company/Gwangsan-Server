@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import team.startup.gwangsan.global.security.jwt.JwtProvider;
+import team.startup.gwangsan.adapter.security.auth.JwtProvider;
 
 import java.io.IOException;
 

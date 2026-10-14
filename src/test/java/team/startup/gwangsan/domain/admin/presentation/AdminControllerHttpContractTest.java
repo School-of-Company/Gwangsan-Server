@@ -12,9 +12,9 @@ import team.startup.gwangsan.domain.admin.exception.NotFoundAdminAlertException;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAlertResponse;
 import team.startup.gwangsan.domain.admin.presentation.dto.response.SignInAdminResponse;
 import team.startup.gwangsan.domain.admin.service.*;
-import team.startup.gwangsan.domain.auth.presentation.dto.response.TokenResponse;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.web.auth.dto.response.TokenResponse;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 
 import java.util.List;

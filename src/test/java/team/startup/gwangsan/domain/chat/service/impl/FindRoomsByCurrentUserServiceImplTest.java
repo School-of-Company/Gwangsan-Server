@@ -13,7 +13,7 @@ import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomProductDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.GetRoomsDto;
 import team.startup.gwangsan.domain.chat.presentation.dto.response.GetRoomsResponse;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.repository.ProductRepository;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -39,11 +39,11 @@ class FindRoomsByCurrentUserServiceImplTest {
     @DisplayName("execute() 메서드는")
     class Describe_execute {
 
-        private Member member;
+        private MemberJpaEntity member;
 
         @BeforeEach
         void setUp() {
-            member = mock(Member.class);
+            member = mock(MemberJpaEntity.class);
             when(member.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
         }

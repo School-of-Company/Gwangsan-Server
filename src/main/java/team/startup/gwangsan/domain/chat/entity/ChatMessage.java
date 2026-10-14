@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.startup.gwangsan.domain.chat.entity.constant.MessageType;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -47,10 +47,10 @@ public class ChatMessage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
-    private Member sender;
+    private MemberJpaEntity sender;
 
     @Builder
-    public ChatMessage(Long id, String content, MessageType messageType, Boolean checked, ChatRoom room, Member sender, LocalDateTime createdAt) {
+    public ChatMessage(Long id, String content, MessageType messageType, Boolean checked, ChatRoom room, MemberJpaEntity sender, LocalDateTime createdAt) {
         this.id = id;
         this.content = content;
         this.messageType = messageType;

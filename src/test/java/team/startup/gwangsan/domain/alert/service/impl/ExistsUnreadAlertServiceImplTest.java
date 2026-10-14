@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.alert.presentation.dto.response.ExistsAlertResponse;
 import team.startup.gwangsan.domain.alert.repository.AlertReceiptRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ class ExistsUnreadAlertServiceImplTest {
         @Test
         @DisplayName("읽지 않은 알림이 있으면 exists=true 를 반환한다")
         void it_returns_true_when_unread_exists() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(member.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(alertReceiptRepository.existsByMemberIdAndChecked(1L, false)).thenReturn(true);
@@ -48,7 +48,7 @@ class ExistsUnreadAlertServiceImplTest {
         @Test
         @DisplayName("읽지 않은 알림이 없으면 exists=false 를 반환한다")
         void it_returns_false_when_no_unread() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(member.getId()).thenReturn(1L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
             when(alertReceiptRepository.existsByMemberIdAndChecked(1L, false)).thenReturn(false);

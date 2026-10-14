@@ -7,26 +7,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.application.member.data.MemberAccount;
 
 @AllArgsConstructor
 public class MemberDetails implements UserDetails {
 
-    private final Member member;
+    private final MemberAccount member;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(member.getRole().name()));
+        return List.of(new SimpleGrantedAuthority(member.role().name()));
     }
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return member.passwordHash();
     }
 
     @Override
     public String getUsername() {
-        return member.getPhoneNumber();
+        return member.phoneNumber();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class MemberDetails implements UserDetails {
         return true;
     }
 
-    public Member getMember() {
+    public MemberAccount getMember() {
         return member;
     }
 }

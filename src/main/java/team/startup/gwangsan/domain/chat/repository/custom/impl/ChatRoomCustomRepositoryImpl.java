@@ -17,8 +17,8 @@ import team.startup.gwangsan.domain.chat.repository.custom.ChatRoomCustomReposit
 import team.startup.gwangsan.domain.chat.repository.projection.ChatRoomDto;
 import team.startup.gwangsan.domain.chat.repository.projection.LatestMessageDto;
 import team.startup.gwangsan.domain.chat.repository.projection.UnreadCountDto;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.QMember;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -37,8 +37,8 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
 
     @Override
     public Optional<ChatRoom> findChatRoomByRoomId(Long roomId) {
-        QMember buyer = new QMember("buyer");
-        QMember seller = new QMember("seller");
+        QMemberJpaEntity buyer = new QMemberJpaEntity("buyer");
+        QMemberJpaEntity seller = new QMemberJpaEntity("seller");
 
         return Optional.ofNullable(queryFactory
                 .selectFrom(chatRoom)
@@ -49,7 +49,7 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
     }
 
     @Override
-    public Optional<ChatRoom> findByProductIdAndMember(Long productId, Member member) {
+    public Optional<ChatRoom> findByProductIdAndMember(Long productId, MemberJpaEntity member) {
         return Optional.ofNullable(
                 queryFactory
                         .selectFrom(chatRoom)
@@ -64,8 +64,8 @@ public class ChatRoomCustomRepositoryImpl implements ChatRoomCustomRepository {
     @Override
     public List<GetRoomsDto> findRoomsByMemberId(Long memberId) {
         QChatMessage unreadMessage = new QChatMessage("unreadMessage");
-        QMember buyer = new QMember("buyer");
-        QMember seller = new QMember("seller");
+        QMemberJpaEntity buyer = new QMemberJpaEntity("buyer");
+        QMemberJpaEntity seller = new QMemberJpaEntity("seller");
 
         List<ChatRoomDto> rooms = queryFactory
                 .select(Projections.constructor(ChatRoomDto.class,

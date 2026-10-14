@@ -8,12 +8,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.WithdrawalRecord;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.WithdrawalRecordRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.WithdrawalRecordJpaRepository;
 import team.startup.gwangsan.domain.member.service.MemberDeletionService;
 import team.startup.gwangsan.global.util.MemberUtil;
 
@@ -31,8 +31,8 @@ class MemberWithdrawalServiceImplTest {
     private MemberWithdrawalServiceImpl service;
 
     @Mock private MemberUtil memberUtil;
-    @Mock private WithdrawalRecordRepository withdrawalRecordRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private WithdrawalRecordJpaRepository withdrawalRecordRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private MemberDeletionService memberDeletionService;
 
     @Nested
@@ -46,17 +46,17 @@ class MemberWithdrawalServiceImplTest {
             @Test
             @DisplayName("실제 gwangsan 값을 탈퇴 기록에 저장하고 회원을 삭제한다")
             void it_saves_withdrawal_record_with_actual_gwangsan_and_deletes_member() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(member.getPhoneNumber()).thenReturn("01012345678");
                 when(memberUtil.getCurrentMember()).thenReturn(member);
 
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
                 when(memberDetail.getGwangsan()).thenReturn(500);
                 when(memberDetailRepository.findByMember(member)).thenReturn(Optional.of(memberDetail));
 
                 service.execute();
 
-                ArgumentCaptor<WithdrawalRecord> captor = ArgumentCaptor.forClass(WithdrawalRecord.class);
+                ArgumentCaptor<WithdrawalRecordJpaEntity> captor = ArgumentCaptor.forClass(WithdrawalRecordJpaEntity.class);
                 verify(withdrawalRecordRepository).save(captor.capture());
                 assertThat(captor.getValue().getPhoneNumber()).isEqualTo("01012345678");
                 assertThat(captor.getValue().getGwangsan()).isEqualTo(500);
@@ -72,7 +72,7 @@ class MemberWithdrawalServiceImplTest {
             @Test
             @DisplayName("NotFoundMemberDetailException을 던진다")
             void it_throws_not_found_member_detail_exception() {
-                Member member = mock(Member.class);
+                MemberJpaEntity member = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(member);
                 when(memberDetailRepository.findByMember(member)).thenReturn(Optional.empty());
 

@@ -13,12 +13,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static team.startup.gwangsan.domain.admin.entity.QAdminAlert.adminAlert;
-import static team.startup.gwangsan.domain.member.entity.QMember.member;
-import static team.startup.gwangsan.domain.member.entity.QMemberDetail.memberDetail;
+import team.startup.gwangsan.adapter.persistence.member.QMemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.QMemberDetailJpaEntity;
 
 @Repository
 @RequiredArgsConstructor
 public class AdminAlertCustomRepositoryImpl implements AdminAlertCustomRepository {
+    private static final QMemberJpaEntity member = QMemberJpaEntity.memberJpaEntity;
+    private static final QMemberDetailJpaEntity memberDetail = QMemberDetailJpaEntity.memberDetailJpaEntity;
 
     private final JPAQueryFactory queryFactory;
 

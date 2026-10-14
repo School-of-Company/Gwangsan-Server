@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.post.repository.custom.ProductCustomRepository;
@@ -44,5 +44,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Product p SET p.member = :dummy WHERE p.member = :target")
-    void reassignMember(@Param("target") Member target, @Param("dummy") Member dummy);
+    void reassignMember(@Param("target") MemberJpaEntity target, @Param("dummy") MemberJpaEntity dummy);
 }

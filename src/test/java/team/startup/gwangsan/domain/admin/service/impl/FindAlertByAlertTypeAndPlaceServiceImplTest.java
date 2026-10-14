@@ -14,12 +14,12 @@ import team.startup.gwangsan.domain.admin.presentation.dto.response.GetAdminAler
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.entity.Image;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
-import team.startup.gwangsan.domain.member.repository.MemberRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.place.repository.PlaceRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
@@ -60,10 +60,10 @@ import static org.mockito.Mockito.when;
 class FindAlertByAlertTypeAndPlaceServiceImplTest {
 
     @InjectMocks private FindAlertByAlertTypeAndPlaceServiceImpl service;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private ReportRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
-    @Mock private MemberRepository memberRepository;
+    @Mock private MemberJpaRepository memberRepository;
     @Mock private ReportImageRepository reportImageRepository;
     @Mock private PlaceRepository placeRepository;
     @Mock private MemberUtil memberUtil;
@@ -78,7 +78,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         @Test
         @DisplayName("지점 관리자는 알림이 없으면 세 유형 모두 빈 응답을 반환한다")
         void it_returns_all_empty_lists_for_place_admin_without_alerts() {
-            Member admin = member(90L, "지점 관리자", null, MemberRole.ROLE_PLACE_ADMIN);
+            MemberJpaEntity admin = member(90L, "지점 관리자", null, MemberRole.ROLE_PLACE_ADMIN);
             Place place = Place.builder().name("관리자 지점").build();
             when(memberUtil.getCurrentMember()).thenReturn(admin);
             when(memberDetailRepository.findPlaceByMemberId(90L)).thenReturn(place);
@@ -95,13 +95,13 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         @Test
         @DisplayName("실제 신고·가입·거래철회 데이터를 유형별 응답으로 변환한다")
         void it_maps_non_empty_alerts_for_all_types() {
-            Member admin = member(90L, "본부 관리자", null, MemberRole.ROLE_PLACE_ADMIN);
-            Member requester = member(1L, "신고자", null, MemberRole.ROLE_USER);
-            Member reported = member(2L, "피신고자", null, MemberRole.ROLE_USER);
-            Member owner = member(3L, "작성자", null, MemberRole.ROLE_USER);
-            Member recommender = member(4L, "추천인", null, MemberRole.ROLE_USER);
-            Member joinedWithRecommender = member(20L, "가입자1", recommender, MemberRole.ROLE_USER);
-            Member joinedWithoutRecommender = member(21L, "가입자2", null, MemberRole.ROLE_USER);
+            MemberJpaEntity admin = member(90L, "본부 관리자", null, MemberRole.ROLE_PLACE_ADMIN);
+            MemberJpaEntity requester = member(1L, "신고자", null, MemberRole.ROLE_USER);
+            MemberJpaEntity reported = member(2L, "피신고자", null, MemberRole.ROLE_USER);
+            MemberJpaEntity owner = member(3L, "작성자", null, MemberRole.ROLE_USER);
+            MemberJpaEntity recommender = member(4L, "추천인", null, MemberRole.ROLE_USER);
+            MemberJpaEntity joinedWithRecommender = member(20L, "가입자1", recommender, MemberRole.ROLE_USER);
+            MemberJpaEntity joinedWithoutRecommender = member(21L, "가입자2", null, MemberRole.ROLE_USER);
             Place place = Place.builder().name("광산 지점").build();
 
             Product reservedProduct = product(300L, owner, ProductStatus.RESERVATION);
@@ -191,7 +191,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         @Test
         @DisplayName("본부 관리자는 지정 지점의 알림을 조회한다")
         void it_uses_explicit_place_for_head_admin() {
-            Member admin = member(90L, "본부", null, MemberRole.ROLE_HEAD_ADMIN);
+            MemberJpaEntity admin = member(90L, "본부", null, MemberRole.ROLE_HEAD_ADMIN);
             Place place = Place.builder().name("지정 지점").build();
             ReflectionTestUtils.setField(place, "id", 7);
             when(memberUtil.getCurrentMember()).thenReturn(admin);
@@ -204,7 +204,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         @Test
         @DisplayName("본부 관리자는 지점 지정 없이 자신의 본부 산하 지점을 모두 조회한다")
         void it_uses_all_head_places_when_place_is_not_specified() {
-            Member admin = member(90L, "본부", null, MemberRole.ROLE_HEAD_ADMIN);
+            MemberJpaEntity admin = member(90L, "본부", null, MemberRole.ROLE_HEAD_ADMIN);
             Place adminPlace = Place.builder().name("관리자 지점").build();
             when(memberUtil.getCurrentMember()).thenReturn(admin);
             when(memberDetailRepository.findPlaceByMemberId(90L)).thenReturn(adminPlace);
@@ -229,8 +229,8 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
     }
 
     private void prepareSingleAlert(AlertType type, Long sourceId) {
-        Member admin = member(90L, "관리자", null, MemberRole.ROLE_PLACE_ADMIN);
-        Member requester = member(sourceId, "요청자", null, MemberRole.ROLE_USER);
+        MemberJpaEntity admin = member(90L, "관리자", null, MemberRole.ROLE_PLACE_ADMIN);
+        MemberJpaEntity requester = member(sourceId, "요청자", null, MemberRole.ROLE_USER);
         Place place = Place.builder().name("지점").build();
         when(memberUtil.getCurrentMember()).thenReturn(admin);
         when(memberDetailRepository.findPlaceByMemberId(90L)).thenReturn(place);
@@ -238,27 +238,27 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         when(memberDetailRepository.findPlaceNameMapByMemberIds(anySet())).thenReturn(Map.of(sourceId, "지점"));
     }
 
-    private Member member(Long id, String nickname, Member recommender, MemberRole role) {
-        Member member = Member.builder().name(nickname).nickname(nickname).phoneNumber(nickname).password("password")
+    private MemberJpaEntity member(Long id, String nickname, MemberJpaEntity recommender, MemberRole role) {
+        MemberJpaEntity member = MemberJpaEntity.builder().name(nickname).nickname(nickname).phoneNumber(nickname).password("password")
                 .recommender(recommender).role(role).status(MemberStatus.ACTIVE).build();
         ReflectionTestUtils.setField(member, "id", id);
         return member;
     }
 
-    private Product product(Long id, Member owner, ProductStatus status) {
+    private Product product(Long id, MemberJpaEntity owner, ProductStatus status) {
         Product product = Product.builder().title("상품 " + id).description("설명").gwangsan(100).member(owner)
                 .type(Type.SERVICE).mode(Mode.GIVER).status(status).build();
         ReflectionTestUtils.setField(product, "id", id);
         return product;
     }
 
-    private Report report(Long id, ReportType type, Member reported, Product product) {
+    private Report report(Long id, ReportType type, MemberJpaEntity reported, Product product) {
         Report report = Report.builder().reportType(type).content("신고 내용").reporter(reported).reported(reported).product(product).build();
         ReflectionTestUtils.setField(report, "id", id);
         return report;
     }
 
-    private TradeCancel cancel(Long id, Member requester, Product product, String reason) {
+    private TradeCancel cancel(Long id, MemberJpaEntity requester, Product product, String reason) {
         TradeComplete complete = TradeComplete.builder().product(product).buyer(requester).seller(product.getMember())
                 .status(TradeStatus.PENDING).requestedBySeller(false).build();
         TradeCancel cancel = TradeCancel.builder().tradeComplete(complete).member(requester).reason(reason).status(TradeCancelStatus.PENDING).build();
@@ -266,7 +266,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         return cancel;
     }
 
-    private AdminAlert alert(Long id, AlertType type, Long sourceId, Member requester) {
+    private AdminAlert alert(Long id, AlertType type, Long sourceId, MemberJpaEntity requester) {
         AdminAlert alert = AdminAlert.builder().type(type).title(type + " 알림").sourceId(sourceId).requester(requester).build();
         ReflectionTestUtils.setField(alert, "id", id);
         return alert;

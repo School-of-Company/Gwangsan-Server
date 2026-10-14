@@ -15,12 +15,12 @@ import team.startup.gwangsan.domain.admin.entity.constant.AlertType;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.entity.constant.MemberRole;
-import team.startup.gwangsan.domain.member.entity.constant.MemberStatus;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
 import team.startup.gwangsan.domain.trade.entity.TradeCancel;
@@ -54,21 +54,21 @@ class TradeCancelApplierTest {
 
     @InjectMocks private TradeCancelApplier applier;
 
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private ChatRoomRepository chatRoomRepository;
     @Mock private TradeStateReader tradeStateReader;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
 
-    private Member buyer;
-    private Member seller;
+    private MemberJpaEntity buyer;
+    private MemberJpaEntity seller;
     private Product product;
     private TradeComplete tradeComplete;
-    private MemberDetail buyerDetail;
-    private MemberDetail sellerDetail;
+    private MemberDetailJpaEntity buyerDetail;
+    private MemberDetailJpaEntity sellerDetail;
 
-    private Member member(Long id) {
-        Member member = mock(Member.class);
+    private MemberJpaEntity member(Long id) {
+        MemberJpaEntity member = mock(MemberJpaEntity.class);
         lenient().when(member.getId()).thenReturn(id);
         return member;
     }
@@ -87,7 +87,7 @@ class TradeCancelApplierTest {
         lenient().when(tradeComplete.getBuyer()).thenReturn(buyer);
         lenient().when(tradeComplete.getSeller()).thenReturn(seller);
 
-        Member requester = member(REQUESTER_ID);
+        MemberJpaEntity requester = member(REQUESTER_ID);
 
         TradeCancel tradeCancel = mock(TradeCancel.class);
         lenient().when(tradeCancel.getId()).thenReturn(TRADE_CANCEL_ID);
@@ -95,8 +95,8 @@ class TradeCancelApplierTest {
         lenient().when(tradeCancel.getTradeComplete()).thenReturn(tradeComplete);
         lenient().when(tradeCancel.getMember()).thenReturn(requester);
 
-        buyerDetail = mock(MemberDetail.class);
-        sellerDetail = mock(MemberDetail.class);
+        buyerDetail = mock(MemberDetailJpaEntity.class);
+        sellerDetail = mock(MemberDetailJpaEntity.class);
         lenient().when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(buyerDetail));
         lenient().when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(sellerDetail));
 
@@ -301,16 +301,16 @@ class TradeCancelApplierTest {
                 .build();
         ReflectionTestUtils.setField(tradeCancel, "id", TRADE_CANCEL_ID);
 
-        buyerDetail = MemberDetail.builder().gwangsan(5_000).light(0).build();
-        sellerDetail = MemberDetail.builder().gwangsan(4_000).light(0).build();
+        buyerDetail = MemberDetailJpaEntity.builder().gwangsan(5_000).light(0).build();
+        sellerDetail = MemberDetailJpaEntity.builder().gwangsan(4_000).light(0).build();
         when(memberDetailRepository.findById(BUYER_ID)).thenReturn(Optional.of(buyerDetail));
         when(memberDetailRepository.findById(SELLER_ID)).thenReturn(Optional.of(sellerDetail));
 
         return tradeCancel;
     }
 
-    private Member actualMember(Long id, String name) {
-        Member member = Member.builder()
+    private MemberJpaEntity actualMember(Long id, String name) {
+        MemberJpaEntity member = MemberJpaEntity.builder()
                 .name(name).nickname(name).phoneNumber("010-0000-000" + id).password("pw")
                 .role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE)
                 .build();

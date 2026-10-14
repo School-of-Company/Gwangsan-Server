@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.chat.repository.ChatMessageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.MemberUtil;
 
 import static org.mockito.Mockito.*;
@@ -32,7 +32,7 @@ class ReadChatMessageServiceImplTest {
         @Test
         @DisplayName("현재 사용자 ID 로 메시지 읽음 처리를 호출한다")
         void it_calls_readMessage_with_current_member_id() {
-            Member member = mock(Member.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(member.getId()).thenReturn(5L);
             when(memberUtil.getCurrentMember()).thenReturn(member);
 

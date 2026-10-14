@@ -12,10 +12,10 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.place.entity.Place;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
@@ -43,7 +43,7 @@ class FindProductsByMemberIdServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private MemberDetailRepository memberDetailRepository;
+    private MemberDetailJpaRepository memberDetailRepository;
 
     @Mock
     private ProductImageRepository productImageRepository;
@@ -77,8 +77,8 @@ class FindProductsByMemberIdServiceImplTest {
         @Test
         @DisplayName("상품이 없으면 빈 리스트를 반환한다")
         void returnsEmptyList_whenNoProducts() {
-            MemberDetail memberDetail = mock(MemberDetail.class);
-            Member member = mock(Member.class);
+            MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             when(memberDetailRepository.findById(MEMBER_ID)).thenReturn(Optional.of(memberDetail));
             when(memberDetail.getMember()).thenReturn(member);
             when(productRepository.findProductByMemberAndTypeAndModeAndStatusIn(member, TYPE, MODE, List.of(ProductStatus.ONGOING, ProductStatus.COMPLETED, ProductStatus.RESERVATION)))
@@ -94,8 +94,8 @@ class FindProductsByMemberIdServiceImplTest {
         @DisplayName("memberId, type, mode에 해당하는 상품과 이미지 정보를 조회하여 응답 DTO 리스트를 반환한다")
         void returnsProductResponses_whenProductsExist() {
             // given
-            MemberDetail memberDetail = mock(MemberDetail.class);
-            Member member = mock(Member.class);
+            MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             Place place = mock(Place.class);
 
             when(memberDetailRepository.findById(MEMBER_ID))
@@ -211,8 +211,8 @@ class FindProductsByMemberIdServiceImplTest {
         @DisplayName("light 값이 0일 때도 최소 1로 보정된 값을 반환한다")
         void returnsLightAsOne_whenRawLightIsZero() {
             // given
-            MemberDetail memberDetail = mock(MemberDetail.class);
-            Member member = mock(Member.class);
+            MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
+            MemberJpaEntity member = mock(MemberJpaEntity.class);
             Place place = mock(Place.class);
 
             when(memberDetailRepository.findById(MEMBER_ID))

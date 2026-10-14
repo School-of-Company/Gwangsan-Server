@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import team.startup.gwangsan.domain.alert.entity.constant.AlertType;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +28,7 @@ public class Alert {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "send_member_id")
-    private Member sendMember;
+    private MemberJpaEntity sendMember;
 
     @Column(name = "alert_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -45,7 +45,7 @@ public class Alert {
     private LocalDateTime createdAt;
 
     @Builder
-    public Alert(Long sourceId, Member sendMember, AlertType alertType, String title, String content) {
+    public Alert(Long sourceId, MemberJpaEntity sendMember, AlertType alertType, String title, String content) {
         this.sourceId = sourceId;
         this.sendMember = sendMember;
         this.alertType = alertType;

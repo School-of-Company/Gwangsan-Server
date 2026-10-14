@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +26,7 @@ public class AlertReceipt {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private MemberJpaEntity member;
 
     @Column(name = "checked", nullable = false)
     private boolean checked;
@@ -35,7 +35,7 @@ public class AlertReceipt {
     private LocalDateTime checkedAt;
 
     @Builder
-    public AlertReceipt(Alert alert, Member member, boolean checked) {
+    public AlertReceipt(Alert alert, MemberJpaEntity member, boolean checked) {
         this.alert = alert;
         this.member = member;
         this.checked = checked;

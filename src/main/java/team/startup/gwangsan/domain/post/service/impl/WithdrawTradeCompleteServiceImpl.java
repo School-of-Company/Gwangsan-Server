@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.chat.entity.ChatRoom;
 import team.startup.gwangsan.domain.chat.exception.NotFoundChatRoomException;
 import team.startup.gwangsan.domain.chat.repository.ChatRoomRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
 import team.startup.gwangsan.domain.post.entity.constant.ProductStatus;
@@ -35,7 +35,7 @@ public class WithdrawTradeCompleteServiceImpl implements WithdrawTradeCompleteSe
     private final ProductRepository productRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final TradeCompleteRepository tradeCompleteRepository;
-    private final MemberDetailRepository memberDetailRepository;
+    private final MemberDetailJpaRepository memberDetailRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TradeStateReader tradeStateReader;
 
@@ -43,8 +43,8 @@ public class WithdrawTradeCompleteServiceImpl implements WithdrawTradeCompleteSe
     @Transactional
     public void execute(Long productId, Long otherMemberId) {
         String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
-        MemberDetail memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);
-        Member member = memberDetail.getMember();
+        MemberDetailJpaEntity memberDetail = memberDetailRepository.findByPhoneNumberWithMember(phoneNumber);
+        MemberJpaEntity member = memberDetail.getMember();
 
         validateNotSelfTrade(member.getId(), otherMemberId);
 
@@ -52,14 +52,14 @@ public class WithdrawTradeCompleteServiceImpl implements WithdrawTradeCompleteSe
                 .orElseThrow(NotFoundProductException::new);
         validateProductStatus(product);
 
-        MemberDetail otherMemberDetail = memberDetailRepository.findByMemberIdWithMember(otherMemberId);
+        MemberDetailJpaEntity otherMemberDetail = memberDetailRepository.findByMemberIdWithMember(otherMemberId);
 
         boolean isBuyer = isBuyer(product, member);
-        MemberDetail buyerDetail = isBuyer ? memberDetail : otherMemberDetail;
-        MemberDetail sellerDetail = isBuyer ? otherMemberDetail : memberDetail;
+        MemberDetailJpaEntity buyerDetail = isBuyer ? memberDetail : otherMemberDetail;
+        MemberDetailJpaEntity sellerDetail = isBuyer ? otherMemberDetail : memberDetail;
 
-        Member buyer = buyerDetail.getMember();
-        Member seller = sellerDetail.getMember();
+        MemberJpaEntity buyer = buyerDetail.getMember();
+        MemberJpaEntity seller = sellerDetail.getMember();
 
         TradeComplete pending = tradeCompleteRepository
                 .findByProductAndBuyerAndSellerAndStatus(product, buyer, seller, TradeStatus.PENDING)
@@ -99,7 +99,7 @@ public class WithdrawTradeCompleteServiceImpl implements WithdrawTradeCompleteSe
         }
     }
 
-    private boolean isBuyer(Product product, Member member) {
+    private boolean isBuyer(Product product, MemberJpaEntity member) {
         if (product.getMode() == Mode.GIVER) {
             return !product.getMember().equals(member);
         } else {

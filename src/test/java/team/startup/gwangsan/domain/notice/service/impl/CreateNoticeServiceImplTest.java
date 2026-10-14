@@ -12,9 +12,9 @@ import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.ImageNotFoundException;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
-import team.startup.gwangsan.domain.member.entity.MemberDetail;
-import team.startup.gwangsan.domain.member.repository.MemberDetailRepository;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
+import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
 import team.startup.gwangsan.domain.notice.entity.Notice;
 import team.startup.gwangsan.domain.notice.presentation.dto.request.CreateNoticeRequest;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
@@ -47,7 +47,7 @@ class CreateNoticeServiceImplTest {
     @Mock private NoticeImageRepository noticeImageRepository;
     @Mock private ApplicationEventPublisher applicationEventPublisher;
     @Mock private DeviceTokenRepository deviceTokenRepository;
-    @Mock private MemberDetailRepository memberDetailRepository;
+    @Mock private MemberDetailJpaRepository memberDetailRepository;
 
     @Nested
     @DisplayName("execute() 메서드는")
@@ -60,10 +60,10 @@ class CreateNoticeServiceImplTest {
             @Test
             @DisplayName("공지를 저장하고 이미지를 저장하고 이벤트를 2회 발행한다")
             void it_saves_notice_and_images_and_publishes_events_twice() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 Place place = mock(Place.class);
                 Image image = mock(Image.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(placeRepository.findById(1)).thenReturn(Optional.of(place));
@@ -90,9 +90,9 @@ class CreateNoticeServiceImplTest {
             @Test
             @DisplayName("공지를 저장하고 이미지 저장은 호출하지 않는다")
             void it_saves_notice_without_saving_images() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 Place place = mock(Place.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(placeRepository.findById(1)).thenReturn(Optional.of(place));
@@ -110,9 +110,9 @@ class CreateNoticeServiceImplTest {
             @Test
             @DisplayName("이미지 ID가 null이면 이미지 조회와 저장을 생략한다")
             void it_skips_image_lookup_and_save_when_image_ids_are_null() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 Place place = mock(Place.class);
-                MemberDetail memberDetail = mock(MemberDetail.class);
+                MemberDetailJpaEntity memberDetail = mock(MemberDetailJpaEntity.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(placeRepository.findById(1)).thenReturn(Optional.of(place));
@@ -135,7 +135,7 @@ class CreateNoticeServiceImplTest {
             @Test
             @DisplayName("PlaceNotFoundException을 던진다")
             void it_throws_place_not_found_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 when(memberUtil.getCurrentMember()).thenReturn(admin);
                 when(placeRepository.findById(99)).thenReturn(Optional.empty());
 
@@ -153,7 +153,7 @@ class CreateNoticeServiceImplTest {
             @Test
             @DisplayName("ImageNotFoundException을 던진다")
             void it_throws_image_not_found_exception() {
-                Member admin = mock(Member.class);
+                MemberJpaEntity admin = mock(MemberJpaEntity.class);
                 Place place = mock(Place.class);
 
                 when(memberUtil.getCurrentMember()).thenReturn(admin);

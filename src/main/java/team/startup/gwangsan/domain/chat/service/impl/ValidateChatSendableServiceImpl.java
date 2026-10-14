@@ -12,7 +12,7 @@ import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.exception.InvalidImageIdsException;
 import team.startup.gwangsan.domain.image.presentation.dto.response.GetImageResponse;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.global.util.BlockValidator;
 import team.startup.gwangsan.global.util.ImageValidateUtil;
 import team.startup.gwangsan.global.util.MemberUtil;
@@ -34,7 +34,7 @@ public class ValidateChatSendableServiceImpl implements ValidateChatSendableServ
     @Override
     @Transactional(readOnly = true)
     public ValidateChatSendableResponse execute(Long roomId, List<String> imageIds) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
         ChatRoom chatRoom = chatRoomRepository.findChatRoomByRoomId(roomId)
                 .orElseThrow(NotFoundChatRoomException::new);
 

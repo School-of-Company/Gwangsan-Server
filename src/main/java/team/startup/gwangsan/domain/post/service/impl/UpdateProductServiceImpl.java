@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.domain.image.repository.ImageRepository;
-import team.startup.gwangsan.domain.member.entity.Member;
+import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.post.entity.Product;
 import team.startup.gwangsan.domain.post.entity.ProductImage;
 import team.startup.gwangsan.domain.post.entity.constant.Mode;
@@ -39,7 +39,7 @@ public class UpdateProductServiceImpl implements UpdateProductService {
     @Override
     @Transactional
     public void execute(Long productId, Type type, Mode mode, String title, String description, Integer gwangsan, List<Long> imageIds) {
-        Member member = memberUtil.getCurrentMember();
+        MemberJpaEntity member = memberUtil.getCurrentMember();
 
         Product product = productRepository.findActiveById(productId)
                 .orElseThrow(NotFoundProductException::new);
@@ -122,7 +122,7 @@ public class UpdateProductServiceImpl implements UpdateProductService {
                 .toList();
     }
 
-    private void validateProductMember(Member member, Product product) {
+    private void validateProductMember(MemberJpaEntity member, Product product) {
         if (!product.getMember().getId().equals(member.getId())) {
             throw new ForbiddenProductException();
         }
