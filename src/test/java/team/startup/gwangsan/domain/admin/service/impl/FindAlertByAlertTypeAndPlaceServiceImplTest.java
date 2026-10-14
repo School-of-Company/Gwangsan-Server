@@ -29,13 +29,13 @@ import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
 import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
 import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.entity.ReportImage;
-import team.startup.gwangsan.domain.report.entity.constant.ReportTargetType;
-import team.startup.gwangsan.domain.report.entity.constant.ReportType;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaEntity;
+import team.startup.gwangsan.domain.report.model.ReportTargetType;
+import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
@@ -61,10 +61,10 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
 
     @InjectMocks private FindAlertByAlertTypeAndPlaceServiceImpl service;
     @Mock private MemberDetailJpaRepository memberDetailRepository;
-    @Mock private ReportRepository reportRepository;
+    @Mock private ReportJpaRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private MemberJpaRepository memberRepository;
-    @Mock private ReportImageRepository reportImageRepository;
+    @Mock private ReportImageJpaRepository reportImageRepository;
     @Mock private PlaceRepository placeRepository;
     @Mock private MemberUtil memberUtil;
     @Mock private ProductImageRepository productImageRepository;
@@ -106,9 +106,9 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
 
             Product reservedProduct = product(300L, owner, ProductStatus.RESERVATION);
             Product completedProduct = product(301L, owner, ProductStatus.COMPLETED);
-            Report memberReport = report(10L, ReportType.SEXUAL, reported, null);
-            Report productReport = report(11L, ReportType.SPAM_AD, owner, reservedProduct);
-            Report missingTargetReport = report(12L, ReportType.ETC, null, null);
+            ReportJpaEntity memberReport = report(10L, ReportType.SEXUAL, reported, null);
+            ReportJpaEntity productReport = report(11L, ReportType.SPAM_AD, owner, reservedProduct);
+            ReportJpaEntity missingTargetReport = report(12L, ReportType.ETC, null, null);
             TradeCancelJpaEntity withImages = cancel(40L, requester, reservedProduct, "이미지 포함 철회");
             TradeCancelJpaEntity withoutImages = cancel(41L, requester, completedProduct, "이미지 없는 철회");
             List<AdminAlert> alerts = List.of(
@@ -126,7 +126,7 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
             when(adminAlertRepository.findAdminAlertByPlacesAndAlertType(List.of(place), AlertType.REPORT)).thenReturn(alerts);
             when(memberDetailRepository.findPlaceNameMapByMemberIds(anySet())).thenReturn(Map.of(1L, "요청 지점", 20L, "가입 지점", 21L, "가입 지점"));
             when(reportRepository.findAllByIdIn(List.of(10L, 11L, 12L))).thenReturn(List.of(memberReport, productReport, missingTargetReport));
-            when(reportImageRepository.findAllByReportIdIn(List.of(10L, 11L, 12L))).thenReturn(List.of(ReportImage.builder().report(memberReport).image(reportImage).build()));
+            when(reportImageRepository.findAllByReportIdIn(List.of(10L, 11L, 12L))).thenReturn(List.of(ReportImageJpaEntity.builder().report(memberReport).image(reportImage).build()));
             when(memberRepository.findAllByIdIn(List.of(20L, 21L))).thenReturn(List.of(joinedWithRecommender, joinedWithoutRecommender));
             when(tradeCancelRepository.findAllByIdIn(List.of(40L, 41L))).thenReturn(List.of(withImages, withoutImages));
             when(tradeCancelImageRepository.findByTradeCancelIn(List.of(40L, 41L))).thenReturn(List.of(TradeCancelImageJpaEntity.builder().tradeCancel(withImages).image(cancelImage).build()));
@@ -252,8 +252,8 @@ class FindAlertByAlertTypeAndPlaceServiceImplTest {
         return product;
     }
 
-    private Report report(Long id, ReportType type, MemberJpaEntity reported, Product product) {
-        Report report = Report.builder().reportType(type).content("신고 내용").reporter(reported).reported(reported).product(product).build();
+    private ReportJpaEntity report(Long id, ReportType type, MemberJpaEntity reported, Product product) {
+        ReportJpaEntity report = ReportJpaEntity.builder().reportType(type).content("신고 내용").reporter(reported).reported(reported).product(product).build();
         ReflectionTestUtils.setField(report, "id", id);
         return report;
     }

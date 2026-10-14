@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.application.image.data.ImageOwnerType;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.application.post.port.in.UnlinkProductImageUseCase;
-import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
+import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase;
 
 import static org.mockito.Mockito.*;
 
@@ -20,14 +20,14 @@ class LegacyImageReferenceCleanupAdapterTest {
     @InjectMocks private LegacyImageReferenceCleanupAdapter adapter;
     @Mock private UnlinkProductImageUseCase unlinkProductImageUseCase;
     @Mock private NoticeImageRepository noticeImageRepository;
-    @Mock private ReportImageRepository reportImageRepository;
+    @Mock private UnlinkReportImageUseCase unlinkReportImageUseCase;
 
     @Test
     @DisplayName("REPORT 는 신고 이미지 링크만 지운다")
     void it_unlinks_report_image() {
         adapter.unlink(ImageOwnerType.REPORT, 10L, 20L);
 
-        verify(reportImageRepository).deleteByReportIdAndImageId(10L, 20L);
+        verify(unlinkReportImageUseCase).unlink(10L, 20L);
         verifyNoInteractions(unlinkProductImageUseCase, noticeImageRepository);
     }
 
@@ -37,7 +37,7 @@ class LegacyImageReferenceCleanupAdapterTest {
         adapter.unlink(ImageOwnerType.NOTICE, 10L, 20L);
 
         verify(noticeImageRepository).deleteByNoticeIdAndImageId(10L, 20L);
-        verifyNoInteractions(unlinkProductImageUseCase, reportImageRepository);
+        verifyNoInteractions(unlinkProductImageUseCase, unlinkReportImageUseCase);
     }
 
     @Test
@@ -46,6 +46,6 @@ class LegacyImageReferenceCleanupAdapterTest {
         adapter.unlink(ImageOwnerType.PRODUCT, 10L, 20L);
 
         verify(unlinkProductImageUseCase).unlink(10L, 20L);
-        verifyNoInteractions(noticeImageRepository, reportImageRepository);
+        verifyNoInteractions(noticeImageRepository, unlinkReportImageUseCase);
     }
 }

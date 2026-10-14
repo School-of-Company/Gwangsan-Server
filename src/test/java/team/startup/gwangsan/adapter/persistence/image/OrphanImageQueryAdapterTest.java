@@ -32,9 +32,9 @@ import team.startup.gwangsan.adapter.persistence.post.ProductImage;
 import team.startup.gwangsan.domain.post.model.Mode;
 import team.startup.gwangsan.domain.post.model.ProductStatus;
 import team.startup.gwangsan.domain.post.model.Type;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.entity.ReportImage;
-import team.startup.gwangsan.domain.report.entity.constant.ReportType;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaEntity;
+import team.startup.gwangsan.domain.report.model.ReportType;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
@@ -124,7 +124,7 @@ class OrphanImageQueryAdapterTest {
         Image secondOrphan = image("second-orphan");
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
         em.persist(NoticeImage.builder().notice(relationships.notice()).image(noticeOnly).build());
-        em.persist(ReportImage.builder().report(relationships.report()).image(reportOnly).build());
+        em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reportOnly).build());
         em.flush();
 
         LocalDateTime protectedTime = LocalDateTime.of(2024, 1, 1, 9, 0);
@@ -158,12 +158,12 @@ class OrphanImageQueryAdapterTest {
 
         em.persist(ProductImage.builder().product(relationships.product()).image(productOnly).build());
         em.persist(NoticeImage.builder().notice(relationships.notice()).image(noticeOnly).build());
-        em.persist(ReportImage.builder().report(relationships.report()).image(reportOnly).build());
+        em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(reportOnly).build());
         em.persist(ChatMessageImageJpaEntity.builder().chatMessage(relationships.chatMessage()).image(chatOnly).build());
         em.persist(TradeCancelImageJpaEntity.builder().tradeCancel(relationships.tradeCancel()).image(tradeCancelOnly).build());
         em.persist(ProductImage.builder().product(relationships.product()).image(multipleReferences).build());
         em.persist(ProductImage.builder().product(relationships.product()).image(multipleReferences).build());
-        em.persist(ReportImage.builder().report(relationships.report()).image(multipleReferences).build());
+        em.persist(ReportImageJpaEntity.builder().report(relationships.report()).image(multipleReferences).build());
         em.flush();
 
         LocalDateTime protectedTime = LocalDateTime.of(2024, 1, 1, 9, 0);
@@ -203,7 +203,7 @@ class OrphanImageQueryAdapterTest {
         Head head = em.persist(new Head("head-" + suffix));
         Place place = em.persist(Place.builder().name("place-" + suffix).head(head).build());
         Notice notice = em.persist(Notice.builder().title("notice").content("content").place(place).member(seller).build());
-        Report report = em.persist(Report.builder()
+        ReportJpaEntity report = em.persist(ReportJpaEntity.builder()
                 .reportType(ReportType.ETC)
                 .content("content")
                 .reported(seller)
@@ -261,6 +261,6 @@ class OrphanImageQueryAdapterTest {
                 .executeUpdate();
     }
 
-    private record Relationships(Product product, Notice notice, Report report, ChatMessageJpaEntity chatMessage, TradeCancelJpaEntity tradeCancel) {
+    private record Relationships(Product product, Notice notice, ReportJpaEntity report, ChatMessageJpaEntity chatMessage, TradeCancelJpaEntity tradeCancel) {
     }
 }

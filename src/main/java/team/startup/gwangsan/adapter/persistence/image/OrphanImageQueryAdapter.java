@@ -12,7 +12,7 @@ import static team.startup.gwangsan.adapter.persistence.chat.QChatMessageImageJp
 import static team.startup.gwangsan.domain.image.entity.QImage.image;
 import static team.startup.gwangsan.domain.notice.entity.QNoticeImage.noticeImage;
 import static team.startup.gwangsan.adapter.persistence.post.QProductImage.productImage;
-import static team.startup.gwangsan.domain.report.entity.QReportImage.reportImage;
+import static team.startup.gwangsan.adapter.persistence.report.QReportImageJpaEntity.reportImageJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.QTradeCancelImageJpaEntity;
 
 /**
@@ -33,13 +33,13 @@ public class OrphanImageQueryAdapter implements LoadOrphanImageCandidatesPort {
                 .selectFrom(image)
                 .leftJoin(productImage).on(productImage.image.eq(image))
                 .leftJoin(noticeImage).on(noticeImage.image.eq(image))
-                .leftJoin(reportImage).on(reportImage.image.eq(image))
+                .leftJoin(reportImageJpaEntity).on(reportImageJpaEntity.image.eq(image))
                 .leftJoin(chatMessageImageJpaEntity).on(chatMessageImageJpaEntity.image.eq(image))
                 .leftJoin(tradeCancelImage).on(tradeCancelImage.image.eq(image))
                 .where(
                         productImage.id.isNull(),
                         noticeImage.id.isNull(),
-                        reportImage.id.isNull(),
+                        reportImageJpaEntity.id.isNull(),
                         chatMessageImageJpaEntity.id.isNull(),
                         tradeCancelImage.id.isNull()
                 )

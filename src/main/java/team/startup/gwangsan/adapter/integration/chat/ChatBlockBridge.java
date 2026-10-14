@@ -3,17 +3,17 @@ package team.startup.gwangsan.adapter.integration.chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.chat.port.out.ChatBlockPort;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.application.block.port.in.BlockRelationQuery;
 
-/** chat → block legacy bridge (BlockedMemberException 403 유지). PR09 의 block 공개 query 로 교체. */
+/** chat → block 공개 query(PR09) 연결. 차단이면 BlockedMemberException(403). */
 @Component
 @RequiredArgsConstructor
 public class ChatBlockBridge implements ChatBlockPort {
 
-    private final BlockValidator blockValidator;
+    private final BlockRelationQuery blockRelationQuery;
 
     @Override
     public void validateNotBlocked(Long memberId, Long otherMemberId) {
-        blockValidator.validate(memberId, otherMemberId);
+        blockRelationQuery.validateNotBlocked(memberId, otherMemberId);
     }
 }

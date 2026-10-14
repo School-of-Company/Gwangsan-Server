@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import team.startup.gwangsan.application.alert.data.AlertImage;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCancelSource;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.TradeCompleteSource;
+import team.startup.gwangsan.application.alert.port.out.LoadAlertSourcePort.ReportSource;
 import team.startup.gwangsan.domain.image.entity.Image;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -23,12 +24,13 @@ import team.startup.gwangsan.application.post.data.ProductImageLinkView;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
 import team.startup.gwangsan.application.post.port.in.ProductSnapshotQuery;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.application.report.data.ReportAlertSource;
+import team.startup.gwangsan.application.report.data.ReportImageLink;
+import team.startup.gwangsan.application.report.port.in.ReportQuery;
+import team.startup.gwangsan.application.suspend.port.in.SuspensionQuery;
 import team.startup.gwangsan.domain.review.exception.NotFoundReviewException;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
 import team.startup.gwangsan.domain.suspend.exception.NotFoundSuspendException;
-import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
@@ -57,8 +59,8 @@ class LegacyAlertBridgeTest {
         private final TradeCompleteJpaRepository trades = mock(TradeCompleteJpaRepository.class);
         private final ProductSnapshotQuery products = mock(ProductSnapshotQuery.class);
         private final ReviewJpaRepository reviews = mock(ReviewJpaRepository.class);
-        private final ReportRepository reports = mock(ReportRepository.class);
-        private final SuspendRepository suspends = mock(SuspendRepository.class);
+        private final ReportQuery reports = mock(ReportQuery.class);
+        private final SuspensionQuery suspends = mock(SuspensionQuery.class);
         private final TradeCancelJpaRepository cancels = mock(TradeCancelJpaRepository.class);
         private final NoticeRepository notices = mock(NoticeRepository.class);
         private final LegacyAlertSourceAdapter adapter = new LegacyAlertSourceAdapter(
@@ -71,8 +73,8 @@ class LegacyAlertBridgeTest {
             when(trades.findById(any())).thenReturn(Optional.empty());
             when(products.getActive(any())).thenThrow(new NotFoundProductException());
             when(reviews.findById(any())).thenReturn(Optional.empty());
-            when(reports.findById(any())).thenReturn(Optional.empty());
-            when(suspends.findById(any())).thenReturn(Optional.empty());
+            when(reports.getAlertSource(any())).thenThrow(new NotFoundReportException());
+            when(suspends.getSuspendedDays(any())).thenThrow(new NotFoundSuspendException());
             when(cancels.findById(any())).thenReturn(Optional.empty());
             when(cancels.findByIdWithTradeCompleteAndMember(any())).thenReturn(Optional.empty());
             when(notices.findById(any())).thenReturn(Optional.empty());
@@ -111,6 +113,16 @@ class LegacyAlertBridgeTest {
             assertThat(adapter.tradeCancelWithParties(9L)).isEqualTo(new TradeCancelSource(2L, 2L, 3L));
             assertThat(adapter.recommenderReward()).isEqualTo(5000);
         }
+
+        @Test
+        @DisplayName("신고·정지 원천은 report/suspend 공개 query 값을 그대로 옮긴다")
+        void it_maps_report_and_suspend_sources() {
+            when(reports.getAlertSource(4L)).thenReturn(new ReportAlertSource(2L, "피신고자"));
+            when(suspends.getSuspendedDays(7L)).thenReturn(3);
+
+            assertThat(adapter.report(4L)).isEqualTo(new ReportSource(2L, "피신고자"));
+            assertThat(adapter.suspendedDays(7L)).isEqualTo(3);
+        }
     }
 
     @Nested
@@ -120,8 +132,17 @@ class LegacyAlertBridgeTest {
         private final NoticeImageRepository noticeImages = mock(NoticeImageRepository.class);
         private final TradeCancelQuery tradeCancelQuery = mock(TradeCancelQuery.class);
         private final ProductImageQuery productImages = mock(ProductImageQuery.class);
+        private final ReportQuery reportQuery = mock(ReportQuery.class);
         private final LegacyAlertImageAdapter adapter = new LegacyAlertImageAdapter(
-                noticeImages, productImages, mock(ReportImageRepository.class), tradeCancelQuery);
+                noticeImages, productImages, reportQuery, tradeCancelQuery);
+
+        @Test
+        @DisplayName("신고 이미지는 report 공개 query 의 연결 행 ID 를 imageId 로 쓴다")
+        void it_maps_report_image_links() {
+            when(reportQuery.findImageLinks(List.of(4L))).thenReturn(java.util.Map.of(4L, List.of(new ReportImageLink(31L, "https://r"))));
+
+            assertThat(adapter.reportImages(List.of(4L))).isEqualTo(java.util.Map.of(4L, List.of(new AlertImage(31L, "https://r"))));
+        }
 
         @Test
         @DisplayName("기존 응답처럼 imageId 에 연결 행 ID 를 넣는다")

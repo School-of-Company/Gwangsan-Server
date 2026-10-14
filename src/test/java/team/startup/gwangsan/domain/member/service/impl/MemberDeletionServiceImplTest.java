@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.domain.admin.repository.AdminAlertRepository;
 import team.startup.gwangsan.adapter.persistence.alert.AlertReceiptJpaRepository;
 import team.startup.gwangsan.adapter.persistence.alert.AlertJpaRepository;
-import team.startup.gwangsan.domain.block.repository.MemberBlockRepository;
+import team.startup.gwangsan.adapter.persistence.block.MemberBlockJpaRepository;
 import team.startup.gwangsan.adapter.persistence.chat.ChatMessageJpaRepository;
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomJpaRepository;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
@@ -21,9 +21,9 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaRepository;
 import team.startup.gwangsan.domain.notice.repository.NoticeRepository;
 import team.startup.gwangsan.adapter.persistence.post.ProductRepository;
 import team.startup.gwangsan.adapter.persistence.relatedkeyword.MemberRelatedKeywordJpaRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.review.ReviewJpaRepository;
-import team.startup.gwangsan.domain.suspend.repository.SuspendRepository;
+import team.startup.gwangsan.adapter.persistence.suspend.SuspendJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCompleteJpaRepository;
 
@@ -45,13 +45,13 @@ class MemberDeletionServiceImplTest {
     @Mock private ChatRoomJpaRepository chatRoomRepository;
     @Mock private ChatMessageJpaRepository chatMessageRepository;
     @Mock private ReviewJpaRepository reviewRepository;
-    @Mock private ReportRepository reportRepository;
+    @Mock private ReportJpaRepository reportRepository;
     @Mock private AdminAlertRepository adminAlertRepository;
     @Mock private AlertJpaRepository alertRepository;
     @Mock private NoticeRepository noticeRepository;
     @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
-    @Mock private SuspendRepository suspendRepository;
-    @Mock private MemberBlockRepository memberBlockRepository;
+    @Mock private SuspendJpaRepository suspendRepository;
+    @Mock private MemberBlockJpaRepository memberBlockRepository;
     @Mock private AlertReceiptJpaRepository alertReceiptRepository;
     @Mock private MemberDetailJpaRepository memberDetailRepository;
 

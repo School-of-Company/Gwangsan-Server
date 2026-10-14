@@ -27,13 +27,13 @@ import team.startup.gwangsan.adapter.web.post.dto.GetProductMemberResponse;
 import team.startup.gwangsan.adapter.web.post.dto.GetProductResponse;
 import team.startup.gwangsan.adapter.web.post.dto.ProductImageResponse;
 import team.startup.gwangsan.adapter.persistence.post.ProductImageRepository;
-import team.startup.gwangsan.domain.report.entity.Report;
-import team.startup.gwangsan.domain.report.entity.ReportImage;
-import team.startup.gwangsan.domain.report.entity.constant.ReportTargetType;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaEntity;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaEntity;
+import team.startup.gwangsan.domain.report.model.ReportTargetType;
 import team.startup.gwangsan.domain.report.exception.NotFoundReportException;
-import team.startup.gwangsan.domain.report.presentation.dto.response.GetReportResponse;
-import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
-import team.startup.gwangsan.domain.report.repository.ReportRepository;
+import team.startup.gwangsan.adapter.web.report.dto.GetReportResponse;
+import team.startup.gwangsan.adapter.persistence.report.ReportImageJpaRepository;
+import team.startup.gwangsan.adapter.persistence.report.ReportJpaRepository;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelJpaEntity;
 import team.startup.gwangsan.adapter.persistence.trade.TradeCancelImageJpaEntity;
 import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException;
@@ -52,10 +52,10 @@ import java.util.stream.Collectors;
 public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlertTypeAndPlaceService {
 
     private final MemberDetailJpaRepository memberDetailRepository;
-    private final ReportRepository reportRepository;
+    private final ReportJpaRepository reportRepository;
     private final AdminAlertRepository adminAlertRepository;
     private final MemberJpaRepository memberRepository;
-    private final ReportImageRepository reportImageRepository;
+    private final ReportImageJpaRepository reportImageRepository;
     private final PlaceRepository placeRepository;
     private final MemberUtil memberUtil;
     private final ProductImageRepository productImageRepository;
@@ -80,8 +80,8 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
         List<AdminAlert> tradeCancelAlerts = filterAlertsByType(alerts, AlertType.TRADE_CANCEL);
 
         List<Long> reportIds = reportAlerts.stream().map(AdminAlert::getSourceId).toList();
-        List<Report> reports = reportIds.isEmpty() ? List.of() : reportRepository.findAllByIdIn(reportIds);
-        List<ReportImage> reportImages = reports.isEmpty() ? List.of() : reportImageRepository.findAllByReportIdIn(reportIds);
+        List<ReportJpaEntity> reports = reportIds.isEmpty() ? List.of() : reportRepository.findAllByIdIn(reportIds);
+        List<ReportImageJpaEntity> reportImages = reports.isEmpty() ? List.of() : reportImageRepository.findAllByReportIdIn(reportIds);
 
         List<GetReportAlertResponse> reportAlertResponses =
                 createReportAlertResponses(reportAlerts, reports, reportImages, memberIdToPlaceName);
@@ -157,12 +157,12 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
     private List<GetReportAlertResponse> createReportAlertResponses(
             List<AdminAlert> alerts,
-            List<Report> reports,
-            List<ReportImage> images,
+            List<ReportJpaEntity> reports,
+            List<ReportImageJpaEntity> images,
             Map<Long, String> memberIdToPlaceName
     ) {
-        Map<Long, Report> reportMap = reports.stream()
-                .collect(Collectors.toMap(Report::getId, r -> r));
+        Map<Long, ReportJpaEntity> reportMap = reports.stream()
+                .collect(Collectors.toMap(ReportJpaEntity::getId, r -> r));
 
         Map<Long, List<GetImageResponse>> imageMap = images.stream()
                 .collect(Collectors.groupingBy(
@@ -174,7 +174,7 @@ public class FindAlertByAlertTypeAndPlaceServiceImpl implements FindAlertByAlert
 
         return alerts.stream()
                 .map(alert -> {
-                    Report report = Optional.ofNullable(reportMap.get(alert.getSourceId()))
+                    ReportJpaEntity report = Optional.ofNullable(reportMap.get(alert.getSourceId()))
                             .orElseThrow(NotFoundReportException::new);
 
                     List<GetImageResponse> imageResponses = imageMap.getOrDefault(report.getId(), List.of());

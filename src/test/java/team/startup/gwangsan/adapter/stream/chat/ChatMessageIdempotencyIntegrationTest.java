@@ -30,7 +30,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import team.startup.gwangsan.domain.block.entity.MemberBlock;
+import team.startup.gwangsan.adapter.persistence.block.MemberBlockJpaEntity;
 import team.startup.gwangsan.adapter.event.chat.ChatMessageMutationEventPublisher;
 import team.startup.gwangsan.adapter.integration.chat.ChatBlockBridge;
 import team.startup.gwangsan.adapter.integration.chat.ChatMemberBridge;
@@ -59,7 +59,8 @@ import team.startup.gwangsan.domain.notification.model.OsType;
 import team.startup.gwangsan.adapter.persistence.notification.DeviceTokenRepository;
 import team.startup.gwangsan.adapter.event.notification.PushRequestedEvent;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.adapter.persistence.block.MemberBlockPersistenceAdapter;
+import team.startup.gwangsan.application.block.service.BlockQueryService;
 import team.startup.gwangsan.global.exception.GlobalException;
 
 import java.time.Instant;
@@ -85,7 +86,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ImportAutoConfiguration(RedisAutoConfiguration.class)
 @Import({QueryDslConfig.class, SaveChatMessageService.class, ChatMessageMutationService.class,
         ChatRoomPersistenceAdapter.class, ChatMessagePersistenceAdapter.class, ChatMemberBridge.class, MemberAccountService.class, MemberPersistenceAdapter.class, ChatBlockBridge.class,
-        ChatPushBridge.class, ChatMessageMutationEventPublisher.class, BlockValidator.class,
+        ChatPushBridge.class, ChatMessageMutationEventPublisher.class, BlockQueryService.class, MemberBlockPersistenceAdapter.class,
         ChatMessageIdempotencyIntegrationTest.EventConfiguration.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 class ChatMessageIdempotencyIntegrationTest {
@@ -433,7 +434,7 @@ class ChatMessageIdempotencyIntegrationTest {
         publish(2300L, "TEXT");
         worker.consumeMessages();
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> entityManager.persist(
-                MemberBlock.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.sellerId()))
+                MemberBlockJpaEntity.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.sellerId()))
                         .blocked(entityManager.getReference(MemberJpaEntity.class, fixture.buyerId())).build()));
         deviceTokens.deleteAll();
         publish(2300L, "TEXT");
@@ -631,7 +632,7 @@ class ChatMessageIdempotencyIntegrationTest {
     @Test
     void blocked_first_processing_leaves_no_partial_message() {
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> entityManager.persist(
-                MemberBlock.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.buyerId()))
+                MemberBlockJpaEntity.builder().blocker(entityManager.getReference(MemberJpaEntity.class, fixture.buyerId()))
                         .blocked(entityManager.getReference(MemberJpaEntity.class, fixture.sellerId())).build()));
         publish(3200L, "IMAGE");
         worker.consumeMessages();

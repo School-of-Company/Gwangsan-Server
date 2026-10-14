@@ -6,7 +6,7 @@ import team.startup.gwangsan.application.alert.data.AlertImage;
 import team.startup.gwangsan.application.alert.port.out.LoadAlertImagesPort;
 import team.startup.gwangsan.domain.notice.repository.NoticeImageRepository;
 import team.startup.gwangsan.application.post.port.in.ProductImageQuery;
-import team.startup.gwangsan.domain.report.repository.ReportImageRepository;
+import team.startup.gwangsan.application.report.port.in.ReportQuery;
 import team.startup.gwangsan.application.trade.port.in.TradeCancelQuery;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * 임시 bridge: 알림 이미지 조회를 기존 Repository 쿼리 그대로 수행한다.
- * 상품 이미지는 post 공개 ProductImageQuery 로 교체됨(PR06). 거래 철회는 trade 공개 TradeCancelQuery 로 교체됨(PR07). 공지(PR10)·신고(PR09)의 공개 조회로 교체하고 PR12 에서 최종 확인한다.
+ * 상품 이미지는 post 공개 ProductImageQuery 로 교체됨(PR06). 거래 철회는 trade 공개 TradeCancelQuery 로 교체됨(PR07). 신고는 report 공개 ReportQuery 로 교체됨(PR09). 공지(PR10)의 공개 조회로 교체하고 PR12 에서 최종 확인한다.
  */
 @Component
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class LegacyAlertImageAdapter implements LoadAlertImagesPort {
 
     private final NoticeImageRepository noticeImageRepository;
     private final ProductImageQuery productImageQuery;
-    private final ReportImageRepository reportImageRepository;
+    private final ReportQuery reportQuery;
     private final TradeCancelQuery tradeCancelQuery;
 
     @Override
@@ -45,11 +45,10 @@ public class LegacyAlertImageAdapter implements LoadAlertImagesPort {
 
     @Override
     public Map<Long, List<AlertImage>> reportImages(List<Long> reportIds) {
-        return reportImageRepository.findAllByReportIdIn(reportIds).stream()
-                .collect(Collectors.groupingBy(
-                        ri -> ri.getReport().getId(),
-                        Collectors.mapping(ri -> new AlertImage(ri.getId(), ri.getImage().getImageUrl()), Collectors.toList())
-                ));
+        // 알림 응답은 기존부터 이미지 ID 가 아니라 신고-이미지 연결 행 ID 를 쓴다.
+        return reportQuery.findImageLinks(reportIds).entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream()
+                        .map(link -> new AlertImage(link.linkId(), link.imageUrl())).toList()));
     }
 
     @Override

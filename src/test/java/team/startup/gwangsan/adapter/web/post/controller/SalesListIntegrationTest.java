@@ -45,7 +45,7 @@ import team.startup.gwangsan.adapter.security.auth.ActorContextArgumentResolver;
 import team.startup.gwangsan.application.post.port.in.*;
 import team.startup.gwangsan.application.post.service.ProductListQueryService;
 import team.startup.gwangsan.infrastructure.config.WebMvcConfig;
-import team.startup.gwangsan.global.util.BlockValidator;
+import team.startup.gwangsan.application.block.port.in.BlockRelationQuery;
 import team.startup.gwangsan.adapter.security.auth.MemberDetailsService;
 import team.startup.gwangsan.global.exception.GlobalExceptionHandler;
 import team.startup.gwangsan.global.querydsl.QueryDslConfig;
@@ -105,7 +105,7 @@ class SalesListIntegrationTest {
 
     // 읽기 경로 외 서비스 및 외부 Redis만 대체한다. 조회/인증/SQL/직렬화는 실제 구현이다.
     @MockitoBean RedisUtil redisUtil;
-    @MockitoBean BlockValidator blockValidator;
+    @MockitoBean BlockRelationQuery blockRelationQuery;
     @MockitoBean CreateProductUseCase createProductUseCase;
     @MockitoBean ValidateProductContentUseCase validateProductContentUseCase;
     @MockitoBean ProductDetailQuery productDetailQuery;
