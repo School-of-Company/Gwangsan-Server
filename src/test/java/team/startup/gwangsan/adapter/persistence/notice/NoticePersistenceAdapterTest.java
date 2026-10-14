@@ -26,6 +26,8 @@ import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlacePersistenceAdapter;
 import team.startup.gwangsan.application.image.service.ImageQueryService;
+import team.startup.gwangsan.application.member.service.MemberSummaryService;
+import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.application.notice.data.NoticeImageLink;
 import team.startup.gwangsan.application.place.service.PlaceQueryService;
 import team.startup.gwangsan.adapter.persistence.image.ImageJpaEntity;
@@ -47,7 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryDslConfig.class, NoticePersistenceAdapter.class,
         NoticePlaceAdapter.class, NoticeMemberAdapter.class, NoticeImageAdapter.class,
-        PlaceQueryService.class, PlacePersistenceAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class})
+        PlaceQueryService.class, PlacePersistenceAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class,
+        MemberSummaryService.class, MemberPersistenceAdapter.class})
 @DisplayName("공지 persistence/bridge adapter MariaDB 통합 테스트")
 class NoticePersistenceAdapterTest {
 
@@ -62,6 +65,7 @@ class NoticePersistenceAdapterTest {
         registry.add("spring.datasource.driver-class-name", mariadb::getDriverClassName);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.flyway.enabled", () -> false);
+        registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> true);
     }
 
     @Autowired private TestEntityManager em;
@@ -71,6 +75,7 @@ class NoticePersistenceAdapterTest {
     @Autowired private NoticeImageAdapter imageAdapter;
     @Autowired private NoticeJpaRepository noticeJpaRepository;
     @Autowired private NoticeImageJpaRepository noticeImageJpaRepository;
+    @Autowired private jakarta.persistence.EntityManagerFactory entityManagerFactory;
 
     private HeadJpaEntity head;
     private PlaceJpaEntity place;
@@ -269,7 +274,7 @@ class NoticePersistenceAdapterTest {
     class Describe_bridges {
 
         @Test
-        @DisplayName("지점·본부·소속 회원·존재 이미지를 legacy 저장소에서 읽는다")
+        @DisplayName("지점·본부·소속 회원·존재 이미지를 각 업무 공개 조회로 읽는다")
         void it_reads_from_legacy_repositories() {
             ImageJpaEntity image = image("exists");
             em.flush();
@@ -282,6 +287,27 @@ class NoticePersistenceAdapterTest {
             assertThat(memberAdapter.findPlaceIdOf(-1L)).isEmpty();
             assertThat(memberAdapter.findMemberIdsInPlace(place.getId())).containsExactly(author.getId());
             assertThat(imageAdapter.findExistingImageIds(List.of(image.getId(), image.getId(), -1L))).containsExactly(image.getId());
+        }
+
+        @Test
+        @DisplayName("회원 bridge 는 상세 없는 회원을 empty 로 보고, 각 조회를 쿼리 1회로 끝낸다")
+        void it_reads_member_place_with_single_query() {
+            MemberJpaEntity noDetail = member("nodetail", "01000000005");
+            em.flush();
+            em.clear();
+            org.hibernate.stat.Statistics stats = entityManagerFactory.unwrap(org.hibernate.SessionFactory.class).getStatistics();
+
+            stats.clear();
+            assertThat(memberAdapter.findPlaceIdOf(author.getId())).contains(place.getId());
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+
+            stats.clear();
+            assertThat(memberAdapter.findPlaceIdOf(noDetail.getId())).isEmpty();
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+
+            stats.clear();
+            assertThat(memberAdapter.findMemberIdsInPlace(place.getId())).containsExactly(author.getId());
+            assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
         }
 
         @Test

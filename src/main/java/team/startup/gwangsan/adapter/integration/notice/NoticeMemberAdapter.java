@@ -2,34 +2,30 @@ package team.startup.gwangsan.adapter.integration.notice;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
-import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaRepository;
+import team.startup.gwangsan.application.member.data.MemberSummary;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
 import team.startup.gwangsan.application.notice.port.out.NoticeMemberPort;
-import team.startup.gwangsan.adapter.persistence.place.PlaceJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-// bridge: member 공개 Port 에 "회원 소속 지점·지점 회원 id" 조회가 없어 member persistence 를 직접 쓴다.
-// member 공개 query 가 생기면 교체한다(최종 확인 PR12).
+// member 공개 MemberSummaryQuery(PR02)로 연결한다. 각 메서드 쿼리 1회.
 @Component
 @RequiredArgsConstructor
 public class NoticeMemberAdapter implements NoticeMemberPort {
 
-    private final MemberDetailJpaRepository memberDetailRepository;
-    private final PlaceJpaRepository placeRepository;
+    private final MemberSummaryQuery memberSummaryQuery;
 
-    // MemberDetail 의 id 는 member_id(@MapsId)다.
+    // 회원 상세가 없으면 empty (기존 member_detail 조회와 같은 집합).
     @Override
     public Optional<Integer> findPlaceIdOf(Long memberId) {
-        return memberDetailRepository.findById(memberId)
-                .map(detail -> detail.getPlace().getId());
+        return memberSummaryQuery.findById(memberId)
+                .filter(MemberSummary::hasDetail)
+                .map(MemberSummary::placeId);
     }
 
     @Override
     public List<Long> findMemberIdsInPlace(Integer placeId) {
-        return memberDetailRepository.findAllByPlace(placeRepository.getReferenceById(placeId)).stream()
-                .map(MemberDetailJpaEntity::getId)
-                .toList();
+        return memberSummaryQuery.findMemberIdsInPlace(placeId);
     }
 }
