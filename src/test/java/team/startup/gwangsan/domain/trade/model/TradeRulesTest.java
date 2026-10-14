@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import team.startup.gwangsan.domain.trade.exception.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -148,6 +149,20 @@ class TradeRulesTest {
 
             assertThatThrownBy(() -> cancel.validateAgreementBy(OWNER)).isInstanceOf(AlreadyTradeCancelRequestException.class);
             cancel.validateAgreementBy(OTHER);
+        }
+
+        @Test
+        @DisplayName("관리자 기각은 PENDING 만 REJECTED 로 바꾸고 나머지는 CannotPendingTradeCancelException 이다")
+        void it_rejects_only_pending() {
+            TradeCancel pending = TradeCancel.request(10L, OWNER, "사유");
+            pending.reject();
+            assertThat(pending.status()).isEqualTo(TradeCancelStatus.REJECTED);
+
+            for (TradeCancelStatus done : List.of(TradeCancelStatus.APPROVED, TradeCancelStatus.REJECTED, TradeCancelStatus.WITHDRAWN)) {
+                TradeCancel cancel = new TradeCancel(1L, 10L, OWNER, "사유", done);
+                assertThatThrownBy(cancel::reject).isInstanceOf(CannotPendingTradeCancelException.class);
+                assertThat(cancel.status()).isEqualTo(done);
+            }
         }
 
         @Test

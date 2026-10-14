@@ -41,6 +41,14 @@ public final class TradeCancel {
         this.status = TradeCancelStatus.APPROVED;
     }
 
+    /** 관리자 기각. PENDING 이 아니면 거절한다(이미 승인·철회·기각된 요청을 덮어쓰지 않는다). */
+    public void reject() {
+        if (status != TradeCancelStatus.PENDING) {
+            throw new CannotPendingTradeCancelException();
+        }
+        this.status = TradeCancelStatus.REJECTED;
+    }
+
     public void withdraw(long memberId) {
         if (requesterId != memberId) {
             throw new NotTradeCancelRequesterException();

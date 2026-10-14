@@ -39,6 +39,16 @@ public class ReviewPersistenceAdapter implements ReviewPort {
     }
 
     @Override
+    public void reassignReviewer(Long memberId, Long dummyMemberId) {
+        reviewJpaRepository.reassignReviewer(member(memberId), member(dummyMemberId));
+    }
+
+    @Override
+    public void reassignReviewed(Long memberId, Long dummyMemberId) {
+        reviewJpaRepository.reassignReviewed(member(memberId), member(dummyMemberId));
+    }
+
+    @Override
     public List<ReviewRow> findWritten(long reviewerId) {
         return reviewJpaRepository.findMyReviews(reviewerId).stream()
                 .map(r -> new ReviewRow(r.reviewId(), r.productId(), r.content(), r.light(), r.reviewedNickname()))

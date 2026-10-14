@@ -1,5 +1,7 @@
 package team.startup.gwangsan.application.trade.port.out;
 
+import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
+import team.startup.gwangsan.application.trade.data.TradeCancelView;
 import team.startup.gwangsan.domain.trade.model.TradeCancel;
 
 import java.util.Collection;
@@ -14,6 +16,15 @@ public interface TradeCancelPort {
     Optional<Long> findProductId(long tradeCancelId);
 
     Optional<TradeCancel> findById(long tradeCancelId);
+
+    /** 연관 fetch join 없이 철회 요청 하나를 읽는다(기각 경로, 호출자가 잠금 후 호출). */
+    Optional<TradeCancel> findBasicById(long tradeCancelId);
+
+    List<TradeCancelView> findViews(Collection<Long> tradeCancelIds);
+
+    Map<Long, List<TradeCancelImageView>> findImageViews(Collection<Long> tradeCancelIds);
+
+    Optional<Long> findRequesterId(long tradeCancelId);
 
     /** 철회 요청 ID → 상품 ID (1 쿼리). */
     Map<Long, Long> findProductIds(Collection<Long> tradeCancelIds);

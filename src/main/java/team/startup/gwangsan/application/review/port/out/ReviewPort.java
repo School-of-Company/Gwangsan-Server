@@ -13,6 +13,11 @@ public interface ReviewPort {
 
     long save(Review review);
 
+    /** bulk 재지정, 실행 뒤 영속성 컨텍스트를 비운다. */
+    void reassignReviewer(Long memberId, Long dummyMemberId);
+
+    void reassignReviewed(Long memberId, Long dummyMemberId);
+
     /** id 내림차순. */
     List<ReviewRow> findWritten(long reviewerId);
 

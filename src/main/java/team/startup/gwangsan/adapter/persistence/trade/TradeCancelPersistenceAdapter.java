@@ -11,7 +11,11 @@ import team.startup.gwangsan.domain.trade.exception.NotFoundTradeCancelException
 import team.startup.gwangsan.domain.trade.model.TradeCancel;
 import team.startup.gwangsan.domain.trade.model.TradeCancelStatus;
 
+import team.startup.gwangsan.application.trade.data.TradeCancelImageView;
+import team.startup.gwangsan.application.trade.data.TradeCancelView;
+
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,6 +46,34 @@ public class TradeCancelPersistenceAdapter implements TradeCancelPort {
     public Optional<TradeCancel> findById(long tradeCancelId) {
         return tradeCancelJpaRepository.findByIdWithTradeCompleteAndBuyerAndSellerAndProduct(tradeCancelId)
                 .map(TradeCancelPersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public Optional<TradeCancel> findBasicById(long tradeCancelId) {
+        return tradeCancelJpaRepository.findById(tradeCancelId).map(TradeCancelPersistenceAdapter::toDomain);
+    }
+
+    @Override
+    public List<TradeCancelView> findViews(Collection<Long> tradeCancelIds) {
+        return tradeCancelJpaRepository.findAllByIdIn(List.copyOf(tradeCancelIds)).stream()
+                .map(tc -> new TradeCancelView(tc.getId(), tc.getTradeComplete().getProduct().getId(),
+                        tc.getMember().getId(), tc.getReason(), tc.getStatus()))
+                .toList();
+    }
+
+    @Override
+    public Map<Long, List<TradeCancelImageView>> findImageViews(Collection<Long> tradeCancelIds) {
+        return tradeCancelImageJpaRepository.findByTradeCancelIn(List.copyOf(tradeCancelIds)).stream()
+                .collect(Collectors.groupingBy(
+                        tci -> tci.getTradeCancel().getId(),
+                        LinkedHashMap::new,
+                        Collectors.mapping(tci -> new TradeCancelImageView(tci.getImage().getId(), tci.getImage().getImageUrl()),
+                                Collectors.toList())));
+    }
+
+    @Override
+    public Optional<Long> findRequesterId(long tradeCancelId) {
+        return tradeCancelJpaRepository.findByIdWithMember(tradeCancelId).map(tc -> tc.getMember().getId());
     }
 
     @Override
