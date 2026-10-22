@@ -25,10 +25,10 @@ class AlertTest {
     }
 
     @Test
-    @DisplayName("업무 트랜잭션 원자 저장 대상은 거래 완료 요청과 철회 완료 두 유형뿐이다")
+    @DisplayName("거래 완료 요청·철회 완료·문의 답변은 업무 트랜잭션에 저장한다")
     void it_limits_atomic_record_scope() {
         assertThat(java.util.Arrays.stream(AlertType.values()).filter(AlertType::isRecordedWithBusinessTransaction))
-                .containsExactlyInAnyOrder(AlertType.OTHER_MEMBER_TRADE_COMPLETE, AlertType.TRADE_CANCEL);
+                .containsExactlyInAnyOrder(AlertType.OTHER_MEMBER_TRADE_COMPLETE, AlertType.TRADE_CANCEL, AlertType.FEEDBACK_ANSWER);
     }
 
     @Test

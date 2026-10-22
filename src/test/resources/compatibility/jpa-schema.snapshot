@@ -12,7 +12,7 @@ table tbl_admin_alert
   unique (alert_type,source_id)
 table tbl_alert
   column alert_id bigint not-null identity
-  column alert_type enum ('NOTICE','OTHER_MEMBER_TRADE_COMPLETE','RECOMMENDER','REPORT','REPORT_REJECT','REVIEW','TRADE_CANCEL','TRADE_CANCEL_REJECT','TRADE_COMPLETE','TRADE_COMPLETE_REJECT') not-null
+  column alert_type enum ('FEEDBACK_ANSWER','NOTICE','OTHER_MEMBER_TRADE_COMPLETE','RECOMMENDER','REPORT','REPORT_REJECT','REVIEW','TRADE_CANCEL','TRADE_CANCEL_REJECT','TRADE_COMPLETE','TRADE_COMPLETE_REJECT') not-null
   column content varchar(255) not-null
   column created_at datetime(6) not-null
   column send_member_id bigint null
@@ -73,6 +73,34 @@ table tbl_dong
   column dong_id integer not-null identity
   column name varchar(255) not-null unique
   pk (dong_id)
+table tbl_feedback
+  column answer TEXT null
+  column answered_at datetime(6) null
+  column answered_by bigint null
+  column app_version varchar(255) null
+  column content varchar(1000) not-null
+  column created_at datetime(6) not-null
+  column device_model varchar(255) null
+  column feedback_id bigint not-null identity
+  column member_id bigint not-null
+  column os_type enum ('ANDROID','IOS') not-null
+  column os_version varchar(255) null
+  column status enum ('DONE','IN_PROGRESS','RECEIVED') not-null
+  column type enum ('ACCOUNT','BUG','ETC','SUGGESTION','TRADE') not-null
+  column updated_at datetime(6) not-null
+  pk (feedback_id)
+  fk (answered_by) -> tbl_member
+  fk (member_id) -> tbl_member
+  index idx_feedback_member_cursor (member_id,feedback_id)
+  index idx_feedback_status_type_cursor (status,type,feedback_id)
+table tbl_feedback_image
+  column feedback_id bigint not-null
+  column feedback_image_id bigint not-null identity
+  column image_id bigint not-null
+  pk (feedback_image_id)
+  fk (feedback_id) -> tbl_feedback
+  fk (image_id) -> tbl_image
+  unique (feedback_id,image_id)
 table tbl_head_place
   column head_id integer not-null identity
   column name varchar(255) not-null unique
@@ -272,6 +300,8 @@ mapped tbl_chat_message
 mapped tbl_chat_message_image
 mapped tbl_chat_room
 mapped tbl_dong
+mapped tbl_feedback
+mapped tbl_feedback_image
 mapped tbl_head_place
 mapped tbl_image
 mapped tbl_member
