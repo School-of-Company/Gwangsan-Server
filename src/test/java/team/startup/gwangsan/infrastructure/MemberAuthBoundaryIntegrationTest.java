@@ -22,6 +22,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import team.startup.gwangsan.adapter.persistence.member.MemberDetailJpaEntity;
 import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.application.sms.port.out.SmsSenderPort;
+import team.startup.gwangsan.application.member.port.in.MemberSummaryQuery;
+import team.startup.gwangsan.application.member.port.out.MemberProfileQueryPort;
 import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
@@ -75,6 +77,8 @@ class MemberAuthBoundaryIntegrationTest {
     @Autowired TransactionTemplate transactionTemplate;
     @Autowired JdbcTemplate jdbcTemplate;
     @Autowired RedisUtil redisUtil;
+    @Autowired MemberSummaryQuery memberSummaryQuery;
+    @Autowired MemberProfileQueryPort memberProfiles;
     @LocalServerPort int port;
 
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
@@ -143,6 +147,42 @@ class MemberAuthBoundaryIntegrationTest {
         assertThat(myInfo.path("dongName").asText()).isEqualTo("광산구");
         assertThat(myInfo.path("headName").asText()).isEqualTo("수완동");
         assertThat(myInfo.path("specialties").get(0).asText()).isEqualTo("요리");
+
+        Integer newPlaceId = transactionTemplate.execute(status -> {
+            HeadJpaEntity head = new HeadJpaEntity("새본점");
+            entityManager.persist(head);
+            PlaceJpaEntity place = new PlaceJpaEntity("새지점", head);
+            entityManager.persist(place);
+            return place.getId();
+        });
+        assertThat(send("PATCH", "/api/member/place", "{\"placeId\":" + newPlaceId + "}", null)
+                .statusCode()).isEqualTo(401);
+        assertError(send("PATCH", "/api/member/place", "{}", "Bearer " + access), 400, "잘못된 요청입니다.");
+        assertError(send("PATCH", "/api/member/place", "{\"placeId\":2147483647}", "Bearer " + access),
+                404, "장소가 존재하지 않습니다.");
+        HttpResponse<String> changed = send("PATCH", "/api/member/place", "{\"placeId\":" + newPlaceId + "}",
+                "Bearer " + access);
+        assertThat(changed.statusCode()).isEqualTo(200);
+        assertThat(changed.body()).isEmpty();
+        JsonNode updatedInfo = json.readTree(send("GET", "/api/member", null, "Bearer " + access).body());
+        assertThat(updatedInfo.path("placeName").asText()).isEqualTo("새지점");
+        assertThat(updatedInfo.path("dongName").asText()).isEqualTo("새본점");
+        assertThat(updatedInfo.path("headName")).isEqualTo(myInfo.path("headName"));
+        assertThat(updatedInfo.path("gwangsan")).isEqualTo(myInfo.path("gwangsan"));
+        assertThat(updatedInfo.path("specialties")).isEqualTo(myInfo.path("specialties"));
+        Long memberId = updatedInfo.path("memberId").asLong();
+        assertThat(memberSummaryQuery.findById(memberId).orElseThrow().placeId()).isEqualTo(newPlaceId);
+        Integer scopedPlaceId = transactionTemplate.execute(status ->
+                memberProfiles.findAdminScope(memberId).orElseThrow().placeId());
+        assertThat(scopedPlaceId).isEqualTo(newPlaceId);
+        assertError(send("PATCH", "/api/member/place", "{\"placeId\":2147483647}", "Bearer " + access),
+                404, "장소가 존재하지 않습니다.");
+        assertThat(jdbcTemplate.queryForObject("SELECT d.place_id FROM tbl_member_detail d JOIN tbl_member m "
+                + "ON m.member_id = d.member_id WHERE m.phone_number = ?", Integer.class, PHONE)).isEqualTo(newPlaceId);
+        assertThat(send("PATCH", "/api/member/place", "{\"placeId\":" + newPlaceId + "}", "Bearer " + access)
+                .statusCode()).isEqualTo(200);
+        assertThat(jdbcTemplate.queryForObject("SELECT d.place_id FROM tbl_member_detail d JOIN tbl_member m "
+                + "ON m.member_id = d.member_id WHERE m.nickname = ?", Integer.class, "추천인")).isEqualTo(placeId);
 
         // 재발급: 같은 초에 만든 JWT 는 같은 문자열이므로 1초 넘게 기다린다.
         Thread.sleep(1_100);

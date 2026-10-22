@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import team.startup.gwangsan.application.member.port.in.UpdateMyPlaceUseCase;
+import team.startup.gwangsan.application.member.data.UpdateMyPlaceCommand;
+import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,6 +46,7 @@ class MemberControllerHttpContractTest {
     private FindUserInfoQuery findUserInfo;
     private FindAllUserInfoQuery findAllUserInfo;
     private WithdrawMemberUseCase withdrawal;
+    private UpdateMyPlaceUseCase updateMyPlace;
 
     @BeforeEach
     void setUp() {
@@ -51,11 +55,45 @@ class MemberControllerHttpContractTest {
         findUserInfo = mock(FindUserInfoQuery.class);
         findAllUserInfo = mock(FindAllUserInfoQuery.class);
         withdrawal = mock(WithdrawMemberUseCase.class);
+        updateMyPlace = mock(UpdateMyPlaceUseCase.class);
         mvc = MockMvcBuilders.standaloneSetup(new MemberController(findMyInfo, updateMyInfo, findUserInfo,
-                        findAllUserInfo, withdrawal))
+                        findAllUserInfo, withdrawal, updateMyPlace))
                 .setCustomArgumentResolvers(new FixedActorResolver(ACTOR))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/member/place 는")
+    class Describe_update_place {
+        @Test
+        @DisplayName("it_인증된 본인 ID 로 변경하고 빈 200 을 반환한다")
+        void it_updates_with_authenticated_actor() throws Exception {
+            mvc.perform(patch("/api/member/place").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"placeId\":4,\"memberId\":999}"))
+                    .andExpect(status().isOk()).andExpect(content().string(""));
+            verify(updateMyPlace).execute(new UpdateMyPlaceCommand(ACTOR, 4));
+        }
+
+        @Test
+        @DisplayName("it_누락과 null 및 잘못된 타입은 메시지와 400 을 반환한다")
+        void it_rejects_missing_null_and_malformed_place() throws Exception {
+            for (String body : List.of("{}", "{\"placeId\":null}", "{\"placeId\":\"invalid\"}")) {
+                mvc.perform(patch("/api/member/place").contentType(MediaType.APPLICATION_JSON).content(body))
+                        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").isNotEmpty());
+            }
+            verifyNoInteractions(updateMyPlace);
+        }
+
+        @Test
+        @DisplayName("it_없는 지점은 메시지와 404 를 반환한다")
+        void it_returns_place_not_found_message() throws Exception {
+            doThrow(new PlaceNotFoundException()).when(updateMyPlace).execute(any());
+            mvc.perform(patch("/api/member/place").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"placeId\":999}"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value("장소가 존재하지 않습니다."));
+        }
     }
 
     @Nested

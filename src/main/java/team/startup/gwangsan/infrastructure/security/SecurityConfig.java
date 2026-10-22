@@ -120,6 +120,7 @@ public class SecurityConfig {
                                 // member
                                 .requestMatchers(HttpMethod.GET, "/api/member").authenticated()
                                 .requestMatchers(HttpMethod.PATCH, "/api/member").authenticated()
+                                .requestMatchers(HttpMethod.PATCH, "/api/member/place").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/member/{memberId}").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/member/all")
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
