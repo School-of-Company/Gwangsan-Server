@@ -4,6 +4,10 @@ on:
   push:
     branches: ["develop"]
 
+concurrency:
+  group: cd-develop
+  cancel-in-progress: false
+
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: gwangsan-app
