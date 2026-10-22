@@ -125,6 +125,7 @@ public class SecurityConfig {
                                 .hasAnyAuthority(MemberRole.ROLE_PLACE_ADMIN.name(), MemberRole.ROLE_HEAD_ADMIN.name())
 
                                 // report
+                                .requestMatchers("/api/feedback", "/api/feedback/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/report").authenticated()
 
                                 // health

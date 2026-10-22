@@ -7,6 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
 
+    INVALID_FEEDBACK(400, "문의 내용, 이미지 또는 상태가 올바르지 않습니다."),
+    NOT_FOUND_FEEDBACK(404, "문의 내역을 찾을 수 없습니다."),
+    FORBIDDEN_FEEDBACK(403, "해당 문의에 접근할 권한이 없습니다."),
+
     APP_VERSION_UNAVAILABLE(503, "앱 버전 정보가 아직 준비되지 않았습니다."),
 
     // token

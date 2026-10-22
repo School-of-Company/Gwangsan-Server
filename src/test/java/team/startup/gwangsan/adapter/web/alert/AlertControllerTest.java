@@ -58,6 +58,17 @@ class AlertControllerTest {
     }
 
     @Test
+    @DisplayName("문의 답변은 알림 목록에 유형과 문의 sourceId를 반환한다")
+    void it_returns_feedback_answer_alert() throws Exception {
+        when(myAlertsQuery.query(7L)).thenReturn(List.of(new AlertView(1L, "문의 답변", "답변이 등록되었습니다.",
+                AlertType.FEEDBACK_ANSWER, LocalDateTime.of(2026, 10, 22, 12, 0), List.of(), 3L, 449L)));
+        mvc.perform(get("/api/alert").with(user(principal())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].alertType").value("FEEDBACK_ANSWER"))
+                .andExpect(jsonPath("$[0].sourceId").value(449));
+    }
+
+    @Test
     @DisplayName("GET /api/alert 는 인증 회원의 알림을 기존 JSON 필드로 반환한다")
     void it_returns_alerts() throws Exception {
         when(myAlertsQuery.query(7L)).thenReturn(List.of(
