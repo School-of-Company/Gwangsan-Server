@@ -44,5 +44,8 @@ class AlertTest {
                 .isEqualTo(new Alert(null, 3L, 4L, AlertType.REPORT, "신고 결과", "7일 정지 조치되었습니다.", null));
         assertThat(Alert.notice(9L, "공지 제목"))
                 .isEqualTo(new Alert(null, 9L, null, AlertType.NOTICE, "공지 제목", "공지가 등록되었습니다.", null));
+        assertThat(Alert.feedbackAnswer(6L))
+                .isEqualTo(new Alert(null, 6L, null, AlertType.FEEDBACK_ANSWER, "문의 답변 등록",
+                        "문의하신 내용에 답변이 등록되었습니다.", null));
     }
 }

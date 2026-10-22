@@ -10,7 +10,8 @@ public enum AlertType {
     TRADE_CANCEL,
     TRADE_CANCEL_REJECT,
     REPORT,
-    REPORT_REJECT;
+    REPORT_REJECT,
+    FEEDBACK_ANSWER;
 
     /**
      * 업무 변경과 같은 DB 트랜잭션에 저장하는 알림. 1차 구현 검토에서 거래 완료 요청과 철회 완료 두 가지로 확정했다.

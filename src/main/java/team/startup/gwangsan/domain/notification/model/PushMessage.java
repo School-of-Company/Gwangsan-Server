@@ -14,6 +14,7 @@ public record PushMessage(
     private static final String CHAT_BODY = "새로운 메세지가 도착했습니다.";
     private static final String RECOMMENDATION_BODY = "추천인이 등록되었습니다.";
     private static final String TRADE_COMPLETE_BODY = "거래가 승인되었습니다.";
+    private static final String FEEDBACK_ANSWER_BODY = "문의하신 내용에 답변이 등록되었습니다.";
 
     public static PushMessage byType(NotificationType type, Long sourceId) {
         String body = switch (type) {
@@ -21,6 +22,7 @@ public record PushMessage(
             case CHATTING -> CHAT_BODY;
             case RECOMMENDATION -> RECOMMENDATION_BODY;
             case TRADE_COMPLETE -> TRADE_COMPLETE_BODY;
+            case FEEDBACK_ANSWER -> FEEDBACK_ANSWER_BODY;
             case RESERVATION_REMINDER, RESERVATION_CANCEL -> throw new IllegalArgumentException("예약 알림은 상대방 이름이 필요합니다.");
         };
         return new PushMessage(DEFAULT_TITLE, body, type, sourceId);

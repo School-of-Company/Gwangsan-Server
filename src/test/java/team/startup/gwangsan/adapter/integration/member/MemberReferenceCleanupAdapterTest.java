@@ -7,6 +7,7 @@ import team.startup.gwangsan.application.admin.port.in.ReassignAdminAlertMemberU
 import team.startup.gwangsan.application.alert.port.in.AlertMemberCleanupUseCase;
 import team.startup.gwangsan.application.block.port.in.DeleteMemberBlocksUseCase;
 import team.startup.gwangsan.application.chat.port.in.ChatMemberCleanupUseCase;
+import team.startup.gwangsan.application.feedback.port.in.ReassignFeedbackMemberUseCase;
 import team.startup.gwangsan.application.notice.port.in.ReassignNoticeAuthorUseCase;
 import team.startup.gwangsan.application.post.port.in.PostMemberReferenceCleanupUseCase;
 import team.startup.gwangsan.application.relatedkeyword.port.in.DeleteAllMemberRelatedKeywordsUseCase;
@@ -30,15 +31,16 @@ class MemberReferenceCleanupAdapterTest {
     private final DeleteAllMemberRelatedKeywordsUseCase keywords = mock(DeleteAllMemberRelatedKeywordsUseCase.class);
     private final DeleteMemberSuspensionsUseCase suspensions = mock(DeleteMemberSuspensionsUseCase.class);
     private final DeleteMemberBlocksUseCase blocks = mock(DeleteMemberBlocksUseCase.class);
+    private final ReassignFeedbackMemberUseCase feedback = mock(ReassignFeedbackMemberUseCase.class);
     private final MemberReferenceCleanupAdapter adapter = new MemberReferenceCleanupAdapter(post, trade, chat, review,
-            report, adminAlerts, alerts, notice, keywords, suspensions, blocks);
+            report, adminAlerts, alerts, notice, keywords, suspensions, blocks, feedback);
 
     @Test
     @DisplayName("it_게시글 작성자 재지정 직후 예약자를 재지정하고, 나머지 업무 참조를 기존 순서로 재지정한다")
     void it_reassigns_in_existing_order() {
         adapter.reassignReferences(1L, 99L);
 
-        InOrder order = inOrder(post, trade, chat, review, report, adminAlerts, alerts, notice);
+        InOrder order = inOrder(post, trade, chat, review, report, adminAlerts, alerts, notice, feedback);
         order.verify(post).reassignAuthor(1L, 99L);
         order.verify(post).reassignReserver(1L, 99L);
         order.verify(trade).reassignTradeParties(1L, 99L);
@@ -49,6 +51,7 @@ class MemberReferenceCleanupAdapterTest {
         order.verify(trade).reassignCancelRequester(1L, 99L);
         order.verify(alerts).reassignSender(1L, 99L);
         order.verify(notice).reassign(1L, 99L);
+        order.verify(feedback).reassign(1L, 99L);
         verifyNoInteractions(keywords, suspensions, blocks);
     }
 

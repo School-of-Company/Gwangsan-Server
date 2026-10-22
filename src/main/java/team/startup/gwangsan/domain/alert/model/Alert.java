@@ -32,6 +32,8 @@ public record Alert(
     private static final String BUYER_TRADE_BODY = "광산이 차감되었습니다.";
     private static final String SELLER_TRADE_BODY = "광산이 추가되었습니다.";
     private static final String NOTICE_CONTENT = "공지가 등록되었습니다.";
+    private static final String FEEDBACK_ANSWER_TITLE = "문의 답변 등록";
+    private static final String FEEDBACK_ANSWER_CONTENT = "문의하신 내용에 답변이 등록되었습니다.";
 
     private static Alert of(Long sourceId, Long senderMemberId, AlertType type, String title, String content) {
         return new Alert(null, sourceId, senderMemberId, type, title, content, null);
@@ -86,5 +88,9 @@ public record Alert(
 
     public static Alert notice(Long noticeId, String noticeTitle) {
         return of(noticeId, null, AlertType.NOTICE, noticeTitle, NOTICE_CONTENT);
+    }
+
+    public static Alert feedbackAnswer(Long feedbackId) {
+        return of(feedbackId, null, AlertType.FEEDBACK_ANSWER, FEEDBACK_ANSWER_TITLE, FEEDBACK_ANSWER_CONTENT);
     }
 }

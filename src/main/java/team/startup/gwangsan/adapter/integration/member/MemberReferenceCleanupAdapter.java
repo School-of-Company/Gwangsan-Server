@@ -6,6 +6,7 @@ import team.startup.gwangsan.application.admin.port.in.ReassignAdminAlertMemberU
 import team.startup.gwangsan.application.alert.port.in.AlertMemberCleanupUseCase;
 import team.startup.gwangsan.application.block.port.in.DeleteMemberBlocksUseCase;
 import team.startup.gwangsan.application.chat.port.in.ChatMemberCleanupUseCase;
+import team.startup.gwangsan.application.feedback.port.in.ReassignFeedbackMemberUseCase;
 import team.startup.gwangsan.application.member.port.out.MemberReferenceCleanupPort;
 import team.startup.gwangsan.application.notice.port.in.ReassignNoticeAuthorUseCase;
 import team.startup.gwangsan.application.post.port.in.PostMemberReferenceCleanupUseCase;
@@ -35,6 +36,7 @@ public class MemberReferenceCleanupAdapter implements MemberReferenceCleanupPort
     private final DeleteAllMemberRelatedKeywordsUseCase deleteAllMemberRelatedKeywordsUseCase;
     private final DeleteMemberSuspensionsUseCase deleteMemberSuspensionsUseCase;
     private final DeleteMemberBlocksUseCase deleteMemberBlocksUseCase;
+    private final ReassignFeedbackMemberUseCase reassignFeedbackMemberUseCase;
 
     @Override
     public void reassignReferences(Long memberId, Long dummyMemberId) {
@@ -48,6 +50,7 @@ public class MemberReferenceCleanupAdapter implements MemberReferenceCleanupPort
         tradeMemberReferenceCleanupUseCase.reassignCancelRequester(memberId, dummyMemberId);
         alertMemberCleanupUseCase.reassignSender(memberId, dummyMemberId);
         reassignNoticeAuthorUseCase.reassign(memberId, dummyMemberId);
+        reassignFeedbackMemberUseCase.reassign(memberId, dummyMemberId);           // 작성자 → 답변자
     }
 
     @Override

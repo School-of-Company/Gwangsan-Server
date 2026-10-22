@@ -22,6 +22,8 @@ class PushMessageTest {
             assertThat(PushMessage.byType(NotificationType.CHATTING, 2L).body()).isEqualTo("새로운 메세지가 도착했습니다.");
             assertThat(PushMessage.byType(NotificationType.RECOMMENDATION, 3L).body()).isEqualTo("추천인이 등록되었습니다.");
             assertThat(PushMessage.byType(NotificationType.TRADE_COMPLETE, 4L).body()).isEqualTo("거래가 승인되었습니다.");
+            assertThat(PushMessage.byType(NotificationType.FEEDBACK_ANSWER, 5L).body())
+                    .isEqualTo("문의하신 내용에 답변이 등록되었습니다.");
         }
 
         @Test

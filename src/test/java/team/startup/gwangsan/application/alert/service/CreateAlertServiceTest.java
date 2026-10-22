@@ -189,6 +189,14 @@ class CreateAlertServiceTest {
         }
 
         @Test
+        @DisplayName("FEEDBACK_ANSWER 는 원천 조회 없이 고정 문구로 저장한다")
+        void it_saves_feedback_answer() {
+            create(AlertType.FEEDBACK_ANSWER, 1L);
+
+            verify(saveAlertPort).save(Alert.feedbackAnswer(1L), List.of(MEMBER));
+        }
+
+        @Test
         @DisplayName("NOTICE 는 단건 경로에서 지원하지 않는다")
         void it_rejects_notice() {
             assertThatThrownBy(() -> create(AlertType.NOTICE, 1L)).isInstanceOf(UnsupportedAlertTypeException.class);

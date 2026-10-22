@@ -84,6 +84,7 @@ public class CreateAlertService implements RecordAlertUseCase, CreateAlertFromSo
                 int days = loadAlertSourcePort.suspendedDays(command.suspendId());
                 saveAlertPort.save(Alert.report(sourceId, report.reporterId(), days), List.of(memberId));
             }
+            case FEEDBACK_ANSWER -> saveAlertPort.save(Alert.feedbackAnswer(sourceId), List.of(memberId));
             default -> throw new UnsupportedAlertTypeException();
         }
     }

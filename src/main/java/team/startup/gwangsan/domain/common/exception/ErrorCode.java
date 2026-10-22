@@ -126,7 +126,10 @@ public enum ErrorCode {
     ALREADY_BLOCKED(409, "이미 차단한 사용자입니다."),
     BLOCKED_MEMBER(403, "차단된 사용자입니다."),
     NOT_FOUND_BLOCK(404, "차단 내역을 찾을 수 없습니다."),
-    SELF_BLOCK_NOT_ALLOWED(403, "본인을 차단할 수 없습니다.");
+    SELF_BLOCK_NOT_ALLOWED(403, "본인을 차단할 수 없습니다."),
+
+    // feedback
+    NOT_FOUND_FEEDBACK(404, "문의 내역을 찾을 수 없습니다.");
     private final int status;
     private final String message;
 }
