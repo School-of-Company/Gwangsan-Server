@@ -7,6 +7,7 @@ import team.startup.gwangsan.application.alert.port.in.AlertMemberCleanupUseCase
 import team.startup.gwangsan.application.block.port.in.DeleteMemberBlocksUseCase;
 import team.startup.gwangsan.application.chat.port.in.ChatMemberCleanupUseCase;
 import team.startup.gwangsan.application.member.port.out.MemberReferenceCleanupPort;
+import team.startup.gwangsan.application.feedback.port.in.FeedbackCleanupUseCase;
 import team.startup.gwangsan.application.notice.port.in.ReassignNoticeAuthorUseCase;
 import team.startup.gwangsan.application.post.port.in.PostMemberReferenceCleanupUseCase;
 import team.startup.gwangsan.application.relatedkeyword.port.in.DeleteAllMemberRelatedKeywordsUseCase;
@@ -23,6 +24,8 @@ import team.startup.gwangsan.application.trade.port.in.TradeMemberReferenceClean
 @Component
 @RequiredArgsConstructor
 public class MemberReferenceCleanupAdapter implements MemberReferenceCleanupPort {
+
+    private final FeedbackCleanupUseCase feedbackCleanupUseCase;
 
     private final PostMemberReferenceCleanupUseCase postMemberReferenceCleanupUseCase;
     private final TradeMemberReferenceCleanupUseCase tradeMemberReferenceCleanupUseCase;
@@ -44,6 +47,7 @@ public class MemberReferenceCleanupAdapter implements MemberReferenceCleanupPort
         chatMemberCleanupUseCase.reassignMember(memberId, dummyMemberId);                  // 방 구매자 → 판매자 → 메시지 발신자
         reviewMemberReferenceCleanupUseCase.reassign(memberId, dummyMemberId);             // 작성자 → 대상
         reassignReportMemberUseCase.reassign(memberId, dummyMemberId);                     // 신고자 → 피신고자
+        feedbackCleanupUseCase.reassign(memberId, dummyMemberId);
         reassignAdminAlertMemberUseCase.reassign(memberId, dummyMemberId);                 // 상대 → 요청자
         tradeMemberReferenceCleanupUseCase.reassignCancelRequester(memberId, dummyMemberId);
         alertMemberCleanupUseCase.reassignSender(memberId, dummyMemberId);

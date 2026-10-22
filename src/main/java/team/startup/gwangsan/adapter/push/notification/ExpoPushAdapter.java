@@ -153,6 +153,9 @@ public class ExpoPushAdapter implements PushSenderPort {
         data.put("alertType", type.name());
         if (sourceId != null) {
             data.put("sourceId", String.valueOf(sourceId));
+            if (type == NotificationType.FEEDBACK_ANSWER) {
+                data.put("feedbackId", String.valueOf(sourceId));
+            }
             if (type == NotificationType.CHATTING || type == NotificationType.RESERVATION_REMINDER
                     || type == NotificationType.RESERVATION_CANCEL) {
                 data.put("roomId", String.valueOf(sourceId));
