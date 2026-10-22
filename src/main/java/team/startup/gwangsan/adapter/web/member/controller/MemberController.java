@@ -6,16 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.startup.gwangsan.adapter.web.member.dto.request.UpdateMyInfoRequest;
+import team.startup.gwangsan.adapter.web.member.dto.request.UpdateMyPlaceRequest;
 import team.startup.gwangsan.adapter.web.member.dto.response.FindAllUserInfoResponse;
 import team.startup.gwangsan.adapter.web.member.dto.response.FindMyInfoResponse;
 import team.startup.gwangsan.adapter.web.member.dto.response.FindUserInfoResponse;
 import team.startup.gwangsan.application.member.data.MyInfoResult;
 import team.startup.gwangsan.application.member.data.UpdateMyInfoCommand;
+import team.startup.gwangsan.application.member.data.UpdateMyPlaceCommand;
 import team.startup.gwangsan.application.member.data.UserInfoResult;
 import team.startup.gwangsan.application.member.port.in.FindAllUserInfoQuery;
 import team.startup.gwangsan.application.member.port.in.FindMyInfoQuery;
 import team.startup.gwangsan.application.member.port.in.FindUserInfoQuery;
 import team.startup.gwangsan.application.member.port.in.UpdateMyInfoUseCase;
+import team.startup.gwangsan.application.member.port.in.UpdateMyPlaceUseCase;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
 import team.startup.gwangsan.application.member.port.in.WithdrawMemberUseCase;
@@ -29,6 +32,7 @@ public class MemberController {
 
     private final FindMyInfoQuery findMyInfoQuery;
     private final UpdateMyInfoUseCase updateMyInfoUseCase;
+    private final UpdateMyPlaceUseCase updateMyPlaceUseCase;
     private final FindUserInfoQuery findUserInfoQuery;
     private final FindAllUserInfoQuery findAllUserInfoQuery;
     // bridge: 탈퇴·회원 삭제는 모든 업무 참조를 정리하는 PR11 에서 member input Port 로 교체한다.
@@ -46,6 +50,12 @@ public class MemberController {
     public ResponseEntity<Void> updateMyInfo(ActorContext actor, @RequestBody @Valid UpdateMyInfoRequest request) {
         updateMyInfoUseCase.execute(new UpdateMyInfoCommand(actor, request.nickname(), request.description(),
                 request.specialties()));
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/place")
+    public ResponseEntity<Void> updateMyPlace(ActorContext actor, @RequestBody @Valid UpdateMyPlaceRequest request) {
+        updateMyPlaceUseCase.execute(new UpdateMyPlaceCommand(actor, request.placeId()));
         return ResponseEntity.ok().build();
     }
 
