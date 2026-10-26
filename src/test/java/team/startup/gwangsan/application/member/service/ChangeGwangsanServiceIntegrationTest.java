@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -26,6 +25,7 @@ import team.startup.gwangsan.adapter.persistence.member.MemberJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
 import team.startup.gwangsan.application.member.port.in.ChangeGwangsanUseCase;
+import team.startup.gwangsan.domain.member.exception.DuplicateGwangsanLedgerException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -92,7 +92,7 @@ class ChangeGwangsanServiceIntegrationTest {
             assertThatThrownBy(() -> tx(() -> {
                 changeGwangsanUseCase.transfer(from, to, 1_000, GwangsanLedgerType.TRADE_COMPLETE, 77L);
                 changeGwangsanUseCase.transfer(from, to, 1_000, GwangsanLedgerType.TRADE_COMPLETE, 77L);
-            })).isInstanceOf(DataIntegrityViolationException.class);
+            })).isInstanceOf(DuplicateGwangsanLedgerException.class);
 
             assertThat(balanceOf(from)).isEqualTo(3_000);
             assertThat(balanceOf(to)).isEqualTo(500);

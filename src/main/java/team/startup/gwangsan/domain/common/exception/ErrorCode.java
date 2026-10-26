@@ -26,6 +26,7 @@ public enum ErrorCode {
     NOT_FOUND_DUMMY_MEMBER(404, "더미 사용자가 존재하지 않습니다."),
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
+    DUPLICATE_GWANGSAN_LEDGER(409, "이미 반영된 광산 이동입니다."),
     NOT_ALLOWED_USER_ACCESS(403, "사용자 목록 조회 권한이 없습니다."),
 
     // dong & place

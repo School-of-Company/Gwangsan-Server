@@ -1,9 +1,11 @@
 package team.startup.gwangsan.adapter.persistence.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.member.data.BalanceMismatch;
 import team.startup.gwangsan.application.member.port.out.GwangsanBalancePort;
+import team.startup.gwangsan.domain.member.exception.DuplicateGwangsanLedgerException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 
@@ -30,7 +32,12 @@ public class GwangsanBalancePersistenceAdapter implements GwangsanBalancePort {
 
     @Override
     public void record(long memberId, int amount, int balanceAfter, GwangsanLedgerType type, Long refId) {
-        gwangsanLedgerJpaRepository.save(GwangsanLedgerJpaEntity.of(memberId, amount, balanceAfter, type, refId));
+        try {
+            gwangsanLedgerJpaRepository.save(GwangsanLedgerJpaEntity.of(memberId, amount, balanceAfter, type, refId));
+        } catch (DataIntegrityViolationException e) {
+            // 원장 INSERT 가 어길 수 있는 제약은 uk_ledger_idem 뿐이다(FK 없음, NOT NULL 은 코드가 채움).
+            throw new DuplicateGwangsanLedgerException();
+        }
     }
 
     @Override
