@@ -2,9 +2,12 @@ package team.startup.gwangsan.adapter.persistence.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import team.startup.gwangsan.application.member.data.BalanceMismatch;
 import team.startup.gwangsan.application.member.port.out.GwangsanBalancePort;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
+
+import java.util.List;
 
 /**
  * 잔액은 엔티티 값이 아니라 UPDATE … SET gwangsan = gwangsan + :delta 로 바꾼다.
@@ -33,5 +36,13 @@ public class GwangsanBalancePersistenceAdapter implements GwangsanBalancePort {
     @Override
     public void record(long memberId, int amount, int balanceAfter, GwangsanLedgerType type, Long refId) {
         gwangsanLedgerJpaRepository.save(GwangsanLedgerJpaEntity.of(memberId, amount, balanceAfter, type, refId));
+    }
+
+    @Override
+    public List<BalanceMismatch> findMismatches() {
+        return gwangsanLedgerJpaRepository.findMismatches().stream()
+                .map(row -> new BalanceMismatch(((Number) row[0]).longValue(), ((Number) row[1]).intValue(),
+                        ((Number) row[2]).longValue()))
+                .toList();
     }
 }
