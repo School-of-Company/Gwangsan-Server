@@ -27,7 +27,8 @@ public class MemberDetailJpaEntity {
     @JoinColumn(name = "dong_id", nullable = false)
     private DongJpaEntity dong;
 
-    @Column(name = "gwangsan", nullable = false)
+    /** 잔액은 원자적 UPDATE 로만 바꾼다. 낡은 엔티티 값이 다른 필드 변경과 함께 되쓰이지 않게 막는다. */
+    @Column(name = "gwangsan", nullable = false, updatable = false)
     private Integer gwangsan;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,25 +54,12 @@ public class MemberDetailJpaEntity {
     /** 순수 MemberDetail 의 변경을 이 managed 엔티티에 반영한다. */
     void apply(MemberDetail detail) {
         this.description = detail.getDescription();
-        this.gwangsan = detail.getGwangsan();
         this.light = detail.getLight();
     }
 
     // bridge: 아래 직접 변경 메서드는 legacy 호출자(post/trade/admin/review)용이다. 각 소유 PR(07/11)이 공개 command 로 교체한 뒤 지운다.
     public void updateDescription(String description) {
         this.description = description;
-    }
-
-    public void minusGwangsan(Integer gwangsan) {
-        this.gwangsan = this.gwangsan - gwangsan;
-    }
-
-    public void plusGwangsan(Integer gwangsan) {
-        this.gwangsan = this.gwangsan + gwangsan;
-    }
-
-    public void adjustGwangsan(Integer gwangsan) {
-        this.gwangsan = Math.max(0, this.gwangsan + gwangsan);
     }
 
     public void plusLight(Integer light) {

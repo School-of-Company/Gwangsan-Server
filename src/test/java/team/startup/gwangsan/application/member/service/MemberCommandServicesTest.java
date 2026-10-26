@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,6 +24,8 @@ import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
 import team.startup.gwangsan.domain.member.exception.DuplicateMemberNicknameException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.application.member.port.out.GwangsanBalancePort;
+import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
@@ -179,30 +182,43 @@ class MemberCommandServicesTest {
     @DisplayName("ChangeGwangsanService 는")
     class Describe_change_gwangsan {
 
-        @Test
-        @DisplayName("plus·minus·adjust 결과를 managed 상세 엔티티에 반영한다 (음수 잔액 허용, 조정만 0 하한)")
-        void it_applies_balance_changes() {
-            MemberDetailJpaEntity detail = detail(member(1L, "테스터일"), 100);
-            when(memberDetailJpaRepository.findById(1L)).thenReturn(Optional.of(detail));
-            ChangeGwangsanService service = new ChangeGwangsanService(persistence, persistence);
+        private final GwangsanBalancePort balance = mock(GwangsanBalancePort.class);
+        private final ChangeGwangsanService service = new ChangeGwangsanService(balance);
 
-            service.plus(1L, 50);
-            assertThat(detail.getGwangsan()).isEqualTo(150);
-            service.minus(1L, 200);
-            assertThat(detail.getGwangsan()).isEqualTo(-50);
-            service.adjust(1L, -10);
-            assertThat(detail.getGwangsan()).isZero();
-            assertThat(detail.getLight()).isEqualTo(1);
-            assertThat(detail.getDescription()).isEqualTo("기존 설명");
+        @Test
+        @DisplayName("이체는 회원 ID 오름차순으로 갱신하고 사유·기준 ID 와 반영 후 잔액으로 원장을 남긴다")
+        void it_transfers_in_member_id_order() {
+            when(balance.add(1L, 300)).thenReturn(1_300);
+            when(balance.add(2L, -300)).thenReturn(-100);
+
+            service.transfer(2L, 1L, 300, GwangsanLedgerType.TRADE_COMPLETE, 9L);
+
+            InOrder order = inOrder(balance);
+            order.verify(balance).add(1L, 300);
+            order.verify(balance).record(1L, 300, 1_300, GwangsanLedgerType.TRADE_COMPLETE, 9L);
+            order.verify(balance).add(2L, -300);
+            order.verify(balance).record(2L, -300, -100, GwangsanLedgerType.TRADE_COMPLETE, 9L);
         }
 
         @Test
-        @DisplayName("상세 정보가 없으면 NotFoundMemberDetailException을 던진다")
-        void it_throws_when_detail_missing() {
-            when(memberDetailJpaRepository.findById(1L)).thenReturn(Optional.empty());
+        @DisplayName("관리자 조정은 잠근 잔액 기준으로 0 하한을 적용하고 실제 반영액만 기록한다")
+        void it_clamps_admin_adjustment() {
+            when(balance.lockBalance(1L)).thenReturn(3_000);
+            when(balance.add(1L, -3_000)).thenReturn(0);
 
-            assertThatThrownBy(() -> new ChangeGwangsanService(persistence, persistence).plus(1L, 1))
+            service.adjust(1L, -5_000);
+
+            verify(balance).record(1L, -3_000, 0, GwangsanLedgerType.ADMIN_ADJUST, null);
+        }
+
+        @Test
+        @DisplayName("상세 정보가 없으면 NotFoundMemberDetailException을 던지고 원장을 남기지 않는다")
+        void it_throws_when_detail_missing() {
+            when(balance.add(1L, 1)).thenThrow(new NotFoundMemberDetailException());
+
+            assertThatThrownBy(() -> service.credit(1L, 1, GwangsanLedgerType.SIGNUP_REWARD, 1L))
                     .isInstanceOf(NotFoundMemberDetailException.class);
+            verify(balance, never()).record(anyLong(), anyInt(), anyInt(), any(), any());
         }
     }
 
