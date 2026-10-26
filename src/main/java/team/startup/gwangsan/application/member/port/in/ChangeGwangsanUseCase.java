@@ -13,6 +13,6 @@ public interface ChangeGwangsanUseCase {
 
     void credit(long memberId, int amount, GwangsanLedgerType type, long refId);
 
-    /** 관리자 조정. 결과가 0 미만이면 0 으로 맞추고, 실제 반영된 차이를 원장에 남긴다. */
+    /** 관리자 조정. 양수는 지급, 음수는 차감이며 결과가 음수여도 그대로 반영한다(PR #325 의도). */
     void adjust(long memberId, int delta);
 }

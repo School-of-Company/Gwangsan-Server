@@ -29,11 +29,6 @@ public class GwangsanBalancePersistenceAdapter implements GwangsanBalancePort {
     }
 
     @Override
-    public int lockBalance(long memberId) {
-        return memberDetailJpaRepository.findGwangsanForUpdate(memberId).orElseThrow(NotFoundMemberDetailException::new);
-    }
-
-    @Override
     public void record(long memberId, int amount, int balanceAfter, GwangsanLedgerType type, Long refId) {
         gwangsanLedgerJpaRepository.save(GwangsanLedgerJpaEntity.of(memberId, amount, balanceAfter, type, refId));
     }

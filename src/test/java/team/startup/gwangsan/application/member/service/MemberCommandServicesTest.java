@@ -201,14 +201,13 @@ class MemberCommandServicesTest {
         }
 
         @Test
-        @DisplayName("관리자 조정은 잠근 잔액 기준으로 0 하한을 적용하고 실제 반영액만 기록한다")
-        void it_clamps_admin_adjustment() {
-            when(balance.lockBalance(1L)).thenReturn(3_000);
-            when(balance.add(1L, -3_000)).thenReturn(0);
+        @DisplayName("관리자 조정은 요청 값을 그대로 더하고 기준 ID 없이 기록한다")
+        void it_applies_admin_adjustment_as_requested() {
+            when(balance.add(1L, -5_000)).thenReturn(-2_000);
 
             service.adjust(1L, -5_000);
 
-            verify(balance).record(1L, -3_000, 0, GwangsanLedgerType.ADMIN_ADJUST, null);
+            verify(balance).record(1L, -5_000, -2_000, GwangsanLedgerType.ADMIN_ADJUST, null);
         }
 
         @Test

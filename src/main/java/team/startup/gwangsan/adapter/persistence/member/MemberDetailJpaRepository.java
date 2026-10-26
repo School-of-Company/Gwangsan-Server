@@ -28,9 +28,6 @@ public interface MemberDetailJpaRepository extends JpaRepository<MemberDetailJpa
     @Query(value = "SELECT gwangsan FROM tbl_member_detail WHERE member_id = :memberId", nativeQuery = true)
     Optional<Integer> findGwangsan(@Param("memberId") Long memberId);
 
-    @Query(value = "SELECT gwangsan FROM tbl_member_detail WHERE member_id = :memberId FOR UPDATE", nativeQuery = true)
-    Optional<Integer> findGwangsanForUpdate(@Param("memberId") Long memberId);
-
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM MemberDetail d WHERE d.member = :member")
     void deleteByMember(@Param("member") MemberJpaEntity member);

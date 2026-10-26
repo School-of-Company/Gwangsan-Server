@@ -144,14 +144,27 @@ class ChangeGwangsanServiceIntegrationTest {
     class Describe_adjust {
 
         @Test
-        @DisplayName("결과가 0 미만이면 0 으로 맞추고 실제 반영된 금액을 원장에 남긴다")
-        void it_clamps_admin_adjust_and_records_applied_amount() {
+        @DisplayName("잔액보다 큰 차감도 요청 값 그대로 반영해 음수가 된다")
+        void it_applies_deduction_beyond_balance_as_requested() {
             long member = persistMember(3_000);
 
             tx(() -> changeGwangsanUseCase.adjust(member, -5_000));
 
-            assertThat(balanceOf(member)).isZero();
-            assertThat(ledgerOf(member)).containsExactly(row(-3_000, 0, "ADMIN_ADJUST", null));
+            assertThat(balanceOf(member)).isEqualTo(-2_000);
+            assertThat(ledgerOf(member)).containsExactly(row(-5_000, -2_000, "ADMIN_ADJUST", null));
+        }
+
+        @Test
+        @DisplayName("음수 잔액 회원에게 지급·차감하면 요청 값만큼만 움직인다")
+        void it_applies_adjustment_to_negative_balance_as_requested() {
+            long member = persistMember(-2_000);
+
+            tx(() -> changeGwangsanUseCase.adjust(member, 500));
+            tx(() -> changeGwangsanUseCase.adjust(member, -500));
+
+            assertThat(balanceOf(member)).isEqualTo(-2_000);
+            assertThat(ledgerOf(member)).containsExactly(
+                    row(500, -1_500, "ADMIN_ADJUST", null), row(-500, -2_000, "ADMIN_ADJUST", null));
         }
 
         @Test

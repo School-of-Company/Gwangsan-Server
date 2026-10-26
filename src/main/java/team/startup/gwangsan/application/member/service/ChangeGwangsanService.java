@@ -13,7 +13,7 @@ import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
  * 단독 호출은 거절되어 잔액만 따로 커밋되는 경로를 만들지 않는다.
  *
  * <p>잔액은 원자적 UPDATE 로 바꾼다. 상품 잠금만으로는 같은 회원의 서로 다른 거래가 직렬화되지 않아
- * 엔티티 값을 읽고 쓰면 잔액이 유실된다(ADR-001). 음수 잔액 허용은 기존 정책이다. 관리자 조정만 0 하한을 둔다.
+ * 엔티티 값을 읽고 쓰면 잔액이 유실된다(ADR-001). 음수 잔액 허용은 기존 정책이고 관리자 조정도 같다.
  */
 @Service
 @RequiredArgsConstructor
@@ -41,9 +41,7 @@ public class ChangeGwangsanService implements ChangeGwangsanUseCase {
 
     @Override
     public void adjust(long memberId, int delta) {
-        int current = gwangsanBalancePort.lockBalance(memberId);
-        int applied = Math.max(0, current + delta) - current;
-        apply(memberId, applied, GwangsanLedgerType.ADMIN_ADJUST, null);
+        apply(memberId, delta, GwangsanLedgerType.ADMIN_ADJUST, null);
     }
 
     private void apply(long memberId, int delta, GwangsanLedgerType type, Long refId) {
