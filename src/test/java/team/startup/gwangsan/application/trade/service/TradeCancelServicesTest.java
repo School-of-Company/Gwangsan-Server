@@ -296,7 +296,7 @@ class TradeCancelServicesTest {
             assertThat(cancel.status()).isEqualTo(TradeCancelStatus.APPROVED);
             assertThat(trade.status()).isEqualTo(TradeStatus.ROLLED_BACK);
             InOrder order = inOrder(tradeMemberPort, tradeCancelPort, tradeCompletePort, tradeProductPort, tradeAlertPort, tradeStatusPort);
-            order.verify(tradeMemberPort).transfer(SELLER, BUYER, GWANGSAN);
+            order.verify(tradeMemberPort).transferForCancel(SELLER, BUYER, GWANGSAN, CANCEL);
             order.verify(tradeCancelPort).update(cancel);
             order.verify(tradeCompletePort).update(trade);
             order.verify(tradeProductPort).reopen(PRODUCT);
@@ -330,7 +330,7 @@ class TradeCancelServicesTest {
         @DisplayName("회원 상세가 없으면 NotFoundMemberDetailException 을 던지고 상태를 저장하지 않는다")
         void it_propagates_missing_member_detail() {
             when(tradeProductPort.find(PRODUCT)).thenReturn(new TradeProduct(PRODUCT, SELLER, true, ProductPhase.COMPLETED, GWANGSAN));
-            doThrow(new NotFoundMemberDetailException()).when(tradeMemberPort).transfer(SELLER, BUYER, GWANGSAN);
+            doThrow(new NotFoundMemberDetailException()).when(tradeMemberPort).transferForCancel(SELLER, BUYER, GWANGSAN, CANCEL);
 
             assertThatThrownBy(() -> realApplier().apply(pendingCancel(BUYER), completed()))
                     .isInstanceOf(NotFoundMemberDetailException.class);

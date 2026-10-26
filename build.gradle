@@ -145,6 +145,9 @@ tasks.named('test') {
 	environment 'DOCKER_API_VERSION', '1.41'
 	environment 'TESTCONTAINERS_API_VERSION', '1.41'
 	systemProperty 'api.version', '1.41'
+	// 벤치(@Tag("bench")) 반복 횟수. ./gradlew test -Dbench.iterations=30 처럼 넘긴다.
+	systemProperty 'bench.iterations', System.getProperty('bench.iterations', '1')
+	systemProperty 'bench.preSelect', System.getProperty('bench.preSelect', 'true')
 	// 전환 후 테스트 수·Spring context 캐시·ArchUnit import 로 기본 512m 에서 OOM 이 났다(PR12 최종 suite).
 	maxHeapSize = '1g'
 	finalizedBy jacocoTestReport

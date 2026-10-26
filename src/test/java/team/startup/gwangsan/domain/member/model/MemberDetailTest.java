@@ -14,42 +14,6 @@ class MemberDetailTest {
     }
 
     @Nested
-    @DisplayName("adjustGwangsan() 메서드는")
-    class Describe_adjustGwangsan {
-
-        @Test
-        @DisplayName("양수와 음수 조정 후 잔액을 반영한다")
-        void it_adjusts_gwangsan_with_positive_and_negative_delta() {
-            MemberDetail detail = memberDetail(100, 0);
-
-            detail.adjustGwangsan(50);
-            detail.adjustGwangsan(-30);
-
-            assertThat(detail.getGwangsan()).isEqualTo(120);
-        }
-
-        @Test
-        @DisplayName("정확히 0이 되는 조정을 유지한다")
-        void it_keeps_exactly_zero() {
-            MemberDetail detail = memberDetail(100, 0);
-
-            detail.adjustGwangsan(-100);
-
-            assertThat(detail.getGwangsan()).isZero();
-        }
-
-        @Test
-        @DisplayName("0 미만 조정은 0으로 제한한다")
-        void it_clamps_negative_balance_to_zero() {
-            MemberDetail detail = memberDetail(100, 0);
-
-            detail.adjustGwangsan(-101);
-
-            assertThat(detail.getGwangsan()).isZero();
-        }
-    }
-
-    @Nested
     @DisplayName("plusLight() 메서드는")
     class Describe_plusLight {
 

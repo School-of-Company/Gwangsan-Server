@@ -101,6 +101,17 @@ table tbl_feedback_image
   fk (feedback_id) -> tbl_feedback
   fk (image_id) -> tbl_image
   unique (feedback_id,image_id)
+table tbl_gwangsan_ledger
+  column amount integer not-null
+  column balance_after integer not-null
+  column created_at datetime(6) not-null
+  column ledger_id bigint not-null identity
+  column member_id bigint not-null
+  column ref_id bigint null
+  column type varchar(32) not-null
+  pk (ledger_id)
+  unique (type,ref_id,member_id)
+  index idx_ledger_member (member_id,ledger_id)
 table tbl_head_place
   column head_id integer not-null identity
   column name varchar(255) not-null unique
@@ -302,6 +313,7 @@ mapped tbl_chat_room
 mapped tbl_dong
 mapped tbl_feedback
 mapped tbl_feedback_image
+mapped tbl_gwangsan_ledger
 mapped tbl_head_place
 mapped tbl_image
 mapped tbl_member

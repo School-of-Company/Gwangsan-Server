@@ -17,6 +17,7 @@ CHAT_MESSAGE_INVALID_CONTENT	400	메시지 내용을 입력해 주세요.
 CHAT_MESSAGE_NOT_TEXT	400	텍스트 메시지만 수정할 수 있습니다.
 DONG_NOT_FOUND	404	동이 존재하지 않습니다.
 DUMMY_MEMBER_DELETION_NOT_ALLOWED	403	더미 사용자는 삭제할 수 없습니다.
+DUPLICATE_GWANGSAN_LEDGER	409	이미 반영된 광산 이동입니다.
 DUPLICATE_NICKNAME	409	이미 존재하는 닉네임입니다.
 DUPLICATE_PHONE_NUMBER	409	이미 존재하는 전화번호입니다.
 EXPIRED_TOKEN	401	토큰이 만료되었습니다.
