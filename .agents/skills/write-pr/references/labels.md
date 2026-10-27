@@ -1,33 +1,45 @@
 # GitHub Labels Reference
 
-Select **1–2 labels** from the PR-eligible list below. Do NOT use issue-only or manual labels.
+Label names differ per repo, so **read the repo's own set first** and match against it:
 
-## PR-Eligible Labels (auto-selectable)
+```bash
+gh label list --limit 100
+```
 
-| Label               | When to use                                               |
-|---------------------|-----------------------------------------------------------|
-| `enhancement:개선작업`  | New feature, improvement to existing feature, refactoring |
-| `bug:버그`            | Bug fix                                                   |
-| `documentation:문서화` | Docs-only changes (README, CONTRIBUTING, comments)        |
-| `release:릴리즈`       | Release preparation or version bump                       |
+Select **1–2** by meaning. If nothing matches, attach none — an undefined label makes PR creation fail,
+and a wrong one is worse than no label.
+
+## Mapping Guide
+
+Match by meaning, not exact string. The middle column lists names seen across these repos; yours may
+differ in wording, language, or the `name:설명` suffix style.
+
+| Change | Names to look for | Fallback |
+|---|---|---|
+| New feature, improvement, refactoring | `enhancement`, `feature`, `개선작업` | the repo's most-used PR label |
+| Bug fix | `bug`, `fix`, `버그` | — |
+| Docs only (README, comments) | `documentation`, `docs`, `문서화` | — |
+| Release prep, version bump | `release`, `릴리즈` | — |
+| Build, CI, dependencies | `chore`, `ci`, `dependencies` | — |
 
 ## Off-limits Labels (do NOT assign)
 
+These are assigned by people, not by this skill. Names vary; the reason is what matters.
+
 | Label                      | Reason                                                                     |
-|----------------------------|----------------------------------------------------------------------------|
-| `waiting for review:검토 대기` | Applied manually by the author after the PR is ready — never auto-assigned |
-| `help wanted:도움 필요`        | Issues only                                                                |
-| `invalid:무효한`              | Issues only                                                                |
-| `duplicate:중복`             | Issues only                                                                |
-| `GFI:첫 기여 추천`              | Issues only                                                                |
-| `blocked:차단됨`              | Applied manually when blocked by another PR/issue                          |
+| Label kind | Names to look for | Reason |
+|---|---|---|
+| Review state | `waiting for review`, `검토 대기`, `needs review` | The author applies it when the PR is ready |
+| Contribution invites | `help wanted`, `good first issue`, `GFI` | Issues only |
+| Triage verdicts | `invalid`, `duplicate`, `wontfix` | Issues only |
+| Blocked | `blocked`, `차단됨`, `on hold` | Applied by a person when another PR/issue blocks this one |
 
 ## Quick Decision
 
 ```
-Bug fix?          → bug:버그
-New feature or improvement? → enhancement:개선작업
-Docs only?        → documentation:문서화
-Release?          → release:릴리즈
-Unsure?           → enhancement:개선작업
+Bug fix?                      → the repo's bug-ish label
+New feature or improvement?   → the repo's enhancement-ish label
+Docs only?                    → the repo's documentation-ish label
+Release?                      → the repo's release-ish label
+Nothing fits?                 → no label (never invent one — PR creation fails on an unknown label)
 ```
