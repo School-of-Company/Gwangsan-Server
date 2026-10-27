@@ -1,0 +1,1727 @@
+{
+  "uid": "gwangsan-data",
+  "title": "05 · MariaDB·Redis",
+  "description": "데이터 저장소 상태. exporter는 읽기 전용 계정 생성 후 활성화된다.",
+  "tags": [
+    "gwangsan"
+  ],
+  "timezone": "Asia/Seoul",
+  "weekStart": "monday",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "graphTooltip": 1,
+  "editable": false,
+  "liveNow": false,
+  "fiscalYearStartMonth": 0,
+  "schemaVersion": 41,
+  "version": 1,
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "gwangsan"
+      ],
+      "asDropdown": true,
+      "title": "광산 운영 관제",
+      "keepTime": true,
+      "includeVars": true,
+      "icon": "external link",
+      "targetBlank": false
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "label": "환경",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "query": {
+          "query": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+          "refId": "env"
+        },
+        "definition": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "text",
+      "title": "활성화 상태",
+      "options": {
+        "mode": "markdown",
+        "content": "- 지표는 최소 권한 모니터링 계정과 `db-redis.alloy`를 배치한 뒤 수집됩니다.\n- 그 전에는 모든 패널이 `미수집`입니다. 장애도 정상도 아닙니다.\n- Redis Streams 처리 상태는 04 화면(API 집계)에서 봅니다."
+      },
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 6
+      }
+    },
+    {
+      "id": 2,
+      "type": "row",
+      "title": "MariaDB",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "DB 상태",
+      "description": "정의: exporter의 DB 접속 성공\n출처: mysqld_exporter mysql_up\n단위: 정상/실패\n집계 창: 30초\n결측 처리: 미활성 → 미수집\n이상 시 확인: MariaDB응답없음 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_up{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "정상",
+                  "color": "green",
+                  "index": 0
+                },
+                "0": {
+                  "text": "수집 실패",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 3,
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "연결 사용률",
+      "description": "정의: 연결 수 / max_connections\n출처: global_status·variables\n단위: %\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 02 · Hikari",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_global_status_threads_connected{service=\"mariadb\",environment=~\"$environment\"}) / max(mysql_global_variables_max_connections{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0.7
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 8,
+        "y": 7,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "쿼리/초",
+      "description": "정의: 서버 전체 쿼리 수/초\n출처: mysql_global_status_queries\n단위: 건/초\n집계 창: 5분\n결측 처리: -\n이상 시 확인: 슬로 쿼리",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(mysql_global_status_queries{service=\"mariadb\",environment=~\"$environment\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 5,
+      "gridPos": {
+        "x": 16,
+        "y": 7,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "슬로 쿼리 (1시간)",
+      "description": "정의: long_query_time 초과 쿼리 증가분(본문 미수집)\n출처: mysql_global_status_slow_queries\n단위: 건\n집계 창: 1시간\n결측 처리: -\n이상 시 확인: DB 서버 slow log(운영자 확인)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(increase(mysql_global_status_slow_queries{service=\"mariadb\",environment=~\"$environment\"}[1h]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 6,
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "버퍼풀 적중률",
+      "description": "정의: InnoDB 버퍼풀 논리 읽기 중 디스크 읽기 제외 비율\n출처: innodb_buffer_pool_reads·read_requests\n단위: %\n집계 창: 5분\n결측 처리: 읽기 0건이면 계산 불가\n이상 시 확인: 06 · 디스크 I/O",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "1 - sum(rate(mysql_global_status_innodb_buffer_pool_reads{service=\"mariadb\",environment=~\"$environment\"}[5m])) / (sum(rate(mysql_global_status_innodb_buffer_pool_read_requests{service=\"mariadb\",environment=~\"$environment\"}[5m])) > 0)",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "요청 없음·미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0.9
+              },
+              {
+                "color": "green",
+                "value": 0.99
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "요청 없음·미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 7,
+      "gridPos": {
+        "x": 8,
+        "y": 11,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "가동 시간",
+      "description": "정의: MariaDB 가동 시간\n출처: mysql_global_status_uptime\n단위: 초\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 재시작 여부",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_global_status_uptime{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 8,
+      "gridPos": {
+        "x": 16,
+        "y": 11,
+        "w": 8,
+        "h": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "연결·스레드",
+      "description": "정의: 연결·실행 스레드\n출처: mysql_global_status_threads_*\n단위: 개\n집계 창: 30초\n결측 처리: -\n이상 시 확인: 02 · Hikari",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_global_status_threads_connected{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "연결"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_global_status_threads_running{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "B",
+          "legendFormat": "실행 중"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(mysql_global_variables_max_connections{service=\"mariadb\",environment=~\"$environment\"})",
+          "refId": "C",
+          "legendFormat": "max_connections"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:개",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 9,
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "잠금 대기·데드락",
+      "description": "정의: InnoDB 행 잠금 대기와 데드락 발생률\n출처: innodb_row_lock_waits, innodb_deadlocks(MariaDB)\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: -\n이상 시 확인: 04 · 저장 시도 결과",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(mysql_global_status_innodb_row_lock_waits{service=\"mariadb\",environment=~\"$environment\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "행 잠금 대기/초"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(mysql_global_status_innodb_deadlocks{service=\"mariadb\",environment=~\"$environment\"}[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "데드락/초"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 10,
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "id": 11,
+      "type": "row",
+      "title": "Redis",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Redis 상태",
+      "description": "정의: exporter의 Redis 접속 성공\n출처: redis_exporter redis_up\n단위: 정상/실패\n집계 창: 30초\n결측 처리: 미활성 → 미수집\n이상 시 확인: Redis응답없음 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_up{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "정상",
+                  "color": "green",
+                  "index": 0
+                },
+                "0": {
+                  "text": "수집 실패",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 12,
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "메모리 사용",
+      "description": "정의: Redis used_memory\n출처: redis_memory_used_bytes\n단위: 바이트\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 메모리 추세",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_memory_used_bytes{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 13,
+      "gridPos": {
+        "x": 4,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "명령/초",
+      "description": "정의: 처리 명령 수/초\n출처: redis_commands_processed_total\n단위: 건/초\n집계 창: 5분\n결측 처리: -\n이상 시 확인: 명령 추세",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(redis_commands_processed_total{service=\"redis\",environment=~\"$environment\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 14,
+      "gridPos": {
+        "x": 8,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "연결 수",
+      "description": "정의: 연결된 클라이언트 수\n출처: redis_connected_clients\n단위: 개\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: Blocked 클라이언트",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_connected_clients{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:개",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 15,
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "키 축출(1h)",
+      "description": "정의: 메모리 정책에 의한 키 축출\n출처: redis_evicted_keys_total\n단위: 건\n집계 창: 1시간\n결측 처리: -\n이상 시 확인: maxmemory·Streams MAXLEN 정책",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(increase(redis_evicted_keys_total{service=\"redis\",environment=~\"$environment\"}[1h]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 16,
+      "gridPos": {
+        "x": 16,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "RDB 저장",
+      "description": "정의: 마지막 BGSAVE 성공 여부(영속화 사용 시)\n출처: redis_rdb_last_bgsave_status\n단위: 성공/실패\n집계 창: 현재값\n결측 처리: RDB를 쓰지 않으면 의미 없음\n이상 시 확인: Redis 설정",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_rdb_last_bgsave_status{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "성공",
+                  "color": "green",
+                  "index": 0
+                },
+                "0": {
+                  "text": "실패",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 17,
+      "gridPos": {
+        "x": 20,
+        "y": 24,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 메모리",
+      "description": "정의: 사용 메모리와 maxmemory(설정 시)\n출처: redis_memory_*_bytes\n단위: 바이트\n집계 창: 30초\n결측 처리: maxmemory=0(무제한)이면 상한 선 없음\n이상 시 확인: Eviction",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_memory_used_bytes{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "Redis 사용"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_memory_max_bytes{service=\"redis\",environment=~\"$environment\"} > 0)",
+          "refId": "B",
+          "legendFormat": "Redis maxmemory"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 18,
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis 클라이언트·명령",
+      "description": "정의: blocked는 Streams 블로킹 읽기로 정상적으로 존재할 수 있음\n출처: redis_exporter\n단위: 개 / 건/초\n집계 창: 30초\n결측 처리: -\n이상 시 확인: 04 · Streams",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_connected_clients{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "Redis 연결"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(redis_blocked_clients{service=\"redis\",environment=~\"$environment\"})",
+          "refId": "B",
+          "legendFormat": "Redis blocked(XREADGROUP BLOCK 포함)"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(redis_commands_processed_total{service=\"redis\",environment=~\"$environment\"}[$__rate_interval]))",
+          "refId": "C",
+          "legendFormat": "Redis 명령/초"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Redis 연결"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Redis blocked(XREADGROUP BLOCK 포함)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Redis 명령/초"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 19,
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      }
+    }
+  ]
+}

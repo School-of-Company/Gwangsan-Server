@@ -1,0 +1,104 @@
+# 부하 비교 전용 격리 스택. baseline/instrumented 가 같은 인프라·자원 제한을 쓴다.
+# 값은 run-load.sh 가 환경변수로 넣는다. 외부 엔드포인트 없음, 포트는 127.0.0.1 에만 연다.
+name: gw-load
+
+services:
+  redis:
+    image: redis:7-alpine
+    cpus: 1
+    mem_limit: 512m
+
+  mariadb:
+    image: mariadb:11
+    cpus: 2
+    mem_limit: 1g
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: gwangsan_db
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      retries: 60
+
+  tempo:
+    image: grafana/tempo:3.1.1
+    cpus: 1
+    mem_limit: 1g
+    command: ["-config.file=/etc/tempo/tempo.yml", "-target=all"]
+    volumes:
+      - ../../tempo.yml:/etc/tempo/tempo.yml:ro
+    ports: ["127.0.0.1:23200:3200"]
+
+  alloy:
+    image: grafana/alloy:v1.21.2
+    cpus: 0.5
+    mem_limit: 256m
+    command: ["run", "/etc/alloy/config.alloy"]
+    environment:
+      TEMPO_TUNNEL_ENDPOINT: http://tempo:4318
+    volumes:
+      - ../alloy-test.alloy:/etc/alloy/config.alloy:ro
+
+  api:
+    image: eclipse-temurin:21-jre-alpine
+    cpus: 2
+    mem_limit: 1536m
+    depends_on:
+      mariadb: { condition: service_healthy }
+      redis: { condition: service_started }
+    command: ["java", "-jar", "/app/app.jar"]
+    volumes:
+      - ${API_JAR:?API_JAR}:/app/app.jar:ro
+      - ${OTEL_AGENT:-/dev/null}:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      JAVA_TOOL_OPTIONS: ${API_JAVA_TOOL_OPTIONS:-}
+      SPRING_PROFILES_ACTIVE: test
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      JWT_ACCESS_SECRET: load-test-secret-at-least-32-bytes-long
+      RDB_HOST: mariadb
+      RDB_PORT: "3306"
+      RDB_SCHEMA: gwangsan_db
+      DB_USER: root
+      DB_PASSWORD: password
+      INSTANCE_ID: api-load
+      MANAGEMENT_SERVER_PORT: "9091"
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_SERVICE_NAME: gwangsan-api
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=loadtest
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_PROPAGATORS: tracecontext,baggage
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: ${SAMPLER_ARG:-1.0}
+      OTEL_INSTRUMENTATION_LETTUCE_ENABLED: "false"  # 릴리스 env 와 동일(JWT 키 노출 방지)
+    ports: ["127.0.0.1:28080:8080", "127.0.0.1:29091:9091"]
+
+  chat:
+    image: node:22-alpine
+    cpus: 1
+    mem_limit: 512m
+    depends_on: [api]
+    working_dir: /app
+    command: ${CHAT_CMD:?CHAT_CMD}
+    volumes:
+      - ${CHAT_DIR:?CHAT_DIR}:/app:ro
+    tmpfs:
+      - /app/logs  # winston 파일 로거용. 앱 디렉터리는 읽기 전용
+    environment:
+      PORT: "3000"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SPRING_SERVER_URL: http://api:8080
+      JWT_ACCESS_SECRET: load-test-secret-at-least-32-bytes-long
+      INTERNAL_API_SECRET: load-internal-secret
+      OTEL_SDK_DISABLED: ${OTEL_SDK_DISABLED:-true}
+      OTEL_SERVICE_NAME: gwangsan-chat
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      DEPLOYMENT_ENVIRONMENT: loadtest
+      METRICS_PORT: ${CHAT_METRICS_PORT:-off}
+      METRICS_HOST: 0.0.0.0
+    ports: ["127.0.0.1:23000:3000", "127.0.0.1:29464:9464"]

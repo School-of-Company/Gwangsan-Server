@@ -1,0 +1,1284 @@
+{
+  "uid": "gwangsan-api",
+  "title": "01 · API 요청·외부 연동",
+  "description": "Spring API 처리량·오류·지연, 외부 호출, 관련 로그·트레이스.",
+  "tags": [
+    "gwangsan"
+  ],
+  "timezone": "Asia/Seoul",
+  "weekStart": "monday",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "graphTooltip": 1,
+  "editable": false,
+  "liveNow": false,
+  "fiscalYearStartMonth": 0,
+  "schemaVersion": 41,
+  "version": 1,
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "gwangsan"
+      ],
+      "asDropdown": true,
+      "title": "광산 운영 관제",
+      "keepTime": true,
+      "includeVars": true,
+      "icon": "external link",
+      "targetBlank": false
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "name": "앱 재시작(배포 추정)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "enable": true,
+        "iconColor": "#FF9830",
+        "expr": "changes(process_start_time_seconds{service=~\"gwangsan-api|gwangsan-chat\",environment=~\"$environment\"}[2m]) > 0",
+        "step": "1m",
+        "titleFormat": "{{service}} 재시작",
+        "textFormat": "프로세스 시작 시각 변경"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "label": "환경",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "query": {
+          "query": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+          "refId": "env"
+        },
+        "definition": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      },
+      {
+        "name": "uri",
+        "label": "경로 템플릿",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "query": {
+          "query": "label_values(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\"}, uri)",
+          "refId": "uri"
+        },
+        "definition": "label_values(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\"}, uri)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "처리량",
+      "description": "정의: 완료된 HTTP 요청/초\n출처: http_server_requests_seconds_count\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: 미수집과 0(요청 없음)을 구분\n이상 시 확인: 아래 상태 코드 분포",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "4xx 비율",
+      "description": "정의: 5분 4.. 응답 비율\n출처: http_server_requests_seconds_count{status}\n단위: %\n집계 창: 5분\n결측 처리: 요청 0건이면 계산하지 않음\n이상 시 확인: 오류 경로 순위, API 오류 로그",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\",status=~\"4..\"}[5m])) / (sum(rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[5m])) > 0)",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "요청 없음·미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.3
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "요청 없음·미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 2,
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "5xx 비율",
+      "description": "정의: 5분 5.. 응답 비율\n출처: http_server_requests_seconds_count{status}\n단위: %\n집계 창: 5분\n결측 처리: 요청 0건이면 계산하지 않음\n이상 시 확인: 오류 경로 순위, API 오류 로그",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\",status=~\"5..\"}[5m])) / (sum(rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[5m])) > 0)",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "요청 없음·미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "요청 없음·미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 3,
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "처리 중 요청",
+      "description": "정의: 현재 처리 중인 요청 수\n출처: Micrometer http_server_requests_active (LongTaskTimer)\n단위: 개\n집계 창: 현재값\n결측 처리: Spring 버전·설정상 미노출이면 '미수집'\n이상 시 확인: 02 · JVM·Spring의 Tomcat 스레드",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(http_server_requests_active_seconds_active_count{service=\"gwangsan-api\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:개",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "응답 시간 백분위",
+      "description": "정의: 경로 필터 적용 후 합산 히스토그램 백분위\n출처: http_server_requests_seconds_bucket\n단위: 초\n집계 창: 5분\n결측 처리: 표본이 적으면 p99는 해석 제한\n이상 시 확인: 느린 경로 순위, 07 · 트레이스",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(http_server_requests_seconds_bucket{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[5m])))",
+          "refId": "A",
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[5m])))",
+          "refId": "B",
+          "legendFormat": "p95"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[5m])))",
+          "refId": "C",
+          "legendFormat": "p99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 5,
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "상태 코드별 요청",
+      "description": "정의: HTTP 상태 코드별 요청/초\n출처: http_server_requests_seconds_count\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: 미수집 구간은 선 없음\n이상 시 확인: 오류 경로 순위",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 6,
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "느린 경로 Top 10 (p95)",
+      "description": "정의: 선택 기간 경로 템플릿별 p95\n출처: http_server_requests_seconds_bucket\n단위: 초\n집계 창: 선택한 시간 범위\n결측 처리: 요청이 없는 경로는 제외\n이상 시 확인: 07 · 트레이스에서 느린 trace 검색",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "topk(10, histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\"}[$__range]))))",
+          "refId": "A",
+          "legendFormat": "__auto",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "해당 없음",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "firing": {
+                  "text": "발생",
+                  "color": "red",
+                  "index": 0
+                },
+                "pending": {
+                  "text": "대기(지속 조건 확인 중)",
+                  "color": "#FF9830",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "경로 템플릿"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "renameByName": {
+              "uri": "경로 템플릿",
+              "Value": "p95"
+            },
+            "includeByName": {
+              "uri": true,
+              "Value": true
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "p95",
+            "desc": true
+          }
+        ]
+      },
+      "id": 7,
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "오류 경로 Top 10 (5xx)",
+      "description": "정의: 선택 기간 5xx 발생 경로\n출처: http_server_requests_seconds_count\n단위: 건\n집계 창: 선택한 시간 범위\n결측 처리: 5xx가 없으면 '해당 없음'\n이상 시 확인: 아래 API 오류 로그",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "topk(10, sum by (uri, status) (increase(http_server_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",uri=~\"$uri\",status=~\"5..\"}[$__range])) > 0)",
+          "refId": "A",
+          "legendFormat": "__auto",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "해당 없음",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "firing": {
+                  "text": "발생",
+                  "color": "red",
+                  "index": 0
+                },
+                "pending": {
+                  "text": "대기(지속 조건 확인 중)",
+                  "color": "#FF9830",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "경로 템플릿"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "건수"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "건수"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "renameByName": {
+              "uri": "경로 템플릿",
+              "status": "상태",
+              "Value": "건수"
+            },
+            "includeByName": {
+              "uri": true,
+              "status": true,
+              "Value": true
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "건수",
+            "desc": true
+          }
+        ]
+      },
+      "id": 8,
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "외부·내부 연동 (HTTP 클라이언트)",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "title": "연동 호출 p95",
+      "description": "정의: RestClient/RestTemplate 등 관측된 외부 호출(채팅 내부 HTTP 포함)\n출처: http_client_requests_seconds_bucket\n단위: 초\n집계 창: 5분\n결측 처리: 클라이언트 관측이 없으면 '미수집'\n이상 시 확인: 07 · 트레이스",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le, client_name) (rate(http_client_requests_seconds_bucket{service=\"gwangsan-api\",environment=~\"$environment\"}[5m])))",
+          "refId": "A",
+          "legendFormat": "{{client_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 10,
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "연동 실패/초",
+      "description": "정의: SUCCESS 외 결과의 외부 호출/초\n출처: http_client_requests_seconds_count{outcome}\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: 실패가 없으면 선 없음\n이상 시 확인: API 오류 로그",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum by (client_name, status) (rate(http_client_requests_seconds_count{service=\"gwangsan-api\",environment=~\"$environment\",outcome!=\"SUCCESS\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{client_name}} {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 11,
+      "gridPos": {
+        "x": 12,
+        "y": 21,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "logs",
+      "title": "API 오류 로그",
+      "description": "정의: API 컨테이너 ERROR 로그. JSON 로그의 trace_id는 상세 보기에서 Tempo로 연결\n출처: 기존 Promtail → Loki (container 라벨 유지)\n단위: -\n집계 창: 선택한 시간 범위(최대 200줄)\n결측 처리: 구형 평문 로그에는 trace 링크 없음\n이상 시 확인: 07 · 로그·분산 추적",
+      "datasource": {
+        "type": "loki",
+        "uid": "gwangsan-loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "gwangsan-loki"
+          },
+          "expr": "{container=\"gwangsan-container\", level=\"ERROR\"}",
+          "refId": "A",
+          "queryType": "range",
+          "maxLines": 200
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showCommonLabels": false
+      },
+      "id": 12,
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 10
+      }
+    }
+  ]
+}

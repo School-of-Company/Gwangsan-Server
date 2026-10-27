@@ -1,0 +1,206 @@
+# cd prometheus && promtool test rules gwangsan-alerts.test.yml
+rule_files:
+  - rules/gwangsan-alerts.yml
+evaluation_interval: 1m
+
+tests:
+  # 저장 정체: pending은 있는데 성공 커밋 카운터가 멈춤 → 발생, 다시 증가하면 해제.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_stream_pending{environment="production",group="chat-message-persistors"}'
+        values: '5x15'
+      - series: 'gwangsan_chat_persist_attempts_total{environment="production",outcome="success"}'
+        values: '10x6 10+5x9'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: 채팅저장처리정체
+        exp_alerts:
+          - exp_labels: {environment: production, severity: 장애, source: aws, runbook: chat-persist-stalled}
+            exp_annotations:
+              summary: "[광산][장애] 채팅 저장 처리 정체"
+              description: "대기 메시지가 있는데 2분 동안 저장 성공이 없습니다. 소비자·DB·Redis 상태를 확인하세요."
+              dashboard: /d/gwangsan-streams
+      - eval_time: 10m
+        alertname: 채팅저장처리정체
+        exp_alerts: []
+
+  # lag 미노출(unread 없음) + 성공 카운터 자체가 없음(재시작 직후) → pending만으로 발생.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_stream_pending{environment="production",group="g"}'
+        values: '3x10'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: 채팅저장처리정체
+        exp_alerts:
+          - exp_labels: {environment: production, severity: 장애, source: aws, runbook: chat-persist-stalled}
+            exp_annotations:
+              summary: "[광산][장애] 채팅 저장 처리 정체"
+              description: "대기 메시지가 있는데 2분 동안 저장 성공이 없습니다. 소비자·DB·Redis 상태를 확인하세요."
+              dashboard: /d/gwangsan-streams
+
+  # unread=NaN(lag null)이어도 pending>0이면 발생. NaN을 0이나 정상으로 취급하지 않는다.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_stream_unread{environment="production",group="rooms"}'
+        values: 'NaN NaN NaN NaN NaN NaN NaN'
+      - series: 'gwangsan_stream_pending{environment="production",group="rooms"}'
+        values: '4x6'
+      - series: 'gwangsan_chat_persist_attempts_total{environment="production",outcome="success"}'
+        values: '7x6'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: 채팅저장처리정체
+        exp_alerts:
+          - exp_labels: {environment: production, severity: 장애, source: aws, runbook: chat-persist-stalled}
+            exp_annotations:
+              summary: "[광산][장애] 채팅 저장 처리 정체"
+              description: "대기 메시지가 있는데 2분 동안 저장 성공이 없습니다. 소비자·DB·Redis 상태를 확인하세요."
+              dashboard: /d/gwangsan-streams
+
+  # 대기 0이면 커밋이 없어도(무트래픽) 경보 없음.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_stream_pending{environment="production",group="g"}'
+        values: '0x10'
+      - series: 'gwangsan_stream_unread{environment="production",group="g"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: 채팅저장처리정체
+        exp_alerts: []
+
+  # API 5xx: 충분한 표본(분당 60요청, 10% 5xx) → 발생. 표본 부족(분당 5요청, 40% 5xx) → 없음.
+  - interval: 1m
+    input_series:
+      - series: 'http_server_requests_seconds_count{service="gwangsan-api",environment="production",status="200",uri="/api/post"}'
+        values: '0+54x15'
+      - series: 'http_server_requests_seconds_count{service="gwangsan-api",environment="production",status="500",uri="/api/post"}'
+        values: '0+6x15'
+      - series: 'http_server_requests_seconds_count{service="gwangsan-api",environment="staging",status="200",uri="/api/post"}'
+        values: '0+3x15'
+      - series: 'http_server_requests_seconds_count{service="gwangsan-api",environment="staging",status="503",uri="/api/post"}'
+        values: '0+2x15'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: API응답오류증가
+        exp_alerts:
+          - exp_labels: {environment: production, severity: 장애, source: aws, runbook: api-5xx}
+            exp_annotations:
+              summary: "[광산][장애] API 5xx 비율 증가"
+              description: "5분 5xx 비율 10% (최소 100요청 조건 충족)."
+              dashboard: /d/gwangsan-api
+
+  # DLQ 신규 유입 → 즉시 발생, 5분 뒤 증가 없으면 해제. 보관량(XLEN)이 아니라 counter 증가만 본다.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_chat_dlq_total{environment="production",outcome="success"}'
+        values: '0 0 1 1 1 1 1 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: 채팅최종실패발생
+        exp_alerts:
+          - exp_labels: {environment: production, severity: 장애, source: aws, runbook: chat-dlq}
+            exp_annotations:
+              summary: "[광산][장애] 채팅 메시지 DLQ 이동"
+              description: "최근 5분 DLQ 이동 1건. 실패 trace와 API 오류 로그를 확인하세요."
+              dashboard: /d/gwangsan-streams
+      - eval_time: 9m
+        alertname: 채팅최종실패발생
+        exp_alerts: []
+
+  # DLQ 인계 실패(outcome=failure)만 증가 → 'DLQ 이동' 경보 없음. 같은 시점 success 증가가 있으면 발생.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_chat_dlq_total{environment="production",outcome="failure"}'
+        values: '0 0 3 3 3 3 3 3'
+      - series: 'gwangsan_chat_dlq_total{environment="staging",outcome="failure"}'
+        values: '0 0 2 2 2 2 2 2'
+      - series: 'gwangsan_chat_dlq_total{environment="staging",outcome="success"}'
+        values: '0 0 2 2 2 2 2 2'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: 채팅최종실패발생
+        exp_alerts:
+          - exp_labels: {environment: staging, severity: 장애, source: aws, runbook: chat-dlq}
+            exp_annotations:
+              summary: "[광산][장애] 채팅 메시지 DLQ 이동"
+              description: "최근 5분 DLQ 이동 2건. 실패 trace와 API 오류 로그를 확인하세요."
+              dashboard: /d/gwangsan-streams
+
+  # AWS 수집 경로: remote_write 샘플이 끊기면 발생.
+  - interval: 1m
+    input_series:
+      - series: 'up{collector="gwangsan-aws-alloy",job="gwangsan-api",service="gwangsan-api",instance="gwangsan-api",environment="production"}'
+        values: '1 1 1 1 _ _ _ _ _ _ _ _'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AWS수집경로중단
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: AWS수집경로중단
+        exp_alerts:
+          - exp_labels: {collector: gwangsan-aws-alloy, severity: 장애, source: school, runbook: aws-collection-down}
+            exp_annotations:
+              summary: "[광산][장애] AWS 메트릭 수집 경로 중단"
+              description: "최근 3분 동안 AWS Alloy remote_write 샘플이 도착하지 않았습니다. 터널·Alloy·학교 Prometheus 수신을 확인하세요. 앱 장애로 단정하지 않습니다."
+              dashboard: /d/gwangsan-telemetry
+
+  # Streams 집계 신선도: 타임스탬프가 멈추면 발생.
+  - interval: 1m
+    input_series:
+      - series: 'gwangsan_stream_snapshot_timestamp_seconds{environment="production",group="g"}'
+        values: '0+60x2 120x10'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: Streams집계지연
+        exp_alerts: []
+      - eval_time: 7m
+        alertname: Streams집계지연
+        exp_alerts:
+          - exp_labels: {environment: production, group: g, severity: 주의, source: aws, runbook: stream-snapshot-stale}
+            exp_annotations:
+              summary: "[광산][주의] Streams 집계 g 갱신 지연"
+              description: "마지막 정상 집계가 5m 0s 전입니다. 대기 건수 화면 값은 오래된 값입니다."
+              dashboard: /d/gwangsan-streams
+
+  # 디스크 여유 15% ext4 → 5분 후 발생. 여유 80% xfs는 미발생.
+  # 영구 디스크 fstype allowlist 밖(tmpfs·erofs·fakeowner)과 /etc bind mount는 여유 0~5%여도 제외.
+  - interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/",fstype="ext4"}'
+        values: '15x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/",fstype="ext4"}'
+        values: '100x10'
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/run",fstype="tmpfs"}'
+        values: '1x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/run",fstype="tmpfs"}'
+        values: '100x10'
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/data",fstype="xfs"}'
+        values: '80x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/data",fstype="xfs"}'
+        values: '100x10'
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/oldroot",fstype="erofs"}'
+        values: '0x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/oldroot",fstype="erofs"}'
+        values: '100x10'
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/run/host_mark/Users",fstype="fakeowner"}'
+        values: '5x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/run/host_mark/Users",fstype="fakeowner"}'
+        values: '100x10'
+      - series: 'node_filesystem_avail_bytes{environment="production",instance="aws-app-host",mountpoint="/etc/hosts",fstype="ext4"}'
+        values: '1x10'
+      - series: 'node_filesystem_size_bytes{environment="production",instance="aws-app-host",mountpoint="/etc/hosts",fstype="ext4"}'
+        values: '100x10'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: 저장공간부족
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: 저장공간부족
+        exp_alerts:
+          - exp_labels: {environment: production, instance: aws-app-host, mountpoint: /, severity: 주의, runbook: disk-low}
+            exp_annotations:
+              summary: "[광산][주의] aws-app-host / 여유 공간 부족"
+              description: "사용 가능 공간 15%. 보관 기간·로그·이미지 정리를 검토하세요."
+              dashboard: /d/gwangsan-hosts
