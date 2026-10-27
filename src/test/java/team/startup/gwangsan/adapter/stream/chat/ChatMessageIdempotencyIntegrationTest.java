@@ -1,5 +1,7 @@
 package team.startup.gwangsan.adapter.stream.chat;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.opentelemetry.api.OpenTelemetry;
 import com.google.gson.Gson;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -173,7 +175,7 @@ class ChatMessageIdempotencyIntegrationTest {
         props.setDlqKey("chat:dlq:messages");
         adapter = new ChatStreamRedisAdapter(redisTemplate, props, new Gson());
         adapter.init();
-        processor = new ChatStreamMessageProcessor(service, adapter, props, new Gson());
+        processor = new ChatStreamMessageProcessor(service, adapter, props, new Gson(), new ChatStreamTelemetry(OpenTelemetry.noop(), new SimpleMeterRegistry()));
         worker = new ChatStreamConsumerWorker(adapter, processor, props);
     }
 
@@ -532,7 +534,7 @@ class ChatMessageIdempotencyIntegrationTest {
         assertThat(redisTemplate.opsForStream().pending(stream, props.getGroup(), Range.unbounded(), 10L)
                 .iterator().next().getConsumerName()).isEqualTo("restarted-consumer");
         ChatStreamMessageProcessor restartedProcessor = new ChatStreamMessageProcessor(
-                service, restarted, props, new Gson());
+                service, restarted, props, new Gson(), new ChatStreamTelemetry(OpenTelemetry.noop(), new SimpleMeterRegistry()));
         ChatStreamConsumerWorker restartedWorker = new ChatStreamConsumerWorker(restarted, restartedProcessor, props);
         restartedWorker.reclaimPendingMessages();
         assertThat(pendingCount()).isZero();
@@ -574,7 +576,7 @@ class ChatMessageIdempotencyIntegrationTest {
             return null;
         };
         ChatStreamMessageProcessor failingProcessor = new ChatStreamMessageProcessor(
-                failureAfterSave, adapter, props, new Gson());
+                failureAfterSave, adapter, props, new Gson(), new ChatStreamTelemetry(OpenTelemetry.noop(), new SimpleMeterRegistry()));
         ChatStreamConsumerWorker failingWorker = new ChatStreamConsumerWorker(adapter, failingProcessor, props);
         acl("-xadd");
         try {

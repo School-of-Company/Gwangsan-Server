@@ -80,7 +80,7 @@ class TradeCancelConcurrencyTest {
         registry.add("spring.datasource.username", mariadb::getUsername);
         registry.add("spring.datasource.password", mariadb::getPassword);
         registry.add("spring.datasource.driver-class-name", mariadb::getDriverClassName);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create"); // 일회용 컨테이너: 종료 시 drop 은 이미 멈춘 DB 를 기다리며 JVM 종료를 막는다
     }
 
     // 거래 쓰기 wiring 의 푸시 bridge 가 Redis 저장소를 요구한다. 철회 경로는 푸시를 보내지 않는다.

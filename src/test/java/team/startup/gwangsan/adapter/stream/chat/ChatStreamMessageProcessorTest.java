@@ -1,5 +1,7 @@
 package team.startup.gwangsan.adapter.stream.chat;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.opentelemetry.api.OpenTelemetry;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +60,7 @@ class ChatStreamMessageProcessorTest {
         when(props.getDlqKey()).thenReturn(dlqKey);
         when(props.getRetryMax()).thenReturn(5);
 
-        processor = new ChatStreamMessageProcessor(saveChatMessageUseCase, redisAdapter, props, new Gson());
+        processor = new ChatStreamMessageProcessor(saveChatMessageUseCase, redisAdapter, props, new Gson(), new ChatStreamTelemetry(OpenTelemetry.noop(), new SimpleMeterRegistry()));
     }
 
     @Nested

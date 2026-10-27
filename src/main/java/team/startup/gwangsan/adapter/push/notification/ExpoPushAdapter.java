@@ -98,7 +98,6 @@ public class ExpoPushAdapter implements PushSenderPort {
                     permanentFailure.set(true);
                     return null;
                 }
-                log.info("[Expo] 응답: {}", response);
                 TicketResult result = readTickets(response, targets.get());
                 if (result.permanentErrors() > 0) permanentFailure.set(true);
                 if (!result.retryTokens().isEmpty()) {
@@ -108,8 +107,8 @@ public class ExpoPushAdapter implements PushSenderPort {
                 return null;
             });
         } catch (Exception e) {
-            log.error("[Expo] 최종 실패: kind=TRANSIENT, type={}, sourceId={}, tokens={}, cause={}",
-                    message.type(), message.sourceId(), targets.get().size(), e.getMessage(), e);
+            log.error("[Expo] 최종 실패: kind=TRANSIENT, type={}, sourceId={}, tokens={}, error_type={}",
+                    message.type(), message.sourceId(), targets.get().size(), e.getClass().getName(), e);
             return false;
         }
         if (permanentFailure.get()) {
@@ -196,8 +195,8 @@ public class ExpoPushAdapter implements PushSenderPort {
                         ? ticket.getAsJsonObject("details")
                         : null;
                 String error = details == null ? null : asString(details, "error");
-                log.warn("[Expo] ticket error: message={}, error={}, details={}",
-                        asString(ticket, "message"), error, details);
+                // ticket message/details 에는 device token 이 들어 있어 error 코드만 남긴다.
+                log.warn("[Expo] ticket error: error={}", error);
                 if (aligned && TRANSIENT_TICKET_ERRORS.contains(error)) {
                     retry.add(tokens.get(i));
                 } else {
@@ -206,7 +205,7 @@ public class ExpoPushAdapter implements PushSenderPort {
             }
             return new TicketResult(permanent, retry);
         } catch (Exception e) {
-            log.warn("[Expo] 응답 파싱 실패: {}", e.getMessage());
+            log.warn("[Expo] 응답 파싱 실패: error_type={}", e.getClass().getName());
             return TicketResult.OK;
         }
     }

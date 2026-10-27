@@ -128,11 +128,16 @@ public class ChatStreamRedisAdapter {
         return result;
     }
 
-    public void ack(String streamKey, RecordId recordId) {
+    /**
+     * XACK 가 실제로 지운 pending 수(0 이면 이미 pending 이 아니었다). 실패는 기존처럼 삼키되 null 을 돌려
+     * metric 이 성공으로 세지 않게 한다.
+     */
+    public Long ack(String streamKey, RecordId recordId) {
         try {
-            streamOps().acknowledge(streamKey, props.getGroup(), recordId);
+            return streamOps().acknowledge(streamKey, props.getGroup(), recordId);
         } catch (Exception e) {
-            log.error("[ChatStream] ACK failed for {} in {}: {}", recordId, streamKey, e.getMessage());
+            log.error("[ChatStream] ACK failed for {} in {}: {}", recordId, streamKey, e.getClass().getName());
+            return null;
         }
     }
 
@@ -154,6 +159,9 @@ public class ChatStreamRedisAdapter {
         fields.put("payload", gson.toJson(record.getValue()));
         fields.put("errorMessage", truncate(errorMessage, 500));
         fields.put("failedAt", String.valueOf(System.currentTimeMillis()));
+        // 생성 시점 trace context 를 그대로 옮긴다(실패한 소비 시도의 context 가 아니다).
+        copyIfPresent(record.getValue(), fields, ChatStreamField.TRACEPARENT);
+        copyIfPresent(record.getValue(), fields, ChatStreamField.TRACESTATE);
         streamOps().add(StreamRecords.newRecord().in(props.getDlqKey()).ofMap(fields));
     }
 
@@ -164,6 +172,11 @@ public class ChatStreamRedisAdapter {
                 Duration.ofMillis(props.getClaimIdleMs()),
                 recordId
         );
+    }
+
+    private void copyIfPresent(Map<String, String> from, Map<String, String> to, String key) {
+        String value = from.get(key);
+        if (value != null) to.put(key, value);
     }
 
     private StreamOperations<String, String, String> streamOps() {
