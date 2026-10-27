@@ -1,7 +1,9 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      # create 는 기동 시 drop 후 생성한다. create-drop 의 종료 시 drop 은 Testcontainers DB 가 먼저 내려가면
+      # Hikari 연결을 기다리며 JVM shutdown hook 을 붙잡는다(기준선 teardown hang).
+      ddl-auto: create
     show-sql: false
   sql:
     init:
@@ -58,3 +60,8 @@ ai:
     url: ""
     connect-timeout: 100ms
     read-timeout: 100ms
+
+management:
+  server:
+    # 여러 테스트 context 가 동시에 떠도 포트가 겹치지 않게 한다.
+    port: 0

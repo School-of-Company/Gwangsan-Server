@@ -1,0 +1,21 @@
+# 운영 기본값: 외부 발송 없음. 메신저/메일 발송은 별도 승인 후 receivers에 추가한다.
+# 경보는 Grafana '경보' 화면과 00·서비스 현황의 진행 중 경보 패널에서 확인한다.
+route:
+  receiver: 보류-외부발송없음
+  group_by: [alertname, service, environment]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: 보류-외부발송없음
+  # 승인 후 예시(URL은 비밀 파일로 관리):
+  # - name: 운영-웹훅
+  #   webhook_configs:
+  #     - url_file: /etc/alertmanager/secrets/webhook_url
+  #       send_resolved: true
+
+inhibit_rules:
+  # 수집 경로 자체가 끊기면 그 경로에 의존하는 개별 대상 경보는 억제한다.
+  - source_matchers: [alertname="AWS수집경로중단"]
+    target_matchers: [source="aws"]

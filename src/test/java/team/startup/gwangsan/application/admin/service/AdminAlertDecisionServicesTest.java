@@ -193,7 +193,7 @@ class AdminAlertDecisionServicesTest {
             givenAdmins(members, places);
             when(alerts.findByIdAndType(ALERT_ID, AlertType.SIGN_UP)).thenReturn(Optional.of(alert(AlertType.SIGN_UP, 20L)));
             when(members.loadSignUpTarget(20L)).thenReturn(new SignUpTarget(20L, "010", place, 4L));
-            when(members.rewardRecommender(4L, 5000)).thenReturn(44L);
+            when(members.rewardRecommender(4L, 20L, 5000)).thenReturn(44L);
             when(members.takeWithdrawnGwangsan("010")).thenReturn(withdrawn);
         }
 
@@ -204,7 +204,7 @@ class AdminAlertDecisionServicesTest {
 
             service.execute(new AdminAlertCommand(PLACE_ADMIN, ALERT_ID));
 
-            verify(members).plusGwangsan(20L, 3200);
+            verify(members).creditSignUpReward(20L, 3200);
         }
 
         @Test
@@ -215,9 +215,9 @@ class AdminAlertDecisionServicesTest {
             service.execute(new AdminAlertCommand(PLACE_ADMIN, ALERT_ID));
 
             InOrder order = inOrder(members, alerts, notifications);
-            order.verify(members).rewardRecommender(4L, 5000);
+            order.verify(members).rewardRecommender(4L, 20L, 5000);
             order.verify(members).activate(20L);
-            order.verify(members).plusGwangsan(20L, 10000);
+            order.verify(members).creditSignUpReward(20L, 10000);
             order.verify(alerts).delete(ALERT_ID);
             order.verify(notifications).notifyMember(20L, 44L, MemberAlertKind.RECOMMENDER);
         }

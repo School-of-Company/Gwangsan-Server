@@ -15,4 +15,6 @@ public class ChatStreamProperties {
     private int retryMax;
     private String retryKey;
     private String dlqKey;
+    // backlog snapshot 한 번에 보는 방 stream 최대 수. 넘으면 부분 집계로 표시한다.
+    private int snapshotMaxKeys = 1000;
 }

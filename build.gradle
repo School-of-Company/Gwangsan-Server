@@ -18,6 +18,8 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	// agentTest 에서만 -javaagent 로 붙인다. 앱 classpath 에는 들어가지 않는다.
+	otelAgent
 }
 
 repositories {
@@ -87,6 +89,13 @@ dependencies {
 
     // retry
     implementation("org.springframework.retry:spring-retry")
+
+	// observability: 런타임 SDK·자동계측은 OpenTelemetry Java agent 가 제공한다. 앱은 API 만 쓴다.
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'io.opentelemetry:opentelemetry-api'
+	testImplementation 'io.opentelemetry:opentelemetry-sdk-testing'
+	otelAgent 'io.opentelemetry.javaagent:opentelemetry-javaagent:2.33.1'
 }
 
 jacoco {
@@ -139,13 +148,36 @@ jacocoTestCoverageVerification {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'otel-agent'
+	}
 	// Docker Engine 29 는 API 1.40 미만을 거부한다. docker-java 가 기본으로 고르는 버전이
 	// 그보다 낮아 Testcontainers 가 /info 에서 400 을 받으므로 명시한다.
 	environment 'DOCKER_API_VERSION', '1.41'
 	environment 'TESTCONTAINERS_API_VERSION', '1.41'
 	systemProperty 'api.version', '1.41'
+	// 벤치(@Tag("bench")) 반복 횟수. ./gradlew test -Dbench.iterations=30 처럼 넘긴다.
+	systemProperty 'bench.iterations', System.getProperty('bench.iterations', '1')
+	systemProperty 'bench.preSelect', System.getProperty('bench.preSelect', 'true')
 	// 전환 후 테스트 수·Spring context 캐시·ArchUnit import 로 기본 512m 에서 OOM 이 났다(PR12 최종 suite).
 	maxHeapSize = '1g'
 	finalizedBy jacocoTestReport
+}
+
+// 운영과 같은 OpenTelemetry Java agent 를 붙여 @Async·HTTP client context 전파를 확인한다. exporter 는 끈다.
+tasks.register('agentTest', Test) {
+	description = 'Runs otel-agent tagged tests with the OpenTelemetry Java agent attached.'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'otel-agent'
+	}
+	jvmArgumentProviders.add({ [
+			"-javaagent:${configurations.otelAgent.singleFile}",
+			'-Dotel.service.name=gwangsan-api-agent-test',
+			'-Dotel.traces.exporter=none',
+			'-Dotel.metrics.exporter=none',
+			'-Dotel.logs.exporter=none',
+	] } as CommandLineArgumentProvider)
 }

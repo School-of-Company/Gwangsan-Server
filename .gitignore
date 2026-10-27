@@ -50,3 +50,6 @@ src/main/resources/firebase-service-account.json
 
 ### GCP ###
 src/main/resources/google-service-account.json
+
+# Local agent plans, evidence, and runtime artifacts
+/.omo/

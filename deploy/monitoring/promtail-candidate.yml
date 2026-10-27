@@ -1,0 +1,44 @@
+# 2026-10-26 AWS 적용분(API 전용 multiline) + 2026-10-27 JSON 로그 대응 후보(운영 미적용).
+# 라벨은 기존 container/stream/level만 유지한다. trace_id·span_id는 본문 JSON 필드로 남기고 라벨로 만들지 않는다.
+# pipeline_stages는 파일 끝에 둔다(test-promtail-pipeline.sh가 이 위치부터 잘라 쓴다).
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+positions:
+  filename: /tmp/positions.yaml
+clients:
+  - url: http://ssh.gsmsv.site:26129/loki/api/v1/push
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        regex: '/(.*)'
+        target_label: container
+      - source_labels: [__meta_docker_container_log_stream]
+        target_label: stream
+    pipeline_stages:
+      - match:
+          selector: '{container="gwangsan-container"}'
+          stages:
+            - multiline:
+                # 구형 날짜 시작 줄, 한 줄 JSON, OTel Java agent stderr 줄([otel.javaagent 날짜 ...]).
+                # 새 항목 시작으로 인식해야 이전 스택트레이스에 붙거나 예전 시각을 재사용하지 않는다.
+                firstline: '^(\d{4}-\d{2}-\d{2}|\{|\[otel\.javaagent \d{4}-\d{2}-\d{2})'
+                max_wait_time: 3s
+      - regex:
+          expression: '.*(?P<level>ERROR|WARN|INFO).*'
+      # 신형 JSON(API·채팅): 본문 속 단어 대신 level 필드를 쓴다. 허용 값 밖은 기존 추출값 유지.
+      - match:
+          selector: '{container=~"gwangsan-container|gwangsan-chat"} |~ "^\\{"'
+          stages:
+            - json:
+                expressions:
+                  json_level: level
+            - template:
+                source: level
+                template: '{{ $l := ToUpper .json_level }}{{ if or (eq $l "ERROR") (eq $l "WARN") (eq $l "INFO") (eq $l "DEBUG") }}{{ $l }}{{ else if eq $l "WARNING" }}WARN{{ else }}{{ with .level }}{{ . }}{{ end }}{{ end }}'
+      - labels:
+          level:

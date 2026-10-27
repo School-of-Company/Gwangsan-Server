@@ -7,6 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
 
+    INVALID_FEEDBACK(400, "문의 내용, 이미지 또는 상태가 올바르지 않습니다."),
+    NOT_FOUND_FEEDBACK(404, "문의 내역을 찾을 수 없습니다."),
+    FORBIDDEN_FEEDBACK(403, "해당 문의에 접근할 권한이 없습니다."),
+
     APP_VERSION_UNAVAILABLE(503, "앱 버전 정보가 아직 준비되지 않았습니다."),
 
     // token
@@ -22,6 +26,7 @@ public enum ErrorCode {
     NOT_FOUND_DUMMY_MEMBER(404, "더미 사용자가 존재하지 않습니다."),
     NOT_FOUND_RECOMMENDER(404, "추천인이 존재하지 않습니다."),
     NOT_FOUND_MEMBER_DETAIL(404, "회원 상세 정보를 찾을 수 없습니다."),
+    DUPLICATE_GWANGSAN_LEDGER(409, "이미 반영된 광산 이동입니다."),
     NOT_ALLOWED_USER_ACCESS(403, "사용자 목록 조회 권한이 없습니다."),
 
     // dong & place

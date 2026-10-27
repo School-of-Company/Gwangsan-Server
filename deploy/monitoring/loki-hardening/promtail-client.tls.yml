@@ -1,0 +1,9 @@
+# 준비만 함: Loki 프록시 적용 후 promtail-candidate.yml의 clients 항목을 이 형태로 바꾼다.
+clients:
+  - url: https://ssh.gsmsv.site:26129/loki/api/v1/push
+    basic_auth:
+      username: gwangsan-promtail
+      password_file: /etc/promtail/secrets/loki_push_password
+    tls_config:
+      ca_file: /etc/promtail/secrets/loki-ca.crt
+      server_name: ssh.gsmsv.site

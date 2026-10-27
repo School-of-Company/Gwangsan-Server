@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -17,6 +18,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -47,6 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.jpa.hibernate.ddl-auto=create"})
 @ActiveProfiles("test")
 @Testcontainers
+// 테스트는 기본으로 metric export(Prometheus registry)를 끈다. 실제 scrape 형식을 보려고 켠다.
+@AutoConfigureObservability(tracing = false)
 @DisplayName("전체 애플리케이션 기동과 인증 경계")
 class ApplicationContextStartupIntegrationTest {
 
@@ -95,6 +99,8 @@ class ApplicationContextStartupIntegrationTest {
     RequestMappingHandlerAdapter handlerAdapter;
     @LocalServerPort
     int port;
+    @LocalManagementPort
+    int managementPort;
 
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
@@ -136,8 +142,58 @@ class ApplicationContextStartupIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("Actuator 는 내부 management 포트에서만")
+    class Describe_actuator {
+
+        @Test
+        @DisplayName("it_prometheus 로 JVM·Hikari·HTTP histogram·Tomcat·executor·stream snapshot metric 을 낸다")
+        void it_exposes_prometheus_on_management_port() throws Exception {
+            get("/api/health", null);
+
+            HttpResponse<String> response = get(managementPort, "/actuator/prometheus", null);
+
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.body())
+                    .contains("jvm_memory_used_bytes")
+                    .contains("hikaricp_connections_active")
+                    .contains("http_server_requests_seconds_bucket")
+                    .contains("le=\"0.005\"")
+                    .contains("tomcat_threads_busy_threads")
+                    .contains("executor_active_threads")
+                    .contains("gwangsan_stream_snapshot_success{group=\"rooms\"}")
+                    .contains("gwangsan_stream_snapshot_timestamp_seconds{group=\"retry\"}")
+                    .contains("gwangsan_chat_publish_to_commit_seconds_bucket")
+                    .doesNotContain("service=\"").doesNotContain("instance=\"");
+        }
+
+        @Test
+        @DisplayName("it_health 는 상세 없이 열고 그 밖의 endpoint 는 노출하지 않는다")
+        void it_limits_exposure() throws Exception {
+            HttpResponse<String> health = get(managementPort, "/actuator/health", null);
+
+            assertThat(health.statusCode()).isEqualTo(200);
+            assertThat(health.body()).doesNotContain("details").doesNotContain("components");
+            assertThat(get(managementPort, "/actuator/env", null).statusCode()).isNotEqualTo(200);
+        }
+
+        @Test
+        @DisplayName("it_API 포트에서는 metric 을 내지 않는다")
+        void it_does_not_expose_metrics_on_api_port() throws Exception {
+            HttpResponse<String> response = get("/actuator/prometheus", null);
+
+            assertThat(response.statusCode()).isNotEqualTo(200);
+            assertThat(response.body()).doesNotContain("jvm_memory_used_bytes");
+            assertThat(managementPort).isNotEqualTo(port);
+        }
+    }
+
     private HttpResponse<String> get(String path, String authorization) throws Exception {
-        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).GET();
+        return get(port, path, authorization);
+    }
+
+    private HttpResponse<String> get(int targetPort, String path, String authorization) throws Exception {
+        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create("http://localhost:" + targetPort + path)).GET();
         if (authorization != null) {
             request.header("Authorization", authorization);
         }

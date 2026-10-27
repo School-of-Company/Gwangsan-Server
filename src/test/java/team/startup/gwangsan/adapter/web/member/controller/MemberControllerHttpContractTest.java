@@ -10,11 +10,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import team.startup.gwangsan.application.member.data.MemberProfile;
 import team.startup.gwangsan.application.member.data.MyInfoResult;
 import team.startup.gwangsan.application.member.data.UpdateMyInfoCommand;
+import team.startup.gwangsan.application.member.data.UpdateMyPlaceCommand;
 import team.startup.gwangsan.application.member.data.UserInfoResult;
 import team.startup.gwangsan.application.member.port.in.FindAllUserInfoQuery;
 import team.startup.gwangsan.application.member.port.in.FindMyInfoQuery;
 import team.startup.gwangsan.application.member.port.in.FindUserInfoQuery;
 import team.startup.gwangsan.application.member.port.in.UpdateMyInfoUseCase;
+import team.startup.gwangsan.application.member.port.in.UpdateMyPlaceUseCase;
+import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.DuplicateMemberNicknameException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
@@ -40,6 +43,7 @@ class MemberControllerHttpContractTest {
     private MockMvc mvc;
     private FindMyInfoQuery findMyInfo;
     private UpdateMyInfoUseCase updateMyInfo;
+    private UpdateMyPlaceUseCase updateMyPlace;
     private FindUserInfoQuery findUserInfo;
     private FindAllUserInfoQuery findAllUserInfo;
     private WithdrawMemberUseCase withdrawal;
@@ -48,11 +52,12 @@ class MemberControllerHttpContractTest {
     void setUp() {
         findMyInfo = mock(FindMyInfoQuery.class);
         updateMyInfo = mock(UpdateMyInfoUseCase.class);
+        updateMyPlace = mock(UpdateMyPlaceUseCase.class);
         findUserInfo = mock(FindUserInfoQuery.class);
         findAllUserInfo = mock(FindAllUserInfoQuery.class);
         withdrawal = mock(WithdrawMemberUseCase.class);
-        mvc = MockMvcBuilders.standaloneSetup(new MemberController(findMyInfo, updateMyInfo, findUserInfo,
-                        findAllUserInfo, withdrawal))
+        mvc = MockMvcBuilders.standaloneSetup(new MemberController(findMyInfo, updateMyInfo, updateMyPlace,
+                        findUserInfo, findAllUserInfo, withdrawal))
                 .setCustomArgumentResolvers(new FixedActorResolver(ACTOR))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -105,6 +110,33 @@ class MemberControllerHttpContractTest {
     }
 
     @Nested
+    @DisplayName("PATCH /api/member/place 는")
+    class Describe_update_place {
+
+        @Test
+        @DisplayName("it_인증 실행자로 command 를 만들고 빈 200 을 반환한다")
+        void it_updates_place_with_actor() throws Exception {
+            mvc.perform(patch("/api/member/place").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"placeId\":4}"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(""));
+
+            verify(updateMyPlace).execute(new UpdateMyPlaceCommand(ACTOR, 4));
+        }
+
+        @Test
+        @DisplayName("it_존재하지 않는 지점은 기존 404 오류 본문으로 응답한다")
+        void it_maps_place_not_found() throws Exception {
+            doThrow(new PlaceNotFoundException()).when(updateMyPlace).execute(any());
+
+            mvc.perform(patch("/api/member/place").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"placeId\":999}"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().json("{\"status\":404,\"message\":\"장소가 존재하지 않습니다.\"}", true));
+        }
+    }
+
+    @Nested
     @DisplayName("회원 조회는")
     class Describe_queries {
 
@@ -125,17 +157,20 @@ class MemberControllerHttpContractTest {
         }
 
         @Test
-        @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 배열을 반환한다")
+        @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 회원별 placeName 을 포함한 배열을 반환한다")
         void it_serializes_admin_list() throws Exception {
             when(findAllUserInfo.query(ACTOR, "회원A", null)).thenReturn(List.of(new MemberProfile(2L, "회원A", "이름",
-                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, "지점", null, null, 1, 100, "")));
+                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, "지점", null, null, 1, 100, ""),
+                    new MemberProfile(3L, "회원A2", "이름2", "01000000000", MemberRole.ROLE_USER, MemberStatus.ACTIVE,
+                            JOINED_AT, "수완지점", null, null, 1, 0, "")));
 
             mvc.perform(get("/api/member/all").param("nickname", "회원A"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].memberId").value(2))
                     .andExpect(jsonPath("$[0].status").value("PENDING"))
                     .andExpect(jsonPath("$[0].gwangsan").value(100))
-                    .andExpect(jsonPath("$[0].placeName").doesNotExist());
+                    .andExpect(jsonPath("$[0].placeName").value("지점"))
+                    .andExpect(jsonPath("$[1].placeName").value("수완지점"));
         }
     }
 

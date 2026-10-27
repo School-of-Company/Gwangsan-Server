@@ -1,129 +1,186 @@
-name: CI/CD
+name: Release API (manual)
 
+# push/PR 은 ci.yml 검증만 수행한다. 운영 배포는 이 워크플로를 수동 실행하고
+# production environment 승인을 거쳐야만 진행된다.
+# 순서: API(Redis 소비자) 먼저, chat(생산자)은 API 배포 확인 후 (docs/observability/release/README.md).
 on:
-  push:
-    branches: ["develop"]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "배포하려면 deploy-api 입력"
+        required: true
+      image_ref:
+        description: "롤백/재배포용 기존 이미지 (계정.dkr.ecr.ap-northeast-2.amazonaws.com/gwangsan-app@sha256:...). 비우면 이 커밋을 테스트·빌드"
+        required: false
+        default: ""
+      otel_enabled:
+        description: "OpenTelemetry 에이전트 활성화 (false = 계측 롤백)"
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+      otel_sampler_arg:
+        description: "루트 트레이스 샘플링 비율 (0~1)"
+        required: true
+        default: "0.1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-api
+  cancel-in-progress: false
 
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: gwangsan-app
-  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
 jobs:
-  ci-cd:
+  guard:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Validate inputs
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          IMAGE_REF: ${{ inputs.image_ref }}
+          SAMPLER: ${{ inputs.otel_sampler_arg }}
+          REF: ${{ github.ref }}
+        run: |
+          [ "$CONFIRM" = "deploy-api" ] || { echo "::error::confirm 값이 deploy-api 가 아님"; exit 1; }
+          case "$REF" in refs/heads/develop|refs/heads/main) ;; *) echo "::error::develop/main 에서만 배포"; exit 1;; esac
+          echo "$SAMPLER" | grep -Eq '^(0(\.[0-9]+)?|1(\.0+)?)$' || { echo "::error::otel_sampler_arg 는 0~1"; exit 1; }
+          # 형식만 먼저 거른다. 계정·저장소·digest 실존은 deploy job 이 AWS 인증 후 검증한다.
+          if [ -n "$IMAGE_REF" ]; then
+            echo "$IMAGE_REF" | grep -Eq "^[0-9]{12}\.dkr\.ecr\.${AWS_REGION}\.amazonaws\.com/${ECR_REPOSITORY}@sha256:[0-9a-f]{64}$" \
+              || { echo "::error::image_ref 는 ${ECR_REPOSITORY}@sha256 digest 참조여야 함"; exit 1; }
+          fi
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
+  test:
+    needs: guard
+    if: inputs.image_ref == ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: "21"
           distribution: "temurin"
+          cache: gradle
+      - name: Run tests
+        run: |
+          chmod +x gradlew
+          # agentTest: 운영과 같은 OTel Java agent 를 붙인 context 전파 테스트(A, build.gradle)
+          ./gradlew test agentTest
+      - name: Upload test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-test-reports
+          path: |
+            build/test-results/test/**/*.xml
+            build/test-results/agentTest/**/*.xml
+            build/reports/tests/test/
+            build/reports/tests/agentTest/
+          retention-days: 14
+      - name: Release script regression test
+        run: bash scripts/release/test-deploy-container.sh
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      image_ref: ${{ steps.push.outputs.image_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
           aws-region: ${{ env.AWS_REGION }}
-
       - name: Download Firebase service account from S3
         run: |
           mkdir -p src/main/resources
           aws s3 cp s3://gwangsan-githubaction/firebase-service-account.json src/main/resources/firebase-service-account.json
-
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
-
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build Docker image and push to ECR
-        id: build-image
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+      - name: Build and push immutable image
+        id: push
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          # 테스트는 test job 에서 이미 통과했다. Dockerfile 빌드 단계는 같은 소스를 -x test 로 패키징한다.
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          ref=$(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE")
+          echo "$ref" | grep -Eq '@sha256:[0-9a-f]{64}$'
+          echo "image_ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "pushed $ref" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create appspec and scripts
+  deploy:
+    needs: [guard, build]
+    if: >-
+      always() && needs.guard.result == 'success' &&
+      (needs.build.result == 'success' || (inputs.image_ref != '' && needs.build.result == 'skipped'))
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Verify image belongs to this AWS account and repository
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_REF: ${{ inputs.image_ref || needs.build.outputs.image_ref }}
         run: |
-          mkdir -p codedeploy/scripts
-
-          cat > codedeploy/appspec.yml << EOF
+          # 수동 입력 image_ref 도 빌드 결과와 같은 기준으로: 인증된 계정·이 리전·설정 저장소의 실존 digest 만 허용
+          account=$(aws sts get-caller-identity --query Account --output text)
+          expected="${account}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
+          [ "${IMAGE_REF%%@*}" = "$expected" ] || { echo "::error::image_ref 는 ${expected}@sha256:... 이어야 함"; exit 1; }
+          digest=${IMAGE_REF#*@}
+          echo "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$' || { echo "::error::digest 형식 오류"; exit 1; }
+          aws ecr describe-images --repository-name "$ECR_REPOSITORY" --image-ids "imageDigest=$digest" \
+            --region "$AWS_REGION" --query 'imageDetails[0].imageDigest' --output text | grep -qx "$digest" \
+            || { echo "::error::$ECR_REPOSITORY 에 $digest 이미지가 없음"; exit 1; }
+      - name: Create CodeDeploy bundle
+        env:
+          IMAGE_REF: ${{ inputs.image_ref || needs.build.outputs.image_ref }}
+          OTEL_ENABLED: ${{ inputs.otel_enabled }}
+          OTEL_SAMPLER: ${{ inputs.otel_sampler_arg }}
+        run: |
+          mkdir -p codedeploy/scripts/release
+          cp scripts/release/deploy-container.sh codedeploy/scripts/release/
+          printf 'IMAGE_REF=%s\nIMAGE_REPOSITORY=%s\nOTEL_ENABLED=%s\nOTEL_TRACES_SAMPLER_ARG=%s\nAWS_REGION=%s\n' \
+            "$IMAGE_REF" "$ECR_REPOSITORY" "$OTEL_ENABLED" "$OTEL_SAMPLER" "$AWS_REGION" > codedeploy/scripts/release/release.env
+          cat > codedeploy/appspec.yml <<'EOF'
           version: 0.0
           os: linux
           hooks:
             AfterInstall:
-              - location: scripts/deploy.sh
-                timeout: 180
+              - location: scripts/release/deploy-container.sh
+                timeout: 600
                 runas: root
           EOF
-
-          cat > codedeploy/scripts/deploy.sh << EOF
-          #!/bin/bash
-          export PATH=\$PATH:/usr/local/bin:/usr/bin
-          /usr/local/bin/aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-          docker stop gwangsan-container || true
-          docker rm gwangsan-container || true
-
-          docker run -d \\
-            --name gwangsan-container \\
-            -p 8080:8080 \\
-            -e TZ=Asia/Seoul \\
-            --env-file /home/ubuntu/.env \\
-            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-          docker system prune -f
-          EOF
-
-          chmod +x codedeploy/scripts/deploy.sh
-
-      - name: Zip codedeploy bundle
+          cat codedeploy/scripts/release/release.env >> "$GITHUB_STEP_SUMMARY"
+          (cd codedeploy && zip -r ../deploy.zip .)
+      - name: Deploy via CodeDeploy and wait
         run: |
-          cd codedeploy
-          zip -r ../deploy.zip .
-
-      - name: Upload to S3
-        run: |
-          aws s3 cp deploy.zip s3://gwangsan-githubaction/codedeploy/deploy.zip
-
-      - name: Deploy via CodeDeploy
-        run: |
-          aws deploy create-deployment \
+          key="codedeploy/gwangsan-api-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.zip"
+          aws s3 cp deploy.zip "s3://gwangsan-githubaction/$key"
+          id=$(aws deploy create-deployment \
             --application-name gwangsan-app \
             --deployment-group-name gwangsan-deployment-group \
-            --s3-location bucket=gwangsan-githubaction,key=codedeploy/deploy.zip,bundleType=zip \
-            --region ${{ env.AWS_REGION }}
-
-      - name: ✅ Discord Notification - 배포 성공
-        if: success()
+            --s3-location "bucket=gwangsan-githubaction,key=$key,bundleType=zip" \
+            --region "$AWS_REGION" --query deploymentId --output text)
+          echo "CodeDeploy $id" >> "$GITHUB_STEP_SUMMARY"
+          aws deploy wait deployment-successful --deployment-id "$id" --region "$AWS_REGION"
+      - name: Discord notification
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
         run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"content": "✅ ECR push and CodeDeploy deployment succeeded!"}' \
-               ${{ env.DISCORD_WEBHOOK_URL }}
-
-      - name: ❌ Discord Notification - 배포 실패
-        if: failure()
-        run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"content": "❌ ECR push or CodeDeploy deployment failed."}' \
-               ${{ env.DISCORD_WEBHOOK_URL }}
+          [ -n "$DISCORD_WEBHOOK_URL" ] || exit 0
+          if [ "$STATUS" = success ]; then msg="✅ [gwangsan-api] 수동 배포 성공"; else msg="❌ [gwangsan-api] 수동 배포 실패"; fi
+          curl -fsS -H "Content-Type: application/json" -X POST -d "{\"content\": \"$msg\"}" "$DISCORD_WEBHOOK_URL" || true

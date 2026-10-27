@@ -41,6 +41,19 @@ class ExpoPushAdapterTest {
     private static final String T2 = "ExponentPushToken[bbb]";
     private static final PushMessage CHAT = PushMessage.byType(NotificationType.CHATTING, 5L);
 
+    @Test
+    @DisplayName("문의 답변 푸시는 feedbackId와 알림 유형을 실제 HTTP data로 전송한다")
+    void it_sends_feedback_navigation_data() {
+        respond(200, ok(1));
+        assertThat(adapter.send(PushMessage.byType(NotificationType.FEEDBACK_ANSWER, 449L), List.of(T1)))
+                .isEqualTo(PushOutcome.SENT);
+        var data = JsonParser.parseString(requests.getFirst()).getAsJsonArray().get(0)
+                .getAsJsonObject().getAsJsonObject("data");
+        assertThat(data.get("alertType").getAsString()).isEqualTo("FEEDBACK_ANSWER");
+        assertThat(data.get("feedbackId").getAsString()).isEqualTo("449");
+        assertThat(data.get("sourceId").getAsString()).isEqualTo("449");
+    }
+
     private HttpServer server;
     private final Deque<int[]> statuses = new ArrayDeque<>();
     private final Deque<String> bodies = new ArrayDeque<>();
