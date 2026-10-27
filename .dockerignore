@@ -1,0 +1,16 @@
+# Dockerfile은 gradle/, build.gradle, settings.gradle, gradlew, src/ 만 COPY 한다.
+# src/main/resources/firebase-service-account.json 은 CD에서 빌드 직전에 내려받으므로 제외하지 않는다.
+.git
+.github
+.gradle
+.idea
+.omo
+build
+deploy
+docs
+scripts
+codedeploy
+*.zip
+*.log
+.env
+.env.*

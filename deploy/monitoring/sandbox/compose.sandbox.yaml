@@ -1,0 +1,101 @@
+# 로컬 격리 검증 전용. 운영 Loki·AWS·학교 VM에 연결하지 않는다.
+# 사용: sandbox/run.sh up | verify | down  (compose.yaml 위에 덮어쓴다)
+services:
+  grafana:
+    ports: !override ["127.0.0.1:13000:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./sandbox/.run/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+
+  prometheus:
+    ports: !override ["127.0.0.1:19090:9090"]
+    volumes:
+      - ./sandbox/.run/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  tempo:
+    ports: !reset []
+
+  alertmanager:
+    ports: !override ["127.0.0.1:19093:9093"]
+    volumes:
+      - ./sandbox/alertmanager.sandbox.yml:/etc/alertmanager/alertmanager.yml:ro
+
+  # Docker Desktop VM은 / 가 shared/slave 마운트가 아니어서 rslave를 뺀다(운영 Linux는 원본 유지).
+  node-exporter:
+    volumes: !override ["/:/host:ro"]
+
+  # 테스트 전용 Loki(운영 Loki 대체 아님). 기존 운영 버전과 같은 2.9.0.
+  loki:
+    image: grafana/loki:2.9.0
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    mem_limit: 256m
+
+  alert-sink:
+    image: python:3.11-slim
+    command: ["python", "-u", "/sink/alert_sink.py"]
+    volumes:
+      - ./sandbox/alert_sink.py:/sink/alert_sink.py:ro
+      - ./sandbox/.run/alerts:/alerts
+
+  # ---- AWS 역할 ----
+  alloy:
+    image: grafana/alloy:v1.21.2
+    user: "65534:65534"
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    mem_limit: 320m
+    cpus: 0.5
+    environment:
+      GOMEMLIMIT: 180MiB
+      TEMPO_TUNNEL_ENDPOINT: http://tempo:4318
+      PROMETHEUS_TUNNEL_ENDPOINT: http://prometheus:9090
+      DEPLOYMENT_ENVIRONMENT: sandbox
+      # A/B 통합 산출물이 없으므로 앱 대상은 이름만 있고 실제 프로세스가 없다 → up=0(수집 실패) 상태 검증.
+      API_METRICS_TARGET: gwangsan-api:9091
+      CHAT_METRICS_TARGET: ""
+      NODE_EXPORTER_TARGET: aws-node-exporter:9100
+      PROMTAIL_METRICS_TARGET: promtail:9080
+      REDIS_EXPORTER_ADDR: redis://redis:6379
+      REDIS_EXPORTER_USER: gwangsan-monitor
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12345", "--storage.path=/tmp/alloy", "/etc/alloy"]
+    volumes:
+      - ./aws/config.alloy:/etc/alloy/config.alloy:ro
+      - ./aws/db-redis.alloy:/etc/alloy/db-redis.alloy:ro
+      - ./sandbox/.run/secrets:/run/secrets:ro
+
+  aws-node-exporter:
+    image: prom/node-exporter:v1.10.2
+    command: ["--collector.disable-defaults", "--collector.cpu", "--collector.meminfo", "--collector.loadavg",
+              "--collector.filesystem", "--collector.netdev", "--collector.diskstats", "--collector.uname"]
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--aclfile", "/acl/users.acl"]
+    volumes:
+      - ./sandbox/.run/users.acl:/acl/users.acl:ro
+
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_root
+      MARIADB_DATABASE: gwangsan_db
+    volumes:
+      - ./sandbox/.run/secrets/mariadb_root:/run/secrets/mariadb_root:ro
+      - ./sandbox/.run/init:/docker-entrypoint-initdb.d:ro
+
+  # 합성 앱 로그(JSON·구형 혼합). 실제 사용자 데이터 없음.
+  gwangsan-container:
+    image: python:3.11-slim
+    container_name: gwangsan-container
+    labels: {gwangsan.sandbox: "api"}
+    command: ["python", "-u", "/gen/log_generator.py", "gwangsan-api"]
+    volumes: ["./sandbox/log_generator.py:/gen/log_generator.py:ro"]
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    command: ["-config.file=/etc/promtail/config.yml"]
+    volumes:
+      - ./sandbox/.run/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro

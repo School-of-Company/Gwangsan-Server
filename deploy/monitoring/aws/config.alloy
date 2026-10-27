@@ -1,0 +1,175 @@
+// AWS 앱 EC2의 단일 수집기.
+// 트레이스: 앱 OTLP HTTP → 학교 Tempo(기존 터널 14318).
+// 메트릭: 로컬 scrape → 학교 Prometheus remote_write(추가 터널 19090).
+// 로그는 기존 Promtail이 계속 담당한다. 여기서 로그를 수집하지 않는다.
+
+logging {
+  level = "info"
+}
+
+// ---------- 트레이스 (2026-10-27 운영 반영분과 동일) ----------
+
+otelcol.receiver.otlp "apps" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.processor.memory_limiter.traces.input]
+  }
+}
+
+otelcol.processor.memory_limiter "traces" {
+  check_interval = "1s"
+  limit = "192MiB"
+  spike_limit = "32MiB"
+  output {
+    traces = [otelcol.processor.batch.traces.input]
+  }
+}
+
+otelcol.processor.batch "traces" {
+  timeout = "1s"
+  send_batch_size = 128
+  send_batch_max_size = 256
+  output {
+    traces = [otelcol.exporter.otlphttp.school.input]
+  }
+}
+
+otelcol.exporter.otlphttp "school" {
+  client {
+    endpoint = sys.env("TEMPO_TUNNEL_ENDPOINT")
+    timeout = "5s"
+  }
+  sending_queue {
+    enabled = true
+    num_consumers = 2
+    queue_size = 200
+  }
+  retry_on_failure {
+    enabled = true
+    initial_interval = "1s"
+    max_interval = "10s"
+    max_elapsed_time = "5m"
+  }
+}
+
+// ---------- 메트릭 ----------
+// service/environment/instance 라벨은 대상마다 고정한다(계약).
+// 주소 환경변수가 비어 있으면 대상을 만들지 않는다. 비활성 대상을 up=0으로 위장하지 않는다.
+
+discovery.relabel "targets" {
+  targets = [
+    {
+      "__address__"      = sys.env("API_METRICS_TARGET"),
+      "__metrics_path__" = "/actuator/prometheus",
+      "job"              = "gwangsan-api",
+      "service"          = "gwangsan-api",
+      "instance"         = "gwangsan-api",
+    },
+    {
+      "__address__"      = sys.env("CHAT_METRICS_TARGET"),
+      "__metrics_path__" = "/metrics",
+      "job"              = "gwangsan-chat",
+      "service"          = "gwangsan-chat",
+      "instance"         = "gwangsan-chat",
+    },
+    {
+      "__address__"      = sys.env("NODE_EXPORTER_TARGET"),
+      "__metrics_path__" = "/metrics",
+      "job"              = "node",
+      "service"          = "aws-app-host",
+      "instance"         = "aws-app-host",
+    },
+    {
+      "__address__"      = sys.env("PROMTAIL_METRICS_TARGET"),
+      "__metrics_path__" = "/metrics",
+      "job"              = "promtail",
+      "service"          = "promtail",
+      "instance"         = "aws-promtail",
+    },
+  ]
+
+  rule {
+    source_labels = ["__address__"]
+    regex         = ""
+    action        = "drop"
+  }
+
+  rule {
+    target_label = "environment"
+    replacement  = coalesce(sys.env("DEPLOYMENT_ENVIRONMENT"), "production")
+  }
+}
+
+prometheus.scrape "aws" {
+  targets         = discovery.relabel.targets.output
+  scrape_interval = "15s"
+  scrape_timeout  = "10s"
+  forward_to      = [prometheus.remote_write.school.receiver]
+}
+
+// Alloy 자체 상태: 트레이스 전송 실패, remote_write 큐·실패, 구성 상태.
+prometheus.exporter.self "alloy" { }
+
+discovery.relabel "alloy_self" {
+  targets = prometheus.exporter.self.alloy.targets
+
+  rule {
+    target_label = "job"
+    replacement  = "alloy"
+  }
+  rule {
+    target_label = "service"
+    replacement  = "aws-alloy"
+  }
+  rule {
+    target_label = "instance"
+    replacement  = "aws-alloy"
+  }
+  rule {
+    target_label = "environment"
+    replacement  = coalesce(sys.env("DEPLOYMENT_ENVIRONMENT"), "production")
+  }
+}
+
+prometheus.scrape "alloy_self" {
+  targets         = discovery.relabel.alloy_self.output
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.school.receiver]
+}
+
+// 학교 Prometheus 127.0.0.1:9090 ← SSH 로컬 포워드(gwangsan-metrics-tunnel).
+// WAL: 컨테이너 tmpfs(64MiB) + max_keepalive 1h는 상한(hard budget)이지 보장 보관 기간이 아니다.
+// sandbox 1회 측정(3,216 시계열) 약 29B/시계열/분 → 1만 시계열·1시간 ≈17MiB는 미검증 추정.
+// tmpfs가 차거나 시계열이 많으면 1시간보다 일찍 유실될 수 있고, Alloy 재시작 시 WAL 전체가 사라진다.
+prometheus.remote_write "school" {
+  endpoint {
+    url            = sys.env("PROMETHEUS_TUNNEL_ENDPOINT") + "/api/v1/write"
+    remote_timeout = "10s"
+
+    queue_config {
+      capacity             = 2500
+      max_shards           = 2
+      min_shards           = 1
+      max_samples_per_send = 1000
+      batch_send_deadline  = "5s"
+      min_backoff          = "1s"
+      max_backoff          = "30s"
+    }
+
+    metadata_config {
+      send = true
+    }
+  }
+
+  wal {
+    truncate_frequency = "15m"
+    min_keepalive_time = "5m"
+    max_keepalive_time = "1h"
+  }
+
+  external_labels = {
+    collector = "gwangsan-aws-alloy",
+  }
+}

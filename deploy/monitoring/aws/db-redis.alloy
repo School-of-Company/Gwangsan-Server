@@ -1,0 +1,103 @@
+// 선택 파일: MariaDB·Redis 읽기 전용 계정과 비밀 파일을 만든 뒤에만 config.alloy와 같은 디렉터리에 둔다.
+// 이 파일이 없으면 DB/Redis 지표는 '미수집'으로 남는다(정상으로 위장하지 않음).
+// 계정·권한 템플릿: deploy/monitoring/exporters/.
+
+local.file "mysql_dsn" {
+  filename  = "/run/secrets/mysql_exporter_dsn"
+  is_secret = true
+}
+
+// mysqld_exporter 내장. DSN 형식: gwangsan_monitor:<비밀번호>@(<사설IP>:3306)/
+prometheus.exporter.mysql "main" {
+  data_source_name   = local.file.mysql_dsn.content
+  disable_collectors = ["slave_status"]
+}
+
+// redis_exporter 내장. 키 스캔 옵션(check_keys 등)은 쓰지 않는다. Streams 지표는 API가 담당한다.
+prometheus.exporter.redis "main" {
+  redis_addr          = sys.env("REDIS_EXPORTER_ADDR")
+  redis_user          = coalesce(sys.env("REDIS_EXPORTER_USER"), "gwangsan-monitor")
+  redis_password_file = "/run/secrets/redis_exporter_password"
+}
+
+discovery.relabel "mysql" {
+  targets = prometheus.exporter.mysql.main.targets
+  rule {
+    target_label = "job"
+    replacement  = "mysql"
+  }
+  rule {
+    target_label = "service"
+    replacement  = "mariadb"
+  }
+  rule {
+    target_label = "instance"
+    replacement  = "aws-mariadb"
+  }
+  rule {
+    target_label = "environment"
+    replacement  = coalesce(sys.env("DEPLOYMENT_ENVIRONMENT"), "production")
+  }
+}
+
+discovery.relabel "redis" {
+  targets = prometheus.exporter.redis.main.targets
+  rule {
+    target_label = "job"
+    replacement  = "redis"
+  }
+  rule {
+    target_label = "service"
+    replacement  = "redis"
+  }
+  rule {
+    target_label = "instance"
+    replacement  = "aws-redis"
+  }
+  rule {
+    target_label = "environment"
+    replacement  = coalesce(sys.env("DEPLOYMENT_ENVIRONMENT"), "production")
+  }
+}
+
+prometheus.scrape "db_redis" {
+  targets         = array.concat(discovery.relabel.mysql.output, discovery.relabel.redis.output)
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+  forward_to      = [prometheus.remote_write.school.receiver]
+}
+
+// DB·Redis EC2 호스트의 node_exporter(선택). exporters/node-exporter-run.sh로 사설 IP에만 바인딩한 뒤 주소를 넣는다.
+discovery.relabel "data_hosts" {
+  targets = [
+    {
+      "__address__" = sys.env("MARIADB_NODE_TARGET"),
+      "service"     = "aws-mariadb-host",
+      "instance"    = "aws-mariadb-host",
+    },
+    {
+      "__address__" = sys.env("REDIS_NODE_TARGET"),
+      "service"     = "aws-redis-host",
+      "instance"    = "aws-redis-host",
+    },
+  ]
+  rule {
+    source_labels = ["__address__"]
+    regex         = ""
+    action        = "drop"
+  }
+  rule {
+    target_label = "job"
+    replacement  = "node"
+  }
+  rule {
+    target_label = "environment"
+    replacement  = coalesce(sys.env("DEPLOYMENT_ENVIRONMENT"), "production")
+  }
+}
+
+prometheus.scrape "data_hosts" {
+  targets         = discovery.relabel.data_hosts.output
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.school.receiver]
+}
