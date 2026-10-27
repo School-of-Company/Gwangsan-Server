@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2329  # check()/trap 으로 간접 호출되는 함수들
+# shellcheck disable=SC2317,SC2329  # check()/trap 으로 간접 호출되는 함수들
 # 로컬 Docker 전용 회귀 테스트: 운영 이미지/레지스트리/AWS 를 쓰지 않고 공개 nginx digest 로
 # deploy-container.sh 의 digest·계정/저장소 검증, 네트워크 선검사·빈 값 생략, 관측 네트워크 연결,
 # env 우선순위, 인자 없는 CodeDeploy 훅 실행, 실패 주입(stop/rename/create/network connect/start/헬스)
