@@ -75,7 +75,7 @@ public class MemberController {
     ) {
         return ResponseEntity.ok(findAllUserInfoQuery.query(actor, nickname, placeName).stream()
                 .map(p -> new FindAllUserInfoResponse(p.memberId(), p.nickname(), p.name(), p.phoneNumber(),
-                        p.role(), p.status(), p.joinedAt(), p.gwangsan()))
+                        p.role(), p.status(), p.joinedAt(), p.gwangsan(), p.placeName()))
                 .toList());
     }
 

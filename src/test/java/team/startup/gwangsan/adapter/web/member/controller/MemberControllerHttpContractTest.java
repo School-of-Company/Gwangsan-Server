@@ -157,17 +157,20 @@ class MemberControllerHttpContractTest {
         }
 
         @Test
-        @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 배열을 반환한다")
+        @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 회원별 placeName 을 포함한 배열을 반환한다")
         void it_serializes_admin_list() throws Exception {
             when(findAllUserInfo.query(ACTOR, "회원A", null)).thenReturn(List.of(new MemberProfile(2L, "회원A", "이름",
-                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, "지점", null, null, 1, 100, "")));
+                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, "지점", null, null, 1, 100, ""),
+                    new MemberProfile(3L, "회원A2", "이름2", "01000000000", MemberRole.ROLE_USER, MemberStatus.ACTIVE,
+                            JOINED_AT, "수완지점", null, null, 1, 0, "")));
 
             mvc.perform(get("/api/member/all").param("nickname", "회원A"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].memberId").value(2))
                     .andExpect(jsonPath("$[0].status").value("PENDING"))
                     .andExpect(jsonPath("$[0].gwangsan").value(100))
-                    .andExpect(jsonPath("$[0].placeName").doesNotExist());
+                    .andExpect(jsonPath("$[0].placeName").value("지점"))
+                    .andExpect(jsonPath("$[1].placeName").value("수완지점"));
         }
     }
 
