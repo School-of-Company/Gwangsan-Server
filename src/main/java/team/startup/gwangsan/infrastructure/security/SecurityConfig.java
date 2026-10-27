@@ -2,6 +2,9 @@ package team.startup.gwangsan.infrastructure.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.actuate.metrics.export.prometheus.PrometheusScrapeEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -130,6 +133,8 @@ public class SecurityConfig {
 
                                 // health
                                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                                // actuator: management 포트(9091, 비공개)에서 온 요청만 매칭된다. API 포트에는 actuator 가 없다.
+                                .requestMatchers(EndpointRequest.to(HealthEndpoint.class, PrometheusScrapeEndpoint.class)).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/app/version").permitAll()
 
                                 // suspend

@@ -1,0 +1,119 @@
+name: gwangsan-monitoring
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  grafana:
+    image: grafana/grafana:13.2.4
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1
+    logging: *logging
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_DEFAULT_LANGUAGE: ko-KR
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: Asia/Seoul
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_USERS_DEFAULT_THEME: dark
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/00-overview.json
+    secrets:
+      - grafana_admin_password
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1
+    logging: *logging
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --storage.tsdb.retention.size=8GB
+      # AWS Alloy remote_write 수신. 9090은 loopback에만 게시하며 SSH permitopen으로만 원격 접근한다.
+      - --web.enable-remote-write-receiver
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+
+  tempo:
+    image: grafana/tempo:3.1.1
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 2
+    logging: *logging
+    command: ["-config.file=/etc/tempo/tempo.yml", "-target=all"]
+    ports:
+      - "127.0.0.1:3200:3200"
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - ./tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo-data:/var/tempo
+
+  alertmanager:
+    image: prom/alertmanager:v0.29.0
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25
+    logging: *logging
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --cluster.listen-address=
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+
+  # 학교 VM 호스트 CPU·메모리·디스크. 브리지 네트워크라 netdev 값은 컨테이너 기준이므로 끈다.
+  node-exporter:
+    image: prom/node-exporter:v1.10.2
+    restart: unless-stopped
+    mem_limit: 64m
+    cpus: 0.2
+    logging: *logging
+    pid: host
+    read_only: true
+    command:
+      - --path.rootfs=/host
+      - --collector.disable-defaults
+      - --collector.cpu
+      - --collector.loadavg
+      - --collector.meminfo
+      - --collector.filesystem
+      - --collector.diskstats
+      - --collector.stat
+      - --collector.uname
+      - --collector.pressure
+      - --collector.vmstat
+      - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|nsfs|overlay|proc|pstore|rpc_pipefs|securityfs|squashfs|sysfs|tmpfs|tracefs)$
+    volumes:
+      - /:/host:ro,rslave
+
+secrets:
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password
+
+volumes:
+  grafana-data:
+  prometheus-data:
+  tempo-data:
+  alertmanager-data:

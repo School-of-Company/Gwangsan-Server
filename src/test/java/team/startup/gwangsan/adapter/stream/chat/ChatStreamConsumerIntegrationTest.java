@@ -1,5 +1,7 @@
 package team.startup.gwangsan.adapter.stream.chat;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.opentelemetry.api.OpenTelemetry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +78,7 @@ class ChatStreamConsumerIntegrationTest {
         ChatStreamRedisAdapter adapter = new ChatStreamRedisAdapter(redisTemplate, props, gson);
         adapter.init();
 
-        ChatStreamMessageProcessor processor = new ChatStreamMessageProcessor(saveChatMessageUseCase, adapter, props, gson);
+        ChatStreamMessageProcessor processor = new ChatStreamMessageProcessor(saveChatMessageUseCase, adapter, props, gson, new ChatStreamTelemetry(OpenTelemetry.noop(), new SimpleMeterRegistry()));
         worker = new ChatStreamConsumerWorker(adapter, processor, props);
     }
 

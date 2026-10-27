@@ -1,0 +1,49 @@
+// 테스트 전용: 운영 config.alloy 와 같은 receiver→memory_limiter→batch→otlphttp 구조를
+// 합성 Tempo(tempo:4318)로 보낸다. 실제 터널·학교 엔드포인트는 쓰지 않는다.
+otelcol.receiver.otlp "apps" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.processor.memory_limiter.traces.input]
+  }
+}
+
+otelcol.processor.memory_limiter "traces" {
+  check_interval = "1s"
+  limit = "192MiB"
+  spike_limit = "32MiB"
+  output {
+    traces = [otelcol.processor.batch.traces.input]
+  }
+}
+
+otelcol.processor.batch "traces" {
+  timeout = "1s"
+  send_batch_size = 128
+  send_batch_max_size = 256
+  output {
+    traces = [otelcol.exporter.otlphttp.school.input]
+  }
+}
+
+otelcol.exporter.otlphttp "school" {
+  client {
+    endpoint = sys.env("TEMPO_TUNNEL_ENDPOINT")
+    timeout = "5s"
+    tls {
+      insecure = true
+    }
+  }
+  sending_queue {
+    enabled = true
+    num_consumers = 2
+    queue_size = 200
+  }
+  retry_on_failure {
+    enabled = true
+    initial_interval = "1s"
+    max_interval = "10s"
+    max_elapsed_time = "5m"
+  }
+}

@@ -1,0 +1,3 @@
+# 테스트 전용 수신기: scrape 없음, Alloy remote_write 만 받는다(--web.enable-remote-write-receiver).
+global:
+  scrape_interval: 15s
