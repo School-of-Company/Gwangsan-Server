@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LoadPlacePort {
+    List<PlaceResult> findAll();
+
     Optional<PlaceResult> findById(Integer placeId);
 
     List<PlaceResult> findAllByHeadId(Integer headId);

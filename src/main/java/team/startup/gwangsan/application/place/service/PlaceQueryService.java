@@ -19,6 +19,11 @@ public class PlaceQueryService implements PlaceQuery {
     private final LoadPlacePort loadPlacePort;
 
     @Override
+    public List<PlaceResult> findAll() {
+        return loadPlacePort.findAll();
+    }
+
+    @Override
     public Optional<PlaceResult> findById(Integer placeId) {
         return loadPlacePort.findById(placeId);
     }
