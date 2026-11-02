@@ -42,7 +42,7 @@ public class MemberController {
     public ResponseEntity<FindMyInfoResponse> findMyInfo(ActorContext actor) {
         MyInfoResult r = findMyInfoQuery.query(actor);
         // 기존 응답 계약 보존: dongName 자리에 본부 이름, headName 자리에 동 이름이 나간다.
-        return ResponseEntity.ok(new FindMyInfoResponse(r.memberId(), r.nickname(), r.placeName(), r.headName(),
+        return ResponseEntity.ok(new FindMyInfoResponse(r.memberId(), r.nickname(), r.placeId(), r.placeName(), r.headName(),
                 r.dongName(), r.light(), r.gwangsan(), r.description(), r.specialties()));
     }
 

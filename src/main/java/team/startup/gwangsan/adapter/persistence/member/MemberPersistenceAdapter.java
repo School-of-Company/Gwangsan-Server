@@ -167,7 +167,7 @@ public class MemberPersistenceAdapter implements LoadMemberPort, SaveMemberPort,
     private static MemberProfile profile(MemberDetailJpaEntity d, String headName, String dongName) {
         MemberJpaEntity m = d.getMember();
         return new MemberProfile(m.getId(), m.getNickname(), m.getName(), m.getPhoneNumber(), m.getRole(),
-                m.getStatus(), m.getJoinedAt(), d.getPlace().getName(), headName, dongName, d.getLight(),
+                m.getStatus(), m.getJoinedAt(), d.getPlace().getId(), d.getPlace().getName(), headName, dongName, d.getLight(),
                 d.getGwangsan(), d.getDescription());
     }
 

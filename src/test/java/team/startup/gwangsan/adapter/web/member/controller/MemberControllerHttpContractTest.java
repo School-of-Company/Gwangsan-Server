@@ -70,13 +70,13 @@ class MemberControllerHttpContractTest {
         @Test
         @DisplayName("it_기존 응답의 dongName 자리에 본부 이름, headName 자리에 동 이름을 그대로 낸다")
         void it_preserves_existing_field_values() throws Exception {
-            when(findMyInfo.query(ACTOR)).thenReturn(new MyInfoResult(1L, "테스터일", "수완지점", "광산구", "수완동",
+            when(findMyInfo.query(ACTOR)).thenReturn(new MyInfoResult(1L, "테스터일", 5, "수완지점", "광산구", "수완동",
                     5, 1000, "자기소개", List.of("Java")));
 
             mvc.perform(get("/api/member"))
                     .andExpect(status().isOk())
                     .andExpect(content().json("""
-                            {"memberId":1,"nickname":"테스터일","placeName":"수완지점","dongName":"광산구",
+                            {"memberId":1,"nickname":"테스터일","placeId":5,"placeName":"수완지점","dongName":"광산구",
                              "headName":"수완동","light":5,"gwangsan":1000,"description":"자기소개","specialties":["Java"]}
                             """, true));
         }
@@ -160,9 +160,9 @@ class MemberControllerHttpContractTest {
         @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 회원별 placeName 을 포함한 배열을 반환한다")
         void it_serializes_admin_list() throws Exception {
             when(findAllUserInfo.query(ACTOR, "회원A", null)).thenReturn(List.of(new MemberProfile(2L, "회원A", "이름",
-                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, "지점", null, null, 1, 100, ""),
+                    "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, 4, "지점", null, null, 1, 100, ""),
                     new MemberProfile(3L, "회원A2", "이름2", "01000000000", MemberRole.ROLE_USER, MemberStatus.ACTIVE,
-                            JOINED_AT, "수완지점", null, null, 1, 0, "")));
+                            JOINED_AT, 5, "수완지점", null, null, 1, 0, "")));
 
             mvc.perform(get("/api/member/all").param("nickname", "회원A"))
                     .andExpect(status().isOk())

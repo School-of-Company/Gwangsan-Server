@@ -127,7 +127,7 @@ class MemberQueryServicesTest {
 
             MyInfoResult result = findMyInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER));
 
-            assertThat(result).isEqualTo(new MyInfoResult(1L, "테스터일", "수완지점", "광산구", "수완동", 5, 1000,
+            assertThat(result).isEqualTo(new MyInfoResult(1L, "테스터일", 5, "수완지점", "광산구", "수완동", 5, 1000,
                     "자기소개", List.of("Java")));
         }
 
