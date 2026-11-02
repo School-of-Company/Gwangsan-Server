@@ -67,7 +67,8 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
                 .join(memberDetail.place, place).fetchJoin()
                 .join(place.head, head).fetchJoin()
                 .where(
-                        roleCondition(placeId, headId),
+                        placeIdEq(placeId),
+                        headIdEq(headId),
                         nicknameEq(nickname),
                         placeNameEq(placeName)
                 )
@@ -122,16 +123,6 @@ public class MemberDetailCustomRepositoryImpl implements MemberDetailCustomRepos
         );
     }
 
-
-    private BooleanExpression roleCondition(Integer placeId, Integer headId) {
-        if (placeId != null) {
-            return place.id.eq(placeId);
-        } else if (headId != null) {
-            return place.head.id.eq(headId);
-        } else {
-            return null;
-        }
-    }
 
     private BooleanExpression nicknameEq(String nickname) {
         return nickname != null ? member.nickname.eq(nickname) : null;

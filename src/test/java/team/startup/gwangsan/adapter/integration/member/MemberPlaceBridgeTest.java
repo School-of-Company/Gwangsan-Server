@@ -12,6 +12,7 @@ import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,24 @@ class MemberPlaceBridgeTest {
 
             assertThatThrownBy(() -> bridge().requireExists(999))
                     .isInstanceOf(PlaceNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("belongsToHead() 는")
+    class Describe_belongs_to_head {
+
+        @Test
+        @DisplayName("지점의 본부가 같으면 true, 다르거나 본부가 없거나 지점이 없으면 false 를 반환한다")
+        void it_checks_place_head() {
+            when(placeQuery.findById(4)).thenReturn(Optional.of(new PlaceResult(4, "신창", 1)));
+            when(placeQuery.findById(5)).thenReturn(Optional.of(new PlaceResult(5, "본부없음", null)));
+            when(placeQuery.findById(999)).thenReturn(Optional.empty());
+
+            assertThat(bridge().belongsToHead(4, 1)).isTrue();
+            assertThat(bridge().belongsToHead(4, 2)).isFalse();
+            assertThat(bridge().belongsToHead(5, 1)).isFalse();
+            assertThat(bridge().belongsToHead(999, 1)).isFalse();
         }
     }
 }

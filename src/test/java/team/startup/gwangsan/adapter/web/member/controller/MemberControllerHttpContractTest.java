@@ -20,6 +20,7 @@ import team.startup.gwangsan.application.member.port.in.UpdateMyPlaceUseCase;
 import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.DuplicateMemberNicknameException;
+import team.startup.gwangsan.domain.member.exception.NotAllowedUserAccessException;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.application.member.data.WithdrawMemberCommand;
@@ -159,7 +160,7 @@ class MemberControllerHttpContractTest {
         @Test
         @DisplayName("it_GET /api/member/all 은 선택 query 를 넘기고 회원별 placeName 을 포함한 배열을 반환한다")
         void it_serializes_admin_list() throws Exception {
-            when(findAllUserInfo.query(ACTOR, "회원A", null)).thenReturn(List.of(new MemberProfile(2L, "회원A", "이름",
+            when(findAllUserInfo.query(ACTOR, null, null, "회원A", null)).thenReturn(List.of(new MemberProfile(2L, "회원A", "이름",
                     "01012345678", MemberRole.ROLE_USER, MemberStatus.PENDING, JOINED_AT, 4, "지점", null, null, 1, 100, ""),
                     new MemberProfile(3L, "회원A2", "이름2", "01000000000", MemberRole.ROLE_USER, MemberStatus.ACTIVE,
                             JOINED_AT, 5, "수완지점", null, null, 1, 0, "")));
@@ -171,6 +172,27 @@ class MemberControllerHttpContractTest {
                     .andExpect(jsonPath("$[0].gwangsan").value(100))
                     .andExpect(jsonPath("$[0].placeName").value("지점"))
                     .andExpect(jsonPath("$[1].placeName").value("수완지점"));
+        }
+
+        @Test
+        @DisplayName("it_GET /api/member/all 은 placeId·headId·placeName query 를 그대로 넘긴다")
+        void it_passes_place_id_and_head_id() throws Exception {
+            when(findAllUserInfo.query(ACTOR, 4, 1, null, "신창지점")).thenReturn(List.of());
+
+            mvc.perform(get("/api/member/all").param("placeId", "4").param("headId", "1")
+                            .param("placeName", "신창지점"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().json("[]"));
+            verify(findAllUserInfo).query(ACTOR, 4, 1, null, "신창지점");
+        }
+
+        @Test
+        @DisplayName("it_GET /api/member/all 은 범위 밖 지점이면 403 을 반환한다")
+        void it_returns_forbidden_when_out_of_scope() throws Exception {
+            when(findAllUserInfo.query(ACTOR, 99, null, null, null)).thenThrow(new NotAllowedUserAccessException());
+
+            mvc.perform(get("/api/member/all").param("placeId", "99"))
+                    .andExpect(status().isForbidden());
         }
     }
 
