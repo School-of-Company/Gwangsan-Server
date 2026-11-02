@@ -154,8 +154,9 @@ public class ChatStreamRedisAdapter {
     public void sendToDlq(String originalKey, MapRecord<String, String, String> record,
                            String errorMessage) {
         Map<String, String> fields = new LinkedHashMap<>();
-        fields.put("originalStreamKey", originalKey);
-        fields.put("originalStreamId", record.getId().getValue());
+        // retry stream 에서 온 record 는 retry 키가 아니라 처음 방 stream 위치를 남겨야 원본 재주입이 가능하다.
+        fields.put("originalStreamKey", record.getValue().getOrDefault("originalStreamKey", originalKey));
+        fields.put("originalStreamId", record.getValue().getOrDefault("originalStreamId", record.getId().getValue()));
         fields.put("payload", gson.toJson(record.getValue()));
         fields.put("errorMessage", truncate(errorMessage, 500));
         fields.put("failedAt", String.valueOf(System.currentTimeMillis()));
