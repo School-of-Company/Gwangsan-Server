@@ -83,7 +83,7 @@ public class ChatStreamMessageProcessor {
                     .log("[ChatStream] 메시지 매핑 실패로 폐기합니다.");
             telemetry.recordError(span, e);
             telemetry.persistAttempt(ChatStreamTelemetry.PERSIST_INVALID_PAYLOAD);
-            sendToDlq(streamKey, record, "MAPPING_ERROR: " + e.getMessage());
+            sendToDlq(streamKey, record, "MAPPING_ERROR: " + describe(e));
             ack(streamKey, record);
             return "invalid_payload";
         }
@@ -108,7 +108,7 @@ public class ChatStreamMessageProcessor {
                         .addKeyValue("error_type", e.getClass().getName())
                         .setCause(e) // JSON formatter 는 예외 메시지를 빼고 타입·frame 만 남긴다
                         .log("[ChatStream] 메시지 처리 실패로 폐기합니다.");
-                sendToDlq(streamKey, record, e.getMessage());
+                sendToDlq(streamKey, record, describe(e));
                 outcome = "dead_lettered";
             } else {
                 log.atWarn().addKeyValue("event", "chat_stream_retry_scheduled")
@@ -117,7 +117,7 @@ public class ChatStreamMessageProcessor {
                         .addKeyValue("attempt", attempt)
                         .addKeyValue("error_type", e.getClass().getName())
                         .log("[ChatStream] 메시지 처리 실패, 재시도합니다.");
-                sendToRetry(streamKey, record, attempt + 1, e.getMessage());
+                sendToRetry(streamKey, record, attempt + 1, describe(e));
                 outcome = "retry_scheduled";
             }
             ack(streamKey, record);
@@ -148,6 +148,11 @@ public class ChatStreamMessageProcessor {
             throw e;
         }
         telemetry.dlq(true);
+    }
+
+    /** DLQ/retry 의 errorMessage. 메시지가 없는 예외(NPE 등)도 원인을 알 수 있게 예외 타입을 앞에 붙인다. */
+    private static String describe(Exception e) {
+        return e.getClass().getName() + ": " + e.getMessage();
     }
 
     private void ack(String streamKey, MapRecord<String, String, String> record) {

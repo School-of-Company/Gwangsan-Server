@@ -25,6 +25,7 @@ import team.startup.gwangsan.application.chat.port.in.SaveChatMessageUseCase;
 import team.startup.gwangsan.domain.chat.model.MessageType;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,7 @@ class ChatStreamConsumerIntegrationTest {
     private StringRedisTemplate redisTemplate;
     private LettuceConnectionFactory connectionFactory;
     private ChatStreamConsumerWorker worker;
+    private ChatStreamProperties props;
 
     private static final String STREAM_KEY = "chat:room:1:messages";
     private static final String RETRY_KEY = "chat:retry:messages";
@@ -65,7 +67,7 @@ class ChatStreamConsumerIntegrationTest {
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.afterPropertiesSet();
 
-        ChatStreamProperties props = new ChatStreamProperties();
+        props = new ChatStreamProperties();
         props.setGroup("chat-message-persistors");
         props.setBatchSize(10);
         props.setBlockMs(100);
@@ -161,6 +163,61 @@ class ChatStreamConsumerIntegrationTest {
         MapRecord<String, String, String> retryRecord = retryEntries.get(0);
         assertThat(retryRecord.getValue().get("content")).isEqualTo("저장 실패 메시지");
         assertThat(retryRecord.getValue().get("attempt")).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("retry record 는 claimIdleMs 전에는 재시도하지 않고, idle 이 지나면 reclaim 이 재시도한다")
+    void it_waits_claim_idle_before_retrying() {
+        doThrow(new RuntimeException("DB 오류")).doReturn(null)
+                .when(saveChatMessageUseCase).execute(any());
+        redisTemplate.opsForStream().add(StreamRecords.newRecord().in(STREAM_KEY).ofMap(textMessage()));
+
+        worker.consumeMessages(); // 원본 실패 → retry stream
+        worker.consumeMessages(); // retry record 를 읽지만 아직 이르므로 pending 에 남긴다
+
+        verify(saveChatMessageUseCase, times(1)).execute(any());
+        assertThat(redisTemplate.opsForStream().pending(RETRY_KEY, "chat-message-persistors").getTotalPendingMessages())
+                .isEqualTo(1);
+
+        props.setClaimIdleMs(0); // idle 시간이 지난 상황
+        worker.reclaimPendingMessages();
+
+        verify(saveChatMessageUseCase, times(2)).execute(any());
+        assertThat(redisTemplate.opsForStream().pending(RETRY_KEY, "chat-message-persistors").getTotalPendingMessages())
+                .isZero();
+        assertThat(redisTemplate.opsForStream().size(DLQ_KEY)).isZero();
+    }
+
+    @Test
+    @DisplayName("retry 를 소진한 record 의 DLQ 항목은 처음 방 stream 위치와 예외 타입을 남긴다")
+    void it_keeps_original_location_and_error_type_in_dlq() {
+        props.setClaimIdleMs(0);
+        doThrow(new IllegalStateException()).when(saveChatMessageUseCase).execute(any());
+        Map<String, String> retryFields = new HashMap<>(textMessage());
+        retryFields.put("attempt", "5");
+        retryFields.put("originalStreamKey", STREAM_KEY);
+        retryFields.put("originalStreamId", "1700000000000-0");
+        redisTemplate.opsForStream().add(StreamRecords.newRecord().in(RETRY_KEY).ofMap(retryFields));
+
+        worker.consumeMessages();
+
+        List<MapRecord<String, String, String>> dlq =
+                redisTemplate.<String, String>opsForStream().range(DLQ_KEY, Range.unbounded());
+        assertThat(dlq).hasSize(1);
+        assertThat(dlq.get(0).getValue())
+                .containsEntry("originalStreamKey", STREAM_KEY)
+                .containsEntry("originalStreamId", "1700000000000-0")
+                .containsEntry("errorMessage", "java.lang.IllegalStateException: null");
+    }
+
+    private Map<String, String> textMessage() {
+        return Map.of(
+                "messageId", "123456789",
+                "roomId", "1",
+                "senderId", "2",
+                "content", "재시도 메시지",
+                "messageType", "TEXT",
+                "createdAt", "1700000000000");
     }
 
     @Test
