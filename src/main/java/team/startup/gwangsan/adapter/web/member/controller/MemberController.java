@@ -42,7 +42,7 @@ public class MemberController {
     public ResponseEntity<FindMyInfoResponse> findMyInfo(ActorContext actor) {
         MyInfoResult r = findMyInfoQuery.query(actor);
         // 기존 응답 계약 보존: dongName 자리에 본부 이름, headName 자리에 동 이름이 나간다.
-        return ResponseEntity.ok(new FindMyInfoResponse(r.memberId(), r.nickname(), r.placeName(), r.headName(),
+        return ResponseEntity.ok(new FindMyInfoResponse(r.memberId(), r.nickname(), r.placeId(), r.placeName(), r.headName(),
                 r.dongName(), r.light(), r.gwangsan(), r.description(), r.specialties()));
     }
 
@@ -71,9 +71,12 @@ public class MemberController {
     public ResponseEntity<List<FindAllUserInfoResponse>> findAllUserInfo(
             ActorContext actor,
             @RequestParam(name = "nickname", required = false) String nickname,
+            @RequestParam(name = "placeId", required = false) Integer placeId,
+            @RequestParam(name = "headId", required = false) Integer headId,
+            // 기존 클라이언트 호환용. 신규 클라이언트는 placeId 를 쓴다.
             @RequestParam(name = "placeName", required = false) String placeName
     ) {
-        return ResponseEntity.ok(findAllUserInfoQuery.query(actor, nickname, placeName).stream()
+        return ResponseEntity.ok(findAllUserInfoQuery.query(actor, placeId, headId, nickname, placeName).stream()
                 .map(p -> new FindAllUserInfoResponse(p.memberId(), p.nickname(), p.name(), p.phoneNumber(),
                         p.role(), p.status(), p.joinedAt(), p.gwangsan(), p.placeName()))
                 .toList());

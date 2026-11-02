@@ -102,6 +102,15 @@ class PlaceKeywordBoundaryTest {
         }
 
         @Test
+        void it_returns_all_places_ordered_by_id() {
+            assertThat(places.findAll()).containsExactly(
+                    new PlaceResult(first.getId(), "첫지점", head.getId()),
+                    new PlaceResult(second.getId(), "둘째지점", head.getId()),
+                    new PlaceResult(otherBranch.getId(), "다른지점", otherHead.getId()),
+                    new PlaceResult(headless.getId(), "본점없음", null));
+        }
+
+        @Test
         void it_returns_requested_ids_only() {
             assertThat(places.findAllByIds(List.of(second.getId(), otherBranch.getId(), -1))).extracting(PlaceResult::name)
                     .containsExactlyInAnyOrder("둘째지점", "다른지점");

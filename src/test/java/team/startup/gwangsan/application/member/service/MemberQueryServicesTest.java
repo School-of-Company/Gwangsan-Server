@@ -14,6 +14,7 @@ import team.startup.gwangsan.adapter.persistence.member.*;
 import team.startup.gwangsan.application.member.data.MemberProfile;
 import team.startup.gwangsan.application.member.data.MyInfoResult;
 import team.startup.gwangsan.application.member.data.UserInfoResult;
+import team.startup.gwangsan.application.member.port.out.ValidatePlacePort;
 import team.startup.gwangsan.application.relatedkeyword.service.FindMemberRelatedKeywordsService;
 import team.startup.gwangsan.application.relatedkeyword.service.MemberKeywordCommandService;
 import team.startup.gwangsan.domain.common.ActorContext;
@@ -52,6 +53,7 @@ class MemberQueryServicesTest {
     @Mock private RelatedKeywordJpaRepository relatedKeywordRepository;
     @Mock private MemberRelatedKeywordJpaRepository memberRelatedKeywordRepository;
     @Mock private EntityManager entityManager;
+    @Mock private ValidatePlacePort validatePlacePort;
 
     private FindMyInfoService findMyInfo;
     private FindUserInfoService findUserInfo;
@@ -67,7 +69,7 @@ class MemberQueryServicesTest {
                 new FindMemberRelatedKeywordsService(keywordPersistence), new MemberKeywordCommandService(keywordPersistence));
         findMyInfo = new FindMyInfoService(persistence, keywords);
         findUserInfo = new FindUserInfoService(persistence, keywords);
-        findAllUserInfo = new FindAllUserInfoService(persistence);
+        findAllUserInfo = new FindAllUserInfoService(persistence, validatePlacePort);
     }
 
     private MemberJpaEntity member(Long id, String nickname) {
@@ -127,7 +129,7 @@ class MemberQueryServicesTest {
 
             MyInfoResult result = findMyInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER));
 
-            assertThat(result).isEqualTo(new MyInfoResult(1L, "테스터일", "수완지점", "광산구", "수완동", 5, 1000,
+            assertThat(result).isEqualTo(new MyInfoResult(1L, "테스터일", 5, "수완지점", "광산구", "수완동", 5, 1000,
                     "자기소개", List.of("Java")));
         }
 
@@ -189,7 +191,7 @@ class MemberQueryServicesTest {
                     .thenReturn(List.of(target));
 
             List<MemberProfile> result = findAllUserInfo.query(
-                    new ActorContext(1L, ActorContext.Role.ROLE_HEAD_ADMIN), "회원A", null);
+                    new ActorContext(1L, ActorContext.Role.ROLE_HEAD_ADMIN), null, null, "회원A", null);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).nickname()).isEqualTo("회원A");
@@ -205,9 +207,52 @@ class MemberQueryServicesTest {
                     .thenReturn(List.of(target));
 
             List<MemberProfile> result = findAllUserInfo.query(
-                    new ActorContext(1L, ActorContext.Role.ROLE_PLACE_ADMIN), null, "지점");
+                    new ActorContext(1L, ActorContext.Role.ROLE_PLACE_ADMIN), null, null, null, "지점");
 
             assertThat(result).extracting(MemberProfile::nickname).containsExactly("회원B");
+        }
+
+        @Test
+        @DisplayName("ROLE_HEAD_ADMIN 이 본부 소속 placeId 를 넘기면 placeId·headId 로 함께 필터한다")
+        void it_filters_by_requested_place_within_head() {
+            adminScope(5, 10);
+            when(validatePlacePort.belongsToHead(7, 10)).thenReturn(true);
+            MemberDetailJpaEntity target = detail(member(4L, "회원C"), place(7, "신창지점", null), 1, 0, "");
+            when(memberDetailJpaRepository.findAllByRoleAndNicknameAndPlaceName(7, 10, null, null))
+                    .thenReturn(List.of(target));
+
+            List<MemberProfile> result = findAllUserInfo.query(
+                    new ActorContext(1L, ActorContext.Role.ROLE_HEAD_ADMIN), 7, 10, null, null);
+
+            assertThat(result).extracting(MemberProfile::placeId).containsExactly(7);
+        }
+
+        @Test
+        @DisplayName("ROLE_HEAD_ADMIN 이 다른 본부 지점이나 다른 headId 를 넘기면 NotAllowedUserAccessException을 던진다")
+        void it_rejects_out_of_scope_for_head_admin() {
+            adminScope(5, 10);
+            when(validatePlacePort.belongsToHead(99, 10)).thenReturn(false);
+            ActorContext headAdmin = new ActorContext(1L, ActorContext.Role.ROLE_HEAD_ADMIN);
+
+            assertThatThrownBy(() -> findAllUserInfo.query(headAdmin, 99, null, null, null))
+                    .isInstanceOf(NotAllowedUserAccessException.class);
+            assertThatThrownBy(() -> findAllUserInfo.query(headAdmin, null, 11, null, null))
+                    .isInstanceOf(NotAllowedUserAccessException.class);
+            verify(memberDetailJpaRepository, never()).findAllByRoleAndNicknameAndPlaceName(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("ROLE_PLACE_ADMIN 은 자기 지점·본부 id 만 허용하고 다른 값이면 NotAllowedUserAccessException을 던진다")
+        void it_rejects_out_of_scope_for_place_admin() {
+            adminScope(5, 10);
+            when(memberDetailJpaRepository.findAllByRoleAndNicknameAndPlaceName(5, 10, null, null)).thenReturn(List.of());
+            ActorContext placeAdmin = new ActorContext(1L, ActorContext.Role.ROLE_PLACE_ADMIN);
+
+            assertThat(findAllUserInfo.query(placeAdmin, 5, 10, null, null)).isEmpty();
+            assertThatThrownBy(() -> findAllUserInfo.query(placeAdmin, 6, null, null, null))
+                    .isInstanceOf(NotAllowedUserAccessException.class);
+            assertThatThrownBy(() -> findAllUserInfo.query(placeAdmin, null, 11, null, null))
+                    .isInstanceOf(NotAllowedUserAccessException.class);
         }
 
         @Test
@@ -215,7 +260,7 @@ class MemberQueryServicesTest {
         void it_rejects_ordinary_member() {
             adminScope(5, 10);
 
-            assertThatThrownBy(() -> findAllUserInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER), null, null))
+            assertThatThrownBy(() -> findAllUserInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER), null, null, null, null))
                     .isInstanceOf(NotAllowedUserAccessException.class);
             verify(memberDetailJpaRepository, never()).findAllByRoleAndNicknameAndPlaceName(any(), any(), any(), any());
         }
@@ -225,7 +270,7 @@ class MemberQueryServicesTest {
         void it_throws_not_found_before_role_check() {
             when(memberDetailJpaRepository.findById(1L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> findAllUserInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER), null, null))
+            assertThatThrownBy(() -> findAllUserInfo.query(new ActorContext(1L, ActorContext.Role.ROLE_USER), null, null, null, null))
                     .isInstanceOf(NotFoundMemberException.class);
         }
     }

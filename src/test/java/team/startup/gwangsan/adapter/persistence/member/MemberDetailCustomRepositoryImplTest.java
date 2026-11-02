@@ -63,7 +63,7 @@ class MemberDetailCustomRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("회원 목록은 place ID를 head ID보다 우선하고 별명과 지점명을 함께 제한한다")
+    @DisplayName("회원 목록은 place ID와 head ID를 함께(AND) 적용하고 별명과 지점명을 함께 제한한다")
     void it_scopes_members_by_place_head_nickname_and_place_name() {
         HeadJpaEntity firstHead = head("A");
         PlaceJpaEntity firstPlace = place("첫", firstHead);
@@ -77,8 +77,13 @@ class MemberDetailCustomRepositoryImplTest {
 
         assertThat(repository.findAllByRoleAndNicknameAndPlaceName(null, firstPlace.getHead().getId(), null, null))
                 .extracting(MemberDetailJpaEntity::getId).containsExactlyInAnyOrder(first.getId(), second.getId());
-        assertThat(repository.findAllByRoleAndNicknameAndPlaceName(firstPlace.getId(), thirdPlace.getHead().getId(), null, null))
+        assertThat(repository.findAllByRoleAndNicknameAndPlaceName(firstPlace.getId(), firstPlace.getHead().getId(), null, null))
                 .extracting(MemberDetailJpaEntity::getId).containsExactly(first.getId());
+        assertThat(repository.findAllByRoleAndNicknameAndPlaceName(firstPlace.getId(), null, null, null))
+                .extracting(MemberDetailJpaEntity::getId).containsExactly(first.getId());
+        // 다른 본부 지점 id 를 넘겨도 본부 범위를 벗어난 회원은 나오지 않는다.
+        assertThat(repository.findAllByRoleAndNicknameAndPlaceName(thirdPlace.getId(), firstPlace.getHead().getId(), null, null))
+                .isEmpty();
         assertThat(repository.findAllByRoleAndNicknameAndPlaceName(null, null, "별명-셋회원", thirdPlace.getName()))
                 .extracting(MemberDetailJpaEntity::getId).containsExactly(third.getId());
         assertThat(repository.findAllByRoleAndNicknameAndPlaceName(null, null, null, null))

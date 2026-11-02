@@ -8,6 +8,9 @@ import java.util.Optional;
 
 /** 다른 업무가 쓰는 지점 공개 조회. 목록 순서는 기존 Repository 조회와 같게 별도 정렬하지 않는다. */
 public interface PlaceQuery {
+    /** 전체 지점. id 오름차순. */
+    List<PlaceResult> findAll();
+
     Optional<PlaceResult> findById(Integer placeId);
 
     List<PlaceResult> findAllByHeadId(Integer headId);
