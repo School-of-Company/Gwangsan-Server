@@ -48,7 +48,7 @@ class MemberDetailRepositoryTest {
         registry.add("spring.datasource.username", mariadb::getUsername);
         registry.add("spring.datasource.password", mariadb::getPassword);
         registry.add("spring.datasource.driver-class-name", mariadb::getDriverClassName);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create"); // 일회용 컨테이너: 종료 시 drop 은 이미 멈춘 DB 를 기다리며 JVM 종료를 막는다
     }
 
     @Autowired private EntityManager entityManager;

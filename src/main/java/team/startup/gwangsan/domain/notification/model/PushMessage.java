@@ -21,6 +21,7 @@ public record PushMessage(
             case CHATTING -> CHAT_BODY;
             case RECOMMENDATION -> RECOMMENDATION_BODY;
             case TRADE_COMPLETE -> TRADE_COMPLETE_BODY;
+            case FEEDBACK_ANSWER -> "문의에 답변이 등록되었습니다.";
             case RESERVATION_REMINDER, RESERVATION_CANCEL -> throw new IllegalArgumentException("예약 알림은 상대방 이름이 필요합니다.");
         };
         return new PushMessage(DEFAULT_TITLE, body, type, sourceId);

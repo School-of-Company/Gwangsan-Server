@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Java 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           java-version: "21"
           distribution: "temurin"
@@ -27,25 +27,47 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests
-        run: ./gradlew test
+        # agentTest: 운영과 같은 OTel Java agent 를 붙인 context 전파 테스트(A, build.gradle)
+        run: ./gradlew test agentTest
 
       - name: Upload test reports
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-reports
           path: |
             build/test-results/test/**/*.xml
+            build/test-results/agentTest/**/*.xml
             build/reports/tests/test/
+            build/reports/tests/agentTest/
           retention-days: 14
 
       - name: Upload coverage artifact
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-report
           path: build/reports/jacoco/test/jacocoTestReport.xml
           retention-days: 90
 
+      # 위 단계에서 테스트가 이미 실행·통과했으므로 패키징만 한다.
       - name: Build
         run: ./gradlew build -x test
+
+  release-checks:
+    # 배포 경로 검증만 한다. 레지스트리 push·배포는 cd.yml(수동, production 승인) 전용.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Shellcheck release scripts
+        run: shellcheck scripts/release/*.sh
+
+      - name: Release script regression test
+        run: bash scripts/release/test-deploy-container.sh
+
+      - name: Docker image build (no push)
+        run: docker build -t gwangsan-api:ci .

@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import team.startup.gwangsan.application.image.data.ImageOwnerType;
+import team.startup.gwangsan.application.feedback.port.in.FeedbackCleanupUseCase;
 import team.startup.gwangsan.application.notice.port.in.UnlinkNoticeImageUseCase;
 import team.startup.gwangsan.application.post.port.in.UnlinkProductImageUseCase;
 import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase;
@@ -18,6 +19,15 @@ import static org.mockito.Mockito.*;
 class ImageReferenceCleanupAdapterTest {
 
     @InjectMocks private ImageReferenceCleanupAdapter adapter;
+    @Mock private FeedbackCleanupUseCase feedbackCleanupUseCase;
+
+    @Test
+    @DisplayName("FEEDBACK 는 문의 이미지 링크를 지운다")
+    void it_unlinks_feedback_image() {
+        adapter.unlink(ImageOwnerType.FEEDBACK, 10L, 20L);
+        verify(feedbackCleanupUseCase).unlink(10L, 20L);
+        verifyNoInteractions(unlinkProductImageUseCase, unlinkNoticeImageUseCase, unlinkReportImageUseCase);
+    }
     @Mock private UnlinkProductImageUseCase unlinkProductImageUseCase;
     @Mock private UnlinkNoticeImageUseCase unlinkNoticeImageUseCase;
     @Mock private UnlinkReportImageUseCase unlinkReportImageUseCase;

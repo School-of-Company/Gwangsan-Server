@@ -13,6 +13,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import team.startup.gwangsan.application.feedback.port.out.FeedbackReferencesPort;
+import team.startup.gwangsan.application.feedback.service.FeedbackService;
+import team.startup.gwangsan.adapter.persistence.feedback.FeedbackPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.feedback.FeedbackJpaEntity;
+import team.startup.gwangsan.domain.feedback.model.Feedback;
+import team.startup.gwangsan.domain.feedback.model.FeedbackType;
+import team.startup.gwangsan.domain.feedback.model.FeedbackStatus;
+import team.startup.gwangsan.domain.feedback.model.OsType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -84,6 +93,7 @@ import static org.mockito.Mockito.doThrow;
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({QueryDslConfig.class, WithdrawMemberService.class, MemberWithdrawalPersistenceAdapter.class,
+        FeedbackService.class, FeedbackPersistenceAdapter.class,
         MemberReferenceCleanupAdapter.class, AdminAlertSupportService.class, AdminAlertPersistenceAdapter.class,
         PostReferenceCleanupService.class, ProductPersistenceAdapter.class, ReservationPersistenceAdapter.class,
         ProductImagePersistenceAdapter.class, DeleteAllMemberRelatedKeywordsService.class,
@@ -124,6 +134,7 @@ class WithdrawMemberIntegrationTest {
     @Autowired private TransactionTemplate tx;
     @Autowired private JdbcTemplate jdbc;
     @MockitoSpyBean private MemberBlockJpaRepository memberBlockRepository;
+    @MockitoBean private FeedbackReferencesPort feedbackReferences;
 
     private record Ids(Long member, Long dummy, Long other, Long product, Long adminAlert, Long keyword,
                        Long reservation) {
@@ -185,6 +196,8 @@ class WithdrawMemberIntegrationTest {
                 assertThat(singleId("SELECT r.reviewer.id FROM ReviewJpaEntity r")).isEqualTo(dummy);
                 assertThat(singleId("SELECT r.reported.id FROM ReportJpaEntity r")).isEqualTo(dummy);
                 assertThat(singleId("SELECT r.reporter.id FROM ReportJpaEntity r")).isEqualTo(dummy);
+                assertThat(singleId("SELECT f.member.id FROM FeedbackJpaEntity f")).isEqualTo(dummy);
+                assertThat(singleId("SELECT f.answeredBy.id FROM FeedbackJpaEntity f")).isEqualTo(dummy);
                 AdminAlertJpaEntity alert = em.find(AdminAlertJpaEntity.class, ids.adminAlert());
                 assertThat(alert.getRequester().getId()).isEqualTo(dummy);
                 assertThat(alert.getOtherMember().getId()).isEqualTo(dummy);
@@ -228,6 +241,8 @@ class WithdrawMemberIntegrationTest {
             assertThat(sql("SELECT COUNT(*) FROM tbl_suspend WHERE member_id = ?", ids.member())).isOne();
             assertThat(sql("SELECT COUNT(*) FROM tbl_member_block WHERE blocked_id = ?", ids.member())).isOne();
             assertThat(sql("SELECT COUNT(*) FROM tbl_alert_receipt WHERE member_id = ?", ids.member())).isOne();
+            assertThat(sql("SELECT member_id FROM tbl_feedback")).isEqualTo(ids.member());
+            assertThat(sql("SELECT answered_by FROM tbl_feedback")).isEqualTo(ids.member());
         }
     }
 
@@ -264,6 +279,12 @@ class WithdrawMemberIntegrationTest {
                     .room(room).sender(member).createdAt(LocalDateTime.now()).build());
             persist(ReviewJpaEntity.builder().content("후기").light(5).reviewer(member).reviewed(other).product(product).build());
             persist(ReportJpaEntity.builder().reportType(ReportType.ETC).content("신고").reported(member).reporter(member).build());
+            LocalDateTime answeredAt = LocalDateTime.now();
+            Feedback feedback = new Feedback(null, member.getId(), FeedbackType.BUG, "문의", null, OsType.IOS,
+                    null, null, FeedbackStatus.DONE, "답변", member.getId(), answeredAt, answeredAt, answeredAt);
+            FeedbackJpaEntity feedbackEntity = new FeedbackJpaEntity(feedback, member);
+            feedbackEntity.apply(feedback, member);
+            persist(feedbackEntity);
             adminAlertId = persist(AdminAlertJpaEntity.builder().type(AlertType.REPORT).title("신고")
                     .sourceId(1L).requester(member).otherMember(member).build()).getId();
             persist(TradeCancelJpaEntity.builder().tradeComplete(trade).member(member).reason("사유")

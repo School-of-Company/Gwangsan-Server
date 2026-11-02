@@ -1,0 +1,165 @@
+# 광산 경보 규칙. 임계값은 SLO가 아니라 baseline 측정 후 조정할 시작점이다.
+# 대응 문서: docs/observability/operations/alerts.md (앵커 = runbook 라벨)
+# 학교 VM 전체 중단은 이 규칙이 스스로 감지할 수 없다(같은 VM에서 평가).
+groups:
+  - name: gwangsan-collection
+    rules:
+      - alert: AWS수집경로중단
+        expr: absent_over_time(up{collector="gwangsan-aws-alloy"}[3m])
+        for: 2m
+        labels: {severity: 장애, source: school, runbook: aws-collection-down}
+        annotations:
+          summary: "[광산][장애] AWS 메트릭 수집 경로 중단"
+          description: "최근 3분 동안 AWS Alloy remote_write 샘플이 도착하지 않았습니다. 터널·Alloy·학교 Prometheus 수신을 확인하세요. 앱 장애로 단정하지 않습니다."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: 수집대상응답없음
+        expr: up{collector="gwangsan-aws-alloy"} == 0
+        for: 2m
+        labels: {severity: 주의, source: aws, runbook: target-down}
+        annotations:
+          summary: "[광산][주의] {{ $labels.service }} 지표 수집 실패"
+          description: "{{ $labels.instance }} scrape가 2분 이상 실패했습니다(up=0). 대상 프로세스·내부 포트·네트워크 연결을 확인하세요."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: 학교관측구성요소중단
+        expr: up{job=~"tempo|grafana|alertmanager|node|loki", collector=""} == 0
+        for: 2m
+        labels: {severity: 주의, source: school, runbook: school-component-down}
+        annotations:
+          summary: "[광산][주의] 관측 구성요소 {{ $labels.service }} 응답 없음"
+          description: "{{ $labels.instance }} 상태 확인 실패가 2분 이상 지속됐습니다."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: 트레이스전송실패
+        expr: sum by (environment) (rate(otelcol_exporter_send_failed_spans_total{service="aws-alloy"}[5m])) > 0
+        for: 5m
+        labels: {severity: 주의, source: aws, runbook: trace-export-failed}
+        annotations:
+          summary: "[광산][주의] 트레이스 학교 전송 실패"
+          description: "Alloy→Tempo 전송 실패가 5분 이상 계속됩니다({{ $value | humanize }} span/초). 터널·Tempo 상태를 확인하세요."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: 메트릭전송실패
+        expr: sum by (environment) (rate(prometheus_remote_storage_samples_failed_total{service="aws-alloy"}[5m])) > 0
+        for: 5m
+        labels: {severity: 주의, source: aws, runbook: metric-export-failed}
+        annotations:
+          summary: "[광산][주의] 메트릭 remote_write 실패"
+          description: "AWS Alloy remote_write 실패 샘플이 5분 이상 발생합니다. 학교 Prometheus 수신·디스크를 확인하세요."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: 로그전송드롭
+        expr: sum by (environment) (increase(promtail_dropped_entries_total[10m])) > 0
+        for: 0m
+        labels: {severity: 주의, source: aws, runbook: log-drop}
+        annotations:
+          summary: "[광산][주의] Promtail 로그 드롭 발생"
+          description: "최근 10분 동안 Promtail이 {{ $value | humanize }}건을 버렸습니다. Loki 응답·순서 오류를 확인하세요."
+          dashboard: /d/gwangsan-telemetry
+
+      - alert: Streams집계지연
+        expr: time() - max by (environment, group) (gwangsan_stream_snapshot_timestamp_seconds) > 120
+        for: 2m
+        labels: {severity: 주의, source: aws, runbook: stream-snapshot-stale}
+        annotations:
+          summary: "[광산][주의] Streams 집계 {{ $labels.group }} 갱신 지연"
+          description: "마지막 정상 집계가 {{ $value | humanizeDuration }} 전입니다. 대기 건수 화면 값은 오래된 값입니다."
+          dashboard: /d/gwangsan-streams
+
+      - alert: Streams집계실패
+        expr: min by (environment, group) (gwangsan_stream_snapshot_success) == 0
+        for: 2m
+        labels: {severity: 주의, source: aws, runbook: stream-snapshot-stale}
+        annotations:
+          summary: "[광산][주의] Streams 집계 {{ $labels.group }} 실패"
+          description: "최근 집계가 실패 상태로 2분 이상 유지됩니다. API 로그의 집계 오류를 확인하세요."
+          dashboard: /d/gwangsan-streams
+
+  - name: gwangsan-service
+    rules:
+      - alert: API응답오류증가
+        expr: |
+          (
+            sum by (environment) (rate(http_server_requests_seconds_count{service="gwangsan-api", status=~"5.."}[5m]))
+            / sum by (environment) (rate(http_server_requests_seconds_count{service="gwangsan-api"}[5m]))
+          ) > 0.05
+          and sum by (environment) (increase(http_server_requests_seconds_count{service="gwangsan-api"}[5m])) >= 100
+        for: 5m
+        labels: {severity: 장애, source: aws, runbook: api-5xx}
+        annotations:
+          summary: "[광산][장애] API 5xx 비율 증가"
+          description: "5분 5xx 비율 {{ $value | humanizePercentage }} (최소 100요청 조건 충족)."
+          dashboard: /d/gwangsan-api
+
+      - alert: 채팅저장처리정체
+        expr: |
+          # unread는 lag 미지원·부분 집계 시 NaN이다. ">= 0"으로 NaN을 버려 pending만으로도 판단한다.
+          sum by (environment) ({__name__=~"gwangsan_stream_unread|gwangsan_stream_pending"} >= 0) > 0
+          unless on (environment)
+          sum by (environment) (increase(gwangsan_chat_persist_attempts_total{outcome="success"}[2m])) > 0
+        for: 2m
+        labels: {severity: 장애, source: aws, runbook: chat-persist-stalled}
+        annotations:
+          summary: "[광산][장애] 채팅 저장 처리 정체"
+          description: "대기 메시지가 있는데 2분 동안 저장 성공이 없습니다. 소비자·DB·Redis 상태를 확인하세요."
+          dashboard: /d/gwangsan-streams
+
+      - alert: 채팅최종실패발생
+        # outcome=failure는 DLQ XADD 자체가 실패한 경우라 'DLQ로 이동'이 아니다(이동 성공만 센다).
+        expr: sum by (environment) (increase(gwangsan_chat_dlq_total{outcome="success"}[5m])) > 0
+        for: 0m
+        labels: {severity: 장애, source: aws, runbook: chat-dlq}
+        annotations:
+          summary: "[광산][장애] 채팅 메시지 DLQ 이동"
+          description: "최근 5분 DLQ 이동 {{ $value | humanize }}건. 실패 trace와 API 오류 로그를 확인하세요."
+          dashboard: /d/gwangsan-streams
+
+      - alert: DB연결대기지속
+        expr: max by (environment) (hikaricp_connections_pending{service="gwangsan-api"}) > 0
+        for: 1m
+        labels: {severity: 주의, source: aws, runbook: hikari-pending}
+        annotations:
+          summary: "[광산][주의] DB 커넥션 대기 지속"
+          description: "Hikari 대기 스레드 {{ $value }}개가 1분 이상 지속됩니다."
+          dashboard: /d/gwangsan-jvm
+
+      - alert: Node이벤트루프지연
+        expr: max by (environment) (nodejs_eventloop_lag_p99_seconds{service="gwangsan-chat"}) > 0.1
+        for: 2m
+        labels: {severity: 주의, source: aws, runbook: node-eventloop}
+        annotations:
+          summary: "[광산][주의] 채팅 이벤트 루프 지연"
+          description: "이벤트 루프 지연 p99 {{ $value | humanizeDuration }}가 2분 이상 100ms를 넘었습니다."
+          dashboard: /d/gwangsan-chat
+
+      - alert: 저장공간부족
+        expr: |
+          min by (environment, instance, mountpoint) (
+            node_filesystem_avail_bytes{fstype=~"ext[234]|xfs|btrfs|zfs",mountpoint!~"/etc/(hostname|hosts|resolv.conf)"}
+            / node_filesystem_size_bytes{fstype=~"ext[234]|xfs|btrfs|zfs",mountpoint!~"/etc/(hostname|hosts|resolv.conf)"}
+          ) < 0.2
+        for: 5m
+        labels: {severity: 주의, runbook: disk-low}
+        annotations:
+          summary: "[광산][주의] {{ $labels.instance }} {{ $labels.mountpoint }} 여유 공간 부족"
+          description: "사용 가능 공간 {{ $value | humanizePercentage }}. 보관 기간·로그·이미지 정리를 검토하세요."
+          dashboard: /d/gwangsan-hosts
+
+      - alert: MariaDB응답없음
+        expr: mysql_up == 0
+        for: 2m
+        labels: {severity: 장애, source: aws, runbook: db-down}
+        annotations:
+          summary: "[광산][장애] MariaDB 상태 확인 실패"
+          description: "exporter가 MariaDB에 2분 이상 접속하지 못했습니다. exporter 권한 문제일 수도 있습니다."
+          dashboard: /d/gwangsan-data
+
+      - alert: Redis응답없음
+        expr: redis_up == 0
+        for: 2m
+        labels: {severity: 장애, source: aws, runbook: redis-down}
+        annotations:
+          summary: "[광산][장애] Redis 상태 확인 실패"
+          description: "exporter가 Redis에 2분 이상 접속하지 못했습니다."
+          dashboard: /d/gwangsan-data

@@ -1,0 +1,23 @@
+[Unit]
+Description=Gwangsan trace tunnel to school Tempo
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ubuntu
+EnvironmentFile=/home/ubuntu/gwangsan-telemetry/tunnel.env
+ExecStart=/usr/bin/ssh -NT -p 27109 -i /home/ubuntu/gwangsan-telemetry/tempo_tunnel_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/ubuntu/gwangsan-telemetry/known_hosts -o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L ${TUNNEL_BIND_ADDRESS}:14318:127.0.0.1:4318 ubuntu@ssh.gsmsv.site
+Restart=always
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+MemoryMax=64M
+CPUQuota=10%
+
+[Install]
+WantedBy=multi-user.target

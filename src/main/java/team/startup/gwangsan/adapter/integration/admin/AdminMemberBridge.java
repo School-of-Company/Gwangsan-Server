@@ -18,6 +18,7 @@ import team.startup.gwangsan.domain.auth.exception.PlaceNotFoundException;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
+import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 
@@ -75,8 +76,8 @@ public class AdminMemberBridge implements AdminMemberPort {
     }
 
     @Override
-    public void plusGwangsan(Long memberId, int gwangsan) {
-        changeGwangsanUseCase.plus(memberId, gwangsan);
+    public void creditSignUpReward(Long memberId, int gwangsan) {
+        changeGwangsanUseCase.credit(memberId, gwangsan, GwangsanLedgerType.SIGNUP_REWARD, memberId);
     }
 
     @Override
@@ -106,10 +107,11 @@ public class AdminMemberBridge implements AdminMemberPort {
     }
 
     @Override
-    public Long rewardRecommender(Long recommenderId, int gwangsan) {
+    public Long rewardRecommender(Long recommenderId, Long newMemberId, int gwangsan) {
         // 기존과 같이 추천인 상세가 없으면 NotFoundMemberDetail. 회원 상세 ID 는 회원 ID 와 같다.
         MemberSummary recommender = withDetail(recommenderId).orElseThrow(NotFoundMemberDetailException::new);
-        changeGwangsanUseCase.plus(recommenderId, gwangsan);
+        // 원장 기준 ID 는 신규 회원 ID 다. 같은 가입 승인이 두 번 반영되면 유니크 키가 막는다.
+        changeGwangsanUseCase.credit(recommenderId, gwangsan, GwangsanLedgerType.RECOMMENDER_REWARD, newMemberId);
         return recommender.memberId();
     }
 

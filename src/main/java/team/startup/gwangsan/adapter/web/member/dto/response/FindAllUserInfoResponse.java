@@ -13,7 +13,8 @@ public record FindAllUserInfoResponse(
         MemberRole role,
         MemberStatus status,
         LocalDateTime joinedAt,
-        Integer gwangsan
+        Integer gwangsan,
+        String placeName
 ) {}
 
 

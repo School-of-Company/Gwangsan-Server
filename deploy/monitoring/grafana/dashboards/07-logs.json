@@ -1,0 +1,479 @@
+{
+  "uid": "gwangsan-logs",
+  "title": "07 · 로그·분산 추적",
+  "description": "JSON 로그 검색, trace_id로 Tempo 이동, 느린·실패 트레이스 검색.",
+  "tags": [
+    "gwangsan"
+  ],
+  "timezone": "Asia/Seoul",
+  "weekStart": "monday",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "graphTooltip": 1,
+  "editable": false,
+  "liveNow": false,
+  "fiscalYearStartMonth": 0,
+  "schemaVersion": 41,
+  "version": 1,
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "gwangsan"
+      ],
+      "asDropdown": true,
+      "title": "광산 운영 관제",
+      "keepTime": true,
+      "includeVars": true,
+      "icon": "external link",
+      "targetBlank": false
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "label": "환경",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "query": {
+          "query": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+          "refId": "env"
+        },
+        "definition": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      },
+      {
+        "name": "container",
+        "label": "컨테이너",
+        "type": "custom",
+        "query": "gwangsan-container,gwangsan-chat",
+        "includeAll": true,
+        "allValue": "gwangsan-container|gwangsan-chat",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": []
+      },
+      {
+        "name": "level",
+        "label": "로그 수준",
+        "type": "custom",
+        "query": "ERROR,WARN,INFO,DEBUG",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": []
+      },
+      {
+        "name": "q",
+        "label": "검색어",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "traceId",
+        "label": "Trace ID",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "text",
+      "title": "사용 안내",
+      "options": {
+        "mode": "markdown",
+        "content": "- Tempo 링크·표 ID로 추적합니다.\n- 운영 샘플링은 10%입니다.\n- 전체 요청·오류 수와 다릅니다.\n- ID는 검색어로 찾습니다.\n- 검색 기간을 좁혀주세요.\n- 개인정보 보호를 위한 설정.\n- Java Redis 자동 span 제외.\n- Streams는 04에서 확인합니다.\n- 채팅 Redis는 Node span."
+      },
+      "description": "- 로그 상세에서 `Tempo에서 트레이스 보기`를 누르면 같은 trace로 이동합니다. 구형 평문 로그에는 trace_id가 없습니다. 아래 trace 표의 ID를 누르면 span 구조와 관련 로그 링크가 열립니다.\n- 트레이스는 **샘플링**됩니다(운영 초기 10%). 트레이스 건수를 전체 요청·오류 수로 해석하지 마세요. 오류 trace도 모두 보존되지 않습니다.\n- trace_id·회원·방·메시지 ID는 Loki 라벨이 아니므로 검색어(줄 필터)로 찾습니다. 넓은 시간 범위의 전체 검색은 느립니다.\n- API의 일반 Redis 호출(Java Lettuce) span은 개인정보 보호를 위해 **의도적으로 수집하지 않습니다**(JWT가 Redis 키로 쓰임). Redis Streams 처리는 커스텀 span·04 화면, 채팅의 Redis 명령은 Node span으로 확인합니다.",
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "로그 건수 (컨테이너·수준)",
+      "datasource": {
+        "type": "loki",
+        "uid": "gwangsan-loki"
+      },
+      "description": "정의: 분당 로그 줄 수\n출처: Loki count_over_time\n단위: 건\n집계 창: $__interval\n결측 처리: 로그가 없으면 선 없음. 장기 무로그를 장애로 단정하지 않음\n이상 시 확인: 아래 로그",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "gwangsan-loki"
+          },
+          "refId": "A",
+          "queryType": "range",
+          "expr": "sum by (container, level) (count_over_time({container=~\"$container\", level=~\"$level\"} |= \"$q\" [$__interval]))",
+          "legendFormat": "{{container}} {{level}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건",
+          "noValue": "로그 없음",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* ERROR$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* WARN$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF9830"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* INFO$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* DEBUG$"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8E8E8E"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "id": 2,
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 6
+      }
+    },
+    {
+      "type": "logs",
+      "title": "로그 검색",
+      "description": "정의: 선택 컨테이너·수준·검색어의 로그\n출처: 기존 Promtail → Loki (container/stream/level 라벨)\n단위: -\n집계 창: 선택 기간(최대 200줄)\n결측 처리: 결과 없음은 '로그 없음'이지 '정상' 판정이 아님\n이상 시 확인: trace 링크",
+      "datasource": {
+        "type": "loki",
+        "uid": "gwangsan-loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "gwangsan-loki"
+          },
+          "expr": "{container=~\"$container\", level=~\"$level\"} |= \"$q\" |= \"$traceId\"",
+          "refId": "A",
+          "queryType": "range",
+          "maxLines": 200
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none",
+        "showLabels": false,
+        "showCommonLabels": false
+      },
+      "id": 3,
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 12
+      }
+    },
+    {
+      "type": "table",
+      "title": "실패 트레이스",
+      "datasource": {
+        "type": "tempo",
+        "uid": "gwangsan-tempo"
+      },
+      "description": "정의: status=error span을 포함한 trace. 샘플링된 trace만 존재\n출처: Tempo TraceQL 검색\n단위: -\n집계 창: 선택 기간(최대 20건)\n결측 처리: 결과 없음은 '샘플 없음'일 수 있음\n이상 시 확인: trace 클릭 → 관련 로그",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "gwangsan-tempo"
+          },
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{resource.service.name=~\"gwangsan-api|gwangsan-chat\" && status=error}",
+          "limit": 20,
+          "tableType": "traces"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "해당 trace 없음"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceID|Trace ID)$"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 280
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(startTime|Start time)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "시작 시각"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceService|Service)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "서비스"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceName|Name)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "작업"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 12,
+        "h": 9
+      }
+    },
+    {
+      "type": "table",
+      "title": "느린 트레이스 (1초 이상)",
+      "datasource": {
+        "type": "tempo",
+        "uid": "gwangsan-tempo"
+      },
+      "description": "정의: 1초 이상 span을 포함한 trace. 샘플링된 trace만 존재\n출처: Tempo TraceQL 검색\n단위: -\n집계 창: 선택 기간(최대 20건)\n결측 처리: 결과 없음은 '샘플 없음'일 수 있음\n이상 시 확인: trace 클릭 → 관련 로그",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "gwangsan-tempo"
+          },
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{resource.service.name=~\"gwangsan-api|gwangsan-chat\" && duration > 1s}",
+          "limit": 20,
+          "tableType": "traces"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "해당 trace 없음"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceID|Trace ID)$"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 280
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(startTime|Start time)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "시작 시각"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceService|Service)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "서비스"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(traceName|Name)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "작업"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "id": 5,
+      "gridPos": {
+        "x": 12,
+        "y": 26,
+        "w": 12,
+        "h": 9
+      }
+    }
+  ]
+}

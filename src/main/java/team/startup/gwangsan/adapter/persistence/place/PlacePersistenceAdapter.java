@@ -1,6 +1,7 @@
 package team.startup.gwangsan.adapter.persistence.place;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.place.data.PlaceResult;
 import team.startup.gwangsan.application.place.port.out.LoadPlacePort;
@@ -14,6 +15,11 @@ import java.util.Optional;
 public class PlacePersistenceAdapter implements LoadPlacePort {
 
     private final PlaceJpaRepository placeRepository;
+
+    @Override
+    public List<PlaceResult> findAll() {
+        return placeRepository.findAll(Sort.by("id")).stream().map(PlacePersistenceAdapter::toResult).toList();
+    }
 
     @Override
     public Optional<PlaceResult> findById(Integer placeId) {

@@ -23,7 +23,7 @@ public class FindMyInfoService implements FindMyInfoQuery {
     public MyInfoResult query(ActorContext actor) {
         MemberProfile profile = memberProfileQueryPort.findMyProfile(actor.memberId())
                 .orElseThrow(NotFoundMemberException::new);
-        return new MyInfoResult(profile.memberId(), profile.nickname(), profile.placeName(), profile.headName(),
+        return new MyInfoResult(profile.memberId(), profile.nickname(), profile.placeId(), profile.placeName(), profile.headName(),
                 profile.dongName(), profile.light(), profile.gwangsan(), profile.description(),
                 memberKeywordPort.findNames(profile.memberId()));
     }

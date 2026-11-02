@@ -1,51 +1,69 @@
 package team.startup.gwangsan.adapter.persistence.member;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import team.startup.gwangsan.adapter.persistence.dong.DongJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.HeadJpaEntity;
+import team.startup.gwangsan.adapter.persistence.place.PlaceJpaEntity;
+import team.startup.gwangsan.domain.member.model.MemberRole;
+import team.startup.gwangsan.domain.member.model.MemberStatus;
+import team.startup.gwangsan.infrastructure.config.QueryDslConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("MemberDetailJpaEntity legacy 변경 메서드 (bridge, PR07/PR11 제거)")
+@DataJpaTest
+@Import(QueryDslConfig.class)
+@DisplayName("MemberDetailJpaEntity")
 class MemberDetailJpaEntityTest {
+
+    @Autowired private EntityManager em;
+
+    private Long persistDetail(int gwangsan) {
+        HeadJpaEntity head = new HeadJpaEntity("본부");
+        em.persist(head);
+        PlaceJpaEntity place = PlaceJpaEntity.builder().name("지점").head(head).build();
+        em.persist(place);
+        DongJpaEntity dong = DongJpaEntity.builder().name("동").build();
+        em.persist(dong);
+        MemberJpaEntity member = MemberJpaEntity.builder().name("회원").nickname("회원").phoneNumber("010")
+                .password("pw").role(MemberRole.ROLE_USER).status(MemberStatus.ACTIVE).build();
+        em.persist(member);
+        em.persist(MemberDetailJpaEntity.builder().member(member).dong(dong).place(place)
+                .gwangsan(gwangsan).light(0).description("소개").build());
+        em.flush();
+        return member.getId();
+    }
 
     private MemberDetailJpaEntity memberDetail(Integer gwangsan, Integer light) {
         return MemberDetailJpaEntity.builder().gwangsan(gwangsan).light(light).build();
     }
 
     @Nested
-    @DisplayName("adjustGwangsan() 메서드는")
-    class Describe_adjustGwangsan {
+    @DisplayName("원자적 UPDATE 뒤 같은 트랜잭션에서 다른 필드를 바꾸면")
+    class Describe_write_back_after_atomic_update {
 
         @Test
-        @DisplayName("양수와 음수 조정 후 잔액을 반영한다")
-        void it_adjusts_gwangsan_with_positive_and_negative_delta() {
-            MemberDetailJpaEntity detail = memberDetail(100, 0);
+        @DisplayName("영속성 컨텍스트의 옛 gwangsan 을 되쓰지 않는다")
+        void it_does_not_write_back_stale_gwangsan() {
+            Long memberId = persistDetail(1_000);
+            em.clear();
 
-            detail.adjustGwangsan(50);
-            detail.adjustGwangsan(-30);
+            MemberDetailJpaEntity detail = em.find(MemberDetailJpaEntity.class, memberId);
+            em.createQuery("UPDATE MemberDetail d SET d.gwangsan = d.gwangsan + 500 WHERE d.id = :id")
+                    .setParameter("id", memberId)
+                    .executeUpdate();
+            detail.updateDescription("바뀐 소개");
+            em.flush();
+            em.clear();
 
-            assertThat(detail.getGwangsan()).isEqualTo(120);
-        }
-
-        @Test
-        @DisplayName("정확히 0이 되는 조정을 유지한다")
-        void it_keeps_exactly_zero() {
-            MemberDetailJpaEntity detail = memberDetail(100, 0);
-
-            detail.adjustGwangsan(-100);
-
-            assertThat(detail.getGwangsan()).isZero();
-        }
-
-        @Test
-        @DisplayName("0 미만 조정은 0으로 제한한다")
-        void it_clamps_negative_balance_to_zero() {
-            MemberDetailJpaEntity detail = memberDetail(100, 0);
-
-            detail.adjustGwangsan(-101);
-
-            assertThat(detail.getGwangsan()).isZero();
+            MemberDetailJpaEntity reloaded = em.find(MemberDetailJpaEntity.class, memberId);
+            assertThat(reloaded.getGwangsan()).isEqualTo(1_500);
+            assertThat(reloaded.getDescription()).isEqualTo("바뀐 소개");
         }
     }
 

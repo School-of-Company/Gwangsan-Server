@@ -6,7 +6,8 @@ public enum NotificationType {
     RECOMMENDATION,
     TRADE_COMPLETE,
     RESERVATION_REMINDER,
-    RESERVATION_CANCEL;
+    RESERVATION_CANCEL,
+    FEEDBACK_ANSWER;
 
     /**
      * 발송 실패를 호출자에게 알려야 하는 유형. 예약 리마인더는 발송 성공 후에만 sentAt 을 기록한다.

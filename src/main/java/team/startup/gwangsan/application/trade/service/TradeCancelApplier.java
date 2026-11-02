@@ -39,7 +39,7 @@ public class TradeCancelApplier {
 
         long productId = tradeComplete.productId();
         int gwangsan = tradeProductPort.find(productId).gwangsan();
-        tradeMemberPort.transfer(tradeComplete.sellerId(), tradeComplete.buyerId(), gwangsan);
+        tradeMemberPort.transferForCancel(tradeComplete.sellerId(), tradeComplete.buyerId(), gwangsan, tradeCancel.id());
 
         tradeCancelPort.update(tradeCancel);
         tradeComplete.rollBack();

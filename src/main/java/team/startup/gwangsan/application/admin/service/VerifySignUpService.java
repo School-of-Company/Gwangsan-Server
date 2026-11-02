@@ -34,10 +34,10 @@ public class VerifySignUpService implements VerifySignUpUseCase {
                 .orElseThrow(NotFoundAdminAlertException::new);
         SignUpTarget target = adminMemberPort.loadSignUpTarget(alert.sourceId());
         Long recommenderDetailId = adminMemberPort.rewardRecommender(
-                target.recommenderId(), SignUpReward.RECOMMENDER_GWANGSAN_REWARD);
+                target.recommenderId(), target.memberId(), SignUpReward.RECOMMENDER_GWANGSAN_REWARD);
         scope.validate(target.placeId());
         adminMemberPort.activate(target.memberId());
-        adminMemberPort.plusGwangsan(target.memberId(),
+        adminMemberPort.creditSignUpReward(target.memberId(),
                 SignUpReward.gwangsanFor(adminMemberPort.takeWithdrawnGwangsan(target.phoneNumber())));
         adminAlertPort.delete(alert.id());
         adminNotificationPort.notifyMember(target.memberId(), recommenderDetailId, MemberAlertKind.RECOMMENDER);

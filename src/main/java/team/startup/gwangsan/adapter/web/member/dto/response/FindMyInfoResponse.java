@@ -5,6 +5,7 @@ import java.util.List;
 public record FindMyInfoResponse(
         Long memberId,
         String nickname,
+        Integer placeId,
         String placeName,
         String dongName,
         String headName,

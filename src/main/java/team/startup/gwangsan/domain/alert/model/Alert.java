@@ -87,4 +87,8 @@ public record Alert(
     public static Alert notice(Long noticeId, String noticeTitle) {
         return of(noticeId, null, AlertType.NOTICE, noticeTitle, NOTICE_CONTENT);
     }
+
+    public static Alert feedbackAnswer(Long feedbackId, Long adminId) {
+        return of(feedbackId, adminId, AlertType.FEEDBACK_ANSWER, "문의 답변", "문의에 답변이 등록되었습니다.");
+    }
 }

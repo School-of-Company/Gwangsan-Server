@@ -7,6 +7,7 @@ import team.startup.gwangsan.application.member.data.AdminScope;
 import team.startup.gwangsan.application.member.data.MemberProfile;
 import team.startup.gwangsan.application.member.port.in.FindAllUserInfoQuery;
 import team.startup.gwangsan.application.member.port.out.MemberProfileQueryPort;
+import team.startup.gwangsan.application.member.port.out.ValidatePlacePort;
 import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.NotAllowedUserAccessException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
@@ -18,20 +19,36 @@ import java.util.List;
 public class FindAllUserInfoService implements FindAllUserInfoQuery {
 
     private final MemberProfileQueryPort memberProfileQueryPort;
+    private final ValidatePlacePort validatePlacePort;
 
     @Override
     @Transactional(readOnly = true)
-    public List<MemberProfile> query(ActorContext actor, String nickname, String placeName) {
+    public List<MemberProfile> query(ActorContext actor, Integer placeId, Integer headId, String nickname,
+                                     String placeName) {
         // 기존 순서: 관리자 상세 조회(404) → 역할 검사(403)
         AdminScope scope = memberProfileQueryPort.findAdminScope(actor.memberId())
                 .orElseThrow(NotFoundMemberException::new);
-        Integer placeId = null;
-        Integer headId = null;
         switch (actor.role()) {
-            case ROLE_HEAD_ADMIN -> headId = scope.headId();
-            case ROLE_PLACE_ADMIN -> placeId = scope.placeId();
+            case ROLE_HEAD_ADMIN -> {
+                requireWithin(headId, scope.headId());
+                if (placeId != null && !validatePlacePort.belongsToHead(placeId, scope.headId())) {
+                    throw new NotAllowedUserAccessException();
+                }
+                headId = scope.headId();
+            }
+            case ROLE_PLACE_ADMIN -> {
+                requireWithin(placeId, scope.placeId());
+                requireWithin(headId, scope.headId());
+                placeId = scope.placeId();
+            }
             default -> throw new NotAllowedUserAccessException();
         }
         return memberProfileQueryPort.findAll(placeId, headId, nickname, placeName);
+    }
+
+    private static void requireWithin(Integer requested, Integer allowed) {
+        if (requested != null && !requested.equals(allowed)) {
+            throw new NotAllowedUserAccessException();
+        }
     }
 }

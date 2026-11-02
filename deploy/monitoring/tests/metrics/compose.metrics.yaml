@@ -1,0 +1,107 @@
+# 실제 aws/config.alloy(파일 그대로)로 앱 메트릭 → Alloy scrape → remote_write → 자체 Prometheus 수신기.
+# 학교/운영 Prometheus 에는 보내지 않는다. 포트는 127.0.0.1 에만 연다.
+name: gw-metrics
+
+services:
+  redis:
+    image: redis:7-alpine
+  mariadb:
+    image: mariadb:11
+    environment: { MYSQL_ROOT_PASSWORD: password, MYSQL_DATABASE: gwangsan_db }
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      retries: 60
+  tempo:
+    image: grafana/tempo:3.1.1
+    command: ["-config.file=/etc/tempo/tempo.yml", "-target=all"]
+    volumes: ["../../tempo.yml:/etc/tempo/tempo.yml:ro"]
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --storage.tsdb.retention.time=1d
+    volumes: ["./prometheus-receiver.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["127.0.0.1:39090:9090"]
+  relay:
+    # SSH 로컬 포워드(gwangsan-metrics-tunnel) 대역. 이 컨테이너만 멈춰 원격 경로 장애를 흉내 낸다.
+    # 기본 대상은 자체 수신기, PROM_REMOTE=host.docker.internal:19090 이면 C sandbox Prometheus.
+    image: alpine/socat:1.8.0.3@sha256:beb4a68d9e4fe6b0f21ea774a0fde6c31f580dde6368939ed70100c5385b015e
+    command: ["TCP-LISTEN:9090,fork,reuseaddr", "TCP:${PROM_REMOTE:-prometheus:9090}"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+  alloy:
+    # start-alloy.sh 와 같은 이미지·사용자·읽기 전용·tmpfs·메모리 제한. config.alloy 한 파일만 마운트한다.
+    image: grafana/alloy:v1.21.2@sha256:89a5a320168387336b9ac3c850609c3ba7757eadd4ae5f1d819deb35e9854b18
+    user: "65534:65534"
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    mem_limit: 320m
+    cpus: 0.5
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges"]
+    environment:
+      GOMEMLIMIT: 180MiB
+      TEMPO_TUNNEL_ENDPOINT: http://tempo:4318
+      PROMETHEUS_TUNNEL_ENDPOINT: http://relay:9090
+      DEPLOYMENT_ENVIRONMENT: test
+      API_METRICS_TARGET: gwangsan-api:9091
+      CHAT_METRICS_TARGET: gwangsan-chat:9464
+      NODE_EXPORTER_TARGET: ""
+      PROMTAIL_METRICS_TARGET: ""
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12345", "--storage.path=/tmp/alloy", "/etc/alloy/config.alloy"]
+    volumes: ["../../aws/config.alloy:/etc/alloy/config.alloy:ro"]
+    ports: ["127.0.0.1:32345:12345"]
+  api:
+    image: eclipse-temurin:21-jre-alpine
+    depends_on: { mariadb: { condition: service_healthy }, redis: { condition: service_started } }
+    networks: { default: { aliases: [gwangsan-api] } }
+    command: ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "/app/app.jar"]
+    volumes:
+      - ${API_JAR:?API_JAR}:/app/app.jar:ro
+      - ${OTEL_AGENT:?OTEL_AGENT}:/app/opentelemetry-javaagent.jar:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      JWT_ACCESS_SECRET: load-test-secret-at-least-32-bytes-long
+      RDB_HOST: mariadb
+      RDB_PORT: "3306"
+      RDB_SCHEMA: gwangsan_db
+      DB_USER: root
+      DB_PASSWORD: password
+      INSTANCE_ID: api-metrics
+      MANAGEMENT_SERVER_PORT: "9091"
+      OTEL_SERVICE_NAME: gwangsan-api
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=test
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      OTEL_PROPAGATORS: tracecontext,baggage
+      OTEL_TRACES_SAMPLER: parentbased_traceidratio
+      OTEL_TRACES_SAMPLER_ARG: "1.0"
+      OTEL_INSTRUMENTATION_LETTUCE_ENABLED: "false"
+  chat:
+    image: node:22-alpine
+    depends_on: [api]
+    networks: { default: { aliases: [gwangsan-chat] } }
+    working_dir: /app
+    command: ["node", "--require", "./dist/src/instrumentation.js", "dist/src/main.js"]
+    volumes: ["${CHAT_DIR:?CHAT_DIR}:/app:ro"]
+    tmpfs: ["/app/logs"]
+    environment:
+      PORT: "3000"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SPRING_SERVER_URL: http://api:8080
+      JWT_ACCESS_SECRET: load-test-secret-at-least-32-bytes-long
+      INTERNAL_API_SECRET: metrics-internal-secret
+      OTEL_SERVICE_NAME: gwangsan-chat
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+      DEPLOYMENT_ENVIRONMENT: test
+      METRICS_PORT: "9464"
+      METRICS_HOST: 0.0.0.0
+    ports: ["127.0.0.1:33000:3000"]

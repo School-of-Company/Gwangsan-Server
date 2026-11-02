@@ -158,14 +158,14 @@ class RequestTradeCompletionServiceTest {
         InOrder order = inOrder(tradeProductPort, tradeCompletePort, tradeMemberPort, tradeReservationPort, tradePushPort, tradeStatusPort);
         order.verify(tradeProductPort).complete(PRODUCT);
         order.verify(tradeCompletePort).update(trade);
-        order.verify(tradeMemberPort).transfer(BUYER, SELLER, GWANGSAN);
+        order.verify(tradeMemberPort).transferForCompletion(BUYER, SELLER, GWANGSAN, trade.id());
         if (reservationId != null) {
             order.verify(tradeReservationPort).completeReservation(reservationId);
         }
         order.verify(tradePushPort).notifyCompleted(List.of(BUYER, SELLER), PRODUCT);
         order.verify(tradeCompletePort).deleteOtherPending(PRODUCT);
         order.verify(tradeStatusPort).publish(new TradeStatusChange(ROOM, PRODUCT, true, false, null, CREATED_AT));
-        verify(tradeMemberPort, times(1)).transfer(anyLong(), anyLong(), anyInt());
+        verify(tradeMemberPort, times(1)).transferForCompletion(anyLong(), anyLong(), anyInt(), anyLong());
         // 완료(확정) 알림함 기록은 신규로 만들지 않는다(확정 정책). 완료 요청 알림도 요청 단계가 없으므로 없다.
         verifyNoInteractions(tradeAlertPort);
     }
@@ -269,7 +269,7 @@ class RequestTradeCompletionServiceTest {
             verify(tradeAlertPort).recordCompletionRequested(PRODUCT, BUYER, SELLER, SELLER);
             verify(tradeStatusPort).publish(new TradeStatusChange(ROOM, PRODUCT, false, false, false, CREATED_AT));
             verify(tradeProductPort, never()).complete(anyLong());
-            verify(tradeMemberPort, never()).transfer(anyLong(), anyLong(), anyInt());
+            verify(tradeMemberPort, never()).transferForCompletion(anyLong(), anyLong(), anyInt(), anyLong());
             verifyNoInteractions(tradePushPort);
         }
 
@@ -325,7 +325,7 @@ class RequestTradeCompletionServiceTest {
             assertThatThrownBy(() -> execute(BUYER, SELLER)).isInstanceOf(TradeAlreadyCompleteRequestException.class);
             verify(tradeProductPort, never()).complete(anyLong());
             verify(tradeCompletePort, never()).update(any());
-            verify(tradeMemberPort, never()).transfer(anyLong(), anyLong(), anyInt());
+            verify(tradeMemberPort, never()).transferForCompletion(anyLong(), anyLong(), anyInt(), anyLong());
             verifyNoInteractions(tradePushPort, tradeStatusPort, tradeAlertPort);
         }
     }

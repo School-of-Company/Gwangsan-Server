@@ -90,7 +90,7 @@ public class RequestTradeCompletionService implements RequestTradeCompletionUseC
     private void complete(TradeComplete trade, TradeSides sides, long roomId, TradeProduct product, Long reservationId) {
         tradeProductPort.complete(product.productId());
         tradeCompletePort.update(trade);
-        tradeMemberPort.transfer(sides.buyerId(), sides.sellerId(), product.gwangsan());
+        tradeMemberPort.transferForCompletion(sides.buyerId(), sides.sellerId(), product.gwangsan(), trade.id());
         if (reservationId != null) {
             tradeReservationPort.completeReservation(reservationId);
         }

@@ -118,6 +118,43 @@ class ChatStreamConsumerWorkerTest {
     }
 
     @Nested
+    @DisplayName("consumeMessages()가 retry stream 을 읽으면")
+    class Describe_retry_backoff {
+
+        private MapRecord<String, String, String> retryRecord(long addedAtMillis) {
+            return MapRecord.create(retryKey, Map.of("messageId", "999", "attempt", "2"))
+                    .withId(RecordId.of(addedAtMillis + "-0"));
+        }
+
+        @BeforeEach
+        void setUp() {
+            when(props.getClaimIdleMs()).thenReturn(30_000L);
+            when(redisAdapter.readMessages(streamKey)).thenReturn(null);
+        }
+
+        @Test
+        @DisplayName("claimIdleMs 가 지나지 않은 record 는 처리하지 않고 pending 에 남긴다")
+        void it_defers_fresh_retry_record() {
+            when(redisAdapter.readMessages(retryKey)).thenReturn(List.of(retryRecord(System.currentTimeMillis())));
+
+            worker.consumeMessages();
+
+            verify(processor, never()).process(any(), any(), anyInt());
+        }
+
+        @Test
+        @DisplayName("claimIdleMs 가 지난 record 는 attempt 와 함께 처리한다")
+        void it_processes_due_retry_record() {
+            MapRecord<String, String, String> record = retryRecord(System.currentTimeMillis() - 31_000L);
+            when(redisAdapter.readMessages(retryKey)).thenReturn(List.of(record));
+
+            worker.consumeMessages();
+
+            verify(processor).process(eq(retryKey), eq(record), eq(2));
+        }
+    }
+
+    @Nested
     @DisplayName("reclaimPendingMessages()는")
     class Describe_reclaimPendingMessages {
 

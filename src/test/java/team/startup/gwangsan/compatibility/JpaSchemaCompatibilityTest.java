@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 헥사고날 전환 중 JPA 클래스 이동/이름 변경이 물리 스키마를 바꾸지 않는지 고정한다.
- * 운영은 ddl-auto=validate 이고 테스트는 create-drop 이라, 테이블명이 바뀌어도 다른 테스트는 통과한다.
+ * 운영은 ddl-auto=validate 이고 테스트는 create 라, 테이블명이 바뀌어도 다른 테스트는 통과한다.
  * 스냅샷은 클래스 이름이 아니라 테이블 기준이므로 Entity → XxxJpaEntity 이동은 통과하고
  * 테이블/컬럼/타입/enum 값/nullable/PK/FK/unique/index 변경만 실패한다.
  * Spring Boot 기본 naming 전략과 MariaDB dialect 로 DB 연결 없이 Hibernate 메타데이터를 만든다.

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import team.startup.gwangsan.application.image.data.ImageOwnerType;
 import team.startup.gwangsan.application.image.port.out.ImageReferenceCleanupPort;
+import team.startup.gwangsan.application.feedback.port.in.FeedbackCleanupUseCase;
 import team.startup.gwangsan.application.notice.port.in.UnlinkNoticeImageUseCase;
 import team.startup.gwangsan.application.post.port.in.UnlinkProductImageUseCase;
 import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase;
@@ -12,6 +13,8 @@ import team.startup.gwangsan.application.report.port.in.UnlinkReportImageUseCase
 @Component
 @RequiredArgsConstructor
 public class ImageReferenceCleanupAdapter implements ImageReferenceCleanupPort {
+
+    private final FeedbackCleanupUseCase feedbackCleanupUseCase;
 
     private final UnlinkProductImageUseCase unlinkProductImageUseCase;
     private final UnlinkNoticeImageUseCase unlinkNoticeImageUseCase;
@@ -23,6 +26,7 @@ public class ImageReferenceCleanupAdapter implements ImageReferenceCleanupPort {
             case PRODUCT -> unlinkProductImageUseCase.unlink(sourceId, imageId);
             case NOTICE -> unlinkNoticeImageUseCase.unlink(sourceId, imageId);
             case REPORT -> unlinkReportImageUseCase.unlink(sourceId, imageId);
+            case FEEDBACK -> feedbackCleanupUseCase.unlink(sourceId, imageId);
         }
     }
 }

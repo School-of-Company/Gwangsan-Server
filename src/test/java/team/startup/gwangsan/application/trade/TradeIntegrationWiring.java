@@ -11,6 +11,7 @@ import team.startup.gwangsan.adapter.persistence.chat.ChatMessagePersistenceAdap
 import team.startup.gwangsan.adapter.persistence.chat.ChatRoomPersistenceAdapter;
 import team.startup.gwangsan.application.chat.service.ChatRoomLookupService;
 import team.startup.gwangsan.adapter.persistence.alert.AlertPersistenceAdapter;
+import team.startup.gwangsan.adapter.persistence.member.GwangsanBalancePersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.member.MemberPersistenceAdapter;
 import team.startup.gwangsan.adapter.persistence.notice.NoticePersistenceAdapter;
 import team.startup.gwangsan.application.notice.service.NoticePublicQueryService;
@@ -49,7 +50,7 @@ import team.startup.gwangsan.application.suspend.service.SuspensionQueryService;
         TradeImageAdapter.class, ImageQueryService.class, ImagePersistenceAdapter.class,
         ProductStatusService.class, ProductPublicQueryService.class, PendingReservationService.class,
         ProductPersistenceAdapter.class, ProductImagePersistenceAdapter.class, ReservationPersistenceAdapter.class,
-        ChangeGwangsanService.class, MemberAccountService.class, MemberPersistenceAdapter.class,
+        ChangeGwangsanService.class, GwangsanBalancePersistenceAdapter.class, MemberAccountService.class, MemberPersistenceAdapter.class,
         CreateAlertService.class, AlertPersistenceAdapter.class, AlertSourceAdapter.class, TradeSummaryService.class,
         ReviewSummaryService.class, ReviewPersistenceAdapter.class,
         NoticePublicQueryService.class, NoticePersistenceAdapter.class,

@@ -1,0 +1,71 @@
+apiVersion: 1
+
+datasources:
+  - name: 메트릭 · Prometheus
+    uid: gwangsan-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      prometheusType: Prometheus
+      manageAlerts: false
+      alertmanagerUid: gwangsan-alertmanager
+  - name: 경보 · Alertmanager
+    uid: gwangsan-alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    editable: false
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: false
+  - name: 분산 추적 · Tempo
+    uid: gwangsan-tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    editable: false
+    jsonData:
+      httpMethod: GET
+      # 트레이스 → 관련 로그. trace_id는 Loki 라벨이 아니라 JSON 본문 필드이므로 줄 필터로 찾는다.
+      tracesToLogsV2:
+        datasourceUid: gwangsan-loki
+        spanStartTimeShift: -5m
+        spanEndTimeShift: 5m
+        filterByTraceID: false
+        filterBySpanID: false
+        customQuery: true
+        query: '{container=~"gwangsan-container|gwangsan-chat"} |= "$${__trace.traceId}"'
+      tracesToMetrics:
+        datasourceUid: gwangsan-prometheus
+        spanStartTimeShift: -5m
+        spanEndTimeShift: 5m
+        queries:
+          - name: API 요청/초
+            query: sum(rate(http_server_requests_seconds_count{service="gwangsan-api"}[1m]))
+          - name: 채팅 이벤트/초
+            query: sum(rate(gwangsan_chat_events_total{service="gwangsan-chat"}[1m]))
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+  - name: 로그 · Loki
+    uid: gwangsan-loki
+    type: loki
+    access: proxy
+    url: http://ssh.gsmsv.site:26129
+    editable: false
+    jsonData:
+      timeout: 30
+      maxLines: 500
+      # 로그 → 트레이스. 구형 평문 로그에는 trace_id가 없어 링크가 생기지 않는다.
+      derivedFields:
+        - name: trace_id
+          matcherRegex: '"trace_id"\s*:\s*"([0-9a-f]{32})"'
+          datasourceUid: gwangsan-tempo
+          url: '$${__value.raw}'
+          urlDisplayLabel: 'Tempo에서 트레이스 보기'

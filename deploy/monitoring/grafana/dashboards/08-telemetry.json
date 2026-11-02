@@ -1,0 +1,2032 @@
+{
+  "uid": "gwangsan-telemetry",
+  "title": "08 · 수집·저장 상태",
+  "description": "관측 시스템 자체 상태: 수집 경로, 전송 실패, 저장 용량·보관 기간.",
+  "tags": [
+    "gwangsan"
+  ],
+  "timezone": "Asia/Seoul",
+  "weekStart": "monday",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m"
+    ]
+  },
+  "graphTooltip": 1,
+  "editable": false,
+  "liveNow": false,
+  "fiscalYearStartMonth": 0,
+  "schemaVersion": 41,
+  "version": 1,
+  "links": [
+    {
+      "type": "dashboards",
+      "tags": [
+        "gwangsan"
+      ],
+      "asDropdown": true,
+      "title": "광산 운영 관제",
+      "keepTime": true,
+      "includeVars": true,
+      "icon": "external link",
+      "targetBlank": false
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "label": "환경",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "gwangsan-prometheus"
+        },
+        "query": {
+          "query": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+          "refId": "env"
+        },
+        "definition": "label_values(up{collector=\"gwangsan-aws-alloy\"}, environment)",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "지표 최신성",
+      "description": "정의: 학교 Prometheus에 도착한 마지막 AWS 샘플 이후 경과\n출처: remote_write up 타임스탬프\n단위: 초\n집계 창: 현재값\n결측 처리: 한 번도 도착하지 않았으면 미수집\n이상 시 확인: AWS수집경로중단 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "time() - max(timestamp(up{collector=\"gwangsan-aws-alloy\",environment=~\"$environment\"}))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#FF9830",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 180
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "수집 정상률",
+      "description": "정의: AWS scrape 대상 중 up=1 비율\n출처: up\n단위: %\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 대상 표",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "count(up{collector=\"gwangsan-aws-alloy\",environment=~\"$environment\"} == 1) / count(up{collector=\"gwangsan-aws-alloy\",environment=~\"$environment\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.99
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 2,
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "메트릭 실패",
+      "description": "정의: Alloy remote_write 영구 실패 샘플/초\n출처: prometheus_remote_storage_samples_failed_total\n단위: 건/초\n집계 창: 5분\n결측 처리: 단절 중에는 이 값도 도착하지 않음(최신성 패널로 판단)\n이상 시 확인: 메트릭전송실패 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(prometheus_remote_storage_samples_failed_total{service=\"aws-alloy\"}[5m]))",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.001
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 3,
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "span 실패",
+      "description": "정의: Alloy→Tempo 전송 실패 span/초\n출처: otelcol_exporter_send_failed_spans_total\n단위: 건/초\n집계 창: 5분\n결측 처리: -\n이상 시 확인: 트레이스전송실패 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(otelcol_exporter_send_failed_spans_total{service=\"aws-alloy\"}[5m])) or sum(rate(otelcol_exporter_sent_spans_total{service=\"aws-alloy\"}[5m])) * 0",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.001
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 4,
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Loki",
+      "description": "정의: 기존 Loki /metrics 응답\n출처: 학교 Prometheus scrape\n단위: 정상/실패\n집계 창: 30초\n결측 처리: -\n이상 시 확인: 로그전송드롭",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(up{job=\"loki\",collector=\"\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "정상",
+                  "color": "green",
+                  "index": 0
+                },
+                "0": {
+                  "text": "수집 실패",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 5,
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Tempo",
+      "description": "정의: 학교 Tempo 응답\n출처: 학교 Prometheus scrape\n단위: 정상/실패\n집계 창: 15초\n결측 처리: -\n이상 시 확인: 학교관측구성요소중단",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(up{job=\"tempo\",collector=\"\"})",
+          "refId": "A",
+          "legendFormat": "__auto"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "noValue": "미수집",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "정상",
+                  "color": "green",
+                  "index": 0
+                },
+                "0": {
+                  "text": "수집 실패",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "text": "미수집",
+                  "color": "#8E8E8E",
+                  "index": 9
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "links": [],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "id": 6,
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      }
+    },
+    {
+      "type": "table",
+      "title": "수집 대상",
+      "description": "정의: 모든 scrape 대상의 up. AWS 대상은 Alloy, 학교 대상은 학교 Prometheus가 수집\n출처: up\n단위: 1=정상\n집계 창: 현재값\n결측 처리: 환경변수로 비활성화한 대상은 행 없음(미수집)\n이상 시 확인: 대상별 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max by (job, service, environment, instance) (up{collector=\"gwangsan-aws-alloy\",environment=~\"$environment\"}) or max by (job, service, environment, instance) (up{collector=\"\"})",
+          "refId": "A",
+          "legendFormat": "__auto",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "해당 없음",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "firing": {
+                  "text": "발생",
+                  "color": "red",
+                  "index": 0
+                },
+                "pending": {
+                  "text": "대기(지속 조건 확인 중)",
+                  "color": "#FF9830",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "서비스"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "환경"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "인스턴스"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "-"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "환경"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "서비스"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "상태"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "1": {
+                        "text": "정상",
+                        "color": "green",
+                        "index": 0
+                      },
+                      "0": {
+                        "text": "응답 없음",
+                        "color": "red",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "renameByName": {
+              "job": "job",
+              "service": "서비스",
+              "environment": "환경",
+              "instance": "인스턴스",
+              "Value": "상태"
+            },
+            "includeByName": {
+              "job": true,
+              "service": true,
+              "environment": true,
+              "instance": true,
+              "Value": true
+            },
+            "indexByName": {
+              "Value": 0,
+              "environment": 1,
+              "service": 2,
+              "job": 3,
+              "instance": 4
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "상태",
+            "desc": false
+          }
+        ]
+      },
+      "id": 7,
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 9
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "remote_write 처리",
+      "description": "정의: Alloy 전송/재시도/실패와 학교 Prometheus 수신 오류\n출처: Alloy·Prometheus 자체 지표\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: -\n이상 시 확인: 터널 상태",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(prometheus_remote_storage_samples_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "전송"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(prometheus_remote_storage_samples_retried_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "재시도"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(prometheus_remote_storage_samples_failed_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "C",
+          "legendFormat": "실패"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(prometheus_http_requests_total{handler=\"/api/v1/write\",code!~\"2..\"}[$__rate_interval]))",
+          "refId": "D",
+          "legendFormat": "학교 수신 거부"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 8,
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 9
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "트레이스 전송",
+      "description": "정의: 앱→Alloy→Tempo span 흐름\n출처: otelcol_* (Alloy)\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: -\n이상 시 확인: Tempo",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(otelcol_receiver_accepted_spans_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "수신"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(otelcol_exporter_sent_spans_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "전송"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(otelcol_exporter_send_failed_spans_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "C",
+          "legendFormat": "실패"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(otelcol_receiver_refused_spans_total{service=\"aws-alloy\"}[$__rate_interval]))",
+          "refId": "D",
+          "legendFormat": "수신 거부(메모리)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 9,
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "큐 적재",
+      "description": "정의: 트레이스 큐 길이(최대 200)와 remote_write 미전송 지연\n출처: Alloy 자체 지표\n단위: 개 / 초\n집계 창: scrape 15초\n결측 처리: -\n이상 시 확인: 터널·학교 수신",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(otelcol_exporter_queue_size{service=\"aws-alloy\"})",
+          "refId": "A",
+          "legendFormat": "트레이스 큐"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "max(prometheus_remote_storage_highest_timestamp_in_seconds{service=\"aws-alloy\"}) - max(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{service=\"aws-alloy\"})",
+          "refId": "B",
+          "legendFormat": "remote_write 지연(초)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 10,
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Promtail 로그 전송",
+      "description": "정의: Promtail→Loki 전송·드롭·오류 응답\n출처: promtail_* (Promtail을 관측 네트워크에 연결해야 수집)\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: 연결 전에는 미수집\n이상 시 확인: 로그전송드롭 runbook",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "gwangsan-prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum(rate(promtail_sent_entries_total[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "전송"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum by (reason) (rate(promtail_dropped_entries_total[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "드롭 {{reason}}"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "expr": "sum by (status_code) (rate(promtail_request_duration_seconds_count{status_code!~\"2..\"}[$__rate_interval]))",
+          "refId": "C",
+          "legendFormat": "응답 {{status_code}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:건/초",
+          "noValue": "미수집",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "insertNulls": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(API|gwangsan-api).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274D9"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(채팅|gwangsan-chat).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#14B8A6"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(Redis|redis).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#A352CC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "links": [],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "id": 11,
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 24,
+        "h": 8
+      }
+    },
+    {
+      "id": 12,
+      "type": "row",
+      "title": "저장 용량·보관 기간",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Prometheus TSDB",
+          "description": "정의: 블록+WAL 크기. 보관 7일 또는 8GB 중 먼저 도달 시 삭제\n출처: prometheus_tsdb_*\n단위: 바이트\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 디스크 여유",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "max(prometheus_tsdb_storage_blocks_bytes{job=\"prometheus\"}) + max(prometheus_tsdb_wal_storage_size_bytes{job=\"prometheus\"})",
+              "refId": "A",
+              "legendFormat": "__auto"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "noValue": "미수집",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "미수집",
+                      "color": "#8E8E8E",
+                      "index": 9
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto",
+            "wideLayout": true,
+            "showPercentChange": false
+          },
+          "id": 13,
+          "gridPos": {
+            "x": 0,
+            "y": 30,
+            "w": 6,
+            "h": 4
+          }
+        },
+        {
+          "type": "stat",
+          "title": "TSDB 상한 대비",
+          "description": "정의: 블록 크기 / retention.size(8GB)\n출처: prometheus_tsdb_retention_limit_bytes\n단위: %\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 보관 정책",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "max(prometheus_tsdb_storage_blocks_bytes{job=\"prometheus\"}) / max(prometheus_tsdb_retention_limit_bytes{job=\"prometheus\"} > 0)",
+              "refId": "A",
+              "legendFormat": "__auto"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "noValue": "미수집",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#FF9830",
+                    "value": 0.8
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.95
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "미수집",
+                      "color": "#8E8E8E",
+                      "index": 9
+                    }
+                  }
+                }
+              ],
+              "decimals": 1
+            },
+            "overrides": []
+          },
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto",
+            "wideLayout": true,
+            "showPercentChange": false
+          },
+          "id": 14,
+          "gridPos": {
+            "x": 6,
+            "y": 30,
+            "w": 6,
+            "h": 4
+          }
+        },
+        {
+          "type": "stat",
+          "title": "가장 오래된 메트릭",
+          "description": "정의: 실제 보관 중인 가장 오래된 샘플 경과(목표 7일)\n출처: prometheus_tsdb_lowest_timestamp_seconds\n단위: 초\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 용량 상한으로 7일보다 짧을 수 있음",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "time() - min(prometheus_tsdb_lowest_timestamp_seconds{job=\"prometheus\"})",
+              "refId": "A",
+              "legendFormat": "__auto"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "noValue": "미수집",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "미수집",
+                      "color": "#8E8E8E",
+                      "index": 9
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto",
+            "wideLayout": true,
+            "showPercentChange": false
+          },
+          "id": 15,
+          "gridPos": {
+            "x": 12,
+            "y": 30,
+            "w": 6,
+            "h": 4
+          }
+        },
+        {
+          "type": "stat",
+          "title": "학교 VM 디스크 여유",
+          "description": "정의: 학교 VM / 여유 비율. 트레이스는 3일 보관, 용량 상한은 보장되지 않음\n출처: node_exporter\n단위: %\n집계 창: 현재값\n결측 처리: -\n이상 시 확인: 저장공간부족 runbook",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "min(node_filesystem_avail_bytes{job=\"node\",collector=\"\",mountpoint=\"/\"} / node_filesystem_size_bytes{job=\"node\",collector=\"\",mountpoint=\"/\"})",
+              "refId": "A",
+              "legendFormat": "__auto"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "noValue": "미수집",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "#FF9830",
+                    "value": 0.2
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.3
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "미수집",
+                      "color": "#8E8E8E",
+                      "index": 9
+                    }
+                  }
+                }
+              ],
+              "decimals": 1
+            },
+            "overrides": []
+          },
+          "links": [],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto",
+            "wideLayout": true,
+            "showPercentChange": false
+          },
+          "id": 16,
+          "gridPos": {
+            "x": 18,
+            "y": 30,
+            "w": 6,
+            "h": 4
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "저장 증가",
+          "description": "정의: 블록 크기·활성 시계열 추세(카디널리티 폭증 감지)\n출처: prometheus_tsdb_*\n단위: 바이트 / 개\n집계 창: scrape 15초\n결측 처리: -\n이상 시 확인: 라벨 허용 목록",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "max(prometheus_tsdb_storage_blocks_bytes{job=\"prometheus\"})",
+              "refId": "A",
+              "legendFormat": "Prometheus 블록"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "max(prometheus_tsdb_head_series{job=\"prometheus\"})",
+              "refId": "B",
+              "legendFormat": "활성 시계열 수"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "noValue": "미수집",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "showPoints": "never",
+                "spanNulls": false,
+                "insertNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "axisSoftMin": 0
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(API|gwangsan-api).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3274D9"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(채팅|gwangsan-chat).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#14B8A6"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(Redis|redis).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#A352CC"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "links": [],
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "id": 17,
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 12,
+            "h": 8
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Tempo 수집",
+          "description": "정의: Tempo 수신·폐기 span\n출처: tempo_* 자체 지표\n단위: 건/초\n집계 창: $__rate_interval\n결측 처리: -\n이상 시 확인: 트레이스 전송",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "gwangsan-prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "sum(rate(tempo_distributor_spans_received_total[$__rate_interval]))",
+              "refId": "A",
+              "legendFormat": "수신 span/초"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "gwangsan-prometheus"
+              },
+              "expr": "sum(rate(tempo_discarded_spans_total[$__rate_interval]))",
+              "refId": "B",
+              "legendFormat": "폐기 span/초"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "suffix:건/초",
+              "noValue": "미수집",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 12,
+                "showPoints": "never",
+                "spanNulls": false,
+                "insertNulls": false,
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                },
+                "axisSoftMin": 0
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(API|gwangsan-api).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#3274D9"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(채팅|gwangsan-chat).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#14B8A6"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*(Redis|redis).*"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#A352CC"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "links": [],
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "id": 18,
+          "gridPos": {
+            "x": 12,
+            "y": 34,
+            "w": 12,
+            "h": 8
+          }
+        },
+        {
+          "type": "text",
+          "title": "보관·복구 한계",
+          "options": {
+            "mode": "markdown",
+            "content": "- 메트릭: 7일 또는 8GB.\n- 트레이스: 3일.\n- 로그 보관: 기존 Loki 기준.\n- VM 소실 시 데이터 복구 불가.\n- HA·외부 백업이 아닙니다.\n- VM 전체 중단은 자가 알림 불가.\n- 복구 절차: backup.md"
+          },
+          "description": "복구 절차 전체: docs/observability/operations/backup.md",
+          "id": 19,
+          "gridPos": {
+            "x": 0,
+            "y": 42,
+            "w": 24,
+            "h": 8
+          }
+        }
+      ]
+    }
+  ]
+}

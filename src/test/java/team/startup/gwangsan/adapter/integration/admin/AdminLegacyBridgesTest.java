@@ -26,6 +26,7 @@ import team.startup.gwangsan.domain.common.ActorContext;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberException;
 import team.startup.gwangsan.domain.admin.model.AccountStatus;
+import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
 import team.startup.gwangsan.domain.trade.exception.CannotPendingTradeCancelException;
@@ -98,10 +99,10 @@ class AdminLegacyBridgesTest {
         @DisplayName("it_광산 조정·가입 보상은 member 공개 잔액 command 로 위임한다")
         void it_delegates_gwangsan_changes() {
             bridge.adjustGwangsan(5L, -300);
-            bridge.plusGwangsan(5L, 10000);
+            bridge.creditSignUpReward(5L, 10000);
 
             verify(changeGwangsanUseCase).adjust(5L, -300);
-            verify(changeGwangsanUseCase).plus(5L, 10000);
+            verify(changeGwangsanUseCase).credit(5L, 10000, GwangsanLedgerType.SIGNUP_REWARD, 5L);
         }
 
         @Test
@@ -156,10 +157,10 @@ class AdminLegacyBridgesTest {
             when(memberSummaryQuery.findById(44L)).thenReturn(Optional.of(summary(44L, null, true)));
             when(memberSummaryQuery.findById(45L)).thenReturn(Optional.of(summary(45L, null, false)));
 
-            assertThat(bridge.rewardRecommender(44L, 5000)).isEqualTo(44L);
-            verify(changeGwangsanUseCase).plus(44L, 5000);
-            assertThatThrownBy(() -> bridge.rewardRecommender(45L, 5000)).isInstanceOf(NotFoundMemberDetailException.class);
-            verify(changeGwangsanUseCase, never()).plus(eq(45L), anyInt());
+            assertThat(bridge.rewardRecommender(44L, 20L, 5000)).isEqualTo(44L);
+            verify(changeGwangsanUseCase).credit(44L, 5000, GwangsanLedgerType.RECOMMENDER_REWARD, 20L);
+            assertThatThrownBy(() -> bridge.rewardRecommender(45L, 21L, 5000)).isInstanceOf(NotFoundMemberDetailException.class);
+            verify(changeGwangsanUseCase, never()).credit(eq(45L), anyInt(), any(), anyLong());
         }
 
         @Test

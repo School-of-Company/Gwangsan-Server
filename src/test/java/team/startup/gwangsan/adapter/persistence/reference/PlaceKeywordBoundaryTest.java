@@ -52,7 +52,7 @@ class PlaceKeywordBoundaryTest {
         registry.add("spring.datasource.username", mariadb::getUsername);
         registry.add("spring.datasource.password", mariadb::getPassword);
         registry.add("spring.datasource.driver-class-name", mariadb::getDriverClassName);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create"); // 일회용 컨테이너: 종료 시 drop 은 이미 멈춘 DB 를 기다리며 JVM 종료를 막는다
         registry.add("spring.flyway.enabled", () -> "false");
     }
 
@@ -99,6 +99,15 @@ class PlaceKeywordBoundaryTest {
             assertThat(places.findAllByHeadId(head.getId())).extracting(PlaceResult::id)
                     .containsExactlyInAnyOrder(first.getId(), second.getId());
             assertThat(places.findAllByHeadId(-1)).isEmpty();
+        }
+
+        @Test
+        void it_returns_all_places_ordered_by_id() {
+            assertThat(places.findAll()).containsExactly(
+                    new PlaceResult(first.getId(), "첫지점", head.getId()),
+                    new PlaceResult(second.getId(), "둘째지점", head.getId()),
+                    new PlaceResult(otherBranch.getId(), "다른지점", otherHead.getId()),
+                    new PlaceResult(headless.getId(), "본점없음", null));
         }
 
         @Test

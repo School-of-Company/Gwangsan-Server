@@ -1,0 +1,15 @@
+# 준비만 함: Loki 프록시 적용 후 datasources.yml의 Loki 항목에 병합한다. 비밀 값은 Grafana 컨테이너 환경변수 파일로 주입.
+datasources:
+  - name: 로그 · Loki
+    uid: gwangsan-loki
+    type: loki
+    access: proxy
+    url: https://ssh.gsmsv.site:26129
+    basicAuth: true
+    basicAuthUser: gwangsan-grafana
+    jsonData:
+      tlsAuthWithCACert: true
+      serverName: ssh.gsmsv.site
+    secureJsonData:
+      basicAuthPassword: $LOKI_QUERY_PASSWORD
+      tlsCACert: $LOKI_CA_CERT

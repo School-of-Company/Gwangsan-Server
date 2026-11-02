@@ -14,11 +14,13 @@ import team.startup.gwangsan.application.report.port.in.ReassignReportMemberUseC
 import team.startup.gwangsan.application.review.port.in.ReviewMemberReferenceCleanupUseCase;
 import team.startup.gwangsan.application.suspend.port.in.DeleteMemberSuspensionsUseCase;
 import team.startup.gwangsan.application.trade.port.in.TradeMemberReferenceCleanupUseCase;
+import team.startup.gwangsan.application.feedback.port.in.FeedbackCleanupUseCase;
 
 import static org.mockito.Mockito.*;
 
 @DisplayName("MemberReferenceCleanupAdapter 단위 테스트")
 class MemberReferenceCleanupAdapterTest {
+    private final FeedbackCleanupUseCase feedback = mock(FeedbackCleanupUseCase.class);
     private final PostMemberReferenceCleanupUseCase post = mock(PostMemberReferenceCleanupUseCase.class);
     private final TradeMemberReferenceCleanupUseCase trade = mock(TradeMemberReferenceCleanupUseCase.class);
     private final ChatMemberCleanupUseCase chat = mock(ChatMemberCleanupUseCase.class);
@@ -30,7 +32,7 @@ class MemberReferenceCleanupAdapterTest {
     private final DeleteAllMemberRelatedKeywordsUseCase keywords = mock(DeleteAllMemberRelatedKeywordsUseCase.class);
     private final DeleteMemberSuspensionsUseCase suspensions = mock(DeleteMemberSuspensionsUseCase.class);
     private final DeleteMemberBlocksUseCase blocks = mock(DeleteMemberBlocksUseCase.class);
-    private final MemberReferenceCleanupAdapter adapter = new MemberReferenceCleanupAdapter(post, trade, chat, review,
+    private final MemberReferenceCleanupAdapter adapter = new MemberReferenceCleanupAdapter(feedback, post, trade, chat, review,
             report, adminAlerts, alerts, notice, keywords, suspensions, blocks);
 
     @Test
@@ -49,6 +51,7 @@ class MemberReferenceCleanupAdapterTest {
         order.verify(trade).reassignCancelRequester(1L, 99L);
         order.verify(alerts).reassignSender(1L, 99L);
         order.verify(notice).reassign(1L, 99L);
+        verify(feedback).reassign(1L, 99L);
         verifyNoInteractions(keywords, suspensions, blocks);
     }
 

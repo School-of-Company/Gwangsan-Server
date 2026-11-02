@@ -19,13 +19,12 @@ import team.startup.gwangsan.application.member.port.in.AddMemberLightUseCase;
 import team.startup.gwangsan.application.member.port.in.ChangeGwangsanUseCase;
 import team.startup.gwangsan.application.member.port.in.ManageMemberUseCase;
 import team.startup.gwangsan.application.member.port.out.LoadMemberPort;
+import team.startup.gwangsan.application.member.port.out.GwangsanBalancePort;
 import team.startup.gwangsan.application.member.port.out.SaveMemberPort;
 import team.startup.gwangsan.domain.member.exception.NotFoundMemberDetailException;
-import team.startup.gwangsan.domain.member.model.MemberDetail;
+import team.startup.gwangsan.domain.member.model.GwangsanLedgerType;
 import team.startup.gwangsan.domain.member.model.MemberRole;
 import team.startup.gwangsan.domain.member.model.MemberStatus;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,6 +36,7 @@ class ChangeGwangsanTransactionTest {
 
     private static final LoadMemberPort LOAD = mock(LoadMemberPort.class);
     private static final SaveMemberPort SAVE = mock(SaveMemberPort.class);
+    private static final GwangsanBalancePort BALANCE = mock(GwangsanBalancePort.class);
 
     @Configuration
     @EnableTransactionManagement
@@ -48,7 +48,7 @@ class ChangeGwangsanTransactionTest {
 
         @Bean
         ChangeGwangsanService changeGwangsanService() {
-            return new ChangeGwangsanService(LOAD, SAVE);
+            return new ChangeGwangsanService(BALANCE);
         }
 
         @Bean
@@ -68,7 +68,7 @@ class ChangeGwangsanTransactionTest {
 
     @BeforeEach
     void setUp() {
-        reset(LOAD, SAVE);
+        reset(LOAD, SAVE, BALANCE);
         context = new AnnotationConfigApplicationContext(Config.class);
         useCase = context.getBean(ChangeGwangsanUseCase.class);
         transaction = new TransactionTemplate(context.getBean(PlatformTransactionManager.class));
@@ -86,8 +86,9 @@ class ChangeGwangsanTransactionTest {
         @Test
         @DisplayName("it_잔액을 읽거나 저장하지 않고 거절한다")
         void it_rejects_standalone_call() {
-            assertThatThrownBy(() -> useCase.plus(1L, 100)).isInstanceOf(IllegalTransactionStateException.class);
-            verifyNoInteractions(LOAD, SAVE);
+            assertThatThrownBy(() -> useCase.credit(1L, 100, GwangsanLedgerType.SIGNUP_REWARD, 1L))
+                    .isInstanceOf(IllegalTransactionStateException.class);
+            verifyNoInteractions(LOAD, SAVE, BALANCE);
         }
 
         @Test
@@ -112,30 +113,28 @@ class ChangeGwangsanTransactionTest {
         @Test
         @DisplayName("it_같은 트랜잭션에 참여해 변경을 저장한다")
         void it_joins_caller_transaction() {
-            MemberDetail detail = new MemberDetail(1L, 1, 1, 100, 1, "소개");
-            when(LOAD.findDetail(1L)).thenReturn(Optional.of(detail));
+            when(BALANCE.add(1L, -30)).thenReturn(70);
 
-            transaction.executeWithoutResult(status -> useCase.minus(1L, 30));
+            transaction.executeWithoutResult(status -> useCase.credit(1L, -30, GwangsanLedgerType.ADMIN_ADJUST, 1L));
 
-            assertThat(detail.getGwangsan()).isEqualTo(70);
-            verify(SAVE).saveDetail(detail);
+            verify(BALANCE).record(1L, -30, 70, GwangsanLedgerType.ADMIN_ADJUST, 1L);
         }
 
         @Test
         @DisplayName("it_command 가 실패하면 호출자와 공유한 트랜잭션 전체를 rollback-only 로 만들어 커밋을 막는다")
         void it_marks_shared_transaction_rollback_only() {
-            when(LOAD.findDetail(1L)).thenReturn(Optional.empty());
+            when(BALANCE.add(1L, 30)).thenThrow(new NotFoundMemberDetailException());
 
             boolean[] rollbackOnly = new boolean[1];
             // 호출자가 예외를 잡고 커밋하려 해도 공유 트랜잭션은 커밋되지 않는다.
             assertThatThrownBy(() -> transaction.executeWithoutResult(status -> {
-                assertThatThrownBy(() -> useCase.plus(1L, 30))
+                assertThatThrownBy(() -> useCase.credit(1L, 30, GwangsanLedgerType.SIGNUP_REWARD, 1L))
                         .isInstanceOf(NotFoundMemberDetailException.class);
                 rollbackOnly[0] = status.isRollbackOnly();
             })).isInstanceOf(UnexpectedRollbackException.class);
 
             assertThat(rollbackOnly[0]).isTrue();
-            verifyNoInteractions(SAVE);
+            verify(BALANCE, never()).record(anyLong(), anyInt(), anyInt(), any(), any());
         }
     }
 }

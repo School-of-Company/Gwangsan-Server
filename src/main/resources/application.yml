@@ -1,4 +1,9 @@
 spring:
+  application:
+    name: gwangsan-api
+  main:
+    # banner 는 JSON 이 아닌 줄이라 log 수집 파이프라인을 깨뜨린다.
+    banner-mode: off
   datasource:
     driver-class-name: ${DB_DRIVER_CLASS:org.mariadb.jdbc.Driver}
     url: jdbc:${RDB_TYPE:mariadb}://${RDB_HOST:localhost}:${RDB_PORT:3306}/${RDB_SCHEMA:gwangsan_db}
@@ -20,7 +25,8 @@ spring:
         order_updates: true
 
 
-    show-sql: true
+    # stdout 직출력이라 JSON 로그 형식을 벗어난다. SQL 확인이 필요하면 로컬에서만 켠다.
+    show-sql: false
   sql:
     init:
       mode: never
@@ -81,3 +87,32 @@ ai:
     url: ${AI_SERVER_URL:}
     connect-timeout: ${AI_CONNECT_TIMEOUT:2s}
     read-timeout: ${AI_READ_TIMEOUT:10s}
+
+logging:
+  structured:
+    format:
+      # timestamp, level, service, message, trace_id, span_id 를 담은 한 줄 JSON
+      console: team.startup.gwangsan.infrastructure.logging.GwangsanJsonLogFormatter
+
+# Actuator 는 컨테이너 내부 전용 포트에서만 연다. API 포트(8080)/proxy 로는 노출되지 않는다.
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:9091}
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    distribution:
+      # http_server_requests_seconds_bucket 를 계약 bucket 으로만 낸다(기본 percentile histogram 은 bucket 이 너무 많다).
+      slo:
+        http.server.requests: 5ms,10ms,25ms,50ms,100ms,250ms,500ms,1s,2500ms,5s,10s,30s,60s
+
+server:
+  tomcat:
+    # tomcat_threads_*, tomcat_sessions_* metric 을 내려면 필요하다.
+    mbeanregistry:
+      enabled: true
